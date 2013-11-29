@@ -29,9 +29,13 @@ int          PkCalc();
 float        splintMatterPk(float EvalPoint);
 float        splintWindowfunc(float EvalPoint);
 float        AnalyticSpherical(float k);
-int          EvaluateConvolution(float (*EvaluateWindowfunc)(float), char type[]);
+int          EvaluateConvolution(char type[]);
 
-float        EvaluatefilterNormalisation(float (*EvaluateWindowfunc)(float));
+float        EvaluatefilterNormalisation();
+float        NormalisationKernel(float q);
+
+float        (*pt2Windowfn)(float) = NULL;
+float        (*pt2Pk)(float)       = NULL;
 
 float        SphericalWindowfuncEval(float k, float R);
 
@@ -60,7 +64,16 @@ double       SumDoubleArray(double array[]);
 int          ConvolveTheory();
 int          splineInputWindowfn(char filepath[]);
 
-double       ConvolvedPkCalculation(float kval, float (*EvaluateMatterPk)(float), float (*EvaluateWindowfunc)(float));
+float         kConvScope;
+float        muConvScope;
+float         qConvScope;
+
+float        ConvolvedPkQrombCalc(float kval);
+float        muConvKernel(float mu);
+
+float        qConvKernel(float q);
+
+float        ConvolvedPkCalculation(float kval);
 
 int          IntegralConstraintCorrection();
 
@@ -365,7 +378,7 @@ float*       WindowFunc2d;
 double*      ConvolvedPk;
 double*      ConvolvedPk2d;
 
-float        matterPkEval        = 0.0;
+float        inputPkEval         = 0.0;
 float        WindowFuncEval      = 0.0;
 float        PkEvalPoint         = 0.0;
 float        FilterNormalisation = 0.0;
@@ -374,7 +387,8 @@ float        muInterval;
 
 int          MuIntegralPrecision;
 
-float        qSpaceVolume;
+float        Analytic2powerlaw(float k);
+float        AnalyticGaussian(float k);
 
 // Integral constraint correction.
 double       ConvolvedPkZeroPoint;

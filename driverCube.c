@@ -26,7 +26,7 @@
 #include "Scripts/FFTw_3Dwf.c"
 #include "Scripts/FFTw_3Dwf_pad.c"
 
-#include "Scripts/ConvolvePk.c"
+#include "Scripts/sphericalConvolvePk.c"
 
 #include "Scripts/ComovingNumberDensityCalc.c"
 
@@ -80,7 +80,7 @@ int main(int argc, char **argv){
     absMagCut                 =      -20.0;
 
     // Apply Jenkin's scaling to beat aliasing.
-    JenkinsScalefactor        =        2.0;
+    JenkinsScalefactor        =        1.0;
 
     // FKP P(k) of interest;
     fkpPk                     =      5000.;                                               // [h^-1 Mpc]^3, Peeble's convention.
@@ -90,7 +90,7 @@ int main(int argc, char **argv){
     modkMax                   =        0.5;
 
     // Convolution of P(k) with window fn.
-    InterpK_binNumber         =        300;
+    InterpK_binNumber         =        400;
     MuIntegralPrecision       =       9000;
 
     // padded window fn. calculation.
@@ -144,9 +144,9 @@ int main(int argc, char **argv){
     
     PkCalc();
 
-    // wfPkCalc();
+    wfPkCalc();
     
-    // ConvolveTheory();
+    ConvolveTheory();
     // printWindowfuncSlices();
     
     // FFTw arrays in and out and binning arrays must be freed and reassigned to the padded size before padded window fn. calc.
@@ -155,17 +155,17 @@ int main(int argc, char **argv){
     
     // padwfPkCalc(sidepad);
     
-    assign2DPkMemory();
+    // assign2DPkMemory();
     
-    inputLinearPk();
+    // inputLinearPk();
     
-    formPkCube();
+    // formPkCube();
 
     // clipCorrfn();
 
     // InvErrorfnTest();
 
-    Theory2Dpk();
+    // Theory2Dpk();
     
     // Observed2Dpk();
 

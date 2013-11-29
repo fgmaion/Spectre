@@ -26,24 +26,6 @@ int wfPkCalc(){
 }
 
 
-int printWindowfuncSlices(){
-    printf("\nPrinting window func. slices.");
-    
-    sprintf(WindowfuncSlices_dir, "%s/Data/WindowfuncSlices", root_dir);
-
-    sprintf(Windowfunc_xSlice, "%s/%s_xSlice.dat", WindowfuncSlices_dir, surveyType);
-    WindowfuncSlice(kIntervalx, n2, 1, 0, 0, Windowfunc_xSlice);
-    
-    sprintf(Windowfunc_ySlice, "%s/%s_ySlice.dat", WindowfuncSlices_dir, surveyType);
-    WindowfuncSlice(kIntervaly, n1, 0, 1, 0, Windowfunc_ySlice);
-    
-    sprintf(Windowfunc_zSlice, "%s/%s_zSlice.dat", WindowfuncSlices_dir, surveyType);
-    WindowfuncSlice(kIntervalz, n0, 0, 0, 1, Windowfunc_zSlice);
-
-    return 0;
-}
-
-
 int WindowfuncSlice(float kintervali, int ni, int x0, int y0, int z0, char filepath[]){
     // ints x0, y0, z0 specify whether it is true or false that the x,y and z co-ordinates have been taken to be zero for that slice.  
     
@@ -79,5 +61,23 @@ int WindowfuncSlice(float kintervali, int ni, int x0, int y0, int z0, char filep
     for(j=0; j<kBinNumb-1; j++)     fprintf(output, "%d \t %g \t %g\n", modesPerBin[j], meanKBin[j], binnedPk[j]);
     fclose(output);
     
+    return 0;
+}
+
+
+int printWindowfuncSlices(){
+    printf("\nPrinting window func. slices.");
+    
+    sprintf(WindowfuncSlices_dir, "%s/Data/WindowfuncSlices", root_dir);
+
+    sprintf(Windowfunc_xSlice, "%s/%s_xSlice.dat", WindowfuncSlices_dir, surveyType);
+    WindowfuncSlice(kIntervalx, n2, 1, 0, 0, Windowfunc_xSlice);
+    
+    sprintf(Windowfunc_ySlice, "%s/%s_ySlice.dat", WindowfuncSlices_dir, surveyType);
+    WindowfuncSlice(kIntervaly, n1, 0, 1, 0, Windowfunc_ySlice);
+    
+    sprintf(Windowfunc_zSlice, "%s/%s_zSlice.dat", WindowfuncSlices_dir, surveyType);
+    WindowfuncSlice(kIntervalz, n0, 0, 0, 1, Windowfunc_zSlice);
+
     return 0;
 }
