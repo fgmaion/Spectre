@@ -67,7 +67,7 @@ float ConvolveCell(int x, int y, int z){
 
 	int   qIndex;
 	int   kkIndex;
-/*
+
 	// -q_z to q_z
 	for(k=0; k<wfKernelsize; k++){
 	  // -q_y to q_y
@@ -81,13 +81,13 @@ float ConvolveCell(int x, int y, int z){
 			j       -= (wfKernelsize-1)/2;
 			k       -= (wfKernelsize-1)/2;
 
-			kkIndex  = (z + 0.*k)*n1*n2 + (y + j*0.)*n2 + (x + i*0.);
+			// kkIndex  = (z + 0.*k)*n1*n2 + (y + j*0.)*n2 + (x + i*0.);
 
 			Interim += windowFunc3D[qIndex]; // *inputPk[kIndex];
 		}
 	  }
 	}
-*/
+
 	return Interim;
 }
 
