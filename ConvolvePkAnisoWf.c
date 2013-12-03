@@ -29,13 +29,13 @@ int AnisoConvolution(){
 
 	flatten3dConvolvedPk();
 
-	// PkBinningCalc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize), flattenedConvolvedPk3D);
+	PkBinningCalc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize), flattenedConvolvedPk3D);
 
-	// sprintf(filepath, "%s/Data/Pk/midK_Pk_ConvolvedAnisoGauss.dat", root_dir);
+	sprintf(filepath, "%s/Data/Pk/midK_Pk_ConvolvedAnisoGauss.dat", root_dir);
     
-    // output = fopen(filepath, "w");
-    // for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
-    // fclose(output);
+    output = fopen(filepath, "w");
+    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
+    fclose(output);
 
 	return 0;	
 }
@@ -59,7 +59,7 @@ int flatten3dConvolvedPk(){
                 kmodulus 		= pow(kSq, 0.5);
 
 				flattenedConvolvedPk3D[qqIndex][0] =  kmodulus;
-				flattenedConvolvedPk3D[qqIndex][1] =  convolvedPk3d[Index];
+				flattenedConvolvedPk3D[qqIndex][1] =  convolvedPk3d[qqIndex];
 			}
 		}
 	}
