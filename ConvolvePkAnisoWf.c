@@ -41,6 +41,8 @@ int AnisoConvolution(){
 
 int convolve3DInputPk(float convolvedPk[], float inputPk[]){
 	for(k=0; k<n0-2*wfKernelsize; k++){
+		printf("\n %d", k);
+
 		for(j=0; j<n1-2*wfKernelsize; j++){
 			for(i=0; i<n2-2*wfKernelsize; i++){
 				Index = k*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + j*(n2-2*wfKernelsize) + i;
