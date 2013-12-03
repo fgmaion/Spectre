@@ -83,12 +83,10 @@ float ConvolveCell(float array[], int x, int y, int z){
 
 			kIndex   = (z + 0.*k)*n1*n2 + (y + j*0.)*n2 + (x + i*0.);
 
-			Interim += windowFunc3D[qIndex];//*array[kIndex];
+			Interim += windowFunc3D[qIndex]*inputPk[kIndex];
 		}
 	  }
 	}
-
-	printf("\n array check: %f", array[0]);
 
 	return Interim;
 }
