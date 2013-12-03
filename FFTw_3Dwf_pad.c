@@ -57,7 +57,7 @@ int padwfPkCalc(int sidepad){
     }
 
     printf("\nBinning padded W2.");
-    PkBinningCalc(padcellsNumber);
+    PkBinningCalc(padcellsNumber, PkArray);
     
     sprintf(filepath, "%s/Data/WindowfuncSpherical/midK_pad%dW2k_%s.dat", root_dir, padfactor, surveyType);
     

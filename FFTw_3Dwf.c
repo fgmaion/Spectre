@@ -12,7 +12,7 @@ int wfPkCalc(){
 
     PkCorrections(1);
 
-    PkBinningCalc(n0*n1*n2);
+    PkBinningCalc(n0*n1*n2, PkArray);
     
     sprintf(filepath, "%s/Data/WindowfuncSpherical/midK_W2k_%s.dat", root_dir, surveyType);
     output = fopen(filepath, "w");
@@ -55,7 +55,7 @@ int WindowfuncSlice(float kintervali, int ni, int x0, int y0, int z0, char filep
          
     printf("\n\nTotal number of modes for %d %d %d window fn. slice:  %d", x0, y0, z0, Num_ModesInInterval);          
          
-    PkBinningCalc(Num_ModesInInterval);
+    PkBinningCalc(Num_ModesInInterval, PkArray);
     
     output = fopen(filepath, "w");
     for(j=0; j<kBinNumb-1; j++)     fprintf(output, "%d \t %g \t %g\n", modesPerBin[j], meanKBin[j], binnedPk[j]);

@@ -84,7 +84,7 @@ int PkCorrections(int WindowFuncParam){
 }
 
 
-int PkBinningCalc(int NumberModes, float PkArray[]){
+int PkBinningCalc(int NumberModes, float PkArray[][]){
     printf("\n\nPerforming binning calculation.");
     
     for(j=0; j<kBinNumb; j++)  kBinLimits[j]  = j*kbinInterval;
@@ -170,7 +170,7 @@ int BinnedPkForMuInterval(float lowerMuLimit, float upperMuLimit, char filepath[
     
     printf("\nNumber of modes in interval:  %d", Num_ModesInMuInterval);
     
-    PkBinningCalc(Num_ModesInMuInterval);
+    PkBinningCalc(Num_ModesInMuInterval, PkArray);
     
     output = fopen(filepath, "w");
     for(j=0; j<kBinNumb-1; j++)     fprintf(output, "%d \t %g \t %g\n", modesPerBin[j], midKBin[j], binnedPk[j]);

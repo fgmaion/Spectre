@@ -55,7 +55,7 @@ int flatten3dConvolvedPk(){
                 kmodulus 		= pow(kSq, 0.5);
 
 				flattenedConvolvedPk3D[qIndex][0] =  kmodulus;
-				flattenedConvolvedPk3D[qIndex][1] =  convolvedPk[Index];
+				flattenedConvolvedPk3D[qIndex][1] =  convolvedPk3d[Index];
 			}
 		}
 	}
