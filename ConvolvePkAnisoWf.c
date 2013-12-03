@@ -45,6 +45,8 @@ int flatten3dConvolvedPk(){
 	int qqIndex;
 	int kkIndex;
 
+	printf("\nkIntervals, x: %f, y: %f, z: %f", kIntervalx, kIntervaly, kIntervalz);
+
 	// k indexing! ie not k=wfKernelsize to blah, not 0 to blah. 
 	for(k=wfKernelsize; k<n0-wfKernelsize; k++){
 		for(j=wfKernelsize; j<n1-wfKernelsize; j++){
@@ -62,14 +64,12 @@ int flatten3dConvolvedPk(){
 
 				flattenedConvolvedPk3D[qqIndex][0] =  kmodulus;
 				flattenedConvolvedPk3D[qqIndex][1] =  convolvedPk3d[qqIndex];
-
-				if(kkIndex<30){
-					printf("\n %f \t %f", kmodulus, convolvedPk3d[qqIndex]/inputPk[kkIndex]);
-				}
 			}
 		}
 	}
 
+	for(j=0; j<100; j++) printf("\n %f \t %f", flattenedConvolvedPk3D[j][0], flattenedConvolvedPk3D[j][0]);
+		
 	return 0;
 }
 
