@@ -23,7 +23,7 @@ int AnisoConvolution(){
 
 	wf3Dnorm  					= filter3Dnorm();
 
-	printf("\nConvolved cell:  %f", ConvolveCell(inputPk, 0, 0, 0));
+	printf("\nConvolved cell:  %f", ConvolveCell(inputPk, n2/2, n1/2, n2/2));
 
 	// convolve3DInputPk(convolvedPk3d, inputPk);
 
@@ -39,25 +39,51 @@ int AnisoConvolution(){
 }
 
 
+int setInputPk(){
+	for(k=0; k<n0; k++){
+		for(j=0; j<n1; j++){
+			for(i=0; i<n2; i++){
+				k_x   	 		= kIntervalx*(i - n2/2.);
+                k_y   	 		= kIntervaly*(j - n1/2.);
+                k_z   	 		= kIntervalz*(k - n0/2.);
+
+                Index 	 		= k*n1*n2 + j*n2 + i;
+
+                kSq      		= pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
+
+                kmodulus 		= pow(kSq, 0.5);
+
+                inputPk[Index]  = (*pt2Pk)(kmodulus);
+			}
+		}
+	}
+
+	return 0;
+}
+
+
 float ConvolveCell(float array[], int x, int y, int z){
 	float Interim = 0.0;
 
 	int   qIndex;
 	int   kIndex;
 
+	// -q_z to q_z
 	for(k=0; k<wfKernelsize; k++){
+	  // -q_y to q_y
 	  for(j=0; j<wfKernelsize; j++){
+	  	// -q_x to q_x 
 	    for(i=0; i<wfKernelsize; i++){
 			qIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
 
 			// k indexing. 
-	//			i       -= (wfKernelsize-1);
-	//			j       -= (wfKernelsize-1);
-	//			k       -= (wfKernelsize-1);
+			i       -= (wfKernelsize-1);
+			j       -= (wfKernelsize-1);
+			k       -= (wfKernelsize-1);
 
-	//			kIndex   = (z + k)*n1*n2 + (y + j)*n2 + (x + i);
+			kIndex   = (z + k)*n1*n2 + (y + j)*n2 + (x + i);
 
-			Interim += array[qIndex]*windowFunc3D[qIndex];
+			Interim += array[kIndex]*windowFunc3D[qIndex];
 		}
 	  }
 	}
@@ -101,29 +127,6 @@ int convolve3DInputPk(float convolvedPk[], float inputPk[]){
 				convolvedPk[Index]  = ConvolveCell(inputPk, i + wfKernelsize, j + wfKernelsize, k + wfKernelsize);
 
 				// convolvedPk[Index] /= wf3Dnorm;
-			}
-		}
-	}
-
-	return 0;
-}
-
-
-int setInputPk(){
-	for(k=0; k<n0; k++){
-		for(j=0; j<n1; j++){
-			for(i=0; i<n2; i++){
-				k_x   	 		= kIntervalx*(i - n2/2.);
-                k_y   	 		= kIntervaly*(j - n1/2.);
-                k_z   	 		= kIntervalz*(k - n0/2.);
-
-                Index 	 		= k*n1*n2 + j*n2 + i;
-
-                kSq      		= pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
-
-                kmodulus 		= pow(kSq, 0.5);
-
-                inputPk[Index]  = (*pt2Pk)(kmodulus);
 			}
 		}
 	}
