@@ -23,7 +23,7 @@ int AnisoConvolution(){
 
 	wf3Dnorm  					= filter3Dnorm();
 
-	// convolve3DInputPk(convolvedPk3d, inputPk);
+	convolve3DInputPk(convolvedPk3d, inputPk);
 
 	// PkBinningCalc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize), flattenedConvolvedPk3D);
 
