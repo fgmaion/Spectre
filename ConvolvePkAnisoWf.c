@@ -65,21 +65,21 @@ int setInputPk(){
 float ConvolveCell(int x, int y, int z){
 	float Interim = 0.0;
 
-	// int   qIndex;
-	// int   kkIndex;
+	int   aaIndex;
+	int   bbIndex;
 
 	// -q_z to q_z
-/*	for(k=0; k<wfKernelsize; k++){
+	for(k=0; k<wfKernelsize; k++){
 	  // -q_y to q_y
 	  for(j=0; j<wfKernelsize; j++){
 	  	// -q_x to q_x 
 	    for(i=0; i<wfKernelsize; i++){
-			qIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
+//			qIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
 
 			// k indexing. 
-			i       -= (wfKernelsize-1)/2;
-			j       -= (wfKernelsize-1)/2;
-			k       -= (wfKernelsize-1)/2;
+//			i       -= (wfKernelsize-1)/2;
+//			j       -= (wfKernelsize-1)/2;
+//			k       -= (wfKernelsize-1)/2;
 
 			// kkIndex  = (z + k)*n1*n2 + (y + j)*n2 + (x + i);
 
@@ -87,7 +87,7 @@ float ConvolveCell(int x, int y, int z){
 		}
 	  }
 	}
-*/
+
 	return Interim;
 }
 
