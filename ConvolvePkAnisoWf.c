@@ -23,7 +23,7 @@ int AnisoConvolution(){
 
 	wf3Dnorm  					= filter3Dnorm();
 
-	printf("\nConvolved cell:  %f", ConvolveCell(inputPk, n2/2, n1/2, n0/2));
+	printf("\nConvolved cell:  %f", ConvolveCell(n2/2, n1/2, n0/2));
 
 	// convolve3DInputPk(convolvedPk3d, inputPk);
 
@@ -62,7 +62,7 @@ int setInputPk(){
 }
 
 
-float ConvolveCell(float array[], int x, int y, int z){
+float ConvolveCell(int x, int y, int z){
 	float Interim = 0.0;
 
 	int   qIndex;
@@ -83,7 +83,7 @@ float ConvolveCell(float array[], int x, int y, int z){
 
 			kIndex   = (z + 0.*k)*n1*n2 + (y + j*0.)*n2 + (x + i*0.);
 
-			Interim += windowFunc3D[qIndex]*inputPk[kIndex];
+			Interim += windowFunc3D[qIndex]; // *inputPk[kIndex];
 		}
 	  }
 	}

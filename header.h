@@ -112,7 +112,7 @@ float        anisoGauss(float x, float y, float z);
 int          AnisoConvolution();
 int          setInputPk();
 int          SetWfKernel();
-float        ConvolveCell(float array[], int x, int y, int z);
+float        ConvolveCell(int x, int y, int z);
 float 		 filter3Dnorm();
 int 		 convolve3DInputPk(float convolvedPk[], float input[]);
 
