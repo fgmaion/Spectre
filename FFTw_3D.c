@@ -14,7 +14,7 @@ int PkCalc(){
     // 0: Subtract shot noise for a real survey, 1: Neglect shot noise subtraction for FFT of window function. 
     PkCorrections(0);
     
-    PkBinningCalc(n0*n1*n2);
+    PkBinningCalc(n0*n1*n2, PkArray);
     
     sprintf(filepath, "%s/Data/Del2k/midK_Del2k_%s.dat", root_dir, surveyType);
     
@@ -84,7 +84,7 @@ int PkCorrections(int WindowFuncParam){
 }
 
 
-int PkBinningCalc(int NumberModes){
+int PkBinningCalc(int NumberModes, float PkArray[]){
     printf("\n\nPerforming binning calculation.");
     
     for(j=0; j<kBinNumb; j++)  kBinLimits[j]  = j*kbinInterval;

@@ -113,7 +113,8 @@ int          AnisoConvolution();
 int          setInputPk();
 int          SetWfKernel();
 float        ConvolveCell(float array[], int x, int y, int z);
-
+float 		 filter3Dnorm();
+int 		 convolve3DInputPk(float convolvedPk[], float input[]);
 
 // Pointers to interpolation functions. 
 float        (*pt2Integrand)(float)                         = &Integrand;
@@ -429,7 +430,10 @@ double       zroll;
 int 		 wfKernelsize;
 
 float 		 PkCubeEntry;
+float 		 wf3Dnorm;
 
 float*       inputPk;
 float*		 windowFunc3D; 
 float*		 convolvedPk3d;
+
+float**      flattenedConvolvedPk3D;
