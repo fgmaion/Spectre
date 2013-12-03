@@ -44,7 +44,7 @@ float ConvolveCell(float array[], int x, int y, int z){
 
 	int   qIndex;
 	int   kIndex;
-/*
+
 	for(k=0; k<wfKernelsize; k++){
 	  for(j=0; j<wfKernelsize; j++){
 	    for(i=0; i<wfKernelsize; i++){
@@ -61,7 +61,7 @@ float ConvolveCell(float array[], int x, int y, int z){
 		}
 	  }
 	}
-*/
+
 	return Interim;
 }
 
