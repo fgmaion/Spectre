@@ -119,10 +119,10 @@ int prepAnisoConvolution(){
     
     convolvedPk3d                    = (float *)  malloc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize)*sizeof(*convolvedPk3d)); 
 
-    flattenedConvolvedPk3D           = (float **) malloc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize)*sizeof(*flattenedConvolvedPk3D));
+    flattenedConvolvedPk3D           = (double **) malloc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize)*sizeof(*flattenedConvolvedPk3D));
 
     for(j=0; j<(n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize); j++){
-        flattenedConvolvedPk3D[j]    = (float *)  malloc(2*sizeof(float));
+        flattenedConvolvedPk3D[j]    = (double *)  malloc(2*sizeof(double));
 
         flattenedConvolvedPk3D[j][0] = 0.0;
         flattenedConvolvedPk3D[j][1] = 0.0;

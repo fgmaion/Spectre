@@ -61,15 +61,13 @@ int flatten3dConvolvedPk(){
 
                 kmodulus 		= pow(kSq, 0.5);
 
-				flattenedConvolvedPk3D[totalModes][0] =  kmodulus;
-				flattenedConvolvedPk3D[totalModes][1] =  convolvedPk3d[qqIndex];
+				flattenedConvolvedPk3D[totalModes][0] =  (double) kmodulus;
+				flattenedConvolvedPk3D[totalModes][1] =  (double) convolvedPk3d[qqIndex];
 
 				totalModes     += 1;
 			}
 		}
 	}
-
-	for(j=0; j<100; j++) printf("\n %f \t %f", flattenedConvolvedPk3D[j][0], flattenedConvolvedPk3D[j][1]);
 
 	PkBinningCalc(totalModes, flattenedConvolvedPk3D);
 

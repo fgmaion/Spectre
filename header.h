@@ -437,4 +437,4 @@ float*       inputPk;
 float*		 windowFunc3D; 
 float*		 convolvedPk3d;
 
-float**      flattenedConvolvedPk3D;
+double**      flattenedConvolvedPk3D;

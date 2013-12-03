@@ -93,7 +93,7 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
 
     // Order by mod k to ensure binning is the mean between LowerBinIndex and UpperBinIndex.
     printf("\nSorting mod k array.");
-    qsort(Array, NumberModes, sizeof(Array[0]), FirstColumnCompare);
+    qsort(&Array, NumberModes, sizeof(Array[0]), FirstColumnCompare);
     
     LowerBinIndex = 0;
     UpperBinIndex = 0;
