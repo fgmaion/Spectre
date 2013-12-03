@@ -139,14 +139,14 @@ int main(int argc, char **argv){
     prepFFTw(n0, n1, n2);
     prepFFTbinning();
 
-    NGPCalcCube();
+    // NGPCalcCube();
     
     // A11                      =   (1./2.6); // Empirical estimate from suppressed Del2k. 
     // clipDensity(appliedClippingThreshold); // Clipping at 5.0
     
-    CalcCorrections();
+    // CalcCorrections();
     
-    PkCalc();
+    // PkCalc();
 
     // wfPkCalc();
     

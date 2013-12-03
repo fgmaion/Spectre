@@ -89,7 +89,7 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
     
     for(j=0; j<kBinNumb; j++)  kBinLimits[j]  = j*kbinInterval;
     
-    for(j=0; j<100; j++) printf("\n %f \t %f", flattenedConvolvedPk3D[j][0], flattenedConvolvedPk3D[j][1]);
+    for(j=0; j<100; j++) printf("\n %f \t %f", Array[j][0], Array[j][1]);
 
     // Order by mod k to ensure binning is the mean between LowerBinIndex and UpperBinIndex.
     printf("\nSorting mod k array.");
