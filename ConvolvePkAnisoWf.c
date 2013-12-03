@@ -23,7 +23,7 @@ int AnisoConvolution(){
 
 	wf3Dnorm  					= filter3Dnorm();
 
-	printf("\nConvolved cell:  %f", ConvolveCell(n2/2, n1/2, n0/2));
+	// printf("\nConvolved cell:  %f", ConvolveCell(n2/2, n1/2, n0/2));
 
 	convolve3DInputPk(convolvedPk3d, inputPk);
 
@@ -39,12 +39,38 @@ int AnisoConvolution(){
 }
 
 
-int convolve3DInputPk(float convolvedPk[], float inputPk[]){
-	for(k=0; k<n0-2*wfKernelsize; k++){
-		printf("\n %d", k);
+int flatten3dConvolvedPk(){
+	int qIndex;
 
+	for(k=0; k<n0-2*wfKernelsize; k++){
 		for(j=0; j<n1-2*wfKernelsize; j++){
 			for(i=0; i<n2-2*wfKernelsize; i++){
+				qIndex = k*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + j*(n2-2*wfKernelsize) + (i - 2*wfKernelsize);
+
+				k_x   	 		= kIntervalx*(i - n2/2.);
+                k_y   	 		= kIntervaly*(j - n1/2.);
+                k_z   	 		= kIntervalz*(k - n0/2.);
+
+                kSq      		= pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
+
+                kmodulus 		= pow(kSq, 0.5);
+
+				flattenedConvolvedPk3D[qIndex][0] =  kmodulus;
+				flattenedConvolvedPk3D[qIndex][1] =  convolvedPk3d[Index];
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+int convolve3DInputPk(float convolvedPk[], float inputPk[]){
+	for(k=0; k<n0-2*wfKernelsize; k++){
+		for(j=0; j<n1-2*wfKernelsize; j++){
+			for(i=0; i<n2-2*wfKernelsize; i++){
+				printf("\n %d \t %d \t %d", i, j, k);
+
 				Index = k*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + j*(n2-2*wfKernelsize) + i;
 
 				convolvedPk3d[Index]  = ConvolveCell(i + wfKernelsize, j + wfKernelsize, k + wfKernelsize);
@@ -112,32 +138,6 @@ float ConvolveCell(int x, int y, int z){
 	}
 
 	return Interim;
-}
-
-
-int flatten3dConvolvedPk(){
-	int qIndex;
-
-	for(k=0; k<n0-2*wfKernelsize; k++){
-		for(j=0; j<n1-2*wfKernelsize; j++){
-			for(i=0; i<n2-2*wfKernelsize; i++){
-				qIndex = k*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + j*(n2-2*wfKernelsize) + (i - 2*wfKernelsize);
-
-				k_x   	 		= kIntervalx*(i - n2/2.);
-                k_y   	 		= kIntervaly*(j - n1/2.);
-                k_z   	 		= kIntervalz*(k - n0/2.);
-
-                kSq      		= pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
-
-                kmodulus 		= pow(kSq, 0.5);
-
-				flattenedConvolvedPk3D[qIndex][0] =  kmodulus;
-				flattenedConvolvedPk3D[qIndex][1] =  convolvedPk3d[Index];
-			}
-		}
-	}
-
-	return 0;
 }
 
 
