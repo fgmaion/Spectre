@@ -39,6 +39,33 @@ int AnisoConvolution(){
 }
 
 
+float ConvolveCell(float array[], int x, int y, int z){
+	float Interim = 0.0;
+
+	int   qIndex;
+	int   kIndex;
+
+	for(k=0; k<wfKernelsize; k++){
+		for(j=0; j<wfKernelsize; j++){
+			for(i=0; i<wfKernelsize; i++){
+				qIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
+
+				// k indexing. 
+				i       -= (wfKernelsize-1);
+				j       -= (wfKernelsize-1);
+				k       -= (wfKernelsize-1);
+
+				kIndex   = (z + k)*n1*n2 + (y + j)*n2 + (x + i);
+
+				// Interim += array[kIndex]*windowFunc3D[qIndex];
+			}
+		}
+	}
+
+	return Interim;
+}
+
+
 int flatten3dConvolvedPk(){
 	int qIndex;
 
@@ -133,33 +160,6 @@ float filter3Dnorm(){
 			for(i=0; i<wfKernelsize; i++){
 				qIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
 				Interim += windowFunc3D[qIndex];
-			}
-		}
-	}
-
-	return Interim;
-}
-
-
-float ConvolveCell(float array[], int x, int y, int z){
-	float Interim = 0.0;
-
-	int   qIndex;
-	int   kIndex;
-
-	for(k=0; k<wfKernelsize; k++){
-		for(j=0; j<wfKernelsize; j++){
-			for(i=0; i<wfKernelsize; i++){
-				qIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
-
-				// k indexing. 
-				i       -= (wfKernelsize-1);
-				j       -= (wfKernelsize-1);
-				k       -= (wfKernelsize-1);
-
-				kIndex   = (z + k)*n1*n2 + (y + j)*n2 + (x + i);
-
-				Interim += array[kIndex]*windowFunc3D[qIndex];
 			}
 		}
 	}
