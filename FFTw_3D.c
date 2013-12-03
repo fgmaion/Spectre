@@ -139,6 +139,8 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
         midKBin[j]          = 0.5*(kBinLimits[j] + kBinLimits[j+1]);
     }
     
+    for(j=0; j<kBinNumb-1; j++) printf("\n%f \t %f", meanKBin[j], binnedPk[j]);
+
     return 0;
 }
 
