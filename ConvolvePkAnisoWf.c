@@ -74,14 +74,14 @@ float ConvolveCell(int x, int y, int z){
 	  for(j=0; j<wfKernelsize; j++){
 	  	// -q_x to q_x 
 	    for(i=0; i<wfKernelsize; i++){
-//			qIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
+			aaIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
 
 			// k indexing. 
 //			i       -= (wfKernelsize-1)/2;
 //			j       -= (wfKernelsize-1)/2;
 //			k       -= (wfKernelsize-1)/2;
 
-			// kkIndex  = (z + k)*n1*n2 + (y + j)*n2 + (x + i);
+			bbIndex  = (z + k)*n1*n2 + (y + j)*n2 + (x + i);
 
 			// Interim += windowFunc3D[qIndex]; // *inputPk[kIndex];
 		}
