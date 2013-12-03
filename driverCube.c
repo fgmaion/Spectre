@@ -95,7 +95,7 @@ int main(int argc, char **argv){
     // MuIntegralPrecision    =       9000;
 
     // Must be odd. 2n + 1.
-    wfKernelsize              =          3;
+    wfKernelsize              =          9;
 
     // padded window fn. calculation.
     sidepad                   =          0; 

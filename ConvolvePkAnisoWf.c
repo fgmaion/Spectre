@@ -51,8 +51,6 @@ int flatten3dConvolvedPk(){
 			for(i=n2/2; i<n2-wfKernelsize; i++){
 				// qqIndex 		= (k - wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + (j - wfKernelsize)*(n2-2*wfKernelsize) + (i - wfKernelsize);
 
-				totalModes     += 1;
-
 				kkIndex 		= k*n1*n2 + j*n2 + i;
 
 				k_x   	 		= kIntervalx*(i - n2/2.);
@@ -65,6 +63,8 @@ int flatten3dConvolvedPk(){
 
 				flattenedConvolvedPk3D[totalModes][0] =  kmodulus;
 				flattenedConvolvedPk3D[totalModes][1] =  convolvedPk3d[qqIndex];
+
+				totalModes     += 1;
 			}
 		}
 	}
