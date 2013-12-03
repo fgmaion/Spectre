@@ -107,6 +107,14 @@ int          free2dPk();
 int          freeConvolutionMemory();
 
 
+// Convolution with anisotropic window fn. 
+float        anisoGauss(float x, float y, float z);
+int          AnisoConvolution();
+int          setInputPk();
+int          SetWfKernel();
+float        ConvolveCell(float array[], int x, int y, int z);
+
+
 // Pointers to interpolation functions. 
 float        (*pt2Integrand)(float)                         = &Integrand;
 float        (*pt2interp_comovingDistance)(float)           = &interp_comovingDistance;

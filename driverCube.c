@@ -27,6 +27,7 @@
 #include "Scripts/FFTw_3Dwf_pad.c"
 
 #include "Scripts/sphericalConvolvePk.c"
+#include "Scripts/ConvolvePkAnisoWf.c"
 
 #include "Scripts/ComovingNumberDensityCalc.c"
 
@@ -149,6 +150,8 @@ int main(int argc, char **argv){
     
     ConvolveTheory();
     // printWindowfuncSlices();
+    
+    AnisoConvolution();
     
     // FFTw arrays in and out and binning arrays must be freed and reassigned to the padded size before padded window fn. calc.
     // freeFFTw();

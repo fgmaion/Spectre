@@ -8,6 +8,8 @@ float anisoGauss(float x, float y, float z){
 
 
 int AnisoConvolution(){
+    printf("\n\nImplementing anisotropic window fn. calculation.");
+
 	prepAnisoConvolution();
 
 	inputLinearPk();
@@ -15,17 +17,16 @@ int AnisoConvolution(){
 	pt2Pk                       = &Analytic2powerlaw;
     pt2AnisoWf                  = &anisoGauss;
 
-	wfSetKernel();
+	SetWfKernel();
 
 	setInputPk();
 
-	for(k=0; k<n0-10; k++){
-		for(j=0; j<n1-10; j++){
-			for(i=0; i<n2-10; i++){
+	for(k=0; k<n0-wfKernelsize; k++){
+		for(j=0; j<n1-wfKernelsize; j++){
+			for(i=0; i<n2-wfKernelsize; i++){
 				Index = k*n1*n2 + j*n2 + i;
 
 				convolvedPk3d[Index] = ConvolveCell(inputPk, i, j, k);
-
 			}
 		}
 	}
