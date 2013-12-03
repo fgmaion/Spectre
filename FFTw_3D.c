@@ -96,7 +96,7 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
     qsort(flattenedConvolvedPk3D, NumberModes, sizeof(flattenedConvolvedPk3D[0]), FirstColumnCompare);
     
     for(j=0; j<100; j++) printf("\n %e \t %e", flattenedConvolvedPk3D[j][0], flattenedConvolvedPk3D[j][1]);
-    /*    
+       
 
     LowerBinIndex = 0;
     UpperBinIndex = 0;
@@ -108,7 +108,7 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
         binnedPk[j]     =            0.0;
         linearErrors[j] =            0.0;
     }
-    
+    /*
     for(j=0; j<kBinNumb-1; j++){
         for(i=LowerBinIndex; i<NumberModes; i++){
             if(flattenedConvolvedPk3D[i][0] > kBinLimits[j+1]){
