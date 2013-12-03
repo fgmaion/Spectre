@@ -23,7 +23,7 @@ int AnisoConvolution(){
 
 	wf3Dnorm  					= filter3Dnorm();
 
-	printf("\nConvolved cell:  %f", ConvolveCell(n2/2, n1/2, n0/2));
+	// printf("\nConvolved cell:  %f", ConvolveCell(n2/2, n1/2, n0/2));
 
 	convolve3DInputPk(convolvedPk3d, inputPk);
 
@@ -68,8 +68,8 @@ int flatten3dConvolvedPk(){
 		}
 	}
 
-	for(j=0; j<100; j++) printf("\n %f \t %f", flattenedConvolvedPk3D[j][0], flattenedConvolvedPk3D[j][0]);
-		
+	for(j=0; j<100; j++) printf("\n %f \t %f", flattenedConvolvedPk3D[j][0], flattenedConvolvedPk3D[j][1]);
+
 	return 0;
 }
 
