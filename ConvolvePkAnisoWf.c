@@ -66,18 +66,20 @@ int flatten3dConvolvedPk(){
 
 
 int convolve3DInputPk(float convolvedPk[], float inputPk[]){
-	for(k=0; k<3; k++){
-		for(j=0; j<3; j++){
-			for(i=0; i<3; i++){
+	int ii, jj, kk;
+
+	for(kk=0; kk<3; kk++){
+		for(jj=0; jj<3; jj++){
+			for(ii=0; ii<3; ii++){
 
 	// for(k=0; k<n0-2*wfKernelsize; k++){
 	// 	for(j=0; j<n1-2*wfKernelsize; j++){
 	// 		for(i=0; i<n2-2*wfKernelsize; i++){
-				printf("\n %d \t %d \t %d", i, j, k);
+				printf("\n %d \t %d \t %d", ii, jj, kk);
 
-				Index = k*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + j*(n2-2*wfKernelsize) + i;
+				Index = kk*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + jj*(n2-2*wfKernelsize) + ii;
 
-				convolvedPk3d[Index]  = ConvolveCell(i + wfKernelsize, j + wfKernelsize, k + wfKernelsize);
+				convolvedPk3d[Index]  = ConvolveCell(ii + wfKernelsize, jj + wfKernelsize, kk + wfKernelsize);
 
 				// convolvedPk[Index] /= wf3Dnorm;
 			}
