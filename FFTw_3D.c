@@ -121,7 +121,6 @@ int PkBinningCalc(int NumberModes){
 	    if(modesPerBin[j]  != 0)  meanKBin[j]  /= modesPerBin[j];
         if(modesPerBin[j]  != 0)  binnedPk[j]  /= modesPerBin[j];
 
-
         // Peacock and Nicholson 1991, pg 313. above eqn (20).
         // Result of summing over a shell in k space containing m modes, should be a Gaussian random variable with variance 2.m/N^2  
               

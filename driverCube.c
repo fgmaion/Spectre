@@ -90,8 +90,9 @@ int main(int argc, char **argv){
     modkMax                   =        0.5;
 
     // Convolution of P(k) with window fn.
-    InterpK_binNumber         =        400;
-    MuIntegralPrecision       =       9000;
+    // InterpK_binNumber      =        400;
+    // MuIntegralPrecision    =       9000;
+    wfKernelsize              =         10;
 
     // padded window fn. calculation.
     sidepad                   =          0; 

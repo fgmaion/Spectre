@@ -34,8 +34,9 @@ int          EvaluateConvolution(char type[]);
 float        EvaluatefilterNormalisation();
 float        NormalisationKernel(float q);
 
-float        (*pt2Windowfn)(float) = NULL;
-float        (*pt2Pk)(float)       = NULL;
+float 		 (*pt2AnisoWf)(float, float, float) = NULL;
+float        (*pt2Windowfn)(float) 				= NULL;
+float        (*pt2Pk)(float)       				= NULL;
 
 float        SphericalWindowfuncEval(float k, float R);
 
@@ -415,3 +416,12 @@ double       zcentre;
 double       xroll;
 double       yroll;
 double       zroll;
+
+// Anisotropic convolution
+int 		 wfKernelsize;
+
+float 		 PkCubeEntry;
+
+float*       inputPk;
+float*		 windowFunc3D; 
+float*		 convolvedPk3d;

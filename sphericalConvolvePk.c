@@ -36,7 +36,6 @@ int ConvolveTheory(){
 
 float EvaluatefilterNormalisation(){
     // Interpolated Window fn. evaluation (spherical average of).
-    
     return qromb(NormalisationKernel, 0.0, 0.9);
 }
 

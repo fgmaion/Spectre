@@ -62,8 +62,6 @@ int formPkCube(){
 
     // Take line of sight wavevector to be (1, 0, 0), i.e unit vector along kx. 
 
-    float PkCubeEntry;
-
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
