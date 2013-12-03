@@ -49,7 +49,7 @@ int flatten3dConvolvedPk(){
 	for(k=n0/2; k<n0-wfKernelsize; k++){
 		for(j=n1/2; j<n1-wfKernelsize; j++){
 			for(i=n2/2; i<n2-wfKernelsize; i++){
-				// qqIndex 		= (k - wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + (j - wfKernelsize)*(n2-2*wfKernelsize) + (i - wfKernelsize);
+				qqIndex 		= (k - wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + (j - wfKernelsize)*(n2-2*wfKernelsize) + (i - wfKernelsize);
 
 				kkIndex 		= k*n1*n2 + j*n2 + i;
 
