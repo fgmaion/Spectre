@@ -117,16 +117,15 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
             } 
         }
 
-        /*
+        
         for(i=LowerBinIndex; i<UpperBinIndex; i++){
             meanKBin[j]    += flattenedConvolvedPk3D[i][0];
             binnedPk[j]    += flattenedConvolvedPk3D[i][1];
             modesPerBin[j] += 1;
         }
-        */
-	    
-        // if(modesPerBin[j]  != 0)  meanKBin[j]  /= modesPerBin[j];
-        // if(modesPerBin[j]  != 0)  binnedPk[j]  /= modesPerBin[j];
+        	    
+        if(modesPerBin[j]  != 0)  meanKBin[j]  /= modesPerBin[j];
+        if(modesPerBin[j]  != 0)  binnedPk[j]  /= modesPerBin[j];
 
         // Peacock and Nicholson 1991, pg 313. above eqn (20).
         // Result of summing over a shell in k space containing m modes, should be a Gaussian random variable with variance 2.m/N^2  
