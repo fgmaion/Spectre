@@ -77,9 +77,9 @@ float ConvolveCell(int x, int y, int z){
 			aaIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
 
 			// k indexing. 
-//			i       -= (wfKernelsize-1)/2;
-//			j       -= (wfKernelsize-1)/2;
-//			k       -= (wfKernelsize-1)/2;
+			i       -= (wfKernelsize-1)/2;
+			j       -= (wfKernelsize-1)/2;
+			k       -= (wfKernelsize-1)/2;
 
 			bbIndex  = (z + k)*n1*n2 + (y + j)*n2 + (x + i);
 
