@@ -48,16 +48,16 @@ float ConvolveCell(float array[], int x, int y, int z){
 	for(k=0; k<wfKernelsize; k++){
 	  for(j=0; j<wfKernelsize; j++){
 	    for(i=0; i<wfKernelsize; i++){
-	//			qIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
+			qIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
 
-				// k indexing. 
+			// k indexing. 
 	//			i       -= (wfKernelsize-1);
 	//			j       -= (wfKernelsize-1);
 	//			k       -= (wfKernelsize-1);
 
 	//			kIndex   = (z + k)*n1*n2 + (y + j)*n2 + (x + i);
 
-				// Interim += array[kIndex]*windowFunc3D[qIndex];
+			Interim += array[qIndex]*windowFunc3D[qIndex];
 		}
 	  }
 	}
