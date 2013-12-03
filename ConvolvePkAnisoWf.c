@@ -63,7 +63,7 @@ int flatten3dConvolvedPk(){
 				flattenedConvolvedPk3D[qqIndex][0] =  kmodulus;
 				flattenedConvolvedPk3D[qqIndex][1] =  convolvedPk3d[qqIndex];
 
-				if(qqIndex<30){
+				if(kkIndex<30){
 					printf("\n %f \t %f", kmodulus, convolvedPk3d[qqIndex]/inputPk[kkIndex]);
 				}
 			}
