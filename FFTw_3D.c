@@ -89,11 +89,11 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
     
     for(j=0; j<kBinNumb; j++)  kBinLimits[j]  = j*kbinInterval;
     
-    for(j=0; j<100; j++) printf("\n %f \t %f", flattenedConvolvedPk3D[j][0], flattenedConvolvedPk3D[j][1]);
+    for(j=0; j<100; j++) printf("\n %e \t %e", flattenedConvolvedPk3D[j][0], flattenedConvolvedPk3D[j][1]);
 
     // Order by mod k to ensure binning is the mean between LowerBinIndex and UpperBinIndex.
     printf("\nSorting mod k array.");
-    qsort(&Array, NumberModes, sizeof(Array[0]), FirstColumnCompare);
+    qsort(&flattenedConvolvedPk3D, NumberModes, sizeof(flattenedConvolvedPk3D[0]), FirstColumnCompare);
     
     LowerBinIndex = 0;
     UpperBinIndex = 0;
@@ -108,15 +108,15 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
     
     for(j=0; j<kBinNumb-1; j++){
         for(i=LowerBinIndex; i<NumberModes; i++){
-            if(Array[i][0] > kBinLimits[j+1]){
+            if(flattenedConvolvedPk3D[i][0] > kBinLimits[j+1]){
                 UpperBinIndex = i;
                 break;
             } 
         }
 
         for(i=LowerBinIndex; i<UpperBinIndex; i++){
-            meanKBin[j]    += Array[i][0];
-            binnedPk[j]    += Array[i][1];
+            meanKBin[j]    += flattenedConvolvedPk3D[i][0];
+            binnedPk[j]    += flattenedConvolvedPk3D[i][1];
             modesPerBin[j] += 1;
         }
 
@@ -126,7 +126,7 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
         // Peacock and Nicholson 1991, pg 313. above eqn (20).
         // Result of summing over a shell in k space containing m modes, should be a Gaussian random variable with variance 2.m/N^2  
               
-        linearErrors[j]     = sqrt(2.*modesPerBin[j]/(TotalZADEWeight*TotalZADEWeight));
+        // linearErrors[j]     = sqrt(2.*modesPerBin[j]/(TotalZADEWeight*TotalZADEWeight));
 
         del2[j]             = pow(meanKBin[j], 3.)*TotalVolume*binnedPk[j]*(4.*pi)/pow(2.*pi, 3.);
         

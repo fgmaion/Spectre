@@ -27,11 +27,11 @@ int AnisoConvolution(){
 
 	flatten3dConvolvedPk();
 
-	sprintf(filepath, "%s/Data/Pk/midK_Pk_ConvolvedAnisoGauss.dat", root_dir);
+	// sprintf(filepath, "%s/Data/Pk/midK_Pk_ConvolvedAnisoGauss.dat", root_dir);
     
-    output = fopen(filepath, "w");
-    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
-    fclose(output);
+    // output = fopen(filepath, "w");
+    // for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
+    // fclose(output);
 
 	return 0;	
 }
