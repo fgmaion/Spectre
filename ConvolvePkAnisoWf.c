@@ -43,12 +43,14 @@ int AnisoConvolution(){
 
 int flatten3dConvolvedPk(){
 	int qqIndex;
+	int kkIndex;
 
 	// k indexing! ie not k=wfKernelsize to blah, not 0 to blah. 
 	for(k=wfKernelsize; k<n0-wfKernelsize; k++){
 		for(j=wfKernelsize; j<n1-wfKernelsize; j++){
 			for(i=wfKernelsize; i<n2-wfKernelsize; i++){
 				qqIndex 		= (k - wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + (j - wfKernelsize)*(n2-2*wfKernelsize) + (i - wfKernelsize);
+				kkIndex 		= k*n1*n2 + j*n2 + i;
 
 				k_x   	 		= kIntervalx*(i - n2/2.);
                 k_y   	 		= kIntervaly*(j - n1/2.);
@@ -60,6 +62,10 @@ int flatten3dConvolvedPk(){
 
 				flattenedConvolvedPk3D[qqIndex][0] =  kmodulus;
 				flattenedConvolvedPk3D[qqIndex][1] =  convolvedPk3d[qqIndex];
+
+				if(qqIndex<30){
+					printf("\n %f", convolvedPk3d[qqIndex]/inputPk[kkIndex]);
+				}
 			}
 		}
 	}
