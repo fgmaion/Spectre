@@ -116,6 +116,7 @@ float        ConvolveCell(float array[], int x, int y, int z);
 float 		 filter3Dnorm();
 int 		 convolve3DInputPk(float convolvedPk[], float input[]);
 
+
 // Pointers to interpolation functions. 
 float        (*pt2Integrand)(float)                         = &Integrand;
 float        (*pt2interp_comovingDistance)(float)           = &interp_comovingDistance;
