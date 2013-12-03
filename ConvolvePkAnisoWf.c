@@ -64,7 +64,7 @@ int flatten3dConvolvedPk(){
 				flattenedConvolvedPk3D[qqIndex][1] =  convolvedPk3d[qqIndex];
 
 				if(qqIndex<30){
-					printf("\n %f", convolvedPk3d[qqIndex]/inputPk[kkIndex]);
+					printf("\n %f \t %f", kmodulus, convolvedPk3d[qqIndex]/inputPk[kkIndex]);
 				}
 			}
 		}
@@ -84,7 +84,7 @@ int convolve3DInputPk(float convolvedPk[], float inputPk[]){
 
 				convolvedPk3d[Index]  = ConvolveCell(ii + wfKernelsize, jj + wfKernelsize, kk + wfKernelsize);
 
-				convolvedPk[Index] /= wf3Dnorm;
+				convolvedPk3d[Index] /= wf3Dnorm;
 			}
 		}
 	}
