@@ -23,13 +23,9 @@ int AnisoConvolution(){
 
 	wf3Dnorm  					= filter3Dnorm();
 
-	// printf("\nConvolved cell:  %f", ConvolveCell(n2/2, n1/2, n0/2));
-
 	convolve3DInputPk(convolvedPk3d, inputPk);
 
 	flatten3dConvolvedPk();
-
-	PkBinningCalc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize), flattenedConvolvedPk3D);
 
 	sprintf(filepath, "%s/Data/Pk/midK_Pk_ConvolvedAnisoGauss.dat", root_dir);
     
@@ -47,11 +43,16 @@ int flatten3dConvolvedPk(){
 
 	printf("\nkIntervals, x: %f, y: %f, z: %f", kIntervalx, kIntervaly, kIntervalz);
 
+	int totalModes = 0;
+
 	// k indexing! ie not k=wfKernelsize to blah, not 0 to blah. 
-	for(k=wfKernelsize; k<n0-wfKernelsize; k++){
-		for(j=wfKernelsize; j<n1-wfKernelsize; j++){
-			for(i=wfKernelsize; i<n2-wfKernelsize; i++){
-				qqIndex 		= (k - wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + (j - wfKernelsize)*(n2-2*wfKernelsize) + (i - wfKernelsize);
+	for(k=n0/2; k<n0-wfKernelsize; k++){
+		for(j=n1/2; j<n1-wfKernelsize; j++){
+			for(i=n2/2; i<n2-wfKernelsize; i++){
+				// qqIndex 		= (k - wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + (j - wfKernelsize)*(n2-2*wfKernelsize) + (i - wfKernelsize);
+
+				totalModes     += 1;
+
 				kkIndex 		= k*n1*n2 + j*n2 + i;
 
 				k_x   	 		= kIntervalx*(i - n2/2.);
@@ -62,13 +63,15 @@ int flatten3dConvolvedPk(){
 
                 kmodulus 		= pow(kSq, 0.5);
 
-				flattenedConvolvedPk3D[qqIndex][0] =  kmodulus;
-				flattenedConvolvedPk3D[qqIndex][1] =  convolvedPk3d[qqIndex];
+				flattenedConvolvedPk3D[totalModes][0] =  kmodulus;
+				flattenedConvolvedPk3D[totalModes][1] =  convolvedPk3d[qqIndex];
 			}
 		}
 	}
 
 	for(j=0; j<100; j++) printf("\n %f \t %f", flattenedConvolvedPk3D[j][0], flattenedConvolvedPk3D[j][1]);
+
+	PkBinningCalc(totalModes, flattenedConvolvedPk3D);
 
 	return 0;
 }
