@@ -20,7 +20,7 @@ int AnisoConvolution(){
 	SetWfKernel();
 
 	setInputPk();
-
+/*
 	for(k=0; k<n0-wfKernelsize; k++){
 		for(j=0; j<n1-wfKernelsize; j++){
 			for(i=0; i<n2-wfKernelsize; i++){
@@ -30,7 +30,7 @@ int AnisoConvolution(){
 			}
 		}
 	}
-
+*/
 	return 0;	
 }
 

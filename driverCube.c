@@ -93,7 +93,7 @@ int main(int argc, char **argv){
     // Convolution of P(k) with window fn.
     // InterpK_binNumber      =        400;
     // MuIntegralPrecision    =       9000;
-    wfKernelsize              =         10;
+    wfKernelsize              =          5;
 
     // padded window fn. calculation.
     sidepad                   =          0; 
