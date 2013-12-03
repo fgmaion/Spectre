@@ -23,7 +23,9 @@ int AnisoConvolution(){
 
 	wf3Dnorm  					= filter3Dnorm();
 
-	convolve3DInputPk(convolvedPk3d, inputPk);
+	printf("\nConvolved cell:  %f", ConvolveCell(inputPk, 0, 0, 0));
+
+	// convolve3DInputPk(convolvedPk3d, inputPk);
 
 	// PkBinningCalc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize), flattenedConvolvedPk3D);
 
@@ -71,7 +73,7 @@ int convolve3DInputPk(float convolvedPk[], float inputPk[]){
 
 				convolvedPk[Index]  = ConvolveCell(inputPk, i + wfKernelsize, j + wfKernelsize, k + wfKernelsize);
 
-				convolvedPk[Index] /= wf3Dnorm;
+				// convolvedPk[Index] /= wf3Dnorm;
 			}
 		}
 	}
