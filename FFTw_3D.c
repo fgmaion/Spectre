@@ -132,11 +132,11 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
               
         // linearErrors[j]     = sqrt(2.*modesPerBin[j]/(TotalZADEWeight*TotalZADEWeight));
 
-        // del2[j]             = pow(meanKBin[j], 3.)*TotalVolume*binnedPk[j]*(4.*pi)/pow(2.*pi, 3.);
+        del2[j]             = pow(meanKBin[j], 3.)*TotalVolume*binnedPk[j]*(4.*pi)/pow(2.*pi, 3.);
         
         LowerBinIndex       = UpperBinIndex;
         
-        // midKBin[j]          = 0.5*(kBinLimits[j] + kBinLimits[j+1]);
+        midKBin[j]          = 0.5*(kBinLimits[j] + kBinLimits[j+1]);
     }
     
     return 0;
