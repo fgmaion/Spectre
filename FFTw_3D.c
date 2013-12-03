@@ -108,7 +108,7 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
         binnedPk[j]     =            0.0;
         linearErrors[j] =            0.0;
     }
-    /*
+    
     for(j=0; j<kBinNumb-1; j++){
         for(i=LowerBinIndex; i<NumberModes; i++){
             if(flattenedConvolvedPk3D[i][0] > kBinLimits[j+1]){
@@ -117,28 +117,28 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
             } 
         }
 
+        /*
         for(i=LowerBinIndex; i<UpperBinIndex; i++){
             meanKBin[j]    += flattenedConvolvedPk3D[i][0];
             binnedPk[j]    += flattenedConvolvedPk3D[i][1];
             modesPerBin[j] += 1;
         }
-
-	    if(modesPerBin[j]  != 0)  meanKBin[j]  /= modesPerBin[j];
-        if(modesPerBin[j]  != 0)  binnedPk[j]  /= modesPerBin[j];
+        */
+	    
+        // if(modesPerBin[j]  != 0)  meanKBin[j]  /= modesPerBin[j];
+        // if(modesPerBin[j]  != 0)  binnedPk[j]  /= modesPerBin[j];
 
         // Peacock and Nicholson 1991, pg 313. above eqn (20).
         // Result of summing over a shell in k space containing m modes, should be a Gaussian random variable with variance 2.m/N^2  
               
         // linearErrors[j]     = sqrt(2.*modesPerBin[j]/(TotalZADEWeight*TotalZADEWeight));
 
-        del2[j]             = pow(meanKBin[j], 3.)*TotalVolume*binnedPk[j]*(4.*pi)/pow(2.*pi, 3.);
+        // del2[j]             = pow(meanKBin[j], 3.)*TotalVolume*binnedPk[j]*(4.*pi)/pow(2.*pi, 3.);
         
         LowerBinIndex       = UpperBinIndex;
         
-        midKBin[j]          = 0.5*(kBinLimits[j] + kBinLimits[j+1]);
+        // midKBin[j]          = 0.5*(kBinLimits[j] + kBinLimits[j+1]);
     }
-
-    */
     
     return 0;
 }
