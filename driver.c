@@ -35,6 +35,9 @@
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_rng.h>
+#include <gsl/gsl_sf_legendre.h>
+
+#include "Scripts/InvErrorfn.c"
 
 #include "Scripts/Clipped_zSpace.c"
 
