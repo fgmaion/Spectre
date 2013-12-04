@@ -26,7 +26,8 @@
 #include "Scripts/FFTw_3D.c"
 #include "Scripts/FFTw_3Dwf.c"
 
-#include "Scripts/ConvolvePk.c"
+#include "Scripts/sphericalConvolvePk.c"
+#include "Scripts/ConvolvePkAnisoWf.c"
 
 #include "Scripts/ComovingNumberDensityCalc.c"
 

@@ -86,7 +86,7 @@ int CalculateCell_raDecRotated(){
         }
     }
 
-    sprint(filepath, "%s/Data/ra_decCells/ra_dec_degs.dat", root_dir);
+    sprintf(filepath, "%s/Data/ra_decCells/ra_dec_degs.dat", root_dir);
 
     output = fopen(filepath, 'w');
 
