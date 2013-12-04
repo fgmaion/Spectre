@@ -80,7 +80,7 @@ fkpPk                 =     5000.;                                              
 
 // Binning interval for P(k).
 kbinInterval          =     0.005;
-modkMax               =      0.5;
+modkMax               =       0.5;
 
 // Convolution of P(k) with window fn.
 // InterpK_binNumber  =       300;
@@ -132,22 +132,30 @@ for(loopCount=1; loopCount<15; loopCount++){
     printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
     printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
+
+    // Check inverse rotation.
+    redshiftSpaceRotation(34.5, -4.79, xCoor, yCoor, zCoor, Vipers_Num, -(180.0 + 94.79));
+    
+    printf("\n\nAfter inverse rotation ...");
+    printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
+    printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
+    printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
   
-    ComovingNumberDensityCalc();
+    // ComovingNumberDensityCalc();
 
-    ApplyFKPweights();
+    // ApplyFKPweights();
 
-    printf("\n\nHighest weighted overdensity estimate: %e",  DoubleArrayMax(FKPweights, n0*n1*n2));
-    printf("\nLowest weighted overdensity estimate:  %e",    DoubleArrayMin(FKPweights, n0*n1*n2));
+    // printf("\n\nHighest weighted overdensity estimate: %e",  DoubleArrayMax(FKPweights, n0*n1*n2));
+    // printf("\nLowest weighted overdensity estimate:  %e",    DoubleArrayMin(FKPweights, n0*n1*n2));
 
     NGPCalc();
   
-    CalcCorrections();
+    // CalcCorrections();
   
-    if(loopCount < 10)  sprintf(filepath, "%s/midK_Del2k_HODMocks_00%d.txt", root_dir, loopCount);
-    else                sprintf(filepath, "%s/midK_Del2k_HODMocks_0%d.txt",  root_dir, loopCount);
+    // if(loopCount < 10)  sprintf(filepath, "%s/midK_Del2k_HODMocks_00%d.txt", root_dir, loopCount);
+    // else                sprintf(filepath, "%s/midK_Del2k_HODMocks_0%d.txt",  root_dir, loopCount);
   
-    PkCalc(filepath);
+    // PkCalc(filepath);
 }
 
 // sprintf(filepath, "%s/midK_WindowFuncPk_HODMocks.dat", root_dir);

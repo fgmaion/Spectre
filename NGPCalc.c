@@ -22,6 +22,81 @@ int NGPCalcCube(){
 }
 
 
+int CalculateCell_raDecRotated(){
+    float xCell, yCell, zCell;
+    float rCell;
+
+    float raCell, polarCell, decCell;
+
+    for(k=0; k<n0; k++){
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+                xCell      = AxisLimsArray[0][0] + CellSize*i;
+                yCell      = AxisLimsArray[0][1] + CellSize*j;
+                zCell      = AxisLimsArray[0][2] + CellSize*k;
+
+                Index      = k*n1*n2 + j*n2 * i;
+
+                Cell_rotatedXvals[Index] = xCell;
+                Cell_rotatedYvals[Index] = yCell;
+                Cell_rotatedZvals[Index] = zCell;
+
+            }
+        }
+    }
+
+    // Check inverse rotation.
+    redshiftSpaceRotation(34.5, -4.79, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, n0*n1*n2, -(180.0 + 94.79));
+
+    for(k=0; k<n0; k++){
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+                Index       = k*n1*n2 + j*n2 + i;
+
+                xCell       = Cell_rotatedXvals[Index];
+                yCell       = Cell_rotatedYvals[Index];
+                zCell       = Cell_rotatedZvals[Index]; 
+
+                rCell       = pow(xCell*xCell + yCell*yCell + zCell*zCell, 0.5);     
+
+                // acos returns radians, argument must be in the range -1 to 1. Returned value is between 0 and pi inclusive. 
+                polarCell   = acos(zcell/rCell);
+
+                // radians. 
+                decCell     = pi/2. - polarCell;
+
+                // returns the arc tangent in radians of y/x based on the signs of both values to determine the correct quadrant. both x and y cannot be zero, returned value is in the range !-pi to pi!
+                raCell      = atan2(yCell, xCell);
+
+                if(raCell < 0.0){
+                    // right ascension in the range [0, 2*pi]
+                    raCell += 2.*pi;
+                }
+
+                // conversion to degrees. 
+                decCell    *= 180./pi;
+                raCell     *= 180./pi;
+
+                // right ascension in degrees.
+                Cell_rAdecVIPERSsystem[j][0] = raCell;
+
+                // declination in degrees.
+                Cell_rAdecVIPERSsystem[j][1] = decCell;
+            }
+        }
+    }
+
+    sprint(filepath, "%s/Data/ra_decCells/ra_dec_degs.dat", root_dir);
+
+    output = fopen(filepath, 'w');
+
+    for(j=0; j<n0*n1*n2; j++) fprintf(output, "%f \t %f \n", Cell_rAdecVIPERSsystem[j][0], Cell_rAdecVIPERSsystem[])
+
+    fclose(output);
+
+    return 0;
+}
+
 int boxCoordinates(int rowNumber){
     xlabel                  = (int) floor((xCoor[rowNumber] - AxisLimsArray[0][0])/CellSize);
     ylabel                  = (int) floor((yCoor[rowNumber] - AxisLimsArray[0][1])/CellSize);

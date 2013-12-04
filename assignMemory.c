@@ -1,7 +1,17 @@
 int prepNGP(){
-    densityArray       =  (double *) realloc(densityArray, n0*n1*n2*sizeof(*densityArray));
-    FKPweights         =  (double *) realloc(FKPweights,   n0*n1*n2*sizeof(*FKPweights));
-    booldensity        =  (double *) realloc(booldensity,  n0*n1*n2*sizeof(*booldensity));
+    densityArray            =  (double *)  realloc(densityArray, n0*n1*n2*sizeof(*densityArray));
+    FKPweights              =  (double *)  realloc(FKPweights,   n0*n1*n2*sizeof(*FKPweights));
+    booldensity             =  (double *)  realloc(booldensity,  n0*n1*n2*sizeof(*booldensity));
+
+    Cell_rotatedXvals       =  (float   *) realloc(Cell_rotatedXvals,       n0*n1*n2*sizeof(*Cell_rotatedXvals));
+    Cell_rotatedYvals       =  (float   *) realloc(Cell_rotatedYvals,       n0*n1*n2*sizeof(*Cell_rotatedYvals));
+    Cell_rotatedZvals       =  (float   *) realloc(Cell_rotatedZvals,       n0*n1*n2*sizeof(*Cell_rotatedZvals));
+
+    Cell_rAdecVIPERSsystem  =  (float  **) realloc(Cell_rAdecVIPERSsystem,  n0*n1*n2*sizeof(*Cell_rAdecVIPERSsystem));
+
+    for(j=0, j<n0*n1*n2; j++){
+        Cell_rAdecVIPERSsystem[j]  = (float *) malloc(2*sizeof(float));
+    }
     
     // Allocate memory for NGP density arrays of both ZADE galaxies and randoms. 
     for(j=0; j<n0*n1*n2; j++) densityArray[j] = 0.0;

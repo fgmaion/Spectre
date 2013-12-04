@@ -441,6 +441,13 @@ float*		 convolvedPk3d;
 
 double**     flattenedConvolvedPk3D;
 
-float*      AnisoWfKernel;
-int*        AnisoWfKernel_ModeNumb;
+float*       AnisoWfKernel;
+int*         AnisoWfKernel_ModeNumb;
 
+
+// VIPERS ra and dec of cell co-ordinates.
+float  * 	 Cell_rotatedXvals;
+float  * 	 Cell_rotatedYvals;
+float  * 	 Cell_rotatedZvals;
+
+float **     Cell_rAdecVIPERSsystem;

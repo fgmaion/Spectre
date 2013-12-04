@@ -40,6 +40,7 @@ int assignbinninginterval(float interval){
     return 0;
 }
 
+
 float SolidAngleCalc(float decLowerBound, float decUpperBound, float raInterval){
     float SolidAngle;
     
