@@ -1,7 +1,7 @@
 float anisoGauss(float x, float y, float z){
-    float xsig = 1.0;
-    float ysig = 0.5;
-    float zsig = 0.2;
+    float xsig =  80.0;
+    float ysig =  100.0;
+    float zsig =  120.0;
     
     return expf(-1.0*(pow(xsig*x, 2.) + pow(ysig*y, 2.) + pow(zsig*z, 2.)));
 }
@@ -83,6 +83,8 @@ int convolve3DInputPk(float convolvedPk[], float inputPk[]){
 		    for(ii=0; ii<n2-2*wfKernelsize; ii++){
 				Index = kk*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + jj*(n2-2*wfKernelsize) + ii;
 
+				convolvedPk3d[Index]  = inputPk[(kk+wfKernelsize)*n1*n2 + (jj+wfKernelsize)*n2 + ii+wfKernelsize];
+
 				convolvedPk3d[Index]  = ConvolveCell(ii + wfKernelsize, jj + wfKernelsize, kk + wfKernelsize);
 
 				convolvedPk3d[Index] /= wf3Dnorm;
@@ -130,21 +132,28 @@ float ConvolveCell(int x, int y, int z){
 	// -q_z to q_z
 	for(k=0; k<wfKernelsize; k++){
 	  // -q_y to q_y
+
+	  jshift = -(wfKernelsize-1)/2;
+
 	  for(j=0; j<wfKernelsize; j++){
 	  	// -q_x to q_x 
+	    
+	    ishift = -(wfKernelsize-1)/2;
+	    
 	    for(i=0; i<wfKernelsize; i++){
 			aaIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
-
-			// k indexing. 
-			ishift  += 1;
-			jshift  += 1;
-			kshift  += 1; 
-
 			bbIndex  = (z + kshift)*n1*n2 + (y + jshift)*n2 + (x + ishift);
 
 			Interim += windowFunc3D[aaIndex]*inputPk[bbIndex];
-		}
+
+			// k indexing.                                                                                      
+                        ishift  += 1;
+                 }
+	  
+	    jshift += 1;
 	  }
+	  
+	  kshift += 1;
 	}
 
 	return Interim;
@@ -155,9 +164,9 @@ int SetWfKernel(){
 	for(k=0; k<wfKernelsize; k++){
 		for(j=0; j<wfKernelsize; j++){
 			for(i=0; i<wfKernelsize; i++){
-				k_x			   		= kIntervalx*(i-wfKernelsize/2.);
-				k_y 		   		= kIntervaly*(j-wfKernelsize/2.);
-				k_z			   		= kIntervalz*(k-wfKernelsize/2.);
+			  k_x			   		= kIntervalx*(i-(wfKernelsize-1)/2.);
+			  k_y 		   		= kIntervaly*(j-(wfKernelsize-1)/2.);
+			  k_z			   		= kIntervalz*(k-(wfKernelsize-1.)/2.);
 
 				Index 		   		= k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
 
@@ -182,6 +191,8 @@ float filter3Dnorm(){
 			}
 		}
 	}
+
+	printf("\n3D filter normalisation:  %f", Interim);
 
 	return Interim;
 }
