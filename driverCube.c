@@ -119,13 +119,15 @@ int main(int argc, char **argv){
 
     prepNGP();
     
-    sprintf(surveyType, "FullCube_Jenkins%.1f", JenkinsScalefactor);
+    sprintf(surveyType, "AnisoGauss_Jenkins%.1f", JenkinsScalefactor);
     
-    FullCube();
+    // FullCube();
     // EmbeddedCube(50);
     // Gaussian(250.);
     // PencilBeamSurvey(40, 60, 40, 60);
     // Spherical(250.);
+
+    AnisoGauss(80., 100., 120.);
 
     SumOfBoolDensity    = SumDoubleArray(booldensity);
   
@@ -152,6 +154,8 @@ int main(int argc, char **argv){
     
     // ConvolveTheory();
     // printWindowfuncSlices();
+    
+    EstimateAnisoWfKernel();
     
     AnisoConvolution();
     

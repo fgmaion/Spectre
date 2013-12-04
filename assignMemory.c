@@ -130,3 +130,16 @@ int prepAnisoConvolution(){
 
     return 0;
 }
+
+
+int assignAnisoWfKernel(){
+    AnisoWfKernel                    = (float *) malloc(wfKernelsize*wfKernelsize*wfKernelsize*sizeof(*AnisoWfKernel));
+    AnisoWfKernel_ModeNumb           = (int *)   malloc(wfKernelsize*wfKernelsize*wfKernelsize*sizeof(*AnisoWfKernel_ModeNumb));
+
+    for(j=0; j<wfKernelsize*wfKernelsize*wfKernelsize; j++){
+        AnisoWfKernel[j]             = 0.0;
+        AnisoWfKernel_ModeNumb[j]    = 0;
+    }
+
+    return 0;
+}

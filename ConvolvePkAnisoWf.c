@@ -1,3 +1,99 @@
+int EstimateAnisoWfKernel(){
+    printf("\nBeginning window function calculation.");
+    
+    for(j=0; j<n0*n1*n2; j++) in[j][0] = (double) (TotalVolume/TotalSurveyedVolume)*booldensity[j]*FKPweights[j];
+    for(j=0; j<n0*n1*n2; j++) in[j][1] = (double) 0.0;
+    
+    printf("\nPerforming FFT.");
+    
+    fftw_execute(p);
+    
+    printf("\nFFT complete.");
+    
+    assignAnisoWfKernel();
+    
+    float iishift, kkshift, jjshift;
+    int   ii, jj, kk;
+    
+    for(k=0; k<n0; k++){
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+                k_x = kIntervalx*i;
+                k_y = kIntervaly*j;
+                k_z = kIntervalz*k;
+
+                if(k_x>NyquistWaveNumber)  k_x    -= n2*kIntervalx;
+                if(k_y>NyquistWaveNumber)  k_y    -= n1*kIntervaly;
+                if(k_z>NyquistWaveNumber)  k_z    -= n0*kIntervalz;
+
+                Index                              = k*n1*n2 + j*n2 + i;
+
+                kSq                                = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
+
+                kmodulus                           = pow(kSq, 0.5);
+
+                H_kReal                            = pow(n0*n1*n2, -1.0)*out[Index][0];
+                H_kImag                            = pow(n0*n1*n2, -1.0)*out[Index][1];
+                
+                
+                if(fabsf(kmodulus) < 0.6*(wfKernelsize-1.)*fmaxf(fmaxf(kIntervalx, kIntervaly), kIntervalz)){
+                
+                    kkshift = -(wfKernelsize-1)/2;
+                    
+                    for(kk=0; kk<wfKernelsize; kk++){
+                        
+                        jjshift = -(wfKernelsize-1)/2;
+                        
+                        for(jj=0; jj<wfKernelsize; jj++){
+                        
+                            iishift = -(wfKernelsize-1)/2;
+                            
+                            for(ii=0; ii< wfKernelsize; ii++){
+                                Index    = kk*wfKernelsize*wfKernelsize + jj*wfKernelsize + ii; 
+                                
+                                if(((iishift-0.05)*kIntervalx < k_x) && (k_x<(iishift+0.05)*kIntervalx)){
+                                    if(((jjshift-0.05)*kIntervaly < k_y) && (k_y<(jjshift+0.05)*kIntervaly)){
+                                        if(((kkshift-0.05)*kIntervalz < k_z) && (k_z<(kkshift+0.05)*kIntervalz)){
+                                    
+                                            AnisoWfKernel[Index]           += pow(H_kReal, 2.) + pow(H_kImag, 2.);
+                                            AnisoWfKernel_ModeNumb[Index]  += 1;
+                                        }
+                                    }                        
+                                }
+                        
+                                iishift += 1;
+                            }
+                    
+                            jjshift += 1;
+                        }
+                    
+                        kkshift += 1;
+                    }
+                }                
+            }
+        }
+    }
+
+    for(kk=0; kk<wfKernelsize; kk++){
+        for(jj=0; jj<wfKernelsize; jj++){
+            for(ii=0; ii<wfKernelsize; ii++){
+                Index = kk*wfKernelsize*wfKernelsize + jj*wfKernelsize + ii;   
+            
+                if(AnisoWfKernel_ModeNumb[Index] != 0){
+                    AnisoWfKernel[Index] /= (float) AnisoWfKernel_ModeNumb[Index];
+                }
+            }
+        }
+    }
+    
+    wf3Dnorm  					= filter3Dnorm(AnisoWfKernel);
+    
+    for(j=0; j<wfKernelsize*wfKernelsize*wfKernelsize; j++) AnisoWfKernel[j] /= wf3Dnorm;
+
+    return 0;
+}
+
+
 float anisoGauss(float x, float y, float z){
     float xsig =  80.0;
     float ysig =  100.0;
@@ -21,8 +117,6 @@ int AnisoConvolution(){
 
 	setInputPk();
 
-	wf3Dnorm  					= filter3Dnorm();
-
 	convolve3DInputPk(convolvedPk3d, inputPk);
 
 	flatten3dConvolvedPk();
@@ -33,15 +127,57 @@ int AnisoConvolution(){
     for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
     fclose(output);
 
+    float ishift, jshift, kshift; 
+    
+    kshift = -0.5*(wfKernelsize-1);
+
+    for(k=0; k<wfKernelsize;k++){
+    
+        jshift = -0.5*(wfKernelsize-1);
+        
+        for(j=0; j<wfKernelsize; j++){
+        
+            ishift = -0.5*(wfKernelsize-1);
+            
+            for(i=0; i<wfKernelsize; i++){
+                Index = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
+            
+                k_x			   		= kIntervalx*ishift;
+			    k_y 		   		= kIntervaly*jshift;
+			    k_z			   		= kIntervalz*kshift;
+            
+                if(AnisoWfKernel_ModeNumb[Index] != 0){
+                    printf("\n %d \t %d \t %d \t %d \t %f \t %f \t %f", i, j, k, AnisoWfKernel_ModeNumb[Index], AnisoWfKernel[Index], windowFunc3D[Index], AnisoWfKernel[Index]/windowFunc3D[Index]);
+                }
+            
+            ishift += 1;
+            }
+            
+        jshift += 1;
+        }
+        
+        kshift +=1;
+    }
+
+    setMeasuredWfKernel();
+
+	convolve3DInputPk(convolvedPk3d, inputPk);
+
+	flatten3dConvolvedPk();
+
+	sprintf(filepath, "%s/Data/Pk/midK_Pk_ConvolvedMeasuredAnisoGauss.dat", root_dir);
+    
+    output = fopen(filepath, "w");
+    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
+    fclose(output);
+
 	return 0;	
 }
 
 
 int flatten3dConvolvedPk(){
-	int qqIndex;
-	int kkIndex;
-
-	printf("\nkIntervals, x: %f, y: %f, z: %f", kIntervalx, kIntervaly, kIntervalz);
+	int qqIndex = 0;
+	int kkIndex = 0;
 
 	int totalModes = 0;
 
@@ -87,7 +223,6 @@ int convolve3DInputPk(float convolvedPk[], float inputPk[]){
 
 				convolvedPk3d[Index]  = ConvolveCell(ii + wfKernelsize, jj + wfKernelsize, kk + wfKernelsize);
 
-				convolvedPk3d[Index] /= wf3Dnorm;
 			}
 		}
 	}
@@ -160,26 +295,36 @@ float ConvolveCell(int x, int y, int z){
 }
 
 
+int setMeasuredWfKernel(){
+    for(j=0; j<wfKernelsize*wfKernelsize*wfKernelsize; j++) windowFunc3D[j] = AnisoWfKernel[j];	
+
+return 0;
+}
+
 int SetWfKernel(){
 	for(k=0; k<wfKernelsize; k++){
 		for(j=0; j<wfKernelsize; j++){
 			for(i=0; i<wfKernelsize; i++){
 			  k_x			   		= kIntervalx*(i-(wfKernelsize-1)/2.);
-			  k_y 		   		= kIntervaly*(j-(wfKernelsize-1)/2.);
+			  k_y 		   		    = kIntervaly*(j-(wfKernelsize-1)/2.);
 			  k_z			   		= kIntervalz*(k-(wfKernelsize-1.)/2.);
 
-				Index 		   		= k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
+			  Index 		   		= k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
 
-				windowFunc3D[Index] = (*pt2AnisoWf)(k_x, k_y, k_z);
+			  windowFunc3D[Index]   = (*pt2AnisoWf)(k_x, k_y, k_z);
 			}
 		}
 	}
+	
+	wf3Dnorm  					= filter3Dnorm(windowFunc3D);
+	
+	for(j=0; j<wfKernelsize*wfKernelsize*wfKernelsize; j++) windowFunc3D[j] /= wf3Dnorm;
 
 	return 0;
 }
 
 
-float filter3Dnorm(){
+float filter3Dnorm(float array[]){
 	int   qIndex;
 	float Interim = 0.0;
 
@@ -187,7 +332,7 @@ float filter3Dnorm(){
 		for(j=0; j<wfKernelsize; j++){
 			for(i=0; i<wfKernelsize; i++){
 				qIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
-				Interim += windowFunc3D[qIndex];
+				Interim += array[qIndex];
 			}
 		}
 	}
