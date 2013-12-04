@@ -60,7 +60,7 @@ int CalculateCell_raDecRotated(){
                 rCell       = pow(xCell*xCell + yCell*yCell + zCell*zCell, 0.5);     
 
                 // acos returns radians, argument must be in the range -1 to 1. Returned value is between 0 and pi inclusive. 
-                polarCell   = acos(zcell/rCell);
+                polarCell   = acos(zCell/rCell);
 
                 // radians. 
                 decCell     = pi/2. - polarCell;
@@ -90,7 +90,7 @@ int CalculateCell_raDecRotated(){
 
     output = fopen(filepath, 'w');
 
-    for(j=0; j<n0*n1*n2; j++) fprintf(output, "%f \t %f \n", Cell_rAdecVIPERSsystem[j][0], Cell_rAdecVIPERSsystem[])
+    for(j=0; j<n0*n1*n2; j++) fprintf(output, "%f \t %f \n", Cell_rAdecVIPERSsystem[j][0], Cell_rAdecVIPERSsystem[1]);
 
     fclose(output);
 

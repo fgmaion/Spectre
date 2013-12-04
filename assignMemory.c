@@ -9,7 +9,7 @@ int prepNGP(){
 
     Cell_rAdecVIPERSsystem  =  (float  **) realloc(Cell_rAdecVIPERSsystem,  n0*n1*n2*sizeof(*Cell_rAdecVIPERSsystem));
 
-    for(j=0, j<n0*n1*n2; j++){
+    for(j=0; j<n0*n1*n2; j++){
         Cell_rAdecVIPERSsystem[j]  = (float *) malloc(2*sizeof(float));
     }
     
