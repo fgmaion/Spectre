@@ -80,11 +80,14 @@ fkpPk                 =     5000.;                                              
 
 // Binning interval for P(k).
 kbinInterval          =     0.005;
+modkMax               =      0.5;
 
 // Convolution of P(k) with window fn.
-InterpK_binNumber     =       300;
-MuIntegralPrecision   =      9000;
+// InterpK_binNumber  =       300;
+// MuIntegralPrecision=      9000;
 
+// Must be odd. 2n+1
+wfKernelsize          =        9;
 
 // Begin fn. calling. 
 
@@ -104,14 +107,14 @@ prepNGP();
 // Generate randoms for given grid, will read file if exists. End product: BoolDensity array. 
 randNGP(); 
 
-SumOfBoolDensity    = SumBoolDensity();
+SumOfBoolDensity    = SumDoubleArray(booldensity);
 
 //Initialsed to zero in header.h
 TotalSurveyedVolume = SumOfBoolDensity*CellVolume;
 
 prepFFTw(n0, n1, n2);
-
 prepFFTbinning();
+
 
 for(loopCount=1; loopCount<15; loopCount++){
     if(loopCount < 10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
@@ -147,14 +150,14 @@ for(loopCount=1; loopCount<15; loopCount++){
     PkCalc(filepath);
 }
 
-sprintf(filepath, "%s/midK_WindowFuncPk_HODMocks.dat", root_dir);
-wfPkCalc(filepath);
+// sprintf(filepath, "%s/midK_WindowFuncPk_HODMocks.dat", root_dir);
+// wfPkCalc(filepath);
 
-printf("\nFreeing allocated memory.");
-freeHOD();
-freeNGP();
+// printf("\nFreeing allocated memory.");
+// freeHOD();
+// freeNGP();
 
-ConvolveTheory();
+// ConvolveTheory();
 
 // assign2DPkMemory();
 
@@ -177,12 +180,12 @@ ConvolveTheory();
 // sprintf(filepath, "%s/Scripts/zDistorted_PkTheory_KaiserLorentzian_0.6mu0.8.dat", root_dir);
 // BinnedPkForMuInterval(0.6, 0.8, filepath, clippedPk);
 
-freeFFTw();
-freePk();
+// freeFFTw();
+// freePk();
 
-free_sdltInterp();
+// free_sdltInterp();
 
-freeConvolutionMemory();
+// freeConvolutionMemory();
 
 // freeClipped();  
 // free_linear();
