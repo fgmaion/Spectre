@@ -39,7 +39,7 @@ int CountGalaxies(){
     for(j=0; j<Vipers_Num; j++){
         boxlabel = boxCoordinates(j);
             
-        if((zobs[j] > redshiftLowLimit) && (zobs[j] < redshiftHiLimit) && (Cell_VIPERSbools[j] > 0.0001)){ 
+        if((zobs[j] > redshiftLowLimit) && (zobs[j] < redshiftHiLimit)){ 
             densityArray[boxlabel] += 1;
         }
     }
