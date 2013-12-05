@@ -10,6 +10,7 @@ int ComovingNumberDensityCalc(){
     ComovingNumberDensity    =  (float *) realloc(ComovingNumberDensity,    zBinNumber*sizeof(*ComovingNumberDensity));
     ComovingVolumeAtZ        =  (float *) realloc(ComovingVolumeAtZ,        zBinNumber*sizeof(*ComovingVolumeAtZ));
 
+    // Second derivatives. 
     ComovingNumberDensity2d  =  (float *) realloc(ComovingNumberDensity2d,  zBinNumber*sizeof(*ComovingNumberDensity2d));
 
     for(j=1; j<zBinNumber+1;   j++)    redshiftSlices[j]   = 0.4 + (j-1)*zBinWidth;
@@ -17,8 +18,8 @@ int ComovingNumberDensityCalc(){
     
     for(j=0; j<Vipers_Num; j++){
         for(i=1; i<zBinNumber; i++){
-            if((redshiftSlices[i] < zcos[j]) && (zcos[j] < redshiftSlices[i+1]) && (M_B[j] < absMagCut)){
-            //if((redshiftSlices[i] < zcos[j]) && (zcos[j] < redshiftSlices[i+1])){
+            //if((redshiftSlices[i] < zcos[j]) && (zcos[j] < redshiftSlices[i+1]) && (M_B[j] < absMagCut)){
+            if((redshiftSlices[i] < zobs[j]) && (zobs[j] < redshiftSlices[i+1])){
                 NumberAtReshift[i] += 1;
             }
         }
@@ -31,6 +32,7 @@ int ComovingNumberDensityCalc(){
 
     sprintf(filepath, "%s/Data/nz/HODMocks_nz.dat", root_dir);
     output = fopen(filepath, "w");
+    
     for(j=1; j<zBinNumber; j++){
         fprintf(output, "%g \t %g \t %g \t %g \n", redshiftSlices[j], NumberAtReshift[j], ComovingVolumeAtZ[j], ComovingNumberDensity[j]);
     }

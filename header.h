@@ -58,7 +58,8 @@ float        arrayMin(float a[], int n);
 
 double       DoubleArrayMax(double a[], int n);
 double       DoubleArrayMin(double a[], int n);
-double       SumDoubleArray(double array[]);
+double       SumDoubleArray(double array[], int len);
+float        SumFloatArray(float array[], int len);
 
 int          ConvolveTheory();
 int          splineInputWindowfn(char filepath[]);
@@ -165,7 +166,7 @@ double*      densityArray        = NULL;
 double*      FKPweights          = NULL;
 double*      booldensity         = NULL;
 
-double       SumOfBoolDensity    = 0.0;
+float        SumOfVIPERSbools    = 0.0;
 
 float        TotalVolume         = 0.0;
 float        TotalSurveyedVolume = 0.0;
@@ -451,7 +452,9 @@ float* 	 Cell_rotatedZvals;
 float*   Cell_raVIPERSsystem;
 float*   Cell_decVIPERSsystem;
 float*   Cell_chiVIPERSsystem;
+
 float*   Cell_VIPERSweights;
+float*   Cell_VIPERSbools;
 
 int VIPERSbasis(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len);
 

@@ -89,6 +89,8 @@ modkMax               =       0.5;
 // Must be odd. 2n+1
 wfKernelsize          =         9;
 
+sprintf(surveyType, "VIPERSparent");
+
 
 VIPERS_SolidAngle     = SolidAngleCalc(-5.4, -4.2, 9.);
 
@@ -103,17 +105,15 @@ assignbinninginterval(kbinInterval);
 
 prepNGP();
 
-// Generate randoms for given grid, will read file if exists. End product: BoolDensity array. 
-// randNGP(); 
+CalculateCell_raDecRotated();
 
-// SumOfBoolDensity    = SumDoubleArray(booldensity);
+SumOfVIPERSbools    = SumFloatArray(Cell_VIPERSbools);
 
 // Initialsed to zero in header.h
-// TotalSurveyedVolume = SumOfBoolDensity*CellVolume;
+TotalSurveyedVolume = SumOfBoolDensity*CellVolume;
 
 prepFFTw(n0, n1, n2);
 prepFFTbinning();
-
 
 for(loopCount=1; loopCount<2; loopCount++){
     if(loopCount < 10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
@@ -128,24 +128,22 @@ for(loopCount=1; loopCount<2; loopCount++){
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
     printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
   
-    // ComovingNumberDensityCalc();
+    ComovingNumberDensityCalc();
 
     // ApplyFKPweights();
 
-    // printf("\n\nHighest weighted overdensity estimate: %e",  DoubleArrayMax(FKPweights, n0*n1*n2));
-    // printf("\nLowest weighted overdensity estimate:  %e",    DoubleArrayMin(FKPweights, n0*n1*n2));
+    printf("\n\nHighest weighted overdensity estimate: %e",  DoubleArrayMax(FKPweights, n0*n1*n2));
+    printf("\nLowest weighted overdensity estimate:  %e",    DoubleArrayMin(FKPweights, n0*n1*n2));
 
-    // NGPCalc();
+    NGPCalc();
   
-    // CalcCorrections();
+    CalcCorrections();
   
-    // if(loopCount < 10)  sprintf(filepath, "%s/midK_Del2k_HODMocks_00%d.txt", root_dir, loopCount);
-    // else                sprintf(filepath, "%s/midK_Del2k_HODMocks_0%d.txt",  root_dir, loopCount);
+    if(loopCount < 10)  sprintf(filepath, "%s/midK_Del2k_HODMocks_00%d.txt", root_dir, loopCount);
+    else                sprintf(filepath, "%s/midK_Del2k_HODMocks_0%d.txt",  root_dir, loopCount);
   
-    // PkCalc(filepath);
+    PkCalc(filepath);
 }
-
-CalculateCell_raDecRotated();
 
 // sprintf(filepath, "%s/midK_WindowFuncPk_HODMocks.dat", root_dir);
 // wfPkCalc(filepath);
