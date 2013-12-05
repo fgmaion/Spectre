@@ -125,7 +125,7 @@ int projectVIPERSsystem(){
                 yCell       = Cell_rotatedYvals[Index];
 
                 if(Cell_VIPERSweights[Index] > 0.0001){
-                    fprintf(output, "%f \t %f \t %f", xCell, yCell, Cell_VIPERSweights[Index]);
+                    fprintf(output, "%f \t %f \t %f \n", xCell, yCell, Cell_VIPERSweights[Index]);
                 }
             }
         }
