@@ -188,7 +188,7 @@ int CalculateCell_raDecRotated(){
     fread(Cell_VIPERSweights,   sizeof(float), n0*n1*n2, inputfile);
 
     for(j=0; j<n0*n1*n2; j++){
-        if(Cell_VIPERSweights[j] > 0.00001){
+        if(Cell_VIPERSweights[j] != 0.0){
              Cell_VIPERSbools[j] = 1.00;
         }
     }
