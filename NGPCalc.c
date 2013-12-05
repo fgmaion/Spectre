@@ -42,7 +42,7 @@ int CountGalaxies(){
         }
     }
 
-    TotalZADEWeight = SumDoubleArray(densityArray);
+    TotalZADEWeight = SumDoubleArray(densityArray, n0*n1*n2);
 
     return 0;
 }
@@ -59,7 +59,7 @@ int CountGalaxiesCube(){
         }
     }
     
-    TotalZADEWeight = SumDoubleArray(densityArray);
+    TotalZADEWeight = SumDoubleArray(densityArray, n0*n1*n2);
     
     return 0;
 }
@@ -185,8 +185,8 @@ int CalculateCell_raDecRotated(){
     fread(Cell_VIPERSweights,   sizeof(float), n0*n1*n2, inputfile);
 
     for(j=0; j<n0*n1*n2; j++){
-        if(Cell_VIPERSweights > 0.00001){
-            Cell_VIPERSbools[j] = 1.00;
+        if(Cell_VIPERSweights[j] > 0.00001){
+             Cell_VIPERSbools[j] = 1.00;
         }
     }
 
@@ -231,7 +231,7 @@ int printSurveyDetails(){
     printf("\n\nTotal ZADE weight: %e.", TotalZADEWeight);
     printf("\nCell volume:  %f.",        CellVolume); 
     printf("\nMean number density:  %f", MeanNumberDensity);    
-    printf("\n\nNon-empty cells:  %e  [n0*n1*n2]", SumOfBoolDensity/(n0*n1*n2));
+    printf("\n\nNon-empty cells:  %e  [n0*n1*n2]", SumOfVIPERSbools/(n0*n1*n2));
     printf("\n\nTotal surveyed volume: %e    [TotalVolume]", (float) TotalSurveyedVolume/TotalVolume);
     return 0;
 }

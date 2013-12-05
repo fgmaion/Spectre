@@ -107,10 +107,10 @@ prepNGP();
 
 CalculateCell_raDecRotated();
 
-SumOfVIPERSbools    = SumFloatArray(Cell_VIPERSbools);
+SumOfVIPERSbools    = SumFloatArray(Cell_VIPERSbools, n0*n1*n2);
 
 // Initialsed to zero in header.h
-TotalSurveyedVolume = SumOfBoolDensity*CellVolume;
+TotalSurveyedVolume = SumOfVIPERSbools*CellVolume;
 
 prepFFTw(n0, n1, n2);
 prepFFTbinning();
