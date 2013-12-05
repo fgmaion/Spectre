@@ -44,7 +44,7 @@ int CalculateCell_raDecRotated(){
         }
     }
     
-    Celestialbasis(34.5, -4.79, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, n0*n1*n2);
+    Celestialbasis(34.5, -5.10, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, n0*n1*n2);
 
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
