@@ -132,17 +132,17 @@ for(loopCount=1; loopCount<2; loopCount++){
 
     // ApplyFKPweights();
 
-    printf("\n\nHighest weighted overdensity estimate: %e",  DoubleArrayMax(FKPweights, n0*n1*n2));
-    printf("\nLowest weighted overdensity estimate:  %e",    DoubleArrayMin(FKPweights, n0*n1*n2));
+    // printf("\n\nHighest weighted overdensity estimate: %e",  DoubleArrayMax(FKPweights, n0*n1*n2));
+    // printf("\nLowest weighted overdensity estimate:  %e",    DoubleArrayMin(FKPweights, n0*n1*n2));
 
-    NGPCalc();
+    // NGPCalc();
   
-    CalcCorrections();
+    // CalcCorrections();
   
-    if(loopCount < 10)  sprintf(filepath, "%s/midK_Del2k_HODMocks_00%d.txt", root_dir, loopCount);
-    else                sprintf(filepath, "%s/midK_Del2k_HODMocks_0%d.txt",  root_dir, loopCount);
+    // if(loopCount < 10)  sprintf(filepath, "%s/midK_Del2k_HODMocks_00%d.txt", root_dir, loopCount);
+    // else                sprintf(filepath, "%s/midK_Del2k_HODMocks_0%d.txt",  root_dir, loopCount);
   
-    PkCalc(filepath);
+    // PkCalc(filepath);
 }
 
 // sprintf(filepath, "%s/midK_WindowFuncPk_HODMocks.dat", root_dir);
