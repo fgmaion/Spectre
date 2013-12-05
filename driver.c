@@ -121,7 +121,7 @@ for(loopCount=1; loopCount<2; loopCount++){
 
     CoordinateCalc(filepath);
       
-    VIPERSbasis(34.5, -4.79, xCoor, yCoor, zCoor, Vipers_Num);
+    VIPERSbasis(34.5, -5.10, xCoor, yCoor, zCoor, Vipers_Num);
    
     printf("\nIn the VIPERS basis..");
     printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
