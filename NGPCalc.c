@@ -114,7 +114,7 @@ int projectVIPERSsystem(){
     sprintf(filepath, "%s/Data/ra_decCells/xywNonemptyCells.dat", root_dir);
     output = fopen(filepath, "w");
 
-    float xCell, yCell;
+    float xCell, yCell, zCell;
 
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
@@ -123,9 +123,10 @@ int projectVIPERSsystem(){
 
                 xCell       = AxisLimsArray[0][0] + CellSize*(i+0.5);
                 yCell       = AxisLimsArray[0][1] + CellSize*(j+0.5);
+                zCell       = AxisLimsArray[0][2] + CellSize*(k+0.5);
 
                 if(Cell_VIPERSweights[Index] > 0.0001){
-                    fprintf(output, "%f \t %f \t %f \n", xCell, yCell, Cell_VIPERSweights[Index]);
+                    fprintf(output, "%f \t %f \t %f \t %f\n", xCell, yCell, zCell, Cell_VIPERSweights[Index]);
                 }
             }
         }
