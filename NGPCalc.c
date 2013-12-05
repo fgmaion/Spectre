@@ -95,14 +95,13 @@ int CalculateCell_raDecRotated(){
     fwrite(Cell_decVIPERSsystem, sizeof(float), n0*n1*n2, output);
     fclose(output);
 
-    sprintf(filepath, "%s/Data/ra_decCells/ra_dec_wght_degs.dat", root_dir);
+    sprintf(filepath, "%s/Data/ra_decCells/ra_dec_wght.dat", root_dir);
     inputfile = fopen(filepath, "rb");
 
     fread(Cell_raVIPERSsystem,  sizeof(float), n0*n1*n2, inputfile);
     fread(Cell_decVIPERSsystem, sizeof(float), n0*n1*n2, inputfile);
     fread(Cell_VIPERSweights,   sizeof(float), n0*n1*n2, inputfile);
 
-    for(j=0; j<40; j++) printf("\n %f \t %f \t %f", Cell_raVIPERSsystem[j], Cell_decVIPERSsystem[j], Cell_VIPERSweights[j]);
     fclose(inputfile);
 
     return 0;
