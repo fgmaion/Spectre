@@ -39,7 +39,7 @@ int CountGalaxies(){
     for(j=0; j<Vipers_Num; j++){
         boxlabel = boxCoordinates(j);
             
-        if((zobs[j] > redshiftLowLimit) && (zobs[j] < redshiftHiLimit) && (Cell_VIPERSbools[Index] > 0.0001)){ 
+        if((zobs[j] > redshiftLowLimit) && (zobs[j] < redshiftHiLimit) && (Cell_VIPERSbools[j] > 0.0001)){ 
             densityArray[boxlabel] += 1;
         }
     }
@@ -78,6 +78,8 @@ int overdensity_volumeLimitedTracer(){
 
 
 int overdensity_ImperfectSelectionTracer(){    
+    MeanNumberDensity = TotalZADEWeight/TotalSurveyedVolume;
+    
     fkpShotNoiseCorr = 0.0;
 
     for(k=0; k<n0; k++){
@@ -91,7 +93,9 @@ int overdensity_ImperfectSelectionTracer(){
                     fkpShotNoiseCorr         += pow(TotalFKPweight, -2.)*pow(CellVolume, -1.)*pow(FKPweights[Index], 2.)/interp_nz(Chi);
                 }
     
-                densityArray[Index]          /= CellVolume*interp_nz(Chi);
+                // densityArray[Index]       /= CellVolume*interp_nz(Chi);
+                
+                densityArray[Index]          /= CellVolume*MeanNumberDensity;
                 densityArray[Index]          -= 1.0;
             }
         }
@@ -168,9 +172,6 @@ int CalculateCell_raDecRotated(){
             }
         }
     }
-
-    printf("\n%f \t %f", arrayMin(Cell_raVIPERSsystem,  n0*n1*n2), arrayMax(Cell_raVIPERSsystem, n0*n1*n2));
-    printf("\n%f \t %f", arrayMin(Cell_decVIPERSsystem, n0*n1*n2), arrayMax(Cell_decVIPERSsystem, n0*n1*n2));
     
     sprintf(filepath, "%s/Data/ra_decCells/ra_dec_degs.dat", root_dir);
     output = fopen(filepath, "wb");

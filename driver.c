@@ -85,8 +85,8 @@ modkMax               =       0.5;
 // Must be odd. 2n+1
 wfKernelsize          =         9;
 
-sprintf(surveyType, "VIPERSparent");
 
+sprintf(surveyType, "VIPERSparent");
 
 VIPERS_SolidAngle     = SolidAngleCalc(-5.4, -4.2, 9.);
 
@@ -110,6 +110,7 @@ assignbinninginterval(kbinInterval);
 
 prepFFTw(n0, n1, n2);
 prepFFTbinning();
+
 
 for(loopCount=1; loopCount<2; loopCount++){
     if(loopCount < 10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
