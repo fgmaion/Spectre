@@ -446,8 +446,12 @@ int*         AnisoWfKernel_ModeNumb;
 
 
 // VIPERS ra and dec of cell co-ordinates.
-float  * 	 Cell_rotatedXvals;
-float  * 	 Cell_rotatedYvals;
-float  * 	 Cell_rotatedZvals;
+float* 	 Cell_rotatedXvals;
+float* 	 Cell_rotatedYvals;
+float* 	 Cell_rotatedZvals;
 
-float **     Cell_rAdecVIPERSsystem;
+float*   Cell_raVIPERSsystem;
+float*   Cell_decVIPERSsystem;
+
+int VIPERSbasis(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len);
+int Celestialbasis(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len);

@@ -72,7 +72,19 @@ int main(int argc, char **argv){
     // lower_zlimit & upper_zlimit
     AxisLimsArray[0][2]       =        0.0;                                               // h^-1 Mpc
     AxisLimsArray[1][2]       =     1000.0;                                               // h^-1 Mpc
-         
+
+    // STRICTER BOUNDS
+    AxisLimsArray[0][0]       =     100.0;                                                  // h^-1 Mpc
+    AxisLimsArray[1][0]       =     495.0;                                                  // h^-1 Mpc
+
+    // lower_ylimit & upper_ylimit
+    AxisLimsArray[0][1]       =      30.0;                                                  // h^-1 Mpc
+    AxisLimsArray[1][1]       =     420.0;                                                  // h^-1 Mpc
+
+    // lower_zlimit & upper_zlimit
+    AxisLimsArray[0][2]       =    1080.0;                                                  // h^-1 Mpc
+    AxisLimsArray[1][2]       =    2655.0;                                                  // h^-1 Mpc
+
     CellSize                  =        4.0;                                               // Cell size, comoving distance, h^-1 Mpc
 
     // Selection parameters. Volume limited sample between redshift 0.7 and 0.9

@@ -7,11 +7,8 @@ int prepNGP(){
     Cell_rotatedYvals       =  (float   *) realloc(Cell_rotatedYvals,       n0*n1*n2*sizeof(*Cell_rotatedYvals));
     Cell_rotatedZvals       =  (float   *) realloc(Cell_rotatedZvals,       n0*n1*n2*sizeof(*Cell_rotatedZvals));
 
-    Cell_rAdecVIPERSsystem  =  (float  **) realloc(Cell_rAdecVIPERSsystem,  n0*n1*n2*sizeof(*Cell_rAdecVIPERSsystem));
-
-    for(j=0; j<n0*n1*n2; j++){
-        Cell_rAdecVIPERSsystem[j]  = (float *) malloc(2*sizeof(float));
-    }
+    Cell_raVIPERSsystem     =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_raVIPERSsystem));
+    Cell_decVIPERSsystem    =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_decVIPERSsystem));
     
     // Allocate memory for NGP density arrays of both ZADE galaxies and randoms. 
     for(j=0; j<n0*n1*n2; j++) densityArray[j] = 0.0;

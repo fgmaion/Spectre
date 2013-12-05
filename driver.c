@@ -120,7 +120,7 @@ prepFFTw(n0, n1, n2);
 prepFFTbinning();
 
 
-for(loopCount=1; loopCount<15; loopCount++){
+for(loopCount=1; loopCount<2; loopCount++){
     if(loopCount < 10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
     else                sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
 
@@ -130,20 +130,18 @@ for(loopCount=1; loopCount<15; loopCount++){
     // centerRA in deg, centerDec in deg, xCoors[], yCoors[], zCoors[], len, rotation angle in deg.
     // Note: p hat must lie in the xy plane by assumption. -z hat assumed to be rotated to VIPERS los direction. 
    
-    redshiftSpaceRotation(34.5, -4.79, xCoor, yCoor, zCoor, Vipers_Num, 180.0 + 94.79);
+    // redshiftSpaceRotation(34.5, -4.79, xCoor, yCoor, zCoor, Vipers_Num, 180.0 + 94.79);
     
-    printf("\n\nAfter orientation of -z Cartesian axis to LOS ...");
+    VIPERSbasis(34.5, -4.79, xCoor, yCoor, zCoor, Vipers_Num);
+
+    // printf("\n\nAfter orientation of -z Cartesian axis to LOS ...");
+   
+    printf("\nIn the VIPERS basis..");
     printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
     printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
 
-    // Check inverse rotation.
-    redshiftSpaceRotation(34.5, -4.79, xCoor, yCoor, zCoor, Vipers_Num, -(180.0 + 94.79));
-    
-    printf("\n\nAfter inverse rotation ...");
-    printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
-    printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
-    printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
+    // Check inverse rotation. all good.
   
     // ComovingNumberDensityCalc();
 
@@ -152,7 +150,7 @@ for(loopCount=1; loopCount<15; loopCount++){
     // printf("\n\nHighest weighted overdensity estimate: %e",  DoubleArrayMax(FKPweights, n0*n1*n2));
     // printf("\nLowest weighted overdensity estimate:  %e",    DoubleArrayMin(FKPweights, n0*n1*n2));
 
-    NGPCalc();
+    // NGPCalc();
   
     // CalcCorrections();
   
@@ -161,6 +159,8 @@ for(loopCount=1; loopCount<15; loopCount++){
   
     // PkCalc(filepath);
 }
+
+CalculateCell_raDecRotated();
 
 // sprintf(filepath, "%s/midK_WindowFuncPk_HODMocks.dat", root_dir);
 // wfPkCalc(filepath);

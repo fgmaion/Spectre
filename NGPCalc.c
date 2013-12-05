@@ -31,22 +31,20 @@ int CalculateCell_raDecRotated(){
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
-                xCell      = AxisLimsArray[0][0] + CellSize*i;
-                yCell      = AxisLimsArray[0][1] + CellSize*j;
-                zCell      = AxisLimsArray[0][2] + CellSize*k;
+	        xCell      = AxisLimsArray[0][0] + CellSize*(i+0.5);
+	        yCell      = AxisLimsArray[0][1] + CellSize*(j+0.5);
+	        zCell      = AxisLimsArray[0][2] + CellSize*(k+0.5);
 
-                Index      = k*n1*n2 + j*n2 * i;
+                Index      = k*n1*n2 + j*n2 + i;
 
                 Cell_rotatedXvals[Index] = xCell;
                 Cell_rotatedYvals[Index] = yCell;
                 Cell_rotatedZvals[Index] = zCell;
-
             }
         }
     }
-
-    // Check inverse rotation.
-    redshiftSpaceRotation(34.5, -4.79, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, n0*n1*n2, -(180.0 + 94.79));
+    
+    Celestialbasis(34.5, -4.79, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, n0*n1*n2);
 
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
@@ -58,8 +56,9 @@ int CalculateCell_raDecRotated(){
                 zCell       = Cell_rotatedZvals[Index]; 
 
                 rCell       = pow(xCell*xCell + yCell*yCell + zCell*zCell, 0.5);     
-
+		
                 // acos returns radians, argument must be in the range -1 to 1. Returned value is between 0 and pi inclusive. 
+
                 polarCell   = acos(zCell/rCell);
 
                 // radians. 
@@ -78,22 +77,28 @@ int CalculateCell_raDecRotated(){
                 raCell     *= 180./pi;
 
                 // right ascension in degrees.
-                Cell_rAdecVIPERSsystem[j][0] = raCell;
-
+	        Cell_raVIPERSsystem[Index]  = raCell;
+		
                 // declination in degrees.
-                Cell_rAdecVIPERSsystem[j][1] = decCell;
+                Cell_decVIPERSsystem[Index] = decCell;
             }
         }
     }
 
+    for(j=0; j<50; j++) printf("\n%f \t %f", Cell_raVIPERSsystem[j], Cell_decVIPERSsystem[j]);
+    
     sprintf(filepath, "%s/Data/ra_decCells/ra_dec_degs.dat", root_dir);
-
-    output = fopen(filepath, 'w');
-
-    for(j=0; j<n0*n1*n2; j++) fprintf(output, "%f \t %f \n", Cell_rAdecVIPERSsystem[j][0], Cell_rAdecVIPERSsystem[1]);
+ 
+    output = fopen(filepath, "wb");
+ 
+    fwrite(Cell_raVIPERSsystem, sizeof(float), n0*n1*n2, output);
+    
+    fwrite(Cell_decVIPERSsystem, sizeof(float), n0*n1*n2, output);
+    
+    printf("\n %d", sizeof(Cell_decVIPERSsystem[0]));
 
     fclose(output);
-
+    
     return 0;
 }
 
