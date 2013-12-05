@@ -104,6 +104,33 @@ int CalculateCell_raDecRotated(){
 
     fclose(inputfile);
 
+    projectVIPERSsystem();
+
+    return 0;
+}
+
+
+int projectVIPERSsystem(){
+    sprintf(filepath, "%s/Data/ra_decCells/xyNonemptyCells.dat", root_dir);
+    output = fopen(filepath, "w");
+
+    for(k=0; k<n0; k++){
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+                Index       = k*n1*n2 + j*n2 + i;
+
+                xCell       = Cell_rotatedXvals[Index];
+                yCell       = Cell_rotatedYvals[Index];
+
+                if(Cell_VIPERSweights > 0.0001){
+                    fprintf(output, "%f \t %f \t %f", xCell, yCell, Cell_VIPERSweights[Index]);
+                }
+            }
+        }
+    }
+
+    fclose(output);
+
     return 0;
 }
 

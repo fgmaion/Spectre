@@ -454,4 +454,7 @@ float*   Cell_chiVIPERSsystem;
 float*   Cell_VIPERSweights;
 
 int VIPERSbasis(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len);
+
 int Celestialbasis(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len);
+
+int projectVIPERSsystem();
