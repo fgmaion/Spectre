@@ -77,7 +77,7 @@ int CalculateCell_raDecRotated(){
                 raCell     *= 180./pi;
 
                 // right ascension in degrees.
-	        Cell_raVIPERSsystem[Index]  = raCell;
+	           Cell_raVIPERSsystem[Index]  = raCell;
 		
                 // declination in degrees.
                 Cell_decVIPERSsystem[Index] = decCell;
@@ -85,7 +85,8 @@ int CalculateCell_raDecRotated(){
         }
     }
 
-    for(j=0; j<50; j++) printf("\n%f \t %f", Cell_raVIPERSsystem[j], Cell_decVIPERSsystem[j]);
+    printf("\n%f \t %f", arrayMin(Cell_raVIPERSsystem, n0*n1*n2), arrayMax(Cell_raVIPERSsystem, n0*n1*n2));
+    printf("\n%f \t %f", arrayMin(Cell_decVIPERSsystem, n0*n1*n2), arrayMax(Cell_decVIPERSsystem, n0*n1*n2));
     
     sprintf(filepath, "%s/Data/ra_decCells/ra_dec_degs.dat", root_dir);
  
