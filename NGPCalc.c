@@ -95,22 +95,22 @@ int CalculateCell_raDecRotated(){
     fwrite(Cell_decVIPERSsystem, sizeof(float), n0*n1*n2, output);
     fclose(output);
 
-    sprintf(filepath, "%s/Data/ra_decCells/ra_dec_wght_degs.dat");
+    sprintf(filepath, "%s/Data/ra_decCells/ra_dec_wght_degs.dat", root_dir);
     inputfile = fopen(filepath, "rb");
 
     fread(Cell_raVIPERSsystem,  sizeof(float), n0*n1*n2, inputfile);
     fread(Cell_decVIPERSsystem, sizeof(float), n0*n1*n2, inputfile);
     fread(Cell_VIPERSweights,   sizeof(float), n0*n1*n2, inputfile);
 
-    for(j=0; j<40; j++) printf("\n %f \t %f \t %f", Cell_raVIPERSsystem[j], Cell_decVIPERSsystem[j], Cell_VIPERSweights);
+    for(j=0; j<40; j++) printf("\n %f \t %f \t %f", Cell_raVIPERSsystem[j], Cell_decVIPERSsystem[j], Cell_VIPERSweights[j]);
+    fclose(inputfile);
 
     return 0;
 }
 
 
 int boxCoordinates(int rowNumber){
-    xlabel                  = (int) floor((xCoor[rowNumber] - AxisLimsArray[0][0])/CellSize);
-    ylabel                  = (int) floor((yCoor[rowNumber] - AxisLimsArray[0][1])/CellSize);
+    xlabel                  = (int) floor((xCoor[rowNumber] - AxisLimsArray[0][0])/CellSize);    ylabel                  = (int) floor((yCoor[rowNumber] - AxisLimsArray[0][1])/CellSize);
     zlabel                  = (int) floor((zCoor[rowNumber] - AxisLimsArray[0][2])/CellSize);
     boxlabel                = (int)                        xlabel + n2*ylabel + n2*n1*zlabel;
 
