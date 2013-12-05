@@ -91,7 +91,7 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
 
     // Order by mod k to ensure binning is the mean between LowerBinIndex and UpperBinIndex.
     printf("\nSorting mod k array.");
-    qsort(flattenedConvolvedPk3D, NumberModes, sizeof(flattenedConvolvedPk3D[0]), FirstColumnCompare);
+    qsort(PkArray, NumberModes, sizeof(PkArray[0]), FirstColumnCompare);
 
     LowerBinIndex = 0;
     UpperBinIndex = 0;
@@ -106,7 +106,7 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
     
     for(j=0; j<kBinNumb-1; j++){
         for(i=LowerBinIndex; i<NumberModes; i++){
-            if(flattenedConvolvedPk3D[i][0] > kBinLimits[j+1]){
+            if(PkArray[i][0] > kBinLimits[j+1]){
                 UpperBinIndex = i;
                 break;
             } 
@@ -114,8 +114,8 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
 
         
         for(i=LowerBinIndex; i<UpperBinIndex; i++){
-            meanKBin[j]    += flattenedConvolvedPk3D[i][0];
-            binnedPk[j]    += flattenedConvolvedPk3D[i][1];
+            meanKBin[j]    += PkArray[i][0];
+            binnedPk[j]    += PkArray[i][1];
             modesPerBin[j] += 1;
         }
         	    
