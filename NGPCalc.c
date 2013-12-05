@@ -189,7 +189,6 @@ int CalculateCell_raDecRotated(){
     for(j=0; j<n0*n1*n2; j++){
         if(Cell_VIPERSweights[j] > 0.00001){
              Cell_VIPERSbools[j] = 1.00;
-             printf("\n %f", Cell_VIPERSbools[j]);
         }
     }
 
