@@ -23,8 +23,10 @@ int NGPCalcCube(){
 
 
 int boxCoordinates(int rowNumber){
-    xlabel                  = (int) floor((xCoor[rowNumber] - AxisLimsArray[0][0])/CellSize);    ylabel                  = (int) floor((yCoor[rowNumber] - AxisLimsArray[0][1])/CellSize);
+    xlabel                  = (int) floor((xCoor[rowNumber] - AxisLimsArray[0][0])/CellSize);    
+    ylabel                  = (int) floor((yCoor[rowNumber] - AxisLimsArray[0][1])/CellSize);
     zlabel                  = (int) floor((zCoor[rowNumber] - AxisLimsArray[0][2])/CellSize);
+    
     boxlabel                = (int)                        xlabel + n2*ylabel + n2*n1*zlabel;
 
     return boxlabel;
@@ -37,7 +39,7 @@ int CountGalaxies(){
     for(j=0; j<Vipers_Num; j++){
         boxlabel = boxCoordinates(j);
             
-        if((zcos[j] > redshiftLowLimit) && (zcos[j] < redshiftHiLimit) && (Cell_VIPERSweights[Index] > 0.0001)){ 
+        if((zobs[j] > redshiftLowLimit) && (zobs[j] < redshiftHiLimit) && (Cell_VIPERSbools[Index] > 0.0001)){ 
             densityArray[boxlabel] += 1;
         }
     }
@@ -54,7 +56,7 @@ int CountGalaxiesCube(){
     for(j=0; j<Vipers_Num; j++){
         boxlabel = boxCoordinates(j);
 
-        if(booldensity[boxlabel] > 0.1){ 
+        if(Cell_VIPERSbools[boxlabel] > 0.1){ 
             densityArray[boxlabel] += 1;
         }
     }

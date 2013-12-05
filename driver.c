@@ -11,10 +11,6 @@
 #include "Scripts/JenkinsRun.c"
 #include "Scripts/GridParams.c"
 
-#include "Scripts/HODrandGen.c"
-#include "Scripts/RandCoorCalc.c"
-#include "Scripts/randNGP.c"
-
 #include "Scripts/assignMemory.c"
 
 #include "Scripts/CoordinateCalc.c"
@@ -96,12 +92,9 @@ VIPERS_SolidAngle     = SolidAngleCalc(-5.4, -4.2, 9.);
 
 comovDistReshiftCalc();
 
-JenkinsCoordinates();
+// JenkinsCoordinates();
 
 EvaluateGridParameters();
-
-// assign binning interval in k, and calcualte number of bins required. 
-assignbinninginterval(kbinInterval);
 
 prepNGP();
 
@@ -111,6 +104,9 @@ SumOfVIPERSbools    = SumFloatArray(Cell_VIPERSbools, n0*n1*n2);
 
 // Initialsed to zero in header.h
 TotalSurveyedVolume = SumOfVIPERSbools*CellVolume;
+
+// assign binning interval in k, and calcualte number of bins required. 
+assignbinninginterval(kbinInterval);
 
 prepFFTw(n0, n1, n2);
 prepFFTbinning();

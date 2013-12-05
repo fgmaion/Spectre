@@ -16,13 +16,6 @@ int JenkinsCoordinates(){
 }
 
 
-int JenkinsFold(float original[], int lenArray, int axis){      // Upper limit           // Lower limit
-    for(j=0; j<lenArray; j++)  original[j] = fmod(original[j], (AxisLimsArray[1][axis] - AxisLimsArray[0][axis]));               
-
-    return 0;
-}
-
-
 int ApplyJenkins(){
     // Jenkins run to beat aliasing. 
     JenkinsFold(xCoor, Vipers_Num, 0);
@@ -33,6 +26,13 @@ int ApplyJenkins(){
     printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
     printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
+
+    return 0;
+}
+
+
+int JenkinsFold(float original[], int lenArray, int axis){      // Upper limit           // Lower limit
+    for(j=0; j<lenArray; j++)  original[j] = fmod(original[j], (AxisLimsArray[1][axis] - AxisLimsArray[0][axis]));               
 
     return 0;
 }
