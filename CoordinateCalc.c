@@ -106,28 +106,6 @@
 }
 
 
-int redshiftSpaceRotation(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len, float angleDeg){
-    // Rotate the z Cartesian axis to line along the LOS.     
-    
-    float centerPolarRad  = pi/2.0 - (pi/180.0)*centerDec;
-    float centerRARad     = centerRA*pi/180.0;
-    float angle           = angleDeg*pi/180.0;
-    
-    float xCo, yCo, zCo;
-    
-    for(j=0; j<len; j++){
-        xCo = (cos(angle) + sin(centerRARad)*sin(centerRARad)*(1. - cos(angle)))*xCoors[j]   - sin(centerRARad)*cos(centerRARad)*(1. - cos(angle))*yCoors[j]  + cos(centerRARad)*sin(angle)*zCoors[j];
-        yCo = -sin(centerRARad)*cos(centerRARad)*(1. - cos(angle))*xCoors[j] + (cos(angle)   + cos(centerRARad)*cos(centerRARad)*(1. - cos(angle)))*yCoors[j] + sin(centerRARad)*sin(angle)*zCoors[j];
-        zCo = -cos(centerRARad)*sin(angle)*xCoors[j] - sin(centerRARad)*sin(angle)*yCoors[j] + cos(angle)*zCoors[j];
-        
-        xCoors[j] = xCo;
-        yCoors[j] = yCo;
-        zCoors[j] = zCo;
-    }
-    
-    return 0;
-}
-
 int VIPERSbasis(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len){
   // Rotate the z Cartesian axis to line along the LOS.                                                                 
 
@@ -137,9 +115,9 @@ int VIPERSbasis(float centerRA, float centerDec, float xCoors[], float yCoors[],
   float gamma1, gamma2, gamma3;
 
   for(j=0; j<len; j++){
-    gamma1 =  xCoors[j]*sin(theta)*cos(phi) + yCoors[j]*sin(theta)*sin(phi) + zCoors[j]*cos(theta);
-    gamma2 = -xCoors[j]*sin(theta)*sin(phi) + yCoors[j]*sin(theta)*cos(phi) + zCoors[j]*cos(theta);
-    gamma3 =  xCoors[j]*cos(theta)*(sin(phi) - cos(phi)) + -yCoors[j]*cos(theta)*(cos(phi) + sin(phi)) + zCoors[j]*sin(theta);
+    gamma1 =  xCoors[j]*sin(theta)*cos(phi)   + yCoors[j]*sin(theta)*sin(phi)   + zCoors[j]*cos(theta);
+    gamma2 = -xCoors[j]*sin(phi)              + yCoors[j]*cos(phi)              + 0.;
+    gamma3 = -xCoors[j]*cos(theta)*cos(phi)   - yCoors[j]*cos(theta)*sin(phi)   + zCoors[j]*sin(theta);
 
     xCoors[j] = gamma1;
     yCoors[j] = gamma2;
@@ -149,6 +127,7 @@ int VIPERSbasis(float centerRA, float centerDec, float xCoors[], float yCoors[],
   return 0;
 }
 
+
 int Celestialbasis(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len){
   // Rotate the z Cartesian axis to line along the LOS.                                                                                              
   float theta  = pi/2.0 - (pi/180.0)*centerDec;
@@ -157,9 +136,9 @@ int Celestialbasis(float centerRA, float centerDec, float xCoors[], float yCoors
   float x, y, z;
 
   for(j=0; j<len; j++){
-    x = xCoors[j]*sin(theta)*cos(phi) - yCoors[j]*sin(theta)*sin(phi) + zCoors[j]*cos(theta)*(sin(phi) - cos(phi));
-    y = xCoors[j]*sin(theta)*sin(phi) + yCoors[j]*sin(theta)*cos(phi) - zCoors[j]*cos(theta)*(cos(phi) + sin(phi));
-    z = xCoors[j]*cos(theta) + yCoors[j]*cos(theta) + zCoors[j]*sin(theta);
+    x = xCoors[j]*sin(theta)*cos(phi) - yCoors[j]*sin(phi) - zCoors[j]*cos(theta)*cos(phi);
+    y = xCoors[j]*sin(theta)*sin(phi) + yCoors[j]*cos(phi) - zCoors[j]*cos(theta)*sin(phi);
+    z = xCoors[j]*cos(theta)          + 0.                 + zCoors[j]*sin(theta);
 
     xCoors[j] = x;
     yCoors[j] = y;
@@ -168,7 +147,6 @@ int Celestialbasis(float centerRA, float centerDec, float xCoors[], float yCoors
 
   return 0;
 }
-
 
 
 // Returns comoving distance at redshift z in h^-1 Mpc. 
@@ -201,7 +179,7 @@ float arrayMax(float a[], int n){
 float arrayMin(float a[], int n){
   float min = a[0];
 
-  for(j=0; j< n; j++){
+  for(j=0; j<n; j++){
     if(a[j] < min){
       min = a[j];
     }
@@ -232,4 +210,3 @@ double DoubleArrayMin(double a[], int n){
   }
   return min;
 }
-

@@ -1,5 +1,5 @@
-//Stacpolly run. 
-//#define AUXfn_DIR "/home/mjw/Aux_functions/header.h"
+// Stacpolly run. 
+// #define AUXfn_DIR "/home/mjw/Aux_functions/header.h"
 
 #define   AUXfn_header "/disk1/mjw/Aux_functions/header.h"
 #include  AUXfn_header
@@ -58,16 +58,16 @@ sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_ValueAddedHOD");
 
 // With orientation of the -z Cartesian axis to the line of sight. 
 // lower_xlimit & upper_xlimit
-AxisLimsArray[0][0]   =     950.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][0]   =    2750.0;                                                  // h^-1 Mpc
+AxisLimsArray[0][0]   =    1090.0;                                                  // h^-1 Mpc
+AxisLimsArray[1][0]   =    2690.0;                                                  // h^-1 Mpc
 
 // lower_ylimit & upper_ylimit
-AxisLimsArray[0][1]   =    -250.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][1]   =     250.0;                                                  // h^-1 Mpc
+AxisLimsArray[0][1]   =    -185.0;                                                  // h^-1 Mpc
+AxisLimsArray[1][1]   =     217.0;                                                  // h^-1 Mpc
 
 // lower_zlimit & upper_zlimit
-AxisLimsArray[0][2]   =     -60.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][2]   =      60.0;                                                  // h^-1 Mpc
+AxisLimsArray[0][2]   =     -43.0;                                                  // h^-1 Mpc
+AxisLimsArray[1][2]   =      44.0;                                                  // h^-1 Mpc
 
 CellSize              =       3.0;                                                  // Cell size, comoving distance, h^-1 Mpc
 
@@ -87,7 +87,7 @@ kbinInterval          =     0.005;
 modkMax               =       0.5;
 
 // Must be odd. 2n+1
-wfKernelsize          =        9;
+wfKernelsize          =         9;
 
 
 VIPERS_SolidAngle     = SolidAngleCalc(-5.4, -4.2, 9.);
@@ -108,34 +108,25 @@ prepNGP();
 
 // SumOfBoolDensity    = SumDoubleArray(booldensity);
 
-//Initialsed to zero in header.h
+// Initialsed to zero in header.h
 // TotalSurveyedVolume = SumOfBoolDensity*CellVolume;
 
 prepFFTw(n0, n1, n2);
 prepFFTbinning();
+
 
 for(loopCount=1; loopCount<2; loopCount++){
     if(loopCount < 10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
     else                sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
 
     CoordinateCalc(filepath);
-  
-    // Orientation of the -z Cartesian axis to the line of sight direction.
-    // centerRA in deg, centerDec in deg, xCoors[], yCoors[], zCoors[], len, rotation angle in deg.
-    // Note: p hat must lie in the xy plane by assumption. -z hat assumed to be rotated to VIPERS los direction. 
-   
-    // redshiftSpaceRotation(34.5, -4.79, xCoor, yCoor, zCoor, Vipers_Num, 180.0 + 94.79);
-    
+      
     VIPERSbasis(34.5, -4.79, xCoor, yCoor, zCoor, Vipers_Num);
-
-    // printf("\n\nAfter orientation of -z Cartesian axis to LOS ...");
    
     printf("\nIn the VIPERS basis..");
     printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
     printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
-
-    // Check inverse rotation. all good.
   
     // ComovingNumberDensityCalc();
 
