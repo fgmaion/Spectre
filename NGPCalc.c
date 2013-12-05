@@ -1,5 +1,5 @@
 int NGPCalc(){
-    ApplyJenkins();
+    // ApplyJenkins();
     
     CountGalaxies();
     
@@ -11,7 +11,7 @@ int NGPCalc(){
 
 
 int NGPCalcCube(){
-    ApplyJenkins();
+    // ApplyJenkins();
     
     CountGalaxiesCube();
     
