@@ -58,22 +58,22 @@ sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_ValueAddedHOD");
 
 // With orientation of the -z Cartesian axis to the line of sight. 
 // lower_xlimit & upper_xlimit
-AxisLimsArray[0][0]   =       0.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][0]   =     600.0;                                                  // h^-1 Mpc
+AxisLimsArray[0][0]   =     950.0;                                                  // h^-1 Mpc
+AxisLimsArray[1][0]   =    2750.0;                                                  // h^-1 Mpc
 
 // lower_ylimit & upper_ylimit
-AxisLimsArray[0][1]   =       0.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][1]   =     600.0;                                                  // h^-1 Mpc
+AxisLimsArray[0][1]   =    -250.0;                                                  // h^-1 Mpc
+AxisLimsArray[1][1]   =     250.0;                                                  // h^-1 Mpc
 
 // lower_zlimit & upper_zlimit
-AxisLimsArray[0][2]   =       0.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][2]   =    3000.0;                                                  // h^-1 Mpc
+AxisLimsArray[0][2]   =     -60.0;                                                  // h^-1 Mpc
+AxisLimsArray[1][2]   =      60.0;                                                  // h^-1 Mpc
 
 CellSize              =       3.0;                                                  // Cell size, comoving distance, h^-1 Mpc
 
 // Selection parameters. Volume limited sample between redshift 0.7 and 0.9
-redshiftLowLimit      =       0.7;
-redshiftHiLimit       =       0.9;
+redshiftLowLimit      =       0.5;
+redshiftHiLimit       =       1.1;
 absMagCut             =     -20.0;
 
 // Apply Jenkins contraction to beat aliasing. 
@@ -86,14 +86,9 @@ fkpPk                 =     5000.;                                              
 kbinInterval          =     0.005;
 modkMax               =       0.5;
 
-// Convolution of P(k) with window fn.
-// InterpK_binNumber  =       300;
-// MuIntegralPrecision=      9000;
-
 // Must be odd. 2n+1
 wfKernelsize          =        9;
 
-// Begin fn. calling. 
 
 VIPERS_SolidAngle     = SolidAngleCalc(-5.4, -4.2, 9.);
 
@@ -109,16 +104,15 @@ assignbinninginterval(kbinInterval);
 prepNGP();
 
 // Generate randoms for given grid, will read file if exists. End product: BoolDensity array. 
-randNGP(); 
+// randNGP(); 
 
-SumOfBoolDensity    = SumDoubleArray(booldensity);
+// SumOfBoolDensity    = SumDoubleArray(booldensity);
 
 //Initialsed to zero in header.h
-TotalSurveyedVolume = SumOfBoolDensity*CellVolume;
+// TotalSurveyedVolume = SumOfBoolDensity*CellVolume;
 
 prepFFTw(n0, n1, n2);
 prepFFTbinning();
-
 
 for(loopCount=1; loopCount<2; loopCount++){
     if(loopCount < 10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
