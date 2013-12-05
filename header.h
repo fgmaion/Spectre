@@ -13,8 +13,6 @@ int          pointRandGen(int lineNum, float Min_SinDec, float Max_SinDec, float
 int          RandCoorCalc();
 int          randNGP();
 
-int          redshiftSpaceRotation(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len, float angleDeg);
-
 int          ApplyFKPweights();
 
 int          CalcCorrections();

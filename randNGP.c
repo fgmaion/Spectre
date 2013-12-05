@@ -12,9 +12,6 @@ int randNGP(){
     
     RandCoorCalc();
     
-    redshiftSpaceRotation(34.5, -4.79, rand_x, rand_y, rand_z, NuRandoms, 180.0 + 94.79);
-    printf("\nRotation of -z axis to VIPERS los for randoms complete.");
-
     // Jenkins run. 
     JenkinsFold(rand_x, NuRandoms, 0);
     JenkinsFold(rand_y, NuRandoms, 1);
