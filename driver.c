@@ -66,8 +66,8 @@ AxisLimsArray[0][1]   =    -203.0;                                              
 AxisLimsArray[1][1]   =     201.0;                                                  // h^-1 Mpc
 
 // lower_zlimit & upper_zlimit
-AxisLimsArray[0][2]   =     -29.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][2]   =      30.0;                                                  // h^-1 Mpc
+AxisLimsArray[0][2]   =     -14.0;                                                  // h^-1 Mpc
+AxisLimsArray[1][2]   =      44.0;                                                  // h^-1 Mpc
 
 CellSize              =       3.0;                                                  // Cell size, comoving distance, h^-1 Mpc
 
