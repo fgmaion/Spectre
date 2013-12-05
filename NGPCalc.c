@@ -111,7 +111,7 @@ int CalculateCell_raDecRotated(){
 
 
 int projectVIPERSsystem(){
-    sprintf(filepath, "%s/Data/ra_decCells/xywNonemptyCells.dat", root_dir);
+    sprintf(filepath, "%s/Data/ra_decCells/xyzwNonemptyCells.dat", root_dir);
     output = fopen(filepath, "w");
 
     float xCell, yCell, zCell;
