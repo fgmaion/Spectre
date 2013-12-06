@@ -86,10 +86,10 @@ modkMax               =       0.5;
 wfKernelsize          =         9;
 
 // Applied window fn.
-Cell_AppliedWindowFn  = Cell_SurveyLimitsMask;
+Cell_AppliedWindowFn  =  &Cell_SurveyLimitsMask;
 
 // Choice of redshift from zcos, zpec, zphot, zobs.
-zUtilized             = zcos;
+zUtilized             =  &zcos;
 
 
 sprintf(surveyType, "VIPERSparent");

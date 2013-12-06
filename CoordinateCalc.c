@@ -48,9 +48,6 @@
     zpec         =  (float *)  realloc(zpec,         Vipers_Num*sizeof(*zpec));
     zobs         =  (float *)  realloc(zobs,         Vipers_Num*sizeof(*zobs)); 
     zphot        =  (float *)  realloc(zphot,        Vipers_Num*sizeof(*zphot));
-
-    zUtilized    =  (float *)  realloc(zUtilized,    Vipers_Num*sizeof(*zUtilized));
-
     M_B          =  (float *)  realloc(M_B,          Vipers_Num*sizeof(*M_B));
     type         =  (int   *)  realloc(type,         Vipers_Num*sizeof(*type));
     csr          =  (float *)  realloc(csr,          Vipers_Num*sizeof(*csr));
