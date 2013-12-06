@@ -10,7 +10,7 @@ int CalcCorrections(){
     printf("\n\nFKP     weighted volume:   %e    [Total Volume]", fkpWeightedVolume/TotalVolume);
     printf("\nFKP Sq. weighted volume:   %e    [V^2 / V_sur]",  fkpSqWeightsVolume/(TotalVolume*TotalVolume/TotalSurveyedVolume));
 
-    printf("\nWindow fn. amplitude correction:  %f ", pow(fkpWeightedVolume, 2.)*pow(fkpSqWeightsVolume, -1.)*pow(TotalVolume, -1.));
+    printf("\nWindow fn. amplitude correction:  %f ", TotalVolume*pow(fkpSqWeightsVolume, -1.));
     
     return 0;
 }
