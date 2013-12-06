@@ -109,9 +109,9 @@ int AnisoConvolution(){
 	prepAnisoConvolution();
 
 	pt2Pk                       = &splintMatterPk;
-    // pt2AnisoWf                  = &anisoGauss;
+    // pt2AnisoWf               = &anisoGauss;
 
-	setMeasuredWfKernel()
+	setMeasuredWfKernel();
 
 	inputPK();
 

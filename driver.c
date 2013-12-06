@@ -89,7 +89,7 @@ wfKernelsize          =         9;
 &Cell_AppliedWindowFn = &Cell_SurveyLimitsMask;
 
 // Choice of redshift from zcos, zpec, zphot, zobs.
-&zUtilized            = &zcos;
+zUtilized             = zcos;
 
 
 sprintf(surveyType, "VIPERSparent");
