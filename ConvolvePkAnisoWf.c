@@ -367,7 +367,7 @@ int WindowfuncSlice(float kintervali, int ni, int x0, int y0, int z0, char filep
         H_kImag                            = pow(n0*n1*n2, -1.0)*out[Index][1]/WindowFunc;
 
         PkArray[Num_ModesInInterval][0]    = fabs(k_i);
-        PkArray[Num_ModesInInterval][1]    = TotalVolume*(pow(H_kReal, 2.) + pow(H_kImag, 2.));
+        PkArray[Num_ModesInInterval][1]    = pow(H_kReal, 2.) + pow(H_kImag, 2.);
         Num_ModesInInterval               += 1;
     }
          
