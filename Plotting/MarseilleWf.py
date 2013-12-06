@@ -1,10 +1,24 @@
-xdata   = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/AnisoGauss_Jenkins1.0_xSlice.dat')
+a = 700.
+b = 800.
+c = 900.
+
+abscissa = np.logspace(0.001, 0.3, 150)
+
+xtheory  = np.exp(-0.5*(abscissa/a)**2.)
+ytheory  = np.exp(-0.5*(abscissa/b)**2.)
+ztheory  = np.exp(-0.5*(abscissa/c)**2.)
+
+pl.loglog(abscissa, xtheory, 'b')
+pl.loglog(abscissa, ytheory, 'g')
+pl.loglog(abscissa, ztheory, 'y')
+
+xdata    = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/AnisoGauss_Jenkins1.0_xSlice.dat')
 pl.loglog(xdata[:,1], xdata[:,2], 'b^', label='x direction')
 
-ydata   = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/AnisoGauss_Jenkins1.0_ySlice.dat')
+ydata    = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/AnisoGauss_Jenkins1.0_ySlice.dat')
 pl.loglog(ydata[:,1], ydata[:,2], 'g^', label='y direction')
 
-zdata   = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/AnisoGauss_Jenkins1.0_zSlice.dat')
+zdata    = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/AnisoGauss_Jenkins1.0_zSlice.dat')
 pl.loglog(zdata[:,1], zdata[:,2], 'y^', label='z direction')
 
 pl.xlim([0.001, 0.3])
