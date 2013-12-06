@@ -90,27 +90,25 @@ int main(int argc, char **argv){
     kbinInterval              =      0.007;
     modkMax                   =        0.5;
 
-    // Convolution of P(k) with window fn.
-    // InterpK_binNumber      =        400;
-    // MuIntegralPrecision    =       9000;
-
     // Must be odd. 2n + 1.
     wfKernelsize              =          9;
 
     // padded window fn. calculation.
     sidepad                   =          0; 
 
+    // Clipping variables. 
     appliedClippingThreshold  =        5.0;
     
     linearBias                = sqrt(2.90);
     
     A11                       =        1.0;
     
+
     // zCubeCreate();
 
     comovDistReshiftCalc();
 
-    JenkinsCoordinates();
+    // JenkinsCoordinates();
 
     EvaluateGridParameters();
     
@@ -129,35 +127,38 @@ int main(int argc, char **argv){
 
     AnisoGauss(80., 100., 120.);
 
-    SumOfBoolDensity    = SumDoubleArray(booldensity);
-  
-    // CoordinateCalcCube();  
-    
-    // rollcube(xCoor, yCoor, zCoor, Vipers_Num);
-    
+    SumOfVIPERSbools    = SumDoubleArray(booldensity);
+
     // TotalSurveyedVolume initialised to zero in header.h
-    TotalSurveyedVolume  = SumOfBoolDensity*CellVolume*pow(JenkinsScalefactor, 3.0);
+    TotalSurveyedVolume  = SumOfVIPERSbools*CellVolume*pow(JenkinsScalefactor, 3.0);
+
+    // assign binning interval in k, and calcualte number of bins required. 
+    assignbinninginterval(kbinInterval);
 
     prepFFTw(n0, n1, n2);
     prepFFTbinning();
 
-    // NGPCalcCube();
+    CoordinateCalcCube();  
+    
+    // rollcube(xCoor, yCoor, zCoor, Vipers_Num);
+
+    NGPCalcCube();
     
     // A11                      =   (1./2.6); // Empirical estimate from suppressed Del2k. 
     // clipDensity(appliedClippingThreshold); // Clipping at 5.0
     
-    // CalcCorrections();
+    CalcCorrections();
     
-    // PkCalc();
+    PkCalc();
 
     // wfPkCalc();
     
     // ConvolveTheory();
     // printWindowfuncSlices();
     
-    EstimateAnisoWfKernel();
+    // EstimateAnisoWfKernel();
     
-    AnisoConvolution();
+    // AnisoConvolution();
     
     // FFTw arrays in and out and binning arrays must be freed and reassigned to the padded size before padded window fn. calc.
     // freeFFTw();

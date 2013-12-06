@@ -56,7 +56,7 @@ int CountGalaxiesCube(){
     for(j=0; j<Vipers_Num; j++){
         boxlabel = boxCoordinates(j);
 
-        if(Cell_AppliedWindowFn[boxlabel] > 0.1){ 
+        if(booldensity[boxlabel] > 0.1){ 
             densityArray[boxlabel] += 1;
         }
     }
