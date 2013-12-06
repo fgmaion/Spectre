@@ -123,7 +123,7 @@ int AnisoConvolution(){
 
 	flatten3dConvolvedPk();
 
-	sprintf(filepath, "%s/Data/Del2k/midK_Pk_IccConvolved%s.dat", root_dir, surveyType);
+	sprintf(filepath, "%s/Data/Del2k/midK_Pk_Convolved%s.dat", root_dir, surveyType);
     
     output = fopen(filepath, "w");
     for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
