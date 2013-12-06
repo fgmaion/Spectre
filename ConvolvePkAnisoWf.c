@@ -128,52 +128,8 @@ int AnisoConvolution(){
     output = fopen(filepath, "w");
     for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
     fclose(output);
-/*
-    float ishift, jshift, kshift; 
-    
-    kshift = -0.5*(wfKernelsize-1);
 
-    for(k=0; k<wfKernelsize;k++){
-    
-        jshift = -0.5*(wfKernelsize-1);
-        
-        for(j=0; j<wfKernelsize; j++){
-        
-            ishift = -0.5*(wfKernelsize-1);
-            
-            for(i=0; i<wfKernelsize; i++){
-                Index = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
-            
-                k_x			   		= kIntervalx*ishift;
-			    k_y 		   		= kIntervaly*jshift;
-			    k_z			   		= kIntervalz*kshift;
-            
-                if(AnisoWfKernel_ModeNumb[Index] != 0){
-                    printf("\n %d \t %d \t %d \t %d \t %f \t %f \t %f", i, j, k, AnisoWfKernel_ModeNumb[Index], AnisoWfKernel[Index], windowFunc3D[Index], AnisoWfKernel[Index]/windowFunc3D[Index]);
-                }
-            
-            ishift += 1;
-            }
-            
-        jshift += 1;
-        }
-        
-        kshift +=1;
-    }
-*/
-    // setMeasuredWfKernel();
-
-	// convolve3DInputPk(convolvedPk3d, inputPk);
-
-	// flatten3dConvolvedPk();
-
-	// sprintf(filepath, "%s/Data/Pk/midK_Pk_ConvolvedMeasuredAnisoGauss.dat", root_dir);
-    
-    // output = fopen(filepath, "w");
-    // for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
-    // fclose(output);
-
-	return 0;	
+    return 0;	
 }
 
 
@@ -220,9 +176,6 @@ int convolve3DInputPk(float convolvedPk[], float inputPk[]){
 	    for(jj=0; jj<n1-2*wfKernelsize; jj++){
 		    for(ii=0; ii<n2-2*wfKernelsize; ii++){
 				Index = kk*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + jj*(n2-2*wfKernelsize) + ii;
-
-				convolvedPk3d[Index]  = inputPk[(kk+wfKernelsize)*n1*n2 + (jj+wfKernelsize)*n2 + ii+wfKernelsize];
-
 				convolvedPk3d[Index]  = ConvolveCell(ii + wfKernelsize, jj + wfKernelsize, kk + wfKernelsize);
 
 			}

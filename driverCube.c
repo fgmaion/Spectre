@@ -118,13 +118,13 @@ int main(int argc, char **argv){
 
     prepNGP();
     
-    sprintf(surveyType, "Spherical_Jenkins%.1f", JenkinsScalefactor);
+    sprintf(surveyType, "FullCube_Jenkins%.1f", JenkinsScalefactor);
     
-    // FullCube();
+    FullCube();
     // EmbeddedCube(50);
     // Gaussian(250.);
     // PencilBeamSurvey(40, 60, 40, 60);
-    Spherical(250.);
+    // Spherical(250.);
     // AnisoGauss(80., 100., 120.);
 
     Cell_AppliedWindowFn  =     &booldensity[0];
@@ -155,9 +155,9 @@ int main(int argc, char **argv){
     // ConvolveTheory();
     // printWindowfuncSlices();
     
-    // EstimateAnisoWfKernel();
+    EstimateAnisoWfKernel();
     
-    // AnisoConvolution();
+    AnisoConvolution();
     
     // FFTw arrays in and out and binning arrays must be freed and reassigned to the padded size before padded window fn. calc.
     // freeFFTw();
