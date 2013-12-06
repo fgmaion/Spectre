@@ -125,7 +125,7 @@ int main(int argc, char **argv){
     // Gaussian(250.);
     // PencilBeamSurvey(40, 60, 40, 60);
     // Spherical(250.);
-    AnisoGauss(80., 100., 120.);
+    AnisoGauss(500., 500., 500.);
 
     Cell_AppliedWindowFn  = &booldensity[0];
 
@@ -139,7 +139,7 @@ int main(int argc, char **argv){
 
     CoordinateCalcCube();  
     
-    // rollcube(xCoor, yCoor, zCoor, Vipers_Num);
+    rollcube(xCoor, yCoor, zCoor, Vipers_Num);
 
     NGPCalcCube();
     

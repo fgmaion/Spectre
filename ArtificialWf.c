@@ -1,24 +1,25 @@
 int AnisoGauss(float a, float b, float c){
     for(j=0; j<n0*n1*n2; j++) booldensity[j] = 0.0;
     
-    float r2x, r2y, r2z;
+    float rx, ry, rz;
     
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
-                r2z   = pow(CellSize*(k-n0/2), 2.);   
-                r2y   = pow(CellSize*(j-n1/2), 2.);
-                r2x   = pow(CellSize*(i-n2/2), 2.);
+                r2z   = CellSize*(k-n0/2);   
+                r2y   = CellSize*(j-n1/2);
+                r2x   = CellSize*(i-n2/2);
             
                 Index = k*n1*n2 + j*n2 + i;
             
-                booldensity[Index] = exp(-0.5*r2x/pow(a, 2.))*exp(-0.5*r2y/pow(b, 2.))*exp(-0.5*r2z/pow(c, 2.));
+                booldensity[Index] = exp(-0.5*pow(rx/a, 2.))*exp(-0.5*pow(ry/b, 2))*exp(-0.5*pow(rz/c, 2.));
             }
         }
     }
     
     return 0;
 }
+
 
 int FullCube(){
     // bool density = 1.0 everywhere for full cube.  Otherwise set to 0.0 initially. 

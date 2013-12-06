@@ -7,6 +7,8 @@ int EstimateAnisoWfKernel(){
     printf("\nPerforming FFT.");
     
     fftw_execute(p);
+
+    printWindowfuncSlices();
     
     printf("\nFFT complete.");
     

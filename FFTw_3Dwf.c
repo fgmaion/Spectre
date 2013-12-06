@@ -33,18 +33,13 @@ int WindowfuncSlice(float kintervali, int ni, int x0, int y0, int z0, char filep
     int   Num_ModesInInterval = 0;
 
     for(j=0; j<ni; j++){
-
         k_i = kintervali*j;
-
+        
         if(k_i>NyquistWaveNumber)  k_i    -= ni*kintervali;
 
-        Index                              = ((float) z0)*n1*n2*j + ((float) y0)*n2*j + ((float) x0)*j;
+        Index                              = z0*n1*n2*j + y0*n2*j + x0*j;
 
-        WindowFunc                         = 1.;
-        
-        if(k_i != 0.){
-		  WindowFunc                      *= sin(pi*k_i*0.5/NyquistWaveNumber)/(pi*k_i*0.5/NyquistWaveNumber);}
-
+        // Cell window fn. uncorrected. 
         H_kReal                            = pow(n0*n1*n2, -1.0)*out[Index][0]/WindowFunc;
         H_kImag                            = pow(n0*n1*n2, -1.0)*out[Index][1]/WindowFunc;
 
