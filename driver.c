@@ -68,8 +68,8 @@ AxisLimsArray[1][2]   =      44.0;                                              
 CellSize              =       3.0;                                                  // Cell size, comoving distance, h^-1 Mpc
 
 // Selection parameters. Volume limited sample between redshift 0.7 and 0.9
-redshiftLowLimit      =       0.5;
-redshiftHiLimit       =       1.1;
+redshiftLowLimit      =       0.7;
+redshiftHiLimit       =       0.9;
 absMagCut             =     -20.0;
 
 // Apply Jenkins contraction to beat aliasing. 
@@ -84,6 +84,12 @@ modkMax               =       0.5;
 
 // Must be odd. 2n+1
 wfKernelsize          =         9;
+
+// Applied window fn.
+&Cell_AppliedWindowFn = &Cell_SurveyLimitsMask;
+
+// Choice of redshift from zcos, zpec, zphot, zobs.
+&zUtilized            = &zcos;
 
 
 sprintf(surveyType, "VIPERSparent");
@@ -100,7 +106,7 @@ prepNGP();
 
 CalculateCell_raDecRotated();
 
-SumOfVIPERSbools    = SumFloatArray(Cell_VIPERSbools, n0*n1*n2);
+SumOfVIPERSbools    = SumFloatArray(Cell_AppliedWindowFn, n0*n1*n2);
 
 // Initialsed to zero in header.h
 TotalSurveyedVolume = SumOfVIPERSbools*CellVolume;
@@ -141,6 +147,10 @@ for(loopCount=1; loopCount<2; loopCount++){
   
     PkCalc(filepath);
 }
+
+EstimateAnisoWfKernel();
+
+AnisoConvolution();
 
 // sprintf(filepath, "%s/midK_WindowFuncPk_HODMocks.dat", root_dir);
 // wfPkCalc(filepath);

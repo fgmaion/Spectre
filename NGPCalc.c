@@ -3,7 +3,7 @@ int NGPCalc(){
     
     CountGalaxies();
     
-    overdensity_ImperfectSelectionTracer();
+    overdensity_volumeLimitedTracer();
     
     printSurveyDetails();
     return 0;
@@ -39,7 +39,7 @@ int CountGalaxies(){
     for(j=0; j<Vipers_Num; j++){
         boxlabel = boxCoordinates(j);
             
-        if((zobs[j] > redshiftLowLimit) && (zobs[j] < redshiftHiLimit)){ 
+        if((zUtilized[j] > redshiftLowLimit) && (zUtilized[j] < redshiftHiLimit) && (M_B[j] < absMagCut)){ 
             densityArray[boxlabel] += 1;
         }
     }
@@ -56,7 +56,7 @@ int CountGalaxiesCube(){
     for(j=0; j<Vipers_Num; j++){
         boxlabel = boxCoordinates(j);
 
-        if(Cell_VIPERSbools[boxlabel] > 0.1){ 
+        if(Cell_AppliedWindowFn[boxlabel] > 0.1){ 
             densityArray[boxlabel] += 1;
         }
     }
@@ -193,6 +193,13 @@ int CalculateCell_raDecRotated(){
         }
     }
 
+
+    for(j=0; j<n0*n1*n2; j++){
+        if((LowerRALimit<Cell_raVIPERSsystem[j]) && (Cell_raVIPERSsystem[j]<UpperRALimit) && (LowerDecLimit<Cell_decVIPERSsystem[j]) && (Cell_decVIPERSsystem[j]<UpperDecLimit) && (LowerChiLimit < Cell_chiVIPERSsystem[j]) && (Cell_chiVIPERSsystem[j] < UpperChiLimit)){
+            Cell_SurveyLimitsMask[j] = 1.0;
+        }
+    }
+
     fclose(inputfile);
 
     // projectVIPERSsystem();
@@ -230,7 +237,10 @@ int projectVIPERSsystem(){
 
 
 int printSurveyDetails(){
-    printf("\n\nTotal ZADE weight: %e.", TotalZADEWeight);
+    printf("\n\nChi limits:  %f to %f", LowerChiLimit, UpperChiLimit);
+    printf("\nright ascension limits:  %f to %f", UpperRALimit, LowerRALimit);
+    printf("\ndeclination limits:  %f to %f", UpperDecLimit, LowerDecLimit);
+    printf("\nTotal ZADE weight: %e.", TotalZADEWeight);
     printf("\nCell volume:  %f.",        CellVolume); 
     printf("\nMean number density:  %f", MeanNumberDensity);    
     printf("\n\nNon-empty cells:  %e  [n0*n1*n2]", SumOfVIPERSbools/(n0*n1*n2));

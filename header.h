@@ -226,6 +226,8 @@ int*             type  = NULL;
 // Value added catalogue parameters. 
 float*           zpec  = NULL;
 float*          zphot  = NULL;
+
+float*	    zUtilized  = NULL;
 float*            csr  = NULL;
 float*       sampling  = NULL;  
 float*     sampling35  = NULL;
@@ -455,9 +457,20 @@ float*   Cell_chiVIPERSsystem;
 
 float*   Cell_VIPERSweights;
 float*   Cell_VIPERSbools;
+float*   Cell_SurveyLimitsMask;
+float*   Cell_AppliedWindowFn;
 
 int VIPERSbasis(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len);
 
 int Celestialbasis(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len);
 
 int projectVIPERSsystem();
+
+float UpperChiLimit;
+float LowerChiLimit;
+
+float UpperRAlimit;
+float LowerRAlimit;
+
+float UpperDecLimit;
+float LowerDecLimit;

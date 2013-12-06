@@ -48,6 +48,9 @@
     zpec         =  (float *)  realloc(zpec,         Vipers_Num*sizeof(*zpec));
     zobs         =  (float *)  realloc(zobs,         Vipers_Num*sizeof(*zobs)); 
     zphot        =  (float *)  realloc(zphot,        Vipers_Num*sizeof(*zphot));
+
+    zUtilized    =  (float *)  realloc(zUtilized,    Vipers_Num*sizeof(*zUtilized));
+
     M_B          =  (float *)  realloc(M_B,          Vipers_Num*sizeof(*M_B));
     type         =  (int   *)  realloc(type,         Vipers_Num*sizeof(*type));
     csr          =  (float *)  realloc(csr,          Vipers_Num*sizeof(*csr));
@@ -87,7 +90,7 @@
             ra[j]                *= (pi/180.0);                                 // Converted to radians.
 
             //  Cosmology dependent, HOD mock parameters assumed - see header.h
-            rDist[j]              = interp_comovingDistance(zobs[j]);           // Comoving distances in h^-1 Mpc
+            rDist[j]              = interp_comovingDistance(zUtilized[j]);      // Comoving distances in h^-1 Mpc
             xCoor[j]              = rDist[j]*sin(polarAngle[j])*cos(ra[j]);
             yCoor[j]              = rDist[j]*sin(polarAngle[j])*sin(ra[j]);
             zCoor[j]              = rDist[j]*cos(polarAngle[j]);
@@ -100,7 +103,14 @@
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
     printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
 
-    printf("\n\nRedshift max:  %f \t Redshift min:  %f", arrayMax(zobs, Vipers_Num), arrayMin(zobs, Vipers_Num));
+    printf("\n\nRedshift max:  %f \t Redshift min:  %f", arrayMax(zUtilized, Vipers_Num), arrayMin(zUtilized, Vipers_Num));
+
+    UpperRAlimit  = arrayMax(ra, Vipers_Num);
+    LowerRAlimit  = arrayMin(ra, Vipers_Num);
+
+    UpperDecLimit = arrayMax(dec, Vipers_Num);
+    LowerDecLimit = arrayMin(dec, Vipers_Num);
+
     return 0;
 }
 

@@ -31,6 +31,10 @@ int comovDistReshiftCalc(){
   // First array must be a monotonically increasing function, start from redshift zero rather than redshift 2.0
   spline(z_Array, ComovingDistance_z, nPoints, 1.0e31, 1.0e31, z_ComovingDistance_2derivatives);
   spline(ComovingDistance_z, z_Array, nPoints, 1.0e31, 1.0e31, ComovingDistance_z_2derivatives);
+
+  UpperChiLimit         =  interp_comovingDistance(redshiftLowLimit);
+  LowerChiLimit         =  interp_comovingDistance(redshiftHiLimit);
+  
   return 0;
 }
 

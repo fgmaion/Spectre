@@ -18,8 +18,7 @@ int ComovingNumberDensityCalc(){
     
     for(j=0; j<Vipers_Num; j++){
         for(i=1; i<zBinNumber; i++){
-            //if((redshiftSlices[i] < zcos[j]) && (zcos[j] < redshiftSlices[i+1]) && (M_B[j] < absMagCut)){
-            if((redshiftSlices[i] < zobs[j]) && (zobs[j] < redshiftSlices[i+1])){
+            if((redshiftSlices[i] < zUtilized[j]) && (zUtilized[j] < redshiftSlices[i+1]) && (M_B[j] < absMagCut)){
                 NumberAtReshift[i] += 1;
             }
         }

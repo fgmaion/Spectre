@@ -10,14 +10,18 @@ int prepNGP(){
     Cell_raVIPERSsystem     =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_raVIPERSsystem));
     Cell_decVIPERSsystem    =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_decVIPERSsystem));
     Cell_chiVIPERSsystem    =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_chiVIPERSsystem));
+
     Cell_VIPERSweights      =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_VIPERSweights));
     Cell_VIPERSbools        =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_VIPERSbools));
+    Cell_SurveyLimitsMask   =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_SurveyLimitsMask));
 
+    Cell_AppliedWindowFn    =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_AppliedWindowFn));
 
     // Allocate memory for NGP density arrays of both ZADE galaxies and randoms. 
-    for(j=0; j<n0*n1*n2; j++)       FKPweights[j] = 1.0;
-    for(j=0; j<n0*n1*n2; j++)     densityArray[j] = 0.0;
-    for(j=0; j<n0*n1*n2; j++) Cell_VIPERSbools[j] = 0.0;
+    for(j=0; j<n0*n1*n2; j++)            FKPweights[j] = 1.0;
+    for(j=0; j<n0*n1*n2; j++)          densityArray[j] = 0.0;
+    for(j=0; j<n0*n1*n2; j++)      Cell_VIPERSbools[j] = 0.0;
+    for(j=0; j<n0*n1*n2; j++)  Cell_SurveyLimitsMask[j] =0.0;
     
     return 0;
 }

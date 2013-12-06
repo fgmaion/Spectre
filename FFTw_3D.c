@@ -2,7 +2,7 @@ int PkCalc(){
     printf("\n\nAssigning FFT in array.");
     
     // Including the normalisation of the mask, TotalVolume/TotalSurveyedVolume, such that the filter fn. has unit mean."
-    for(j=0; j<n0*n1*n2; j++) in[j][0] = densityArray[j]*FKPweights[j]*(TotalVolume/TotalSurveyedVolume)*Cell_VIPERSbools[j];
+    for(j=0; j<n0*n1*n2; j++) in[j][0] = densityArray[j]*FKPweights[j]*(TotalVolume/TotalSurveyedVolume)*Cell_AppliedWindowFn[j];
     for(j=0; j<n0*n1*n2; j++) in[j][1] = 0.0;
     
     printf("\nPerforming FFT.");

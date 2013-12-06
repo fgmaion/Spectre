@@ -1,7 +1,7 @@
 int EstimateAnisoWfKernel(){
     printf("\nBeginning window function calculation.");
     
-    for(j=0; j<n0*n1*n2; j++) in[j][0] = (double) (TotalVolume/TotalSurveyedVolume)*booldensity[j]*FKPweights[j];
+    for(j=0; j<n0*n1*n2; j++) in[j][0] = (double) (TotalVolume/TotalSurveyedVolume)*Cell_AppliedWindowFn[j];
     for(j=0; j<n0*n1*n2; j++) in[j][1] = (double) 0.0;
     
     printf("\nPerforming FFT.");
@@ -108,12 +108,14 @@ int AnisoConvolution(){
 
 	prepAnisoConvolution();
 
-	pt2Pk                       = &Analytic2powerlaw;
-    pt2AnisoWf                  = &anisoGauss;
+	pt2Pk                       = &splintMatterPk;
+    // pt2AnisoWf                  = &anisoGauss;
 
-	SetWfKernel();
+	setMeasuredWfKernel()
 
-	inputLinearPk();
+	inputPK();
+
+	// inputLinearPk();
 
 	setInputPk();
 
@@ -121,12 +123,12 @@ int AnisoConvolution(){
 
 	flatten3dConvolvedPk();
 
-	sprintf(filepath, "%s/Data/Pk/midK_Pk_ConvolvedAnisoGauss.dat", root_dir);
+	sprintf(filepath, "%s/Data/Pk/midK_Pk_ConvolvedparentHOD.dat", root_dir);
     
     output = fopen(filepath, "w");
     for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
     fclose(output);
-
+/*
     float ishift, jshift, kshift; 
     
     kshift = -0.5*(wfKernelsize-1);
@@ -158,18 +160,18 @@ int AnisoConvolution(){
         
         kshift +=1;
     }
+*/
+    // setMeasuredWfKernel();
 
-    setMeasuredWfKernel();
+	// convolve3DInputPk(convolvedPk3d, inputPk);
 
-	convolve3DInputPk(convolvedPk3d, inputPk);
+	// flatten3dConvolvedPk();
 
-	flatten3dConvolvedPk();
-
-	sprintf(filepath, "%s/Data/Pk/midK_Pk_ConvolvedMeasuredAnisoGauss.dat", root_dir);
+	// sprintf(filepath, "%s/Data/Pk/midK_Pk_ConvolvedMeasuredAnisoGauss.dat", root_dir);
     
-    output = fopen(filepath, "w");
-    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
-    fclose(output);
+    // output = fopen(filepath, "w");
+    // for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
+    // fclose(output);
 
 	return 0;	
 }
