@@ -100,11 +100,6 @@ prepNGP();
 
 CalculateCell_raDecRotated();
 
-SumOfVIPERSbools    = SumFloatArray(Cell_AppliedWindowFn, n0*n1*n2);
-
-// Initialsed to zero in header.h
-TotalSurveyedVolume = SumOfVIPERSbools*CellVolume;
-
 // assign binning interval in k, and calcualte number of bins required. 
 assignbinninginterval(kbinInterval);
 
@@ -124,6 +119,10 @@ for(loopCount=1; loopCount<2; loopCount++){
     // Applied window fn.
     Cell_AppliedWindowFn  =     &Cell_SurveyLimitsMask[0];
 
+    SumOfVIPERSbools    = SumFloatArray(Cell_AppliedWindowFn, n0*n1*n2);
+
+    // Initialsed to zero in header.h
+    TotalSurveyedVolume = SumOfVIPERSbools*CellVolume;
 
     VIPERSbasis(34.5, -5.10, xCoor, yCoor, zCoor, Vipers_Num);
    
