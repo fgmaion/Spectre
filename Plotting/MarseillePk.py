@@ -1,11 +1,11 @@
-data   = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Del2k/midK_Del2k_FullCube_Jenkins1.0.dat')
+data   = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Del2k/midK_Del2k_AnisoGauss_Jenkins1.0.dat')
 pl.loglog(data[:,0], data[:,2], 'b^', label='Measured, volume limited sample.')
 
 theory = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/HODTheoryPk/cambExtendedPk_hod_20.0.dat')
 pl.loglog(theory[:,0], theory[:,1], 'y', label='HOD input')
 
-conv = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Del2k/midK_Pk_IccConvolvedFullCube_Jenkins1.0.dat')
-pl.loglog(conv[:,0], conv[:,2], 'g', label='convolved. Icc')
+conv = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Del2k/midK_Pk_IccConvolvedAnisoGauss_Jenkins1.0.dat')
+pl.loglog(conv[:,0], conv[:,2], 'g^', label='convolved. Icc')
 
 pl.xlim([0.001, 2.0])
 #pl.ylim([10**-3, 2.5*10**2])
@@ -20,6 +20,6 @@ leg.draw_frame(False)
 pl.ylabel(r'$P(k)$', fontsize = '10')
 pl.xlabel(r'$k \ [h \ Mpc^{-1}]$', fontsize = '10')
 
-pl.savefig('/disk1/mjw/HOD_MockRun/Plots/MarseillePk.pdf')
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/MarseillePkAnisoGauss.pdf')
 
 
