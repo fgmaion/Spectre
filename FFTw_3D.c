@@ -71,8 +71,6 @@ int PkCorrections(int WindowFuncParam){
 				    //PkArray[Index][1]           -= fkpShotNoiseCorr;
 				    // PkArray[Index][1]             *= pow(fkpWeightedVolume, 2.)*pow(fkpSqWeightsVolume, -1.)*pow(TotalVolume, -1.);
                 }
-
-                printf("\nWindow fn. amplitude correction:  %f ", pow(fkpWeightedVolume, 2.)*pow(fkpSqWeightsVolume, -1.)*pow(TotalVolume, -1.));
                 
                 // PkCorrections called to correct NGP for survey window function.
                 if(WindowFuncParam == 1){
