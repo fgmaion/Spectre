@@ -10,12 +10,10 @@ int sphereCentre(){
     // Generate random x, y, z co-ordinates for the sphere centre.  Use periodicity of box to roll the co-ordinates
     // such that the sphere lies in the centre of the new co-ordinate system. 
     
-    xcentre       = 1000.*gsl_rng_uniform(r);
-    ycentre       = 1000.*gsl_rng_uniform(r);
-    zcentre       = 1000.*gsl_rng_uniform(r);
-    
-    printf("\n\n%e \t %e \t %e", xcentre, ycentre, zcentre);
-    
+    xcentre       = (AxisLimsArray[1][0] - AxisLimsArray[0][0])*gsl_rng_uniform(r);
+    ycentre       = (AxisLimsArray[1][1] - AxisLimsArray[0][1])*gsl_rng_uniform(r);
+    zcentre       = (AxisLimsArray[1][2] - AxisLimsArray[0][2])*gsl_rng_uniform(r);
+        
     xroll         = -1.*(xcentre - 0.5*(AxisLimsArray[1][0] - AxisLimsArray[0][0]));
     yroll         = -1.*(ycentre - 0.5*(AxisLimsArray[1][1] - AxisLimsArray[0][1]));
     zroll         = -1.*(zcentre - 0.5*(AxisLimsArray[1][2] - AxisLimsArray[0][2]));
@@ -32,18 +30,18 @@ int rollcube(float xCoor[], float yCoor[], float zCoor[], int galNumber){
     for(j=0; j<galNumber; j++){
         xCoor[j] += xroll;
     
-        if(xCoor[j] > 1000.) xCoor[j] -= 1000.;
-        if(xCoor[j] <    0.) xCoor[j] += 1000.;
+        if(xCoor[j] > AxisLimsArray[1][0]) xCoor[j] -= (AxisLimsArray[1][0] - AxisLimsArray[0][0]).;
+        if(xCoor[j] < AxisLimsArray[0][0]) xCoor[j] += (AxisLimsArray[1][0] - AxisLimsArray[0][0]).;
     
         yCoor[j] += yroll;
         
-        if(yCoor[j] > 1000.) yCoor[j] -= 1000.;
-        if(yCoor[j] <    0.) yCoor[j] += 1000.;
+        if(yCoor[j] > AxisLimsArray[1][1]) yCoor[j] -= (AxisLimsArray[1][1] - AxisLimsArray[0][1]);
+        if(yCoor[j] < AxisLimsArray[0][1]) yCoor[j] += (AxisLimsArray[1][1] - AxisLimsArray[0][1]);
     
         zCoor[j] += zroll;
         
-        if(zCoor[j] > 1000.) zCoor[j] -= 1000.;
-        if(zCoor[j] <    0.) zCoor[j] += 1000.;
+        if(zCoor[j] > AxisLimsArray[1][0]) zCoor[j] -= (AxisLimsArray[1][2] - AxisLimsArray[0][2]);
+        if(zCoor[j] < AxisLimsArray[0][2]) zCoor[j] += (AxisLimsArray[1][2] - AxisLimsArray[0][2]);
     
     }
 
