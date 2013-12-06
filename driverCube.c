@@ -118,7 +118,7 @@ int main(int argc, char **argv){
 
     prepNGP();
     
-    sprintf(surveyType, "Spherical_Jenkins%.1f\n", JenkinsScalefactor);
+    sprintf(surveyType, "Spherical_Jenkins%.1f", JenkinsScalefactor);
     
     // FullCube();
     // EmbeddedCube(50);
@@ -133,9 +133,6 @@ int main(int argc, char **argv){
 
     // TotalSurveyedVolume initialised to zero in header.h
     TotalSurveyedVolume  = SumOfVIPERSbools*CellVolume*pow(JenkinsScalefactor, 3.0);
-
-    // assign binning interval in k, and calcualte number of bins required. 
-    assignbinninginterval(kbinInterval);
 
     prepFFTw(n0, n1, n2);
     prepFFTbinning();
