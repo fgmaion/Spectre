@@ -127,7 +127,7 @@ int main(int argc, char **argv){
 
     AnisoGauss(80., 100., 120.);
 
-    SumOfVIPERSbools    = SumDoubleArray(booldensity);
+    SumOfVIPERSbools    = SumDoubleArray(booldensity, n0*n1*n2);
 
     // TotalSurveyedVolume initialised to zero in header.h
     TotalSurveyedVolume  = SumOfVIPERSbools*CellVolume*pow(JenkinsScalefactor, 3.0);
