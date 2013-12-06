@@ -8,7 +8,7 @@ pl.loglog(theory[:,0], theory[:,1], 'y', label='HOD input')
 #pl.loglog(conv[:,0], conv[:,2], 'g^', label='convolved.')
 
 pl.xlim([0.001, 2.0])
-#pl.ylim([10**-3, 2.5*10**2])
+pl.ylim([10**3, 5*10**4])
 
 xx, locs = plt.xticks()
 ll = ['%.3f' % a for a in xx]
