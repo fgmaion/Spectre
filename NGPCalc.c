@@ -197,7 +197,7 @@ int CalculateCell_raDecRotated(){
     for(j=0; j<n0*n1*n2; j++){
         if((LowerRAlimit<Cell_raVIPERSsystem[j]) && (Cell_raVIPERSsystem[j]<UpperRAlimit) && (LowerDecLimit<Cell_decVIPERSsystem[j]) && (Cell_decVIPERSsystem[j]<UpperDecLimit) && (LowerChiLimit < Cell_chiVIPERSsystem[j]) && (Cell_chiVIPERSsystem[j] < UpperChiLimit)){
             Cell_SurveyLimitsMask[j] = 1.0;
-        }
+        } 
     }
 
     fclose(inputfile);
