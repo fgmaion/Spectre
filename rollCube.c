@@ -30,8 +30,8 @@ int rollcube(float xCoor[], float yCoor[], float zCoor[], int galNumber){
     for(j=0; j<galNumber; j++){
         xCoor[j] += xroll;
     
-        if(xCoor[j] > AxisLimsArray[1][0]) xCoor[j] -= (AxisLimsArray[1][0] - AxisLimsArray[0][0]).;
-        if(xCoor[j] < AxisLimsArray[0][0]) xCoor[j] += (AxisLimsArray[1][0] - AxisLimsArray[0][0]).;
+        if(xCoor[j] > AxisLimsArray[1][0]) xCoor[j] -= (AxisLimsArray[1][0] - AxisLimsArray[0][0]);
+        if(xCoor[j] < AxisLimsArray[0][0]) xCoor[j] += (AxisLimsArray[1][0] - AxisLimsArray[0][0]);
     
         yCoor[j] += yroll;
         
