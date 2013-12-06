@@ -141,9 +141,9 @@ int AnisoICC(){
     printf("\nConvolved P(vec k) zero point calculated to be: %e", ConvolvedPkZeroPoint);
 
     Index = 0.5*(wfKernelsize - 1)*wfKernelsize*wfKernelsize + 0.5*(wfKernelsize - 1)*wfKernelsize + 0.5*(wfKernelsize - 1);
-    printf("\nWindow fn. zero point calculated to be:  %f", windowFunc3D[Index])
+    printf("\nWindow fn. zero point calculated to be:  %f", windowFunc3D[Index]);
         
-    int   aaIndex;
+    int   blahIndex;
 	int   bbIndex;
 
 	int   ishift = -(wfKernelsize-1)/2;
@@ -162,10 +162,10 @@ int AnisoICC(){
 	    ishift = -(wfKernelsize-1)/2;
 	    
 	    for(i=0; i<wfKernelsize; i++){
-			aaIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
-			bbIndex   = (n0/2 + kshift)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + (n1/2 + jshift)*(n2-2*wfKernelsize) + (n2/2 + ishift);
+			blahIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
+			bbIndex     = (n0/2 + kshift)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + (n1/2 + jshift)*(n2-2*wfKernelsize) + (n2/2 + ishift);
 
-			convolvedPk3d[bbIndex] -= windowFunc3D[aaIndex];
+			convolvedPk3d[bbIndex] -= windowFunc3D[blahIndex];
 
 			// k indexing.                                                                                      
             ishift  += 1;
