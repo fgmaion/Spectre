@@ -15,6 +15,7 @@
 
 #include "Scripts/CoordinateCalc.c"
 #include "Scripts/NGPCalc.c"
+#include "Scripts/BasisChange.c"
 #include "Scripts/FKPweights.c"
 #include "Scripts/Windowfn_PkCorrections.c"
 
