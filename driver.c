@@ -65,6 +65,14 @@ AxisLimsArray[1][1]   =     201.0;                                              
 AxisLimsArray[0][2]   =     -14.0;                                                  // h^-1 Mpc
 AxisLimsArray[1][2]   =      44.0;                                                  // h^-1 Mpc
 
+// limits in right asecension.
+LowerRAlimit          =      30.1;
+UpperRAlimit          =      38.8;
+
+// limits in declination. 
+LowerDecLimit         =      -5.4;
+UpperDecLimit         =     -4.15;
+
 CellSize              =       3.0;                                                  // Cell size, comoving distance, h^-1 Mpc
 
 // Selection parameters. Volume limited sample between redshift 0.7 and 0.9
@@ -103,6 +111,11 @@ CalculateCell_raDecRotated();
 // Applied window fn.
 Cell_AppliedWindowFn  =     &Cell_SurveyLimitsMask[0];
 
+SumOfVIPERSbools      = SumFloatArray(Cell_AppliedWindowFn, n0*n1*n2);
+
+// Initialsed to zero in header.h
+TotalSurveyedVolume = SumOfVIPERSbools*CellVolume;
+
 // assign binning interval in k, and calcualte number of bins required. 
 assignbinninginterval(kbinInterval);
 
@@ -121,18 +134,13 @@ for(loopCount=1; loopCount<2; loopCount++){
 
     CoordinateCalc();
 
-    SumOfVIPERSbools    = SumFloatArray(Cell_AppliedWindowFn, n0*n1*n2);
-
-    // Initialsed to zero in header.h
-    TotalSurveyedVolume = SumOfVIPERSbools*CellVolume;
-
     VIPERSbasis(34.5, -5.10, xCoor, yCoor, zCoor, Vipers_Num);
    
     printf("\nIn the VIPERS basis..");
     printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
     printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
-  
+
     ComovingNumberDensityCalc();
 
     // ApplyFKPweights();

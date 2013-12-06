@@ -107,12 +107,6 @@ int CoordinateCalc(){
 
     printf("\n\nRedshift max:  %f \t Redshift min:  %f", arrayMax(zUtilized, Vipers_Num), arrayMin(zUtilized, Vipers_Num));
 
-    UpperRAlimit  = arrayMax(ra, Vipers_Num);
-    LowerRAlimit  = arrayMin(ra, Vipers_Num);
-
-    UpperDecLimit = arrayMax(dec, Vipers_Num);
-    LowerDecLimit = arrayMin(dec, Vipers_Num);
-
     return 0;
 }
 
