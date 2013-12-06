@@ -1,4 +1,4 @@
- int CoordinateCalc(char filepath[]){
+ int CatalogueInput(char filepath[]){
     printf("\n\nOpening catalogue: %s", filepath);
     
     inputfile     = fopen(filepath, "r");  
@@ -81,6 +81,11 @@
 
     printf("\nHOD catalogue input successful.");
 
+    return 0;
+}
+
+
+int CoordinateCalc(){
     for(j=0; j<Vipers_Num; j++){
             //  Derived parameters 
             polarAngle[j]         =  pi/2.0 - (pi/180.0)*dec[j];                // Converted to radians. 

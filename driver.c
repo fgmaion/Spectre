@@ -100,6 +100,9 @@ prepNGP();
 
 CalculateCell_raDecRotated();
 
+// Applied window fn.
+Cell_AppliedWindowFn  =     &Cell_SurveyLimitsMask[0];
+
 // assign binning interval in k, and calcualte number of bins required. 
 assignbinninginterval(kbinInterval);
 
@@ -111,13 +114,12 @@ for(loopCount=1; loopCount<2; loopCount++){
     if(loopCount < 10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
     else                sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
 
-    CoordinateCalc(filepath);
+    CatalogueInput(filepath);
       
     // Choice of redshift from zcos, zpec, zphot, zobs.
     zUtilized             =     &zcos[0];
 
-    // Applied window fn.
-    Cell_AppliedWindowFn  =     &Cell_SurveyLimitsMask[0];
+    CoordinateCalc();
 
     SumOfVIPERSbools    = SumFloatArray(Cell_AppliedWindowFn, n0*n1*n2);
 

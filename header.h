@@ -474,3 +474,5 @@ float LowerRAlimit;
 
 float UpperDecLimit;
 float LowerDecLimit;
+
+int CatalogueInput(char filepath[]);
