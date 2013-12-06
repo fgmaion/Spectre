@@ -237,14 +237,16 @@ int projectVIPERSsystem(){
 
 
 int printSurveyDetails(){
-    printf("\n\nChi limits:  %f to %f", LowerChiLimit, UpperChiLimit);
+    printf("\n\nSurvey type:  %s", surveyType);
+    printf("\nChi limits:              %f to %f", LowerChiLimit, UpperChiLimit);
     printf("\nright ascension limits:  %f to %f", UpperRAlimit, LowerRAlimit);
-    printf("\ndeclination limits:  %f to %f", UpperDecLimit, LowerDecLimit);
-    printf("\nTotal ZADE weight: %e.", TotalZADEWeight);
-    printf("\nCell volume:  %f.",        CellVolume); 
-    printf("\nMean number density:  %f", MeanNumberDensity);    
-    printf("\n\nNon-empty cells:  %e  [n0*n1*n2]", SumOfVIPERSbools/(n0*n1*n2));
-    printf("\n\nTotal surveyed volume: %e    [TotalVolume]", (float) TotalSurveyedVolume/TotalVolume);
+    printf("\ndeclination limits:      %f to %f", UpperDecLimit, LowerDecLimit);
+    printf("\nTotal ZADE weight:             %e.", TotalZADEWeight);
+    printf("\nCell volume:                   %f.",        CellVolume); 
+    printf("\nMean number density:           %f", MeanNumberDensity);    
+    printf("\n\nNon-empty cells:             %e  [n0*n1*n2]", SumOfVIPERSbools/(n0*n1*n2));
+    printf("\n\nTotal surveyed volume:       %e    [TotalVolume]", (float) TotalSurveyedVolume/TotalVolume);
+    
     return 0;
 }
 

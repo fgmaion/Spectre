@@ -1,5 +1,5 @@
 int EstimateAnisoWfKernel(){
-    printf("\nBeginning window function calculation.");
+    printf("\n\nBeginning measurement of window function.");
     
     for(j=0; j<n0*n1*n2; j++) in[j][0] = (double) (TotalVolume/TotalSurveyedVolume)*Cell_AppliedWindowFn[j];
     for(j=0; j<n0*n1*n2; j++) in[j][1] = (double) 0.0;
