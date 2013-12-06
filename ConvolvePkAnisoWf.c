@@ -121,6 +121,12 @@ int AnisoConvolution(){
 
 	// AnisoICC();
 
+	ConvolvedPkZeroPoint     = ConvolveCell(n2/2, n1/2, n0/2);
+    printf("\nConvolved P(vec k) zero point calculated to be: %e", ConvolvedPkZeroPoint);
+
+    Index = 0.5*(wfKernelsize - 1)*wfKernelsize*wfKernelsize + 0.5*(wfKernelsize - 1)*wfKernelsize + 0.5*(wfKernelsize - 1);
+    printf("\nWindow fn. zero point calculated to be:  %f", windowFunc3D[Index]);
+
 	flatten3dConvolvedPk();
 
 	sprintf(filepath, "%s/Data/Del2k/midK_Pk_Convolved%s.dat", root_dir, surveyType);
@@ -135,12 +141,6 @@ int AnisoConvolution(){
 
 int AnisoICC(){    
 	// Integral constraint correction in the 3D anisotropic case. 
-    ConvolvedPkZeroPoint     = ConvolveCell(n2/2, n1/2, n0/2);
-    printf("\nConvolved P(vec k) zero point calculated to be: %e", ConvolvedPkZeroPoint);
-
-    Index = 0.5*(wfKernelsize - 1)*wfKernelsize*wfKernelsize + 0.5*(wfKernelsize - 1)*wfKernelsize + 0.5*(wfKernelsize - 1);
-    printf("\nWindow fn. zero point calculated to be:  %f", windowFunc3D[Index]);
-        
     int   blahIndex;
 	int   bbIndex;
 
