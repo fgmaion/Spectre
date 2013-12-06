@@ -195,7 +195,7 @@ int CalculateCell_raDecRotated(){
 
 
     for(j=0; j<n0*n1*n2; j++){
-        if((LowerRAlimit<Cell_raVIPERSsystem[j]) && (Cell_raVIPERSsystem[j]<UpperRAlimit) && (LowerDeclimit<Cell_decVIPERSsystem[j]) && (Cell_decVIPERSsystem[j]<UpperDeclimit) && (LowerChiLimit < Cell_chiVIPERSsystem[j]) && (Cell_chiVIPERSsystem[j] < UpperChiLimit)){
+        if((LowerRAlimit<Cell_raVIPERSsystem[j]) && (Cell_raVIPERSsystem[j]<UpperRAlimit) && (LowerDecLimit<Cell_decVIPERSsystem[j]) && (Cell_decVIPERSsystem[j]<UpperDecLimit) && (LowerChiLimit < Cell_chiVIPERSsystem[j]) && (Cell_chiVIPERSsystem[j] < UpperChiLimit)){
             Cell_SurveyLimitsMask[j] = 1.0;
         }
     }
@@ -239,7 +239,7 @@ int projectVIPERSsystem(){
 int printSurveyDetails(){
     printf("\n\nChi limits:  %f to %f", LowerChiLimit, UpperChiLimit);
     printf("\nright ascension limits:  %f to %f", UpperRAlimit, LowerRAlimit);
-    printf("\ndeclination limits:  %f to %f", UpperDeclimit, LowerDeclimit);
+    printf("\ndeclination limits:  %f to %f", UpperDecLimit, LowerDecLimit);
     printf("\nTotal ZADE weight: %e.", TotalZADEWeight);
     printf("\nCell volume:  %f.",        CellVolume); 
     printf("\nMean number density:  %f", MeanNumberDensity);    
