@@ -118,15 +118,15 @@ int main(int argc, char **argv){
 
     prepNGP();
     
-    sprintf(surveyType, "AnisoGauss_Jenkins%.1f", JenkinsScalefactor);
+    sprintf(surveyType, "Spherical_Jenkins%.1f\n", JenkinsScalefactor);
     
     // FullCube();
     // EmbeddedCube(50);
     // Gaussian(250.);
     // PencilBeamSurvey(40, 60, 40, 60);
-    // Spherical(250.);
+    Spherical(250.);
 
-    AnisoGauss(80., 100., 120.);
+    // AnisoGauss(80., 100., 120.);
 
     SumOfVIPERSbools    = SumDoubleArray(booldensity, n0*n1*n2);
 
@@ -150,7 +150,7 @@ int main(int argc, char **argv){
     
     CalcCorrections();
     
-    PkCalc();
+    // PkCalc();
 
     // wfPkCalc();
     
