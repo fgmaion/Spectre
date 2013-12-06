@@ -119,10 +119,10 @@ for(loopCount=1; loopCount<2; loopCount++){
     CoordinateCalc(filepath);
       
     // Choice of redshift from zcos, zpec, zphot, zobs.
-    zUtilized             =     &zcos;
+    zUtilized             =     &zcos[0];
 
     // Applied window fn.
-    Cell_AppliedWindowFn  =     &Cell_SurveyLimitsMask;
+    Cell_AppliedWindowFn  =     &Cell_SurveyLimitsMask[0];
 
 
     VIPERSbasis(34.5, -5.10, xCoor, yCoor, zCoor, Vipers_Num);
