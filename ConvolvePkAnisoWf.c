@@ -350,8 +350,6 @@ float filter3Dnorm(float array[]){
 
 
 int WindowfuncSlice(float kintervali, int ni, int x0, int y0, int z0, char filepath[]){
-    // ints x0, y0, z0 specify whether it is true or false that the x,y and z co-ordinates have been taken to be zero for that slice.  
-    
     float k_i                 = 0.0;
     int   Num_ModesInInterval = 0;
 
@@ -363,8 +361,8 @@ int WindowfuncSlice(float kintervali, int ni, int x0, int y0, int z0, char filep
         Index                              = z0*n1*n2*j + y0*n2*j + x0*j;
 
         // Cell window fn. uncorrected. 
-        H_kReal                            = pow(n0*n1*n2, -1.0)*out[Index][0]/WindowFunc;
-        H_kImag                            = pow(n0*n1*n2, -1.0)*out[Index][1]/WindowFunc;
+        H_kReal                            = pow(n0*n1*n2, -1.0)*out[Index][0];
+        H_kImag                            = pow(n0*n1*n2, -1.0)*out[Index][1];
 
         PkArray[Num_ModesInInterval][0]    = fabs(k_i);
         PkArray[Num_ModesInInterval][1]    = pow(H_kReal, 2.) + pow(H_kImag, 2.);

@@ -125,7 +125,7 @@ int main(int argc, char **argv){
     // Gaussian(250.);
     // PencilBeamSurvey(40, 60, 40, 60);
     // Spherical(250.);
-    AnisoGauss(700., 800., 900.);
+    AnisoGauss(300., 400., 500.);
 
     Cell_AppliedWindowFn  = &booldensity[0];
 

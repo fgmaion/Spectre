@@ -1,12 +1,12 @@
-a = 700.
-b = 800.
-c = 900.
+a = 300.
+b = 400.
+c = 500.
 
-abscissa = np.logspace(0.001, 0.3, 150)
+abscissa = np.arange(0.001, 0.3, 0.001)
 
-xtheory  = np.exp(-0.5*(abscissa/a)**2.)
-ytheory  = np.exp(-0.5*(abscissa/b)**2.)
-ztheory  = np.exp(-0.5*(abscissa/c)**2.)
+xtheory  = np.exp(-(abscissa*a)**2.)
+ytheory  = np.exp(-(abscissa*b)**2.)
+ztheory  = np.exp(-(abscissa*c)**2.)
 
 pl.loglog(abscissa, xtheory, 'b')
 pl.loglog(abscissa, ytheory, 'g')
@@ -22,7 +22,7 @@ zdata    = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/AnisoGauss_J
 pl.loglog(zdata[:,1], zdata[:,2], 'y^', label='z direction')
 
 pl.xlim([0.001, 0.3])
-#pl.ylim([10**3, 5*10**4])
+pl.ylim([0.0001, 1.0])
 
 xx, locs = plt.xticks()
 ll = ['%.3f' % a for a in xx]
