@@ -221,7 +221,7 @@ int convolve3DInputPk(float convolvedPk[], float inputPk[]){
 	    for(jj=0; jj<n1-2*wfKernelsize; jj++){
 		    for(ii=0; ii<n2-2*wfKernelsize; ii++){
 				Index = kk*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + jj*(n2-2*wfKernelsize) + ii;
-				convolvedPk3d[Index]  = ConvolveCell(ii + wfKernelsize, jj + wfKernelsize, kk + wfKernelsize);
+				convolvedPk3d[Index]  = (1./wf3Dnorm)*ConvolveCell(ii + wfKernelsize, jj + wfKernelsize, kk + wfKernelsize);
 			}
 		}
 	}

@@ -92,7 +92,7 @@ int main(int argc, char **argv){
     modkMax                   =        0.5;
 
     // Must be odd. 2n + 1.
-    wfKernelsize              =          9;
+    wfKernelsize              =         13;
 
     // padded window fn. calculation.
     sidepad                   =          0; 
