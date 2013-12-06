@@ -125,10 +125,11 @@ int main(int argc, char **argv){
     // Gaussian(250.);
     // PencilBeamSurvey(40, 60, 40, 60);
     Spherical(250.);
-
     // AnisoGauss(80., 100., 120.);
 
-    SumOfVIPERSbools    = SumDoubleArray(booldensity, n0*n1*n2);
+    Cell_AppliedWindowFn  =     &booldensity[0];
+
+    SumOfVIPERSbools      = SumFloatArray(booldensity, n0*n1*n2);
 
     // TotalSurveyedVolume initialised to zero in header.h
     TotalSurveyedVolume  = SumOfVIPERSbools*CellVolume*pow(JenkinsScalefactor, 3.0);

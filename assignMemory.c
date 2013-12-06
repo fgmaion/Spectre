@@ -1,7 +1,7 @@
 int prepNGP(){
     densityArray            =  (double *)  realloc(densityArray, n0*n1*n2*sizeof(*densityArray));
     FKPweights              =  (double *)  realloc(FKPweights,   n0*n1*n2*sizeof(*FKPweights));
-    booldensity             =  (double *)  realloc(booldensity,  n0*n1*n2*sizeof(*booldensity));
+    booldensity             =  (float  *)  realloc(booldensity,  n0*n1*n2*sizeof(*booldensity));
 
     Cell_rotatedXvals       =  (float   *) realloc(Cell_rotatedXvals,       n0*n1*n2*sizeof(*Cell_rotatedXvals));
     Cell_rotatedYvals       =  (float   *) realloc(Cell_rotatedYvals,       n0*n1*n2*sizeof(*Cell_rotatedYvals));

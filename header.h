@@ -164,7 +164,7 @@ float        CellVolume;
 
 double*      densityArray        = NULL;
 double*      FKPweights          = NULL;
-double*      booldensity         = NULL;
+float*       booldensity         = NULL;
 
 float        SumOfVIPERSbools    = 0.0;
 
