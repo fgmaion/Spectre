@@ -84,7 +84,7 @@ int PkCorrections(int WindowFuncParam){
 }
 
 
-int PkBinningCalc(int NumberModes, float** Array[][2]){
+int PkBinningCalc(int NumberModes, double** Array){
     printf("\n\nPerforming binning calculation.");
     
     for(j=0; j<kBinNumb; j++)  kBinLimits[j]  = j*kbinInterval;
