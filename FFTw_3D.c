@@ -67,9 +67,10 @@ int PkCorrections(int WindowFuncParam){
 				// Subtract shot noise contribution for a real survey.  Neglect this for window function calculation.  FKP corrections. 
 				if(WindowFuncParam == 0){
 				    PkArray[Index][1]              = pow(H_kReal, 2.) + pow(H_kImag, 2.);
-				    //PkArray[Index][1]           -= 1./TotalZADEWeight;
-				    //PkArray[Index][1]           -= fkpShotNoiseCorr;
-				    PkArray[Index][1]             /= pow(fkpWeightedVolume, 2.)*pow(fkpSqWeightsVolume, -1.)*pow(TotalVolume, -1.);
+				    // PkArray[Index][1]           -= 1./TotalZADEWeight;
+				    // PkArray[Index][1]           -= fkpShotNoiseCorr;
+				    // PkArray[Index][1]             /= pow(fkpWeightedVolume, 2.)*pow(fkpSqWeightsVolume, -1.)*pow(TotalVolume, -1.);
+                    PkArray[Index][1]             *= TotalVolume*pow(fkpSqWeightsVolume, -1.);
                 }
                 
                 // PkCorrections called to correct NGP for survey window function.
