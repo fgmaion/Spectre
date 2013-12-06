@@ -151,7 +151,7 @@ int main(int argc, char **argv){
     
     CalcCorrections();
     
-    // PkCalc();
+    PkCalc();
 
     // wfPkCalc();
     
