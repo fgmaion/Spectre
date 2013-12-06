@@ -6,9 +6,9 @@ int AnisoGauss(float a, float b, float c){
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
-                r2z   = CellSize*(k-n0/2);   
-                r2y   = CellSize*(j-n1/2);
-                r2x   = CellSize*(i-n2/2);
+                rz   = CellSize*(k-n0/2);   
+                ry   = CellSize*(j-n1/2);
+                rx   = CellSize*(i-n2/2);
             
                 Index = k*n1*n2 + j*n2 + i;
             
