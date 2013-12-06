@@ -42,3 +42,18 @@ int comovDistReshiftCalc(){
 float Integrand(float x){
     return pow(Om_v + Om_m*pow(1.+ x, 3.) + Om_r*pow(1.+ x, 4.) -(Om_tot -1.)*pow(1.+ x,2.), -0.5);
 }
+
+
+// Returns comoving distance at redshift z in h^-1 Mpc. 
+float interp_comovingDistance(float z){
+    float InterimInterp_yVal;
+    splint(z_Array, ComovingDistance_z, z_ComovingDistance_2derivatives, nPoints, z, &InterimInterp_yVal);
+    return InterimInterp_yVal;
+}
+
+
+float interp_inverseComovingDistance(float r){
+    float InterimInterp_yVal;
+    splint(ComovingDistance_z, z_Array, ComovingDistance_z_2derivatives, nPoints, r, &InterimInterp_yVal);
+    return InterimInterp_yVal;
+}   // Returns z at comoving distance, [h^-1 Mpc]. 

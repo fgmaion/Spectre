@@ -267,3 +267,51 @@ float SumFloatArray(float array[], int len){
 
     return Interim;
 }
+
+
+float arrayMax(float a[], int n){
+  float max = a[0];
+
+  for(j=0; j< n; j++){
+    if(a[j] > max){
+      max = a[j]; 
+    }
+  }
+  return max;
+}
+
+
+float arrayMin(float a[], int n){
+  float min = a[0];
+
+  for(j=0; j< n; j++){
+    if(a[j] < min){
+      min = a[j];
+    }
+  }
+  return min;
+}
+
+
+double DoubleArrayMax(double a[], int n){
+  double max = a[0];
+
+  for(j=0; j< n; j++){
+    if(a[j] > max){
+      max = a[j]; 
+    }
+  }
+  return max;
+}
+
+
+double DoubleArrayMin(double a[], int n){
+  double min = a[0];
+
+  for(j=0; j< n; j++){
+    if(a[j] < min){
+      min = a[j];
+    }
+  }
+  return min;
+}
