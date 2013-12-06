@@ -85,12 +85,6 @@ modkMax               =       0.5;
 // Must be odd. 2n+1
 wfKernelsize          =         9;
 
-// Applied window fn.
-Cell_AppliedWindowFn  =  &Cell_SurveyLimitsMask;
-
-// Choice of redshift from zcos, zpec, zphot, zobs.
-zUtilized             =  &zcos;
-
 
 sprintf(surveyType, "VIPERSparent");
 
@@ -124,6 +118,13 @@ for(loopCount=1; loopCount<2; loopCount++){
 
     CoordinateCalc(filepath);
       
+    // Choice of redshift from zcos, zpec, zphot, zobs.
+    zUtilized             =     &zcos;
+
+    // Applied window fn.
+    Cell_AppliedWindowFn  =     &Cell_SurveyLimitsMask;
+
+
     VIPERSbasis(34.5, -5.10, xCoor, yCoor, zCoor, Vipers_Num);
    
     printf("\nIn the VIPERS basis..");
