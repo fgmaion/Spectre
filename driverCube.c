@@ -139,7 +139,7 @@ int main(int argc, char **argv){
 
     CoordinateCalcCube();  
     
-    // rollcube(xCoor, yCoor, zCoor, Vipers_Num);
+    rollcube(xCoor, yCoor, zCoor, Vipers_Num);
 
     NGPCalcCube();
     
