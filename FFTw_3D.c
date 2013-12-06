@@ -2,7 +2,7 @@ int PkCalc(){
     printf("\n\nAssigning FFT in array.");
     
     // Including the normalisation of the mask, TotalVolume/TotalSurveyedVolume, such that the filter fn. has unit mean."
-    for(j=0; j<n0*n1*n2; j++) in[j][0] = densityArray[j]*Cell_AppliedWindowFn[j];
+    for(j=0; j<n0*n1*n2; j++) in[j][0] = densityArray[j];//*Cell_AppliedWindowFn[j];
     for(j=0; j<n0*n1*n2; j++) in[j][1] = 0.0;
     
     printf("\nPerforming FFT.");
@@ -69,8 +69,10 @@ int PkCorrections(int WindowFuncParam){
 				    PkArray[Index][1]              = pow(H_kReal, 2.) + pow(H_kImag, 2.);
 				    //PkArray[Index][1]           -= 1./TotalZADEWeight;
 				    //PkArray[Index][1]           -= fkpShotNoiseCorr;
-				    PkArray[Index][1]             *= pow(fkpWeightedVolume, 2.)*pow(fkpSqWeightsVolume, -1.)*pow(TotalVolume, -1.);
+				    // PkArray[Index][1]             *= pow(fkpWeightedVolume, 2.)*pow(fkpSqWeightsVolume, -1.)*pow(TotalVolume, -1.);
                 }
+
+                printf("\nWindow fn. amplitude correction:  %f ", pow(fkpWeightedVolume, 2.)*pow(fkpSqWeightsVolume, -1.)*pow(TotalVolume, -1.));
                 
                 // PkCorrections called to correct NGP for survey window function.
                 if(WindowFuncParam == 1){

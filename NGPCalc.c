@@ -56,9 +56,7 @@ int CountGalaxiesCube(){
     for(j=0; j<Vipers_Num; j++){
         boxlabel = boxCoordinates(j);
 
-        if(booldensity[boxlabel] > 0.1){ 
-            densityArray[boxlabel] += 1;
-        }
+        densityArray[boxlabel] += 1;
     }
     
     TotalZADEWeight = SumDoubleArray(densityArray, n0*n1*n2);
@@ -68,7 +66,7 @@ int CountGalaxiesCube(){
 
 
 int overdensity_volumeLimitedTracer(){
-    MeanNumberDensity = TotalZADEWeight/TotalSurveyedVolume;
+    MeanNumberDensity = TotalZADEWeight/TotalVolume;
 
     for(j=0; j<n0*n1*n2; j++)  densityArray[j] /= CellVolume*MeanNumberDensity;
     for(j=0; j<n0*n1*n2; j++)  densityArray[j] -= 1.0;
