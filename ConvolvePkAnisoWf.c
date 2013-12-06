@@ -88,7 +88,7 @@ int EstimateAnisoWfKernel(){
     
     wf3Dnorm  					= filter3Dnorm(AnisoWfKernel);
     
-    for(j=0; j<wfKernelsize*wfKernelsize*wfKernelsize; j++) AnisoWfKernel[j] /= wf3Dnorm;
+    for(j=0; j<wfKernelsize*wfKernelsize*wfKernelsize; j++) AnisoWfKernel[j];
 
     return 0;
 }
@@ -121,9 +121,11 @@ int AnisoConvolution(){
 
 	convolve3DInputPk(convolvedPk3d, inputPk);
 
+	AnisoICC();
+
 	flatten3dConvolvedPk();
 
-	sprintf(filepath, "%s/Data/Del2k/midK_Pk_Convolved%s.dat", root_dir, surveyType);
+	sprintf(filepath, "%s/Data/Del2k/midK_Pk_IccConvolved%s.dat", root_dir, surveyType);
     
     output = fopen(filepath, "w");
     for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
@@ -134,18 +136,46 @@ int AnisoConvolution(){
 
 
 int AnisoICC(){    
-	// Integral constraint correction in the anisotropic case. 
+	// Integral constraint correction in the 3D anisotropic case. 
+    ConvolvedPkZeroPoint     = ConvolveCell(n2/2, n1/2, n0/2);
+    printf("\nConvolved P(vec k) zero point calculated to be: %e", ConvolvedPkZeroPoint);
 
-    ConvolvedPkZeroPoint     = ConvolveCell(0, 0, 0);
-    printf("\nConvolved P(k) zero point calculated to be: %e", ConvolvedPkZeroPoint);
+    Index = 0.5*(wfKernelsize - 1)*wfKernelsize*wfKernelsize + 0.5*(wfKernelsize - 1)*wfKernelsize + 0.5*(wfKernelsize - 1);
+    printf("\nWindow fn. zero point calculated to be:  %f", windowFunc3D[Index])
         
-    // Window fn. evaluated on the same regular grid in k on which the convolved P(k) is estimated, normalised such that W^2 = 1.0 at k=0.0
-    for(j=0; j<kBinNumb-1; j++) ConvolvedPk[j] -= splintWindowfunc(midKBin[j])*ConvolvedPkZeroPoint;
+    int   aaIndex;
+	int   bbIndex;
 
-    sprintf(filepath, "%s/Data/ConvolvedPk/IntegralConstraint_Corrected/midK_Pk_%ssplint_padded.dat", root_dir, surveyType);
-    output = fopen(filepath, "w");    
-    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%f \t %e \n", midKBin[j], ConvolvedPk[j]);
-    fclose(output);
+	int   ishift = -(wfKernelsize-1)/2;
+	int   jshift = -(wfKernelsize-1)/2;
+	int   kshift = -(wfKernelsize-1)/2;
+
+	// -q_z to q_z
+	for(k=0; k<wfKernelsize; k++){
+	  // -q_y to q_y
+
+	  jshift = -(wfKernelsize-1)/2;
+
+	  for(j=0; j<wfKernelsize; j++){
+	  	// -q_x to q_x 
+	    
+	    ishift = -(wfKernelsize-1)/2;
+	    
+	    for(i=0; i<wfKernelsize; i++){
+			aaIndex   = k*wfKernelsize*wfKernelsize + j*wfKernelsize + i;
+			bbIndex   = (n0/2 + kshift)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + (n1/2 + jshift)*(n2-2*wfKernelsize) + (n2/2 + ishift);
+
+			convolvedPk3d[bbIndex] -= windowFunc3D[aaIndex];
+
+			// k indexing.                                                                                      
+            ishift  += 1;
+        }
+	  
+	    jshift += 1;
+	  }
+	  
+	  kshift += 1;
+	}
 
     return 0;
 }
@@ -157,7 +187,6 @@ int flatten3dConvolvedPk(){
 
 	int totalModes = 0;
 
-	// k indexing! ie not k=wfKernelsize to blah, not 0 to blah. 
 	for(k=n0/2; k<n0-wfKernelsize; k++){
 		for(j=n1/2; j<n1-wfKernelsize; j++){
 			for(i=n2/2; i<n2-wfKernelsize; i++){
@@ -194,8 +223,7 @@ int convolve3DInputPk(float convolvedPk[], float inputPk[]){
 	    for(jj=0; jj<n1-2*wfKernelsize; jj++){
 		    for(ii=0; ii<n2-2*wfKernelsize; ii++){
 				Index = kk*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + jj*(n2-2*wfKernelsize) + ii;
-				convolvedPk3d[Index]  = ConvolveCell(ii + wfKernelsize, jj + wfKernelsize, kk + wfKernelsize);
-
+				convolvedPk3d[Index]  = (1./wf3Dnorm)*ConvolveCell(ii + wfKernelsize, jj + wfKernelsize, kk + wfKernelsize);
 			}
 		}
 	}
@@ -273,6 +301,7 @@ int setMeasuredWfKernel(){
 
 return 0;
 }
+
 
 int SetWfKernel(){
 	for(k=0; k<wfKernelsize; k++){
