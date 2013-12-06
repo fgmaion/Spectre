@@ -7,11 +7,7 @@ pl.loglog(theory[:,0], theory[:,1], 'y', label='HOD input')
 conv = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Del2k/midK_Pk_ConvolvedAnisoGauss_Jenkins1.0.dat')
 pl.loglog(conv[:,0], conv[:,2], 'g^', label='convolved.')
 
-<<<<<<< HEAD
-pl.xlim([0.001, 2.0])
-=======
 pl.xlim([0.001, 0.3])
->>>>>>> 63fcb9f5b3c1c9e8d26254a027746c894ceb1611
 pl.ylim([10**3, 5*10**4])
 
 xx, locs = plt.xticks()
