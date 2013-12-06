@@ -1,7 +1,7 @@
 int EstimateAnisoWfKernel(){
     printf("\n\nBeginning measurement of window function.");
     
-    for(j=0; j<n0*n1*n2; j++) in[j][0] = (double) (TotalVolume/TotalSurveyedVolume)*Cell_AppliedWindowFn[j];
+    for(j=0; j<n0*n1*n2; j++) in[j][0] = (double) Cell_AppliedWindowFn[j];
     for(j=0; j<n0*n1*n2; j++) in[j][1] = (double) 0.0;
     
     printf("\nPerforming FFT.");
@@ -86,9 +86,7 @@ int EstimateAnisoWfKernel(){
         }
     }
     
-    wf3Dnorm  					= filter3Dnorm(AnisoWfKernel);
-    
-    for(j=0; j<wfKernelsize*wfKernelsize*wfKernelsize; j++) AnisoWfKernel[j];
+    wf3Dnorm = filter3Dnorm(AnisoWfKernel);
 
     return 0;
 }
@@ -121,7 +119,7 @@ int AnisoConvolution(){
 
 	convolve3DInputPk(convolvedPk3d, inputPk);
 
-	AnisoICC();
+	// AnisoICC();
 
 	flatten3dConvolvedPk();
 
