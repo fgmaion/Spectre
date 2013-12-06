@@ -243,7 +243,7 @@ int printSurveyDetails(){
     printf("\nCell volume:                   %f.",        CellVolume); 
     printf("\nMean number density:           %f", MeanNumberDensity);    
     printf("\n\nNon-empty cells:             %e  [n0*n1*n2]", SumOfVIPERSbools/(n0*n1*n2));
-    printf("\n\nTotal surveyed volume:       %e    [TotalVolume]", (float) TotalSurveyedVolume/TotalVolume);
+    printf("\n\nEffective survey volume:       %e    [TotalVolume]", (float) TotalSurveyedVolume/TotalVolume);
     
     return 0;
 }
