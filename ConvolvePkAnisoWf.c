@@ -11,7 +11,7 @@ int EstimateAnisoWfKernel(){
     printf("\nFFT complete.");
     
     assignAnisoWfKernel();
-    
+
     float iishift, kkshift, jjshift;
     int   ii, jj, kk;
     
@@ -123,13 +123,31 @@ int AnisoConvolution(){
 
 	flatten3dConvolvedPk();
 
-	sprintf(filepath, "%s/Data/Pk/midK_Pk_ConvolvedparentHOD.dat", root_dir);
+	sprintf(filepath, "%s/Data/Del2k/midK_Pk_Convolved%s.dat", root_dir, surveyType);
     
     output = fopen(filepath, "w");
     for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
     fclose(output);
 
     return 0;	
+}
+
+
+int AnisoICC(){    
+	// Integral constraint correction in the anisotropic case. 
+
+    ConvolvedPkZeroPoint     = ConvolveCell(0, 0, 0);
+    printf("\nConvolved P(k) zero point calculated to be: %e", ConvolvedPkZeroPoint);
+        
+    // Window fn. evaluated on the same regular grid in k on which the convolved P(k) is estimated, normalised such that W^2 = 1.0 at k=0.0
+    for(j=0; j<kBinNumb-1; j++) ConvolvedPk[j] -= splintWindowfunc(midKBin[j])*ConvolvedPkZeroPoint;
+
+    sprintf(filepath, "%s/Data/ConvolvedPk/IntegralConstraint_Corrected/midK_Pk_%ssplint_padded.dat", root_dir, surveyType);
+    output = fopen(filepath, "w");    
+    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%f \t %e \n", midKBin[j], ConvolvedPk[j]);
+    fclose(output);
+
+    return 0;
 }
 
 

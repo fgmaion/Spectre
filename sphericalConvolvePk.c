@@ -91,9 +91,6 @@ float ConvolvedPkZeroPointCalc(){
 
 
 int IntegralConstraintCorrection(){    
-    WindowfnZeroPointEval    = WindowFuncNR[1];
-    printf("\nBinned   window fn. zero point:  %e", WindowFuncNR[1]);
-    
     ConvolvedPkZeroPoint     = ConvolvedPkZeroPointCalc();
     printf("\nConvolved P(k) zero point calculated to be: %e", ConvolvedPkZeroPoint);
     

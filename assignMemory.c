@@ -127,11 +127,11 @@ int prepConvolution(int inputWindowfnBinNumb, int evalConvPkNumb){
 
 
 int prepAnisoConvolution(){
-    inputPk                          = (float *)  malloc(n0*n1*n2*sizeof(*inputPk));
+    inputPk                          = (float *)   malloc(n0*n1*n2*sizeof(*inputPk));
     
-    windowFunc3D                     = (float *)  malloc(wfKernelsize*wfKernelsize*wfKernelsize*sizeof(*windowFunc3D));       
+    windowFunc3D                     = (float *)   malloc(wfKernelsize*wfKernelsize*wfKernelsize*sizeof(*windowFunc3D));       
     
-    convolvedPk3d                    = (float *)  malloc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize)*sizeof(*convolvedPk3d)); 
+    convolvedPk3d                    = (float *)   malloc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize)*sizeof(*convolvedPk3d)); 
 
     flattenedConvolvedPk3D           = (double **) malloc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize)*sizeof(*flattenedConvolvedPk3D));
 
