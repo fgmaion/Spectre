@@ -84,14 +84,14 @@ int PkCorrections(int WindowFuncParam){
 }
 
 
-int PkBinningCalc(int NumberModes, float Array[][2]){
+int PkBinningCalc(int NumberModes, float** Array[][2]){
     printf("\n\nPerforming binning calculation.");
     
     for(j=0; j<kBinNumb; j++)  kBinLimits[j]  = j*kbinInterval;
 
     // Order by mod k to ensure binning is the mean between LowerBinIndex and UpperBinIndex.
     printf("\nSorting mod k array.");
-    qsort(PkArray, NumberModes, sizeof(PkArray[0]), FirstColumnCompare);
+    qsort(Array, NumberModes, sizeof(Array[0]), FirstColumnCompare);
 
     LowerBinIndex = 0;
     UpperBinIndex = 0;
@@ -106,15 +106,15 @@ int PkBinningCalc(int NumberModes, float Array[][2]){
     
     for(j=0; j<kBinNumb-1; j++){
         for(i=LowerBinIndex; i<NumberModes; i++){
-            if(PkArray[i][0] > kBinLimits[j+1]){
+            if(Array[i][0] > kBinLimits[j+1]){
                 UpperBinIndex = i;
                 break;
             } 
         }
         
         for(i=LowerBinIndex; i<UpperBinIndex; i++){
-            meanKBin[j]    += PkArray[i][0];
-            binnedPk[j]    += PkArray[i][1];
+            meanKBin[j]    += Array[i][0];
+            binnedPk[j]    += Array[i][1];
             modesPerBin[j] += 1;
         }
         	    
