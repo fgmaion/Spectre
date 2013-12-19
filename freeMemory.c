@@ -1,18 +1,3 @@
-int freeRand(){
-// Free dynamic memory allocated for Randoms catalogue.  
-  free(rand_chi);
-  free(rand_dec);
-  free(rand_rA);
-  free(rand_rshift); 
-  free(rand_polar); 
-  free(rand_x);     
-  free(rand_y);   
-  free(rand_z);
-
-  return 0;
-}
-
-
 int freeHOD(){
 // Free dynamic memory allocated for ZADE catalogue + derived parameters.                                                                                                     
   free(id);
@@ -54,6 +39,18 @@ int freeNGP(){
  // NGP density arrays for both ZADE galaxies and randoms.                                                              
   free(densityArray);
   free(FKPweights);
+  
+  free(Cell_rotatedXvals);
+  free(Cell_rotatedYvals);
+  free(Cell_rotatedZvals);
+  
+  free(Cell_raVIPERSsystem);
+  free(Cell_decVIPERSsystem);
+  free(Cell_chiVIPERSsystem);
+  
+  free(Cell_VIPERSweights);
+  free(Cell_VIPERSbools);
+  
   free(booldensity);
   return 0;
 }

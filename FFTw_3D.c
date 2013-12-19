@@ -1,7 +1,7 @@
 int PkCalc(){
     printf("\n\nAssigning FFT in array.");
     
-    // Including the normalisation of the mask, TotalVolume/TotalSurveyedVolume, such that the filter fn. has unit mean."
+    // The true density field multiplied by a mask, W(x). 
     for(j=0; j<n0*n1*n2; j++) in[j][0] = densityArray[j]*Cell_AppliedWindowFn[j];
     for(j=0; j<n0*n1*n2; j++) in[j][1] = 0.0;
     
@@ -67,9 +67,10 @@ int PkCorrections(int WindowFuncParam){
 				// Subtract shot noise contribution for a real survey.  Neglect this for window function calculation.  FKP corrections. 
 				if(WindowFuncParam == 0){
 				    PkArray[Index][1]              = pow(H_kReal, 2.) + pow(H_kImag, 2.);
-				    // PkArray[Index][1]           -= 1./TotalZADEWeight;
-				    // PkArray[Index][1]           -= fkpShotNoiseCorr;
-				    // PkArray[Index][1]             /= pow(fkpWeightedVolume, 2.)*pow(fkpSqWeightsVolume, -1.)*pow(TotalVolume, -1.);
+				    // PkArray[Index][1]          -= 1./TotalZADEWeight;
+				    // PkArray[Index][1]          -= fkpShotNoiseCorr;
+				    
+				    // The true density field is multiplied by a mask, correct for this with the measured P(k).
                     PkArray[Index][1]             *= TotalVolume*pow(fkpSqWeightsVolume, -1.);
                 }
                 
@@ -138,7 +139,7 @@ int PkBinningCalc(int NumberModes, double** Array){
 }
 
 
-int BinnedPkForMuInterval(float lowerMuLimit, float upperMuLimit, char filepath[], double Array[]){
+int BinnedPkForMuInterval(double lowerMuLimit, double upperMuLimit, char filepath[], double Array[]){
     printf("\nPerforming P(k) binning for given mu interval, %f < mu < %f", lowerMuLimit, upperMuLimit);
 
     for(k=0; k<n0; k++){

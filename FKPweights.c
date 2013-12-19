@@ -25,5 +25,8 @@ int ApplyFKPweights(){
         }
     }
     
+    printf("\n\nHighest weighted overdensity estimate: %e",  arrayMax(FKPweights, n0*n1*n2));
+    printf("\nLowest weighted overdensity estimate:  %e",    arrayMin(FKPweights, n0*n1*n2));
+    
     return 0;
 }

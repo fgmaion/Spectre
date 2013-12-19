@@ -1,10 +1,10 @@
-int VIPERSbasis(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len){
+int VIPERSbasis(double centerRA, double centerDec, double xCoors[], double yCoors[], double zCoors[], int len){
   // Rotate the z Cartesian axis to line along the LOS.                                                                 
 
-  float theta  = pi/2.0 - (pi/180.0)*centerDec;
-  float phi    = centerRA*pi/180.0;
+  double theta  = pi/2.0 - (pi/180.0)*centerDec;
+  double phi    = centerRA*pi/180.0;
 
-  float gamma1, gamma2, gamma3;
+  double gamma1, gamma2, gamma3;
 
   for(j=0; j<len; j++){
     gamma1 =  xCoors[j]*sin(theta)*cos(phi)   + yCoors[j]*sin(theta)*sin(phi)   + zCoors[j]*cos(theta);
@@ -20,12 +20,12 @@ int VIPERSbasis(float centerRA, float centerDec, float xCoors[], float yCoors[],
 }
 
 
-int Celestialbasis(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len){
+int Celestialbasis(double centerRA, double centerDec, double xCoors[], double yCoors[], double zCoors[], int len){
   // Rotate the z Cartesian axis to line along the LOS.                                                                                              
-  float theta  = pi/2.0 - (pi/180.0)*centerDec;
-  float phi    = centerRA*pi/180.0;
+  double theta  = pi/2.0 - (pi/180.0)*centerDec;
+  double phi    = centerRA*pi/180.0;
 
-  float x, y, z;
+  double x, y, z;
 
   for(j=0; j<len; j++){
     x = xCoors[j]*sin(theta)*cos(phi) - yCoors[j]*sin(phi) - zCoors[j]*cos(theta)*cos(phi);

@@ -1,19 +1,19 @@
 int prepNGP(){
     densityArray            =  (double *)  realloc(densityArray, n0*n1*n2*sizeof(*densityArray));
     FKPweights              =  (double *)  realloc(FKPweights,   n0*n1*n2*sizeof(*FKPweights));
-    booldensity             =  (float  *)  realloc(booldensity,  n0*n1*n2*sizeof(*booldensity));
+    booldensity             =  (double *)  realloc(booldensity,  n0*n1*n2*sizeof(*booldensity));
 
-    Cell_rotatedXvals       =  (float   *) realloc(Cell_rotatedXvals,       n0*n1*n2*sizeof(*Cell_rotatedXvals));
-    Cell_rotatedYvals       =  (float   *) realloc(Cell_rotatedYvals,       n0*n1*n2*sizeof(*Cell_rotatedYvals));
-    Cell_rotatedZvals       =  (float   *) realloc(Cell_rotatedZvals,       n0*n1*n2*sizeof(*Cell_rotatedZvals));
+    Cell_rotatedXvals       =  (double *)  realloc(Cell_rotatedXvals,       n0*n1*n2*sizeof(*Cell_rotatedXvals));
+    Cell_rotatedYvals       =  (double *)  realloc(Cell_rotatedYvals,       n0*n1*n2*sizeof(*Cell_rotatedYvals));
+    Cell_rotatedZvals       =  (double *)  realloc(Cell_rotatedZvals,       n0*n1*n2*sizeof(*Cell_rotatedZvals));
 
-    Cell_raVIPERSsystem     =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_raVIPERSsystem));
-    Cell_decVIPERSsystem    =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_decVIPERSsystem));
-    Cell_chiVIPERSsystem    =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_chiVIPERSsystem));
+    Cell_raVIPERSsystem     =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_raVIPERSsystem));
+    Cell_decVIPERSsystem    =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_decVIPERSsystem));
+    Cell_chiVIPERSsystem    =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_chiVIPERSsystem));
 
-    Cell_VIPERSweights      =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_VIPERSweights));
-    Cell_VIPERSbools        =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_VIPERSbools));
-    Cell_SurveyLimitsMask   =  (float  *)  malloc(n0*n1*n2*sizeof(*Cell_SurveyLimitsMask));
+    Cell_VIPERSweights      =  (double  *) malloc(n0*n1*n2*sizeof(*Cell_VIPERSweights));
+    Cell_VIPERSbools        =  (double  *) malloc(n0*n1*n2*sizeof(*Cell_VIPERSbools));
+    Cell_SurveyLimitsMask   =  (double  *) malloc(n0*n1*n2*sizeof(*Cell_SurveyLimitsMask));
 
     // Allocate memory for NGP density arrays of both ZADE galaxies and randoms. 
     for(j=0; j<n0*n1*n2; j++)            FKPweights[j] = 1.0;
@@ -101,16 +101,7 @@ int assign2DPkMemory(){
 }
 
 
-int prepConvolution(int inputWindowfnBinNumb, int evalConvPkNumb){
-    kVals            = (float *)   malloc(InterpK_binNumber*sizeof(float));
-    interpolatedPk   = (float *)   malloc(InterpK_binNumber*sizeof(float));
-    
-    // Interpolate theoretical P(k) to a regular grid in k. 
-    for(j=0; j<InterpK_binNumber; j++)                    kVals[j] =      kbinInterval + j*kbinInterval;
-    for(j=0; j<InterpK_binNumber; j++) splint(sdltk, sdltPk, sdlt2d, 293, kVals[j], &interpolatedPk[j]);
-    
-    printf("\nP(k) interpolated between: %f \t %f", kVals[0], kVals[InterpK_binNumber-1]);
-    
+int prepSphericalConv(int inputWindowfnBinNumb, int evalConvPkNumb){    
     // Define arrays for Window function spline, with the usual NR offset. 
     midKmodesperbin  = (int   *)   malloc(inputWindowfnBinNumb*sizeof(int));
     midKBinNR        = (float *)   malloc(inputWindowfnBinNumb*sizeof(float)); 
@@ -127,16 +118,16 @@ int prepConvolution(int inputWindowfnBinNumb, int evalConvPkNumb){
 
 
 int prepAnisoConvolution(){
-    inputPk                          = (float *)   malloc(n0*n1*n2*sizeof(*inputPk));
+    inputPk                          = (double *)   malloc(n0*n1*n2*sizeof(*inputPk));
     
-    windowFunc3D                     = (float *)   malloc(wfKernelsize*wfKernelsize*wfKernelsize*sizeof(*windowFunc3D));       
+    windowFunc3D                     = (double *)   malloc(wfKernelsize*wfKernelsize*wfKernelsize*sizeof(*windowFunc3D));       
     
-    convolvedPk3d                    = (float *)   malloc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize)*sizeof(*convolvedPk3d)); 
+    convolvedPk3d                    = (double *)   malloc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize)*sizeof(*convolvedPk3d)); 
 
-    flattenedConvolvedPk3D           = (double **) malloc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize)*sizeof(*flattenedConvolvedPk3D));
+    flattenedConvolvedPk3D           = (double **)  malloc((n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize)*sizeof(*flattenedConvolvedPk3D));
 
     for(j=0; j<(n0-2*wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize); j++){
-        flattenedConvolvedPk3D[j]    = (double *)  malloc(2*sizeof(double));
+        flattenedConvolvedPk3D[j]    = (double *)   malloc(2*sizeof(double));
 
         flattenedConvolvedPk3D[j][0] = 0.0;
         flattenedConvolvedPk3D[j][1] = 0.0;
@@ -147,8 +138,8 @@ int prepAnisoConvolution(){
 
 
 int assignAnisoWfKernel(){
-    AnisoWfKernel                    = (float *) malloc(wfKernelsize*wfKernelsize*wfKernelsize*sizeof(*AnisoWfKernel));
-    AnisoWfKernel_ModeNumb           = (int *)   malloc(wfKernelsize*wfKernelsize*wfKernelsize*sizeof(*AnisoWfKernel_ModeNumb));
+    AnisoWfKernel                    = (double *) malloc(wfKernelsize*wfKernelsize*wfKernelsize*sizeof(*AnisoWfKernel));
+    AnisoWfKernel_ModeNumb           = (int *)    malloc(wfKernelsize*wfKernelsize*wfKernelsize*sizeof(*AnisoWfKernel_ModeNumb));
 
     for(j=0; j<wfKernelsize*wfKernelsize*wfKernelsize; j++){
         AnisoWfKernel[j]             = 0.0;

@@ -1,7 +1,7 @@
-int AnisoGauss(float a, float b, float c){
+int AnisoGauss(double a, double b, double c){
     for(j=0; j<n0*n1*n2; j++) booldensity[j] = 0.0;
     
-    float rx, ry, rz;
+    double rx, ry, rz;
     
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
@@ -12,7 +12,7 @@ int AnisoGauss(float a, float b, float c){
             
                 Index = k*n1*n2 + j*n2 + i;
             
-                booldensity[Index] = exp(-0.5*pow(rx/a, 2.))*exp(-0.5*pow(ry/b, 2))*exp(-0.5*pow(rz/c, 2.));
+                booldensity[Index] = exp(-0.5*pow(rx/a, 2.))*exp(-0.5*pow(ry/b, 2.))*exp(-0.5*pow(rz/c, 2.));
             }
         }
     }

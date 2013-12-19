@@ -24,7 +24,7 @@ int sphereCentre(){
 }
 
 
-int rollcube(float xCoor[], float yCoor[], float zCoor[], int galNumber){
+int rollcube(double xCoor[], double yCoor[], double zCoor[], int galNumber){
     sphereCentre();
     
     for(j=0; j<galNumber; j++){

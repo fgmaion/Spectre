@@ -1,8 +1,12 @@
 int wfPkCalc(){
+    // Delivers the spherical average of W^2(q).
+
     printf("\nBeginning window function calculation.");
     
-    for(j=0; j<n0*n1*n2; j++) in[j][0] = (double) (TotalVolume/TotalSurveyedVolume)*booldensity[j]*FKPweights[j];
-    for(j=0; j<n0*n1*n2; j++) in[j][1] = (double) 0.0;
+    // The true density field is multiplied by a mask, Cell_AppliedWindowFn [W(x)].
+    for(j=0; j<n0*n1*n2; j++) in[j][0] = Cell_AppliedWindowFn[j];
+    
+    for(j=0; j<n0*n1*n2; j++) in[j][1] = 0.0;
     
     printf("\nPerforming FFT.");
     
@@ -14,9 +18,9 @@ int wfPkCalc(){
 
     PkBinningCalc(n0*n1*n2, PkArray);
     
-    sprintf(filepath, "%s/Data/WindowfuncSpherical/midK_W2k_%s.dat", root_dir, surveyType);
+    sprintf(filepath, "%s/Data/WindowfuncSpherical/midK_W2q_%s.dat", root_dir, surveyType);
     output = fopen(filepath, "w");
-    for(j=0; j<kBinNumb-1; j++)  fprintf(output, "%f \t %f\n", meanKBin[j], binnedPk[j]);
+    for(j=0; j<kBinNumb-1; j++)  fprintf(output, "%e \t %e\n", meanKBin[j], binnedPk[j]);
 
     printf("\nWindow function P(k) calculation complete.");
     

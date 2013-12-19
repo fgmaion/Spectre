@@ -31,7 +31,7 @@ int ApplyJenkins(){
 }
 
 
-int JenkinsFold(float original[], int lenArray, int axis){      // Upper limit           // Lower limit
+int JenkinsFold(double original[], int lenArray, int axis){      // Upper limit           // Lower limit
     for(j=0; j<lenArray; j++)  original[j] = fmod(original[j], (AxisLimsArray[1][axis] - AxisLimsArray[0][axis]));               
 
     return 0;

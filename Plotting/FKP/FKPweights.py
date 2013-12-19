@@ -6,9 +6,10 @@ data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/nz/HODMocks_nz.dat')
 # column 3: Comoving number density. 
 
 pl.clf()
-pl.plot(data[:,0], data[:,3], '^')
+pl.bar(data[:,0], data[:,3], 0.03, color='b')
 pl.xlabel(r'$z$',    fontsize = '10')
 pl.ylabel(r'$\overline{n}(z)$', fontsize = '10')
+pl.xlim([0.4, 1.4])
 pl.savefig('/disk1/mjw/HOD_MockRun/Plots/FKPweights/HODMocks_W1_nz.pdf')
 
 pl.clf()

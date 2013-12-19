@@ -1,115 +1,114 @@
-int ConvolveTheory(){
+int ConvolveSphericalSymm(){
     printf("\n\nConvolving HOD theory P(k).");
     
     // HOD theory P(k).
     inputPK();
     
     // Calculate the convolution of HOD P(k) with the upadded measurement of the window fn.
-    sprintf(filepath, "%s/Data/WindowfuncSpherical/midK_W2k_%s.dat", root_dir, surveyType);
+    sprintf(filepath, "%s/Data/WindowfuncSpherical/midK_W2q_%s.dat", root_dir, surveyType);
     splineInputWindowfn(filepath);
+    
+    pt2Pk                       = &Analytic2powerlaw;
+    pt2Windowfn                 = &AnalyticGaussian;
 
-    // EvaluateConvolution(splintMatterPk, splintWindowfunc, "splint_unpadded");
+    // EvaluateSphericalConv("splint_unpadded");
     // freeConvolutionMemory();
 
     // Calculate the convolution of the HOD P(k) with the padded measurement of the window fn.
     // sprintf(filepath, "%s/Data/WindowfuncSpherical/midK_pad3W2k_%s.dat", root_dir, surveyType);
     // splineInputWindowfn(filepath);
 
-    // EvaluateConvolution(splintMatterPk, splintWindowfunc, "splint_padded");
+    // EvaluateSphericalConv("splint_padded");
     
     // Now calculate the integral constraint correction.
     // IntegralConstraintCorrection();
     
     // Now the analytic "truth" for the spherical case.
-    // EvaluateConvolution(AnalyticSpherical, "splintanalytic");
+    // EvaluateSphericalConv("splintanalytic");
     
     // printInterpPk();
     
-    pt2Pk                       = &Analytic2powerlaw;
-    pt2Windowfn                 = &AnalyticGaussian;
+    EvaluateSphericalConv("powerlaw2_Gauss");
     
-    EvaluateConvolution("powerlaw2_Gauss");
+    kConvScope = 0.1;
     
+    printf("\n %e", fqConvKernel(0.2));
+
     return 0;
 }
 
 
-float EvaluatefilterNormalisation(){
-    // Interpolated Window fn. evaluation (spherical average of).
-    return qromb(NormalisationKernel, 0.0, 0.9);
+int EvaluateSphericalConv(char Convtype[]){
+    ConvNorm = SphericalW2NormEval();
+    printf("\nW^2(q) norm (spherical symmetry):  %e", ConvNorm);
+
+    // For each k mode interval in convolved P(k).
+    // for(k=0; k<kBinNumb-1; k++)  ConvolvedPk[k] = SphConvPk(midKBin[k]);
+
+    // sprintf(filepath, "%s/Data/ConvolvedPk/IntegralConstraint_Uncorrected/midK_Pk_%s_%s.dat", root_dir, surveyType, Convtype);
+
+    // output = fopen(filepath, "w");    
+    
+    // for(j=0; j<kBinNumb-1; j++) fprintf(output, "%f \t %e \n", midKBin[j], ConvolvedPk[j]);
+    
+    // fclose(output);
+    return 0;
 }
 
 
-float NormalisationKernel(float q){
+double NormKernel(double q){
     return 4.*pi*q*q*(*pt2Windowfn)(q);
 }
 
 
-int EvaluateConvolution(char type[]){
-    // splint the measured window fn.
-    FilterNormalisation = EvaluatefilterNormalisation();
-    printf("\nfilter normalisation:  %f", FilterNormalisation);
+float fNormKernel(float q){
+    double qdub = (double) q;
     
-    kConvScope = 1.0;
-    
-    printf("\nq kernel check:  %f\n", qConvKernel(0.2));
-
-    /*
-    // For each k mode interval in convolved P(k).
-    for(k=0; k<kBinNumb-1; k++)  ConvolvedPk[k] = ConvolvedPkQrombCalc(midKBin[k]);
-
-    sprintf(filepath, "%s/Data/ConvolvedPk/IntegralConstraint_Uncorrected/midK_Pk_%s_%s.dat", root_dir, surveyType, type);
-
-    output = fopen(filepath, "w");    
-    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%f \t %e \n", midKBin[j], ConvolvedPk[j]);
-    fclose(output);
-    */
-    return 0;
+    return (float) NormKernel(qdub);
 }
 
 
-float ConvolvedPkQrombCalc(float kval){
-    kConvScope  = kval;
-    return qromb(qConvKernel, 0.0, 1.5);
+double SphericalW2NormEval(){
+    // Interpolated Window fn. evaluation (spherical average of).
+    return (double) qromb(fNormKernel, 0.0, 0.9);
 }
 
 
-float qConvKernel(float q){
-    qConvScope = q;
-    return qromb(muConvKernel, -1., 1.);
-}
-
-
-float muConvKernel(float mu){
-    return  (2.0*pi/FilterNormalisation)*qConvScope*qConvScope*(*pt2Windowfn)(qConvScope)*(*pt2Pk)(pow(pow(kConvScope, 2.) + pow(qConvScope, 2.) - 2.0*kConvScope*qConvScope*mu, 0.5));
-}
-
-
-float ConvolvedPkZeroPointCalc(){
-    return ConvolvedPkQrombCalc(0.0);
-}
-
-
-int IntegralConstraintCorrection(){    
-    ConvolvedPkZeroPoint     = ConvolvedPkZeroPointCalc();
-    printf("\nConvolved P(k) zero point calculated to be: %e", ConvolvedPkZeroPoint);
+double SphConvPk(double kval){
+    kConvScope  = (float) kval;
     
-    sprintf(filepath, "%s/Data/ConvolvedPk/IntegralConstraint_Uncorrected/midK_Pk_%ssplint_padded.dat", root_dir, surveyType);
-    output = fopen(filepath, "w");    
-    fprintf(output, "%f \t %f \n", 0.0, ConvolvedPkZeroPoint);
-    
-    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%f \t %e \n", midKBin[j], ConvolvedPk[j]);
-    fclose(output);
-    
-    // Window fn. evaluated on the same regular grid in k on which the convolved P(k) is estimated, normalised such that W^2 = 1.0 at k=0.0
-    for(j=0; j<kBinNumb-1; j++) ConvolvedPk[j] -= splintWindowfunc(midKBin[j])*ConvolvedPkZeroPoint;
+    return (double) qromb(fqConvKernel, 0.0, 4.0);
+}
 
-    sprintf(filepath, "%s/Data/ConvolvedPk/IntegralConstraint_Corrected/midK_Pk_%ssplint_padded.dat", root_dir, surveyType);
-    output = fopen(filepath, "w");    
-    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%f \t %e \n", midKBin[j], ConvolvedPk[j]);
-    fclose(output);
+// Evaluated correctly.
+float fqConvKernel(float q){
+    double qdub = (double) q;
 
-    return 0;
+    return (float) qConvKernel(qdub);
+}
+
+
+double qConvKernel(double q){
+    qConvScope = (float) q;
+    
+    return (double) qromb(fmuConvKernel, -1., 1.);
+}
+
+
+float fmuConvKernel(float q){
+    double qdub = (double) q;
+    
+    return (float)  muConvKernel(qdub);
+}
+
+
+double muConvKernel(double mu){
+    return  (2.0*pi/ConvNorm)*qConvScope*qConvScope*(*pt2Windowfn)(qConvScope)*(*pt2Pk)(pow(pow(kConvScope, 2.) + pow(qConvScope, 2.) - 2.0*kConvScope*qConvScope*mu, 0.5));
+}
+
+
+double SphConvZeroPoint(){
+    return (double) SphConvPk(0.0);
 }
 
 
@@ -125,7 +124,7 @@ int splineInputWindowfn(char filepath[]){
        	  inputWindowfnBinNumb += 1;
     } while (ch != EOF);
 
-    prepConvolution(inputWindowfnBinNumb+1, kBinNumb);
+    prepSphericalConv(inputWindowfnBinNumb+1, kBinNumb);
 
     printf("\nWindow fn. line number:  %d", inputWindowfnBinNumb);
 
@@ -140,45 +139,23 @@ int splineInputWindowfn(char filepath[]){
 }
 
 
-float splintWindowfunc(float EvalPoint){
+double splintWindowfunc(double EvalPoint){
     // Interpolated Window fn. evaluation (spherical average of).
     
     float Interim;
     
-    splint(midKBinNR, WindowFuncNR, WindowFunc2d, inputWindowfnBinNumb, EvalPoint, &Interim);
-    return Interim;
+    splint(midKBinNR, WindowFuncNR, WindowFunc2d, inputWindowfnBinNumb, (float) EvalPoint, &Interim);
+    return (double) Interim;
 }
 
 
-float splintMatterPk(float k){
+double splintMatterPk(double k){
     // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec). 
 
     float Interim;
     
-    splint(sdltk, sdltPk, sdlt2d, 293, k, &Interim);
-    return Interim;
-}
-
-
-float AnalyticSpherical(float k){
-    float y = k*250.;
-
-    return 3.*pow(y, -3.)*(sin(y) - y*cos(y));
-}
-
-
-float AnalyticGaussian(float q){
-    float r0 = 10.;
-
-    return expf(-q*q*r0*r0);
-}
-
-
-float Analytic2powerlaw(float k){
-    float p0 = 150.;
-    float  n =   2.;
-
-    return p0*powf(k, n);
+    splint(sdltk, sdltPk, sdlt2d, 293, (float) k, &Interim);
+    return (double) Interim;
 }
 
 

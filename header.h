@@ -2,16 +2,11 @@
 int          comovDistReshiftCalc();
 
 int          JenkinsCoordinates();
-int          JenkinsFold(float original[], int lenArray, int axis);
+int          JenkinsFold(double original[], int lenArray, int axis);
 int          ApplyJenkins();
 
 int          EvaluateGridParameters();
-float        SolidAngleCalc(float decLowerBound, float decUpperBound, float raInterval);
-
-int          randGenerate();
-int          pointRandGen(int lineNum, float Min_SinDec, float Max_SinDec, float Min_rA, float Max_rA);
-int          RandCoorCalc();
-int          randNGP();
+double       SolidAngleCalc(double decLowerBound, double decUpperBound, double raInterval);
 
 int          ApplyFKPweights();
 
@@ -24,62 +19,39 @@ int          CoordinateCalc();
 int          NGPCalc();
 int          PkCalc();
 
-float        splintMatterPk(float EvalPoint);
-float        splintWindowfunc(float EvalPoint);
-float        AnalyticSpherical(float k);
+double       splintMatterPk(double EvalPoint);
+double        splintWindowfunc(double EvalPoint);
+double       AnalyticSpherical(double k);
 int          EvaluateConvolution(char type[]);
 
-float        EvaluatefilterNormalisation();
-float        NormalisationKernel(float q);
+double 		 (*pt2AnisoWf)(double, double, double)  = NULL;
+double       (*pt2Windowfn)(double)                 = NULL;
+double       (*pt2Pk)(double)       				= NULL;
 
-float 		 (*pt2AnisoWf)(float, float, float) = NULL;
-float        (*pt2Windowfn)(float) 				= NULL;
-float        (*pt2Pk)(float)       				= NULL;
-
-float        SphericalWindowfuncEval(float k, float R);
+double       (*pt2nz)(double)                       = NULL;
 
 // Artificial window fn's for cubic run
 int          FullCube();
 int          PencilBeamSurvey(int xlow, int xhi, int ylow, int yhi);
 
 int          printWindowfuncSlices();
-int          WindowfuncSlice(float kintervali, int ni, int x0, int y0, int z0, char filepath[]);
+int          WindowfuncSlice(double kintervali, int ni, int x0, int y0, int z0, char filepath[]);
 
 int          inputWindowfnBinNumb;
 
-float        interp_nz(float x);
-float        testWindowfn(float k2);
+double       interp_nz(double x);
 
 int          FirstColumnCompare(const void* a, const void* b);
 int          SecondColumnCompare(const void* a, const void* b);
 
-float        arrayMax(float a[], int n);
-float        arrayMin(float a[], int n);
+double       ArrayMax(double a[], int n);
+double       ArrayMin(double a[], int n);
 
-double       DoubleArrayMax(double a[], int n);
-double       DoubleArrayMin(double a[], int n);
 double       SumDoubleArray(double array[], int len);
-float        SumFloatArray(float array[], int len);
-
-int          ConvolveTheory();
-int          splineInputWindowfn(char filepath[]);
-
-float         kConvScope;
-float        muConvScope;
-float         qConvScope;
-
-float        ConvolvedPkQrombCalc(float kval);
-float        muConvKernel(float mu);
-
-float        qConvKernel(float q);
-
-float        ConvolvedPkCalculation(float kval);
-
-int          IntegralConstraintCorrection();
 
 int          printInterpPk();
 
-int          assignbinninginterval(float interval);
+int          assignbinninginterval(double interval);
 
 int          zCubeCreate();
 
@@ -106,22 +78,26 @@ int          free2dPk();
 int          freeConvolutionMemory();
 
 
-// Convolution with anisotropic window fn. 
-float        anisoGauss(float x, float y, float z);
+// Convolution with anisotropic window fn.
+int          AnisoGauss(double x, double y, double z);
 int          AnisoConvolution();
 int          setInputPk();
 int          SetWfKernel();
-float        ConvolveCell(int x, int y, int z);
-float 		 filter3Dnorm();
-int 		 convolve3DInputPk(float convolvedPk[], float input[]);
+double       ConvolveCell(int x, int y, int z);
+int 		 convolve3DInputPk();
 
-int          EstimateAnisoWfKernel();
+double       anisokGauss(double x, double y, double z);
+
+int          MeasureAnisoWfKernel();
 int          setMeasuredWfKernel();
 
+double       interp_comovingDistance(double z);
+double       interp_inverseComovingDistance(double r);
+
 // Pointers to interpolation functions. 
-float        (*pt2Integrand)(float)                         = &Integrand;
-float        (*pt2interp_comovingDistance)(float)           = &interp_comovingDistance;
-float        (*pt2interp_inverseComovingDistance)(float)    = &interp_inverseComovingDistance;
+float        (*pt2Integrand)(float)                        = &Integrand;
+double       (*pt2interp_comovingDistance)(double)         = &interp_comovingDistance;
+double       (*pt2interp_inverseComovingDistance)(double)  = &interp_inverseComovingDistance;
 
 char         vipersHOD_dir[200];
 
@@ -136,40 +112,40 @@ char         Windowfunc_zSlice[200];
 
 
 // VIPERS HOD mock parameters
-const float  Om_v      =   0.73;
-const float  Om_r      =   0.0;
-const float  Om_m      =   0.27;
-const float  Om_b      =   0.0469;
-const float  Om_tot    =   1.0;
-const float  h         =   0.7;
-const float  sigma_8   =   0.82;
-const float  ns        =   0.95;
+const double  Om_v      =   0.73;
+const double  Om_r      =   0.0;
+const double  Om_m      =   0.27;
+const double  Om_b      =   0.0469;
+const double  Om_tot    =   1.0;
+const double  h         =   0.7;
+const double  sigma_8   =   0.82;
+const double  ns        =   0.95;
 
-float        hz        =    0.0;
+double        hz        =    0.0;
 // Selection parameters. Volume limited sample between redshift 0.7 and 0.9
-float        redshiftHiLimit;
-float        redshiftLowLimit;
-float        absMagCut;
+double        redshiftHiLimit;
+double        redshiftLowLimit;
+double        absMagCut;
 
 // Array to hold the coordinate limits of the VIPERS survey. 
-float        AxisLimsArray[2][3];
+double        AxisLimsArray[2][3];
          
-float        CellSize;                                                     // Cell size, comoving distance, h^-1 Mpc
+double        CellSize;                                                     // Cell size, comoving distance, h^-1 Mpc
 
-float        MinChi3;                                                      // h^-1 Mpc, Approximately, fig. 14, Guzzo et al.  2013
-float        MaxChi3;                                                      // Redshift limited sample, 0.7 < z < 0.9
-float        IntervalChi3;
+double        MinChi3;                                                      // h^-1 Mpc, Approximately, fig. 14, Guzzo et al.  2013
+double        MaxChi3;                                                      // Redshift limited sample, 0.7 < z < 0.9
+double        IntervalChi3;
 
-float        CellVolume;
+double        CellVolume;
 
 double*      densityArray        = NULL;
 double*      FKPweights          = NULL;
-float*       booldensity         = NULL;
+double*      booldensity         = NULL;
 
-float        SumOfVIPERSbools    = 0.0;
+double       SumOfVIPERSbools    = 0.0;
 
-float        TotalVolume         = 0.0;
-float        TotalSurveyedVolume = 0.0;
+double       TotalVolume         = 0.0;
+double       TotalSurveyedVolume = 0.0;
 
 double       fkpWeightedVolume   = 0.0;
 double       fkpSqWeightsVolume  = 0.0;
@@ -178,26 +154,6 @@ double       fkpShotNoiseCorr    = 0.0;
 // Dimensions of the padded volume (TotalVolume) in units of CellSize. 
 int          n0, n1, n2;      
 int          loopCount;
-
-// Declaration  for Random Generation. 
-
-float        Min_rA;  
-float        Max_rA;
-float        Min_SinDec;
-float        Max_SinDec;
-
-long         randCall_chi3    = 45;
-long         randCall_sinDec  = 95;
-long         randCall_rA      = 153;
-
-float*       rand_chi         = NULL;
-float*       rand_dec         = NULL;
-float*       rand_rA          = NULL;
-float*       rand_rshift      = NULL;
-float*       rand_polar       = NULL;
-float*       rand_x           = NULL;
-float*       rand_y           = NULL;
-float*       rand_z           = NULL;
 
 // z - Comoving distance data points for interpolation. 
 int          nPoints = 1000;
@@ -215,43 +171,44 @@ int                ch;
 int        Vipers_Num;
 
 int*               id  = NULL;
-float*             ra  = NULL;
-float*            dec  = NULL;
-float*           zobs  = NULL;
-float*           zcos  = NULL;
-float*            M_B  = NULL;
+double*             ra  = NULL;
+double*            dec  = NULL;
+double*           zobs  = NULL;
+double*           zcos  = NULL;
+double*            M_B  = NULL;
 int*             type  = NULL;
 
 
 // Value added catalogue parameters. 
-float*           zpec  = NULL;
-float*          zphot  = NULL;
+double*           zpec  = NULL;
+double*          zphot  = NULL;
 
-float*	    zUtilized  = NULL;
-float*            csr  = NULL;
-float*       sampling  = NULL;  
-float*     sampling35  = NULL;
+double*	    zUtilized  = NULL;
+double*            csr  = NULL;
+double*       sampling  = NULL;  
+double*     sampling35  = NULL;
 char**       pointing  = NULL;
 char**       quadrant  = NULL;
 int*      flag_Nagoya  = NULL;
 int*       flag_SSPOC  = NULL;
 int*     flag_SSPOC35  = NULL;
-float*       rand_sel  = NULL;
+double*       rand_sel  = NULL;
 
 
 // derived parameters
-float*     polarAngle  = NULL;
-float*          rDist  = NULL;
-float*          xCoor  = NULL;
-float*          yCoor  = NULL;
-float*          zCoor  = NULL;
-float*          xVel   = NULL;
-float*          yVel   = NULL;
-float*          zVel   = NULL; 
+bool*   Acceptanceflag = NULL;
+double*     polarAngle  = NULL;
+double*          rDist  = NULL;
+double*          xCoor  = NULL;
+double*          yCoor  = NULL;
+double*          zCoor  = NULL;
+double*          xVel   = NULL;
+double*          yVel   = NULL;
+double*          zVel   = NULL; 
 
 // TotalWeight is the sum of ZADE weight for the ZADE catalogue = Number of spec z + Number of used Photometric galaxies used (including compensation for sampling).
-float        TotalZADEWeight   = 0.0;
-float        MeanNumberDensity = 0.0;
+double       TotalZADEWeight   = 0.0;
+double       MeanNumberDensity = 0.0;
 
 int          boxlabel;
 int          xlabel, ylabel, zlabel;
@@ -318,7 +275,6 @@ float*      sdltPk              = NULL;
 float*      sdlt2d              = NULL;
 
 // Camb linear P(k)
-
 float*      lineark             = NULL;
 float*      linearPk            = NULL;
 float*      linear2d            = NULL;
@@ -329,7 +285,6 @@ double       velocityDispersion;
 double       f;
 double       beta;
 double       y;
-
 
 const double gamma_GR           =    0.545;
 const double gamma_DGP          =  11./16.;
@@ -355,31 +310,30 @@ double**     zSpaceBinnedPk     = NULL;
 // Comoving number density calculation
 int          zBinNumber;
 
-float        zBinWidth;
-float        VIPERS_SolidAngle;
+double       zBinWidth;
+double       VIPERS_SolidAngle;
 
-float*       redshiftSlices     = NULL;
-float*       ChiSlices          = NULL;
-float*       NumberAtReshift    = NULL;
-float*       ComovingVolumeAtZ  = NULL;
-float*       ComovingNumberDensity  = NULL;
-
+double*       redshiftSlices         = NULL;
+float*        ChiSlices              = NULL;
+int*          NumberAtRedshift       = NULL;
+double*       ComovingVolumeAtZ      = NULL;
+float*        ComovingNumberDensity  = NULL;
+double*       MeanSliceRedshift      = NULL;
 
 // spline and splint comoving number density, n(z).
-float*       ComovingNumberDensity2d    = NULL;
+float*       ComovingNumberDensity2d = NULL;
 
 // 
-float        linearBias;
-float        A11;
+double       linearBias;
+double       A11;
 
 // FKP weights. 
-float        fkpPk;
-float        TotalFKPweight;
-float        Chi;                       //  Comoving distance at redshift z for weight calculation.
-float        Interim;
+double        fkpPk;
+double        TotalFKPweight;
+double        Chi;                       //  Comoving distance at redshift z for weight calculation.
+double        Interim;
 
-
-// Convolving theory with window fn.
+// Window fn. convolution, spherical symmetry.
 int          InterpK_binNumber;
 float*       kVals;
 float*       interpolatedPk;
@@ -395,22 +349,21 @@ double*      ConvolvedPk2d;
 float        inputPkEval         = 0.0;
 float        WindowFuncEval      = 0.0;
 float        PkEvalPoint         = 0.0;
-float        FilterNormalisation = 0.0;
 float        muVal;
 float        muInterval;
 
 int          MuIntegralPrecision;
 
-float        Analytic2powerlaw(float k);
-float        AnalyticGaussian(float k);
+/*              */
+
+double       Analytic2powerlaw(double k);
+double       AnalyticGaussian(double k);
 
 // Integral constraint correction.
-double       ConvolvedPkZeroPoint;
 float        WindowfnZeroPointEval;
 
 // Nomenclature for applied survey window.
 char         surveyType[200];
-
 
 // padded window fn. calculation
 int          sidepad;
@@ -419,7 +372,7 @@ int          padcellsNumber;
 int          padIndex;
 
 // clipping threshold
-float        appliedClippingThreshold;
+double       appliedClippingThreshold;
 
 // rolling periodic cube. 
 double       xcentre;
@@ -433,46 +386,99 @@ double       zroll;
 // Anisotropic convolution
 int 		 wfKernelsize;
 
-float 		 PkCubeEntry;
-float 		 wf3Dnorm;
+double 		 PkCubeEntry;
+double 		 ConvNorm;
 
-float*       inputPk;
-float*		 windowFunc3D; 
-float*		 convolvedPk3d;
+double*      inputPk;
+double*		 windowFunc3D; 
+double*		 convolvedPk3d;
 
 double**     flattenedConvolvedPk3D;
 
-float*       AnisoWfKernel;
+double*       AnisoWfKernel;
 int*         AnisoWfKernel_ModeNumb;
 
 
 // VIPERS ra and dec of cell co-ordinates.
-float* 	 Cell_rotatedXvals;
-float* 	 Cell_rotatedYvals;
-float* 	 Cell_rotatedZvals;
+double*   Cell_rotatedXvals;
+double*   Cell_rotatedYvals;
+double*   Cell_rotatedZvals;
 
-float*   Cell_raVIPERSsystem;
-float*   Cell_decVIPERSsystem;
-float*   Cell_chiVIPERSsystem;
+double*   Cell_raVIPERSsystem;
+double*   Cell_decVIPERSsystem;
+double*   Cell_chiVIPERSsystem;
 
-float*   Cell_VIPERSweights;
-float*   Cell_VIPERSbools;
-float*   Cell_SurveyLimitsMask;
-float*   Cell_AppliedWindowFn;
+double*   Cell_VIPERSweights;
+double*   Cell_VIPERSbools;
+double*   Cell_SurveyLimitsMask;
+double*   Cell_AppliedWindowFn;
 
-int VIPERSbasis(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len);
+int VIPERSbasis(double centerRA, double centerDec, double xCoors[], double yCoors[], double zCoors[], int len);
 
-int Celestialbasis(float centerRA, float centerDec, float xCoors[], float yCoors[], float zCoors[], int len);
+int Celestialbasis(double centerRA, double centerDec, double xCoors[], double yCoors[], double zCoors[], int len);
 
 int projectVIPERSsystem();
 
-float UpperChiLimit;
-float LowerChiLimit;
+double UpperChiLimit;
+double LowerChiLimit;
 
-float UpperRAlimit;
-float LowerRAlimit;
+double UpperRAlimit;
+double LowerRAlimit;
 
-float UpperDecLimit;
-float LowerDecLimit;
+double UpperDecLimit;
+double LowerDecLimit;
 
 int CatalogueInput(char filepath[]);
+
+double minKernelshift;
+double maxKernelshift;
+
+int   iishift, kkshift, jjshift;
+
+double MaxkInterval;
+
+int   filterIndex;
+int   convIndex;
+int   PkIndex;
+
+int   CalcCellraDec();
+
+double sdltNz(double z);
+
+int   CatalogNumber;
+
+double steradians2sqdegs(double inSteradians);
+
+int   SelectedGalNumber_nz; 
+
+double ZeroPointNorm();
+
+
+// Convolution calc. spherical symmetry. 
+
+int          splineInputWindowfn(char filepath[]);
+
+float        kConvScope;
+float       muConvScope;
+float        qConvScope;
+
+double  NormKernel(double q);
+float  fNormKernel(float);
+
+double SphericalW2NormEval();
+
+int EvaluateSphericalConv(char Convtype[]);
+
+double SphConvPk(double kval);
+float fqConvKernel(float q);
+double qConvKernel(double q);
+float fmuConvKernel(float q);
+double muConvKernel(double mu);
+double SphConvZeroPoint();
+double ZeroPoint;
+double ConvPkZeroPoint;
+
+int          IntegralConstraintCorrection();
+
+double ConvolutionNorm(double array[]);
+

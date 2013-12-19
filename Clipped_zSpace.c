@@ -1,4 +1,4 @@
-int clipDensity(float threshold){
+int clipDensity(double threshold){
 
     printf("\n\nTaking a machete to the density field.");
 
@@ -118,35 +118,35 @@ int formPkCube(){
 }
 
 
-float HermitePolynomial(float x, int n){
+double HermitePolynomial(double x, int n){
     switch(n){
         case 0:
             return 1.0;
         case 1:
             return 2.0*x;
         case 2:
-            return 4.0*powf(x, 2.0)   - 2.0;
+            return 4.0*pow(x, 2.0)   - 2.0;
         case 3:
-            return 8.0*powf(x, 3.0)   - 12.0*x;
+            return 8.0*pow(x, 3.0)   - 12.0*x;
         case 4:
-            return 16.0*powf(x, 4.0)  - 48.*powf(x, 2.0)   + 12.;
+            return 16.0*pow(x, 4.0)  - 48.*pow(x, 2.0)   + 12.;
         case 5:
-            return 32.0*powf(x, 5.0)  - 160.*powf(x, 3.0)  + 120.*x;
+            return 32.0*pow(x, 5.0)  - 160.*pow(x, 3.0)  + 120.*x;
         case 6:
-            return 64.0*powf(x, 6.0)  - 480.*powf(x, 4.0)  + 720.*powf(x, 2.0)   - 120.;
+            return 64.0*pow(x, 6.0)  - 480.*pow(x, 4.0)  + 720.*pow(x, 2.0)   - 120.;
         case 7:
-            return 128.0*powf(x, 7.0) - 1344.*powf(x, 5.0) + 3360.*powf(x, 3.0)  - 1680.*x;
+            return 128.0*pow(x, 7.0) - 1344.*pow(x, 5.0) + 3360.*pow(x, 3.0)  - 1680.*x;
         case 8:
-            return 256.*powf(x, 8.)   - 3584.*powf(x, 6.)  + 13440.*powf(x, 4.)  - 13440.*powf(x, 2.)  + 1680.;
+            return 256.*pow(x, 8.)   - 3584.*pow(x, 6.)  + 13440.*pow(x, 4.)  - 13440.*pow(x, 2.)  + 1680.;
         case 9:
-            return 512.*powf(x, 9.)   - 9216.*powf(x, 7.)  + 48384.*powf(x, 5.)  - 80640.*powf(x, 3.0) + 30240.*x;
+            return 512.*pow(x, 9.)   - 9216.*pow(x, 7.)  + 48384.*pow(x, 5.)  - 80640.*pow(x, 3.0) + 30240.*x;
         case 10:
-            return 1024.*powf(x, 10.) - 23040.*powf(x, 8.) + 161280.*powf(x, 6.) - 403200.*powf(x, 4.) + 302400.*powf(x, 2.0) - 30240.;   
+            return 1024.*pow(x, 10.) - 23040.*pow(x, 8.) + 161280.*pow(x, 6.) - 403200.*pow(x, 4.) + 302400.*pow(x, 2.0) - 30240.;   
     }
 }
 
 
-float C_n(float x, int n){                                                // (n+1)! = Gamma (n+2)
+double C_n(double x, int n){                                                // (n+1)! = Gamma (n+2)
     return pow(HermitePolynomial(x, n-1), 2.)*exp(-2.*x*x)/(pi*pow(2., n)*gsl_sf_gamma(n + 2));
 }
 
@@ -166,8 +166,8 @@ int clipCorrfn(){
 
     for(j=0; j<n0*n1*n2; j++) Corrfn[j] = out[j][0];
 
-    float variance    =  Corrfn[0];
-    float u0;
+    double variance    =  Corrfn[0];
+    double u0;
 
     u0      = inverse_erf(2.*sqrt(A11) -1.);
     

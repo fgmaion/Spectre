@@ -3,7 +3,9 @@ int NGPCalc(){
     
     CountGalaxies();
     
-    overdensity_volumeLimitedTracer();
+    // overdensity_volumeLimitedTracer();
+    
+    overdensity_varyingSelection();
     
     printSurveyDetails();
     return 0;
@@ -13,7 +15,7 @@ int NGPCalc(){
 int NGPCalcCube(){
     // ApplyJenkins();
     
-    CountGalaxiesCube();
+    CountGalaxies();
     
     overdensity_volumeLimitedTracer();    
     
@@ -39,7 +41,7 @@ int CountGalaxies(){
     for(j=0; j<Vipers_Num; j++){
         boxlabel = boxCoordinates(j);
             
-        if((zUtilized[j] > redshiftLowLimit) && (zUtilized[j] < redshiftHiLimit) && (M_B[j] < absMagCut)){ 
+        if(Acceptanceflag[j]==true){    
             densityArray[boxlabel] += 1;
         }
     }
@@ -50,22 +52,8 @@ int CountGalaxies(){
 }
 
 
-int CountGalaxiesCube(){
-    // Cubic run, perhaps to which a window fn. is to be applied. 
-
-    for(j=0; j<Vipers_Num; j++){
-        boxlabel = boxCoordinates(j);
-
-        densityArray[boxlabel] += 1;
-    }
-    
-    TotalZADEWeight = SumDoubleArray(densityArray, n0*n1*n2);
-    
-    return 0;
-}
-
-
 int overdensity_volumeLimitedTracer(){
+    // The true density field. 
     MeanNumberDensity = TotalZADEWeight/TotalVolume;
 
     for(j=0; j<n0*n1*n2; j++)  densityArray[j] /= CellVolume*MeanNumberDensity;
@@ -75,9 +63,7 @@ int overdensity_volumeLimitedTracer(){
 }
 
 
-int overdensity_ImperfectSelectionTracer(){    
-    MeanNumberDensity = TotalZADEWeight/TotalSurveyedVolume;
-    
+int overdensity_varyingSelection(){    
     fkpShotNoiseCorr = 0.0;
 
     for(k=0; k<n0; k++){
@@ -87,148 +73,19 @@ int overdensity_ImperfectSelectionTracer(){
             
                 Chi                           = Cell_chiVIPERSsystem[Index];
                 
-                if(densityArray[Index] > 0){
-                    fkpShotNoiseCorr         += pow(TotalFKPweight, -2.)*pow(CellVolume, -1.)*pow(FKPweights[Index], 2.)/interp_nz(Chi);
-                }
-    
-                // densityArray[Index]       /= CellVolume*interp_nz(Chi);
+                // if(densityArray[Index] > 0){
+                //     fkpShotNoiseCorr         += pow(TotalFKPweight, -2.)*pow(CellVolume, -1.)*pow(FKPweights[Index], 2.)/interp_nz(Chi);
+                // }
                 
-                densityArray[Index]          /= CellVolume*MeanNumberDensity;
-                densityArray[Index]          -= 1.0;
+                if(interp_nz(Chi) != 0.0)       densityArray[Index]         /= CellVolume*(*pt2nz)(Chi);
+                
+                densityArray[Index]         -=  1.0;
             }
         }
     }
     
-    printf("\n\nFKP shot noise P(k) expectation:            %e", fkpShotNoiseCorr);
-    printf("\nFKP unweighted shot noise P(k) expectation:   %e", 1./TotalZADEWeight);
-
-    return 0;
-}
-
-
-int CalculateCell_raDecRotated(){
-    float xCell, yCell, zCell;
-    float rCell;
-
-    float raCell, polarCell, decCell;
-
-    for(k=0; k<n0; k++){
-        for(j=0; j<n1; j++){
-            for(i=0; i<n2; i++){
-	           xCell      = AxisLimsArray[0][0] + CellSize*(i+0.5);
-	           yCell      = AxisLimsArray[0][1] + CellSize*(j+0.5);
-	           zCell      = AxisLimsArray[0][2] + CellSize*(k+0.5);
-
-               Index     = k*n1*n2 + j*n2 + i;
-
-               Cell_rotatedXvals[Index] = xCell;
-               Cell_rotatedYvals[Index] = yCell;
-               Cell_rotatedZvals[Index] = zCell;
-            }
-        }
-    }
-    
-    Celestialbasis(34.5, -5.10, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, n0*n1*n2);
-
-    for(k=0; k<n0; k++){
-        for(j=0; j<n1; j++){
-            for(i=0; i<n2; i++){
-                Index       = k*n1*n2 + j*n2 + i;
-
-                xCell       = Cell_rotatedXvals[Index];
-                yCell       = Cell_rotatedYvals[Index];
-                zCell       = Cell_rotatedZvals[Index]; 
-
-                rCell       = pow(xCell*xCell + yCell*yCell + zCell*zCell, 0.5);     
-
-                Cell_chiVIPERSsystem[Index] = rCell;
-		
-                // acos returns radians, argument must be in the range -1 to 1. Returned value is between 0 and pi inclusive. 
-
-                polarCell   = acos(zCell/rCell);
-
-                // radians. 
-                decCell     = pi/2. - polarCell;
-
-                // returns the arc tangent in radians of y/x based on the signs of both values to determine the correct quadrant. both x and y cannot be zero, returned value is in the range !-pi to pi!
-                raCell      = atan2(yCell, xCell);
-
-                if(raCell < 0.0){
-                    // right ascension in the range [0, 2*pi]
-                    raCell += 2.*pi;
-                }
-
-                // conversion to degrees. 
-                decCell    *= 180./pi;
-                raCell     *= 180./pi;
-
-                // right ascension in degrees.
-	            Cell_raVIPERSsystem[Index]  = raCell;
-		
-                // declination in degrees.
-                Cell_decVIPERSsystem[Index] = decCell;
-            }
-        }
-    }
-    
-    sprintf(filepath, "%s/Data/ra_decCells/ra_dec_degs.dat", root_dir);
-    output = fopen(filepath, "wb");
- 
-    fwrite(Cell_raVIPERSsystem, sizeof(float), n0*n1*n2, output);
-    fwrite(Cell_decVIPERSsystem, sizeof(float), n0*n1*n2, output);
-    fclose(output);
-
-    sprintf(filepath, "%s/Data/ra_decCells/ra_dec_wght.dat", root_dir);
-    inputfile = fopen(filepath, "rb");
-
-    fread(Cell_raVIPERSsystem,  sizeof(float), n0*n1*n2, inputfile);
-    fread(Cell_decVIPERSsystem, sizeof(float), n0*n1*n2, inputfile);
-    fread(Cell_VIPERSweights,   sizeof(float), n0*n1*n2, inputfile);
-
-    for(j=0; j<n0*n1*n2; j++){
-        if(Cell_VIPERSweights[j] != 0.0){
-             Cell_VIPERSbools[j] = 1.00;
-        }
-    }
-
-
-    for(j=0; j<n0*n1*n2; j++){
-        if((LowerRAlimit<Cell_raVIPERSsystem[j]) && (Cell_raVIPERSsystem[j]<UpperRAlimit) && (LowerDecLimit<Cell_decVIPERSsystem[j]) && (Cell_decVIPERSsystem[j]<UpperDecLimit) && (LowerChiLimit < Cell_chiVIPERSsystem[j]) && (Cell_chiVIPERSsystem[j] < UpperChiLimit)){
-            Cell_SurveyLimitsMask[j] = 1.0;
-        } 
-    }
-
-    fclose(inputfile);
-
-    // projectVIPERSsystem();
-
-    return 0;
-}
-
-
-int projectVIPERSsystem(){
-    sprintf(filepath, "%s/Data/ra_decCells/xyzwNonemptyCells.dat", root_dir);
-    output = fopen(filepath, "w");
-
-    float xCell, yCell, zCell;
-
-    for(k=0; k<n0; k++){
-        for(j=0; j<n1; j++){
-            for(i=0; i<n2; i++){
-                Index       = k*n1*n2 + j*n2 + i;
-
-                xCell       = AxisLimsArray[0][0] + CellSize*(i+0.5);
-                yCell       = AxisLimsArray[0][1] + CellSize*(j+0.5);
-                zCell       = AxisLimsArray[0][2] + CellSize*(k+0.5);
-
-                if(Cell_VIPERSweights[Index] > 0.0001){
-                    fprintf(output, "%f \t %f \t %f \t %f\n", xCell, yCell, zCell, Cell_VIPERSweights[Index]);
-                }
-            }
-        }
-    }
-
-    fclose(output);
+    // printf("\n\nFKP shot noise P(k) expectation:            %e", fkpShotNoiseCorr);
+    // printf("\nFKP unweighted shot noise P(k) expectation:   %e", 1./TotalZADEWeight);
 
     return 0;
 }
@@ -243,73 +100,10 @@ int printSurveyDetails(){
     printf("\nCell volume:                   %f.",        CellVolume); 
     printf("\nMean number density:           %f", MeanNumberDensity);    
     printf("\n\nNon-empty cells:             %e  [n0*n1*n2]", SumOfVIPERSbools/(n0*n1*n2));
-    printf("\n\nEffective survey volume:       %e    [TotalVolume]", (float) TotalSurveyedVolume/TotalVolume);
+    
+    printf("\n\nfundamental x mode:  %f", kIntervalx);
+    printf("\nfundamental y mode:  %f", kIntervaly);
+    printf("\nfundamental z mode:  %f", kIntervalz);
     
     return 0;
-}
-
-
-double SumDoubleArray(double array[], int len){
-    double Interim = 0.0;
-
-    for(j=0; j<len; j++)  Interim += array[j];
-
-    return Interim;
-}
-
-
-float SumFloatArray(float array[], int len){
-    float Interim = 0.0;
-
-    for(j=0; j<len; j++) Interim += array[j];
-
-    return Interim;
-}
-
-
-float arrayMax(float a[], int n){
-  float max = a[0];
-
-  for(j=0; j< n; j++){
-    if(a[j] > max){
-      max = a[j]; 
-    }
-  }
-  return max;
-}
-
-
-float arrayMin(float a[], int n){
-  float min = a[0];
-
-  for(j=0; j< n; j++){
-    if(a[j] < min){
-      min = a[j];
-    }
-  }
-  return min;
-}
-
-
-double DoubleArrayMax(double a[], int n){
-  double max = a[0];
-
-  for(j=0; j< n; j++){
-    if(a[j] > max){
-      max = a[j]; 
-    }
-  }
-  return max;
-}
-
-
-double DoubleArrayMin(double a[], int n){
-  double min = a[0];
-
-  for(j=0; j< n; j++){
-    if(a[j] < min){
-      min = a[j];
-    }
-  }
-  return min;
 }

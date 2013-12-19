@@ -28,28 +28,35 @@ int EvaluateGridParameters(){
 }
 
 
-int assignbinninginterval(float interval){
-    kbinInterval = interval;
+int assignbinninginterval(double interval){
+    kbinInterval      = interval;
     
-    kBinNumb     =  (int) ceil(modkMax/kbinInterval);   
+    kBinNumb          =  (int) ceil(modkMax/kbinInterval);   
+    
+    InterpK_binNumber =  (int) ceil(10.0/kbinInterval);
 
     printf("\n\nkbinterval:  %f", kbinInterval);
-    
     printf("\nNumber of k bins:  %d", kBinNumb);
 
     return 0;
 }
 
 
-float SolidAngleCalc(float decLowerBound, float decUpperBound, float raInterval){
-    float SolidAngle;
+double SolidAngleCalc(double decLowerBound, double decUpperBound, double raInterval){
+    double SolidAngle;
     
-    float thetaLowerRa = pi/2. - decUpperBound*pi/180.;
-    float thetaUpperRa = pi/2. - decLowerBound*pi/180.;
+    double thetaLowerRad = pi/2. - decUpperBound*pi/180.;
+    double thetaUpperRad = pi/2. - decLowerBound*pi/180.;
     
-    SolidAngle = (raInterval*pi/180.)*(-cos(thetaUpperRa) + cos(thetaLowerRa));
+    SolidAngle = (raInterval*pi/180.)*(-cos(thetaUpperRad) + cos(thetaLowerRad));
 
-    printf("\nSolid angle observed in a given mock: %f", SolidAngle);
-
+    printf("\nSolid angle observed in a given mock: %e steradians.", SolidAngle);
+    printf("\n                                    : %e sq degrees.", steradians2sqdegs(SolidAngle));
     return SolidAngle;
 }
+
+
+double steradians2sqdegs(double inSteradians){
+    return pow(180./pi, 2.)*inSteradians;
+}
+

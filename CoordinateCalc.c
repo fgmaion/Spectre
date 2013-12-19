@@ -28,6 +28,7 @@
  
     // Calculate number of Galaxies in the ZADE catalogue (line number);
 
+    
     ch         = 0;
     Vipers_Num = 0;
     
@@ -41,45 +42,48 @@
     
     // ZADE Catalogue parameters.
     
-    id           =  (int   *)  realloc(id,           Vipers_Num*sizeof(*id));
-    ra           =  (float *)  realloc(ra,           Vipers_Num*sizeof(*ra));
-    dec          =  (float *)  realloc(dec,          Vipers_Num*sizeof(*dec));
-    zcos         =  (float *)  realloc(zcos,         Vipers_Num*sizeof(*zcos));
-    zpec         =  (float *)  realloc(zpec,         Vipers_Num*sizeof(*zpec));
-    zobs         =  (float *)  realloc(zobs,         Vipers_Num*sizeof(*zobs)); 
-    zphot        =  (float *)  realloc(zphot,        Vipers_Num*sizeof(*zphot));
-    M_B          =  (float *)  realloc(M_B,          Vipers_Num*sizeof(*M_B));
-    type         =  (int   *)  realloc(type,         Vipers_Num*sizeof(*type));
-    csr          =  (float *)  realloc(csr,          Vipers_Num*sizeof(*csr));
-    sampling     =  (float *)  realloc(sampling,     Vipers_Num*sizeof(*sampling));
-    sampling35   =  (float *)  realloc(sampling35,   Vipers_Num*sizeof(*sampling35));
+    id             =  (int   *)   realloc(id,             Vipers_Num*sizeof(*id));
+    ra             =  (double *)  realloc(ra,             Vipers_Num*sizeof(*ra));
+    dec            =  (double *)  realloc(dec,            Vipers_Num*sizeof(*dec));
+    zcos           =  (double *)  realloc(zcos,           Vipers_Num*sizeof(*zcos));
+    zpec           =  (double *)  realloc(zpec,           Vipers_Num*sizeof(*zpec));
+    zobs           =  (double *)  realloc(zobs,           Vipers_Num*sizeof(*zobs)); 
+    zphot          =  (double *)  realloc(zphot,          Vipers_Num*sizeof(*zphot));
+    M_B            =  (double *)  realloc(M_B,            Vipers_Num*sizeof(*M_B));
+    type           =  (int   *)   realloc(type,           Vipers_Num*sizeof(*type));
+    csr            =  (double *)  realloc(csr,            Vipers_Num*sizeof(*csr));
+    sampling       =  (double *)  realloc(sampling,       Vipers_Num*sizeof(*sampling));
+    sampling35     =  (double *)  realloc(sampling35,     Vipers_Num*sizeof(*sampling35));
 
-    pointing     =  (float **) realloc(pointing,     Vipers_Num*sizeof(char*));
-    quadrant     =  (float **) realloc(quadrant,     Vipers_Num*sizeof(char*));
+    pointing       =  (char **)   realloc(pointing,       Vipers_Num*sizeof(char*));
+    quadrant       =  (char **)   realloc(quadrant,       Vipers_Num*sizeof(char*));
 
-    flag_Nagoya  =  (int   *)  realloc(flag_Nagoya,  Vipers_Num*sizeof(*flag_Nagoya));
-    flag_SSPOC   =  (int   *)  realloc(flag_SSPOC,   Vipers_Num*sizeof(*flag_SSPOC));
-    flag_SSPOC35 =  (int   *)  realloc(flag_SSPOC35, Vipers_Num*sizeof(*flag_SSPOC35));
-    rand_sel     =  (float *)  realloc(rand_sel,     Vipers_Num*sizeof(*rand_sel));
+    flag_Nagoya    =  (int   *)   realloc(flag_Nagoya,    Vipers_Num*sizeof(*flag_Nagoya));
+    flag_SSPOC     =  (int   *)   realloc(flag_SSPOC,     Vipers_Num*sizeof(*flag_SSPOC));
+    flag_SSPOC35   =  (int   *)   realloc(flag_SSPOC35,   Vipers_Num*sizeof(*flag_SSPOC35));
+    rand_sel       =  (double *)  realloc(rand_sel,       Vipers_Num*sizeof(*rand_sel));
      
     // derived parameters. 
-    polarAngle   =  (float *)  realloc(polarAngle,   Vipers_Num*sizeof(*polarAngle));
-    rDist        =  (float *)  realloc(rDist,        Vipers_Num*sizeof(*rDist));
-    xCoor        =  (float *)  realloc(xCoor,        Vipers_Num*sizeof(*xCoor));
-    yCoor        =  (float *)  realloc(yCoor,        Vipers_Num*sizeof(*yCoor));
-    zCoor        =  (float *)  realloc(zCoor,        Vipers_Num*sizeof(*zCoor));
+    Acceptanceflag =  (bool  *)   realloc(Acceptanceflag, Vipers_Num*sizeof(*Acceptanceflag));
+    polarAngle     =  (double *)  realloc(polarAngle,     Vipers_Num*sizeof(*polarAngle));
+    rDist          =  (double *)  realloc(rDist,          Vipers_Num*sizeof(*rDist));
+    xCoor          =  (double *)  realloc(xCoor,          Vipers_Num*sizeof(*xCoor));
+    yCoor          =  (double *)  realloc(yCoor,          Vipers_Num*sizeof(*yCoor));
+    zCoor          =  (double *)  realloc(zCoor,          Vipers_Num*sizeof(*zCoor));
     
     for(j=0; j<Vipers_Num; j++){
-        pointing[j] =  (float *) realloc(pointing[j], 20*sizeof(char));
-        quadrant[j] =  (float *) realloc(quadrant[j], 20*sizeof(char));
+        pointing[j] =  (char *) realloc(pointing[j], 20*sizeof(char));
+        quadrant[j] =  (char *) realloc(quadrant[j], 20*sizeof(char));
     }
 
-    for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%d \t %f \t %f \t %f \t %f \t %f \t %f \t %f \t %d \t %f \t %f \t %f \t %s \t %s \t %d \t %d \t %d \t %f \n", &id[j], &ra[j], &dec[j], &zcos[j], &zpec[j], &zobs[j], &zphot[j], &M_B[j], &type[j], &csr[j], &sampling[j], &sampling35[j], pointing[j], quadrant[j], &flag_Nagoya[j], &flag_SSPOC[j], &flag_SSPOC35[j], &rand_sel[j]);
+    for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%d \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %d \t %lf \t %lf \t %lf \t %s \t %s \t %d \t %d \t %d \t %lf \n", &id[j], &ra[j], &dec[j], &zcos[j], &zpec[j], &zobs[j], &zphot[j], &M_B[j], &type[j], &csr[j], &sampling[j], &sampling35[j], pointing[j], quadrant[j], &flag_Nagoya[j], &flag_SSPOC[j], &flag_SSPOC35[j], &rand_sel[j]);
 
     // Note: &pointing[j] must be passed to any printf statement. 
+    
     fclose(inputfile);
 
     printf("\nHOD catalogue input successful.");
+    printf("\nNumber of galaxies in catalogue:  %d", Vipers_Num);
 
     return 0;
 }
@@ -99,13 +103,13 @@ int CoordinateCalc(){
             ra[j]                /= (pi/180.0);                                 // Converted to degrees  
     }
 
+
     printf("\n\nOn input...");
-    printf("\nNumber of galaxies in catalogue:  %d", Vipers_Num);
     printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
     printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
-
     printf("\n\nRedshift max:  %f \t Redshift min:  %f", arrayMax(zUtilized, Vipers_Num), arrayMin(zUtilized, Vipers_Num));
+    printf("\n\nAbs. mag. max:  %f \t Abs. mag. min:  %f", arrayMax(M_B, Vipers_Num), arrayMin(M_B, Vipers_Num));
 
     return 0;
 }

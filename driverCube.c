@@ -4,6 +4,17 @@
 #define   AUXfn_header "/disk1/mjw/Aux_functions/header.h"
 #include  AUXfn_header
 
+#define   AUXfn_funcs  "/disk1/mjw/Aux_functions/Aux_functions.c"
+#include  AUXfn_funcs
+
+#include <stdbool.h>
+
+#include <gsl/gsl_sf_bessel.h>
+#include <gsl/gsl_sf_erf.h>
+#include <gsl/gsl_sf_gamma.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_sf_legendre.h>
+
 #include "Scripts/header.h"
 
 #include "Scripts/comovDistRedshiftCalc.c"
@@ -14,11 +25,14 @@
 #include "Scripts/assignMemory.c"
 
 #include "Scripts/CoordinateCalcCube.c"
+#include "Scripts/assignAcceptance.c"
 
 #include "Scripts/ArtificialWf.c"
 
 #include "Scripts/NGPCalc.c"
 #include "Scripts/BasisChange.c"
+#include "Scripts/CalcCellraDec.c"
+
 #include "Scripts/FKPweights.c"
 #include "Scripts/Windowfn_PkCorrections.c"
 
@@ -26,17 +40,17 @@
 #include "Scripts/FFTw_3D.c"
 #include "Scripts/FFTw_3Dwf.c"
 #include "Scripts/FFTw_3Dwf_pad.c"
+#include "Scripts/axesWfSlices.c"
 
+#include "Scripts/MeasureWfKernel.c"
 #include "Scripts/sphericalConvolvePk.c"
+#include "Scripts/setConvolutionKernels.c"
+#include "Scripts/AnalyticTestConvolution.c"
 #include "Scripts/ConvolvePkAnisoWf.c"
 
-#include "Scripts/ComovingNumberDensityCalc.c"
+#include "Scripts/IntegralConstraintCorrection.c"
 
-#include <gsl/gsl_sf_bessel.h>
-#include <gsl/gsl_sf_erf.h>
-#include <gsl/gsl_sf_gamma.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_sf_legendre.h>
+#include "Scripts/ComovingNumberDensityCalc.c"
 
 #include "Scripts/InvErrorfn.c"
 
@@ -50,7 +64,7 @@
 
 int main(int argc, char **argv){
 
-    sprintf(root_dir, "/disk1/mjw/HOD_MockRun");
+    sprintf(root_dir,      "/disk1/mjw/HOD_MockRun");
     sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_HOD_Mocks");
 
     // Stacpolly run. 
@@ -85,14 +99,14 @@ int main(int argc, char **argv){
     JenkinsScalefactor        =        1.0;
 
     // FKP P(k) of interest;
-    fkpPk                     =      5000.;                                               // [h^-1 Mpc]^3, Peeble's convention.
+    fkpPk                     =      5000.;                                               // [P(k)] = [h^-1 Mpc]^3, Peeble's convention.
 
     // Binning interval for P(k).
     kbinInterval              =      0.007;
     modkMax                   =        0.5;
 
     // Must be odd. 2n + 1.
-    wfKernelsize              =         13;
+    wfKernelsize              =          7;
 
     // padded window fn. calculation.
     sidepad                   =          0; 
@@ -118,50 +132,57 @@ int main(int argc, char **argv){
 
     prepNGP();
     
-    sprintf(surveyType, "AnisoGauss_Jenkins%.1f", JenkinsScalefactor);
+    sprintf(surveyType, "Spherical_Jenkins%.1f", JenkinsScalefactor);
     
     // FullCube();
     // EmbeddedCube(50);
     // Gaussian(250.);
     // PencilBeamSurvey(40, 60, 40, 60);
-    // Spherical(250.);
-    AnisoGauss(300., 400., 500.);
+    Spherical(250.);
+    // AnisoGauss(80., 100., 120.);
 
     Cell_AppliedWindowFn  = &booldensity[0];
 
-    SumOfVIPERSbools      = SumFloatArray(booldensity, n0*n1*n2);
+    SumOfVIPERSbools      = SumDoubleArray(booldensity, n0*n1*n2);
 
     // TotalSurveyedVolume initialised to zero in header.h
-    TotalSurveyedVolume  = SumOfVIPERSbools*CellVolume*pow(JenkinsScalefactor, 3.0);
+    TotalSurveyedVolume   = SumOfVIPERSbools*CellVolume*pow(JenkinsScalefactor, 3.0);
 
     prepFFTw(n0, n1, n2);
     prepFFTbinning();
 
     CoordinateCalcCube();  
     
-    rollcube(xCoor, yCoor, zCoor, Vipers_Num);
+    // rollcube(xCoor, yCoor, zCoor, Vipers_Num);
+    
+    // Currently all galaxies accepted. 
+    assignAcceptanceCube();
 
     NGPCalcCube();
     
     // A11                      =   (1./2.6); // Empirical estimate from suppressed Del2k. 
     // clipDensity(appliedClippingThreshold); // Clipping at 5.0
     
-    CalcCorrections();
+    CalcWfCorrections();
     
     PkCalc();
 
-    // wfPkCalc();
+    wfPkCalc();
     
-    // ConvolveTheory();
+    // Window func. convolution assuming spherical symmetry/averaging.
+    ConvolveSphericalSymm();
+    
+    // Anisotropic window func. and/or anisotropic P(k) convolution calc. 
+    
+    // MeasureAnisoWfKernel();
+
+    // analyticConvTest();
+    // analyticConvTest_MeasuredWf(); 
+    
     // printWindowfuncSlices();
     
-    EstimateAnisoWfKernel();
+    // AnisoConvolution();
     
-    AnisoConvolution();
-    
-    // FFTw arrays in and out and binning arrays must be freed and reassigned to the padded size before padded window fn. calc.
-    // freeFFTw();
-    // freeBinning();
     
     // padwfPkCalc(sidepad);
     
@@ -182,5 +203,7 @@ int main(int argc, char **argv){
     // Stacpolly run. 
     // MPI_Finalize();
 
+    printf("\n\n");
+    
 return 0; 
 }

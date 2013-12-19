@@ -29,11 +29,13 @@ int CoordinateCalcCube(){
     rewind(inputfile);
     
     // ZADE Catalogue parameters.
-    xCoor      =  (float *) realloc(xCoor,       Vipers_Num*sizeof(*xCoor));
-    yCoor      =  (float *) realloc(yCoor,       Vipers_Num*sizeof(*yCoor));
-    zCoor      =  (float *) realloc(zCoor,       Vipers_Num*sizeof(*zCoor));
+    xCoor          =  (double *)  realloc(xCoor,          Vipers_Num*sizeof(*xCoor));
+    yCoor          =  (double *)  realloc(yCoor,          Vipers_Num*sizeof(*yCoor));
+    zCoor          =  (double *)  realloc(zCoor,          Vipers_Num*sizeof(*zCoor));
     
-    for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%f \t %f \t %f \n", &xCoor[j], &yCoor[j], &zCoor[j]);
+    Acceptanceflag =  (bool  *)   realloc(Acceptanceflag, Vipers_Num*sizeof(*Acceptanceflag));
+    
+    for(j=0; j<Vipers_Num; j++)   fscanf(inputfile, "%lf \t %lf \t %lf \n", &xCoor[j], &yCoor[j], &zCoor[j]);
     
     fclose(inputfile);
    
