@@ -1,27 +1,39 @@
-xdata    = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/VIPERSparent_xSlice.dat')
-pl.loglog(xdata[:,1], xdata[:,2], 'b', label='x direction')
+xdata    = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/VIPERSparent_Mock001_GaussSmoothNz_100.0_SkinDepth_5.0_xSlice.dat')
+pl.semilogy(xdata[:,1], xdata[:,2], 'b', label='x direction')
 
-ydata    = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/VIPERSparent_ySlice.dat')
-pl.loglog(ydata[:,1], ydata[:,2], 'g', label='y direction')
+ydata    = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/VIPERSparent_Mock001_GaussSmoothNz_100.0_SkinDepth_5.0_ySlice.dat')
+pl.semilogy(ydata[:,1], ydata[:,2], 'g', label='y direction')
 
-zdata    = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/VIPERSparent_zSlice.dat')
-pl.loglog(zdata[:,1], zdata[:,2], 'y^', label='z direction')
+zdata    = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/VIPERSparent_Mock001_GaussSmoothNz_100.0_SkinDepth_5.0_zSlice.dat')
+pl.semilogy(zdata[:,1], zdata[:,2], 'y', label='z direction')
 
 #pl.xlim([0.001, 0.3])
 #pl.ylim([0.0001, 1.0])
 
-matplotlib.pyplot.axvline(x=0.0097, ymin=0, ymax=1, color='b')
-matplotlib.pyplot.axvline(x=0.0180, ymin=0, ymax=1, color='g')
-matplotlib.pyplot.axvline(x=0.0419, ymin=0, ymax=1, color='y')
+matplotlib.pyplot.axvline(x=0.0435468, ymin=0, ymax=1, color='b')
+matplotlib.pyplot.axvline(x=0.0679263, ymin=0, ymax=1, color='g')
+matplotlib.pyplot.axvline(x=0.314159, ymin=0, ymax=1, color='y')
 
 xx, locs = plt.xticks()
 ll = ['%.3f' % a for a in xx]
 plt.gca().xaxis.set_major_formatter(FixedFormatter(ll))
 
-leg = pl.legend(loc=3, ncol=1, prop = FontProperties(size = '10'))
+leg = pl.legend(loc=1, ncol=1, prop = FontProperties(size = '10'))
 leg.draw_frame(False)
 
-pl.ylabel(r'$W^2(k_i)$', fontsize = '10')
+pl.ylabel(r'$W^2(k)$', fontsize = '10')
 pl.xlabel(r'$k \ [h \ Mpc^{-1}]$', fontsize = '10')
+pl.title('$0.7 < z < 0.9$')
 
 pl.savefig('/disk1/mjw/HOD_MockRun/Plots/MarseilleWf.pdf')
+
+pl.clf()
+
+pl.ylabel(r'Spherically averaged $W^2(k)$', fontsize = '10')
+pl.xlabel(r'$k \ [h \ Mpc^{-1}]$', fontsize = '10')
+pl.title('$0.7 < z < 0.9$')
+
+data    = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSpherical/midK_W2q_VIPERSparent_Mock001_GaussSmoothNz_100.0_SkinDepth_5.0.dat')
+pl.loglog(data[:,0], data[:,1], 'b')
+
+pl.savefig("/disk1/mjw/HOD_MockRun/Plots/SphericallyAveragedWindowfn.pdf")

@@ -11,7 +11,7 @@ int CalcCellraDec(){
 	           yCell      = AxisLimsArray[0][1] + CellSize*(j+0.5);
 	           zCell      = AxisLimsArray[0][2] + CellSize*(k+0.5);
 
-               Index     = k*n1*n2 + j*n2 + i;
+               Index      = k*n1*n2 + j*n2 + i;
 
                Cell_rotatedXvals[Index] = xCell;
                Cell_rotatedYvals[Index] = yCell;
@@ -70,10 +70,8 @@ int CalcCellraDec(){
     fwrite(Cell_decVIPERSsystem, sizeof(double), n0*n1*n2, output);
     fclose(output);
 
-/*
-    --//--
-*/  
-    /* 
+    /* // Read in the VIPERS weights. 
+    
     sprintf(filepath, "%s/Data/ra_decCells/ra_dec_wght.dat", root_dir);
     inputfile = fopen(filepath, "rb");
 
@@ -88,7 +86,6 @@ int CalcCellraDec(){
     }
     
     fclose(inputfile);
-    
     */
     
     for(j=0; j<n0*n1*n2; j++){

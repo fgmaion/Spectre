@@ -13,11 +13,17 @@ int MeasureAnisoWfKernel(){
     // Allocates memory for (the averaging of) the measured window fn. kernel.
     assignAnisoWfKernel();
     
-    // Largest fundamental mode.
-    MaxkInterval = fmax(fmax(kIntervalx, kIntervaly), kIntervalz);
+    xminKernelshift              = -(xwfKernelsize-1)/2;
+    xmaxKernelshift              =  (xwfKernelsize-1)/2;
     
-    minKernelshift              = -0.5*(wfKernelsize-1);
-    maxKernelshift              =  0.5*(wfKernelsize-1);
+    yminKernelshift              = -(ywfKernelsize-1)/2;
+    ymaxKernelshift              =  (ywfKernelsize-1)/2;
+    
+    zminKernelshift              = -(zwfKernelsize-1)/2;
+    zmaxKernelshift              =  (zwfKernelsize-1)/2;
+    
+    // Largest size of the kernel, in k.
+    KernelMaxk = fmax(fmax(xmaxKernelshift*kIntervalx, ymaxKernelshift*kIntervaly), zmaxKernelshift*kIntervalz);
     
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
@@ -39,18 +45,18 @@ int MeasureAnisoWfKernel(){
                 H_kReal                            = pow(n0*n1*n2, -1.0)*out[Index][0];
                 H_kImag                            = pow(n0*n1*n2, -1.0)*out[Index][1];
                 
-                // The kernel only extends to kx, ky, kz limited by e.g 0.037699, can ignore modes which have a modulus much greater than this. 
-                if(fabs(kmodulus) < pow(3., 0.5)*(wfKernelsize-1.)*MaxkInterval){
-                
-                    for(kkshift= minKernelshift; kkshift<maxKernelshift + 1; kkshift++){
-                        for(jjshift= minKernelshift; jjshift<maxKernelshift + 1; jjshift++){ 
-                            for(iishift= minKernelshift; iishift<maxKernelshift + 1; iishift++){
+                // The kernel only extends to kx, ky, kz limited by e.g 0.037699, can ignore modes which have a modulus much greater than this, (safety factor of 1.5) 
+                if(fabs(kmodulus) < pow(3., 0.5)*1.5*KernelMaxk){
+                    for(kkshift= zminKernelshift; kkshift<zmaxKernelshift + 1; kkshift++){
+                        for(jjshift= yminKernelshift; jjshift<ymaxKernelshift + 1; jjshift++){ 
+                            for(iishift= xminKernelshift; iishift<xmaxKernelshift + 1; iishift++){
                             
-                                Index    = (kkshift + maxKernelshift)*wfKernelsize*wfKernelsize + (jjshift + maxKernelshift)*wfKernelsize + (iishift + maxKernelshift); 
+                                Index    = (kkshift + zmaxKernelshift)*ywfKernelsize*xwfKernelsize + (jjshift + ymaxKernelshift)*xwfKernelsize + (iishift + xmaxKernelshift); 
                                 
-                                if(    ((iishift-0.1)*kIntervalx < k_x) && (k_x<(iishift+0.1)*kIntervalx) 
-                                    && ((jjshift-0.1)*kIntervaly < k_y) && (k_y<(jjshift+0.1)*kIntervaly) 
-                                    && ((kkshift-0.1)*kIntervalz < k_z) && (k_z<(kkshift+0.1)*kIntervalz)){
+                                if(    ((iishift - 0.1)*kIntervalx < k_x) && (k_x<(iishift + 0.1)*kIntervalx) 
+                                    && ((jjshift - 0.1)*kIntervaly < k_y) && (k_y<(jjshift + 0.1)*kIntervaly) 
+                                    && ((kkshift - 0.1)*kIntervalz < k_z) && (k_z<(kkshift + 0.1)*kIntervalz)){
+                                            
                                             AnisoWfKernel[Index]           += pow(H_kReal, 2.) + pow(H_kImag, 2.);
                                             AnisoWfKernel_ModeNumb[Index]  += 1;
                                 }
@@ -58,17 +64,15 @@ int MeasureAnisoWfKernel(){
                         }
                     }
                     
-                }
-                    
-                    
+                }        
             }
         }                
     }
     
-    for(kk=0; kk<wfKernelsize; kk++){
-        for(jj=0; jj<wfKernelsize; jj++){
-            for(ii=0; ii<wfKernelsize; ii++){
-                Index = kk*wfKernelsize*wfKernelsize + jj*wfKernelsize + ii;   
+    for(kk=0; kk<zwfKernelsize; kk++){
+        for(jj=0; jj<ywfKernelsize; jj++){
+            for(ii=0; ii<xwfKernelsize; ii++){
+                Index = kk*ywfKernelsize*xwfKernelsize + jj*xwfKernelsize + ii;   
             
                 if(AnisoWfKernel_ModeNumb[Index] != 0){
                     AnisoWfKernel[Index] /= (double) AnisoWfKernel_ModeNumb[Index];
@@ -77,9 +81,9 @@ int MeasureAnisoWfKernel(){
         }
     }
 
-    printf("\n\nUpper Wf kenel x limit: %g", 0.5*(wfKernelsize-1)*kIntervalx);
-    printf("\nUpper Wf kenel y limit: %g", 0.5*(wfKernelsize-1)*kIntervaly);
-    printf("\nUpper Wf kenel z limit: %g", 0.5*(wfKernelsize-1)*kIntervalz);
+    printf("\n\nUpper Wf kernel x limit: %g", xmaxKernelshift*kIntervalx);
+    printf("\nUpper Wf kernel y limit: %g",   ymaxKernelshift*kIntervaly);
+    printf("\nUpper Wf kernel z limit: %g\n\n",   zmaxKernelshift*kIntervalz);
 
     return 0;
 }

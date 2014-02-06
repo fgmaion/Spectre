@@ -3,6 +3,7 @@ int PkCalc(){
     
     // The true density field multiplied by a mask, W(x). 
     for(j=0; j<n0*n1*n2; j++) in[j][0] = densityArray[j]*Cell_AppliedWindowFn[j];
+    
     for(j=0; j<n0*n1*n2; j++) in[j][1] = 0.0;
     
     printf("\nPerforming FFT.");
@@ -14,15 +15,136 @@ int PkCalc(){
     // 0: Subtract shot noise for a real survey, 1: Neglect shot noise subtraction for FFT of window function. 
     PkCorrections(0);
     
-    PkBinningCalc(n0*n1*n2, PkArray);
+    // if(loopCount<10)  sprintf(filepath, "%s/Data/Del2k/midK_Del2k_%s_00%d.dat", root_dir, surveyType, loopCount);
+    // else              sprintf(filepath, "%s/Data/Del2k/midK_Del2k_%s_0%d.dat", root_dir, surveyType, loopCount);
+    // Monopole();
+
+    // 2D Power spectrum.
     
-    sprintf(filepath, "%s/Data/Del2k/midK_Del2k_%s.dat", root_dir, surveyType);
+    // if(loopCount<10)  sprintf(filepath, "%s/Data/ClippedPk/zSpace/2Dpk/Observed2Dpk_%s_00%d.dat", root_dir, surveyType, loopCount);
+    // else              sprintf(filepath, "%s/Data/ClippedPk/zSpace/2Dpk/Observed2Dpk_%s_0%d.dat", root_dir, surveyType, loopCount);
+    // Cartesian2Dpk();
+    
+    if(loopCount<10)  sprintf(filepath, "%s/Data/ClippedPk/zSpace/2Dpk/Observedpolar2Dpk_%s_00%d.dat", root_dir, surveyType, loopCount);
+    else              sprintf(filepath, "%s/Data/ClippedPk/zSpace/2Dpk/Observedpolar2Dpk_%s_0%d.dat", root_dir, surveyType, loopCount);
+    polar2DpkCalc();
+    
+    // Quadrupole
+    MultipoleCalc(2, kBinNumb, kQuadrupole);
+    
+    return 0;
+}
+
+
+int Monopole(char filepath[]){
+    PkBinningCalc(n0*n1*n2, PkArray);
+
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%e \t %e \t %e \t %d \t %e \n", meanKBin[j], del2[j], TotalVolume*binnedPk[j], modesPerBin[j], linearErrors[j]);
+
+    fclose(output);
+
+    return 0;
+}
+
+
+int Cartesian2Dpk(char filepath[]){
+    for(j=0;  j<loskBinNumb;  j++)   loskBinLimits[j]  = j*2.*kbinInterval;
+    for(j=0; j<perpkBinNumb;  j++)   perpkBinLimits[j] = loskBinLimits[j];
+    
+    DualBinning(n0*n1*n2, loskBinNumb, loskBinLimits, perpkBinNumb, perpkBinLimits, TwoDpkArray, zSpaceBinnedPk, mean_losk, mean_perpk, zSpacemodesPerBin);
     
     output = fopen(filepath, "w");
-    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], TotalVolume*binnedPk[j], modesPerBin[j], linearErrors[j]);
+
+    for(j=0; j<loskBinNumb-1; j++){
+        for(k=0; k<perpkBinNumb-1; k++){
+            fprintf(output, "%g \t %g \t %g \t %d \n", mean_losk[j][k], mean_perpk[j][k], TotalVolume*zSpaceBinnedPk[j][k], zSpacemodesPerBin[j][k]);
+        }
+    }
+
+    fclose(output);
+
+    return 0;
+}
+
+
+int polar2DpkCalc(char filepath[]){
+    for(j=0; j<kBinNumb;  j++)        kBinLimits[j]  =               kbinInterval*j;
+    for(j=0; j<muBinNumb; j++)       muBinLimits[j]  =   (1.0/(double) muBinNumb)*j;
+
+    DualBinning(n0*n1*n2, muBinNumb, muBinLimits, kBinNumb, kBinLimits, polar2Dpk, polar2DBinnedPk, mean_mu, mean_modk, polar_modesPerBin);
+    
+    output = fopen(filepath, "w");
+
+    for(j=0; j<muBinNumb-1; j++){
+        for(k=0; k<kBinNumb-1; k++){
+            fprintf(output, "%g \t %g \t %g \t %d \n", mean_mu[j][k], mean_modk[j][k], TotalVolume*polar2DBinnedPk[j][k], polar_modesPerBin[j][k]);
+        }
+    }
+
+    fclose(output);
+
+    return 0;
+}
+
+
+int MultipoleCalc(int momentOrder, int kBinNumb, double kMultipole[]){
+    // Callable for momentOrder = {0, 2, 4}, for which the polynomial is *even* in mu.
+
+    double muVal;
+    double muInterval = (1.0/(double) muBinNumb); 
+
+    for(k=0; k<kBinNumb-1; k++){
+        kMultipole[k] = 0.0;
+     
+        for(j=0; j<muBinNumb; j++){
+            // Even integral.   
+            muVal           = j*muInterval;
+            
+            kMultipole[k]  += (2*momentOrder + 1)*muInterval*polar2DBinnedPk[j][k]*gsl_sf_legendre_Pl(momentOrder, muVal);
+        }
+    }
+    
+    if(loopCount<10)  sprintf(filepath, "%s/Data/ClippedPk/zSpace/2Dpk/Observed_%dMultipole_%s_00%d.dat", root_dir, momentOrder, surveyType, loopCount);
+    else              sprintf(filepath, "%s/Data/ClippedPk/zSpace/2Dpk/Observed_%dMultipole_%s_0%d.dat", root_dir,  momentOrder, surveyType, loopCount);
+    
+    output = fopen(filepath, "w");
+
+    for(k=0; k<kBinNumb-1; k++)  fprintf(output, "%g \t %g \t %g \t %d \n", kMultipole[k]);
+
     fclose(output);
     
     return 0;
+}
+
+
+float ShotNoise(){
+    // Shot noise correction for a varying background number density. In the Peeble's convention for P(k).
+    
+    float numerator;
+    float denominator;
+    
+    float flowChi;
+    float fhiChi;
+    
+    flowChi = (float)  LowerChiLimit;
+    fhiChi  = (float)  UpperChiLimit;
+    
+    numerator   =  qromb(&nbarChi2, flowChi, fhiChi);
+    denominator =  qromb(&nbar2Chi2, flowChi, fhiChi);
+    
+    return numerator/denominator;
+}
+
+
+float nbarChi2(float Chi){
+    return (float) (*pt2nz)(Chi)*Chi*Chi;
+}
+
+
+float nbar2Chi2(float Chi){
+    return (float) (*pt2nz)(Chi)*(*pt2nz)(Chi)*Chi*Chi;
 }
 
 
@@ -41,7 +163,12 @@ int PkCorrections(int WindowFuncParam){
                 Index                              = k*n1*n2 + j*n2 + i;
 
                 kSq                                = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
-
+                
+                kmodulus                           = pow(pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.), 0.5);
+                
+                mu                                 = fabs(k_x/kmodulus);
+                if(kmodulus < 0.000001)       mu   = 0.0;      
+                
                 GaussianFilter                     = exp(-1.*kSq*0.5*(pow(1., 2.)));
 
                 WindowFunc                         = 1.;
@@ -67,17 +194,25 @@ int PkCorrections(int WindowFuncParam){
 				// Subtract shot noise contribution for a real survey.  Neglect this for window function calculation.  FKP corrections. 
 				if(WindowFuncParam == 0){
 				    PkArray[Index][1]              = pow(H_kReal, 2.) + pow(H_kImag, 2.);
-				    // PkArray[Index][1]          -= 1./TotalZADEWeight;
-				    // PkArray[Index][1]          -= fkpShotNoiseCorr;
 				    
 				    // The true density field is multiplied by a mask, correct for this with the measured P(k).
                     PkArray[Index][1]             *= TotalVolume*pow(fkpSqWeightsVolume, -1.);
-                }
+                    
+                    PkArray[Index][1]             -= (1./TotalVolume)*ShotNoise();
+                 }
                 
                 // PkCorrections called to correct NGP for survey window function.
                 if(WindowFuncParam == 1){
                     PkArray[Index][1]              = pow(H_kReal, 2.) + pow(H_kImag, 2.);
 	            }
+	            
+	              polar2Dpk[Index][0]              = mu;
+	              polar2Dpk[Index][1]              = kmodulus;
+	              polar2Dpk[Index][2]              = PkArray[Index][1];
+	            
+	            TwoDpkArray[Index][0]              = fabs(k_x);                      // Line of sight wavevector. 
+	            TwoDpkArray[Index][1]              = pow(k_y*k_y + k_z*k_z, 0.5);    // perpendicular wavevector.
+                TwoDpkArray[Index][2]              = PkArray[Index][1];
 	        }
         }
     }
@@ -182,70 +317,66 @@ int BinnedPkForMuInterval(double lowerMuLimit, double upperMuLimit, char filepat
 }
 
 
-int TwoDpkBinningCalc(){
-    printf("\nPerforming 2d binning calc.");
+int DualBinning(int NumberModes, int firstBinNumb, double firstBinLimits[], int secndBinNumb, double secondBinLimits[], double** DualParamArray, double** BinnedDualParamArray, double** mean_firstCol, double** mean_secndCol, int** modesPerBin){
+    int m;
     
-    // Binned Pk assignment. 
+    printf("\nPerforming 2D binning calc.");
     
-    for(j=0; j<kBinNumb; j++)  kBinLimits[j]  = j*kbinInterval;
+    qsort(DualParamArray, NumberModes, sizeof(DualParamArray[0]), FirstColumnCompare);
 
-    // Order by k_los and k_perp.
-    printf("\nSorting 2d array.");
-    qsort(TwoDpkArray, n0*n1*n2, sizeof(TwoDpkArray[0]), FirstColumnCompare);
+    // Order by first then second column.
+    printf("\nDual param array sorted.");
 
-    int losLowerBinIndex  = 0;
-    int losUpperBinIndex  = 0;
+    int firstColLowerBinIndex     = 0;
+    int firstColUpperBinIndex     = 0;
     
-    int perpLowerBinIndex = 0;
-    int perpUpperBinIndex = 0;
+    int secndColLowerBinIndex     = 0;
+    int secndColUpperBinIndex     = 0;
     
-    int m                 = 0;
-    
-    for(j=0; j<kBinNumb-1; j++){
-        for(k=0; k<kBinNumb-1; k++){
-            zSpaceBinnedPk[j][k]    = 0.0;
-            mean_perpk[j][k]        = 0.0;
-            mean_losk[j][k]         = 0.0;
-            zSpacemodesPerBin[j][k] = 0;    
+    for(j=0; j<firstBinNumb-1; j++){
+        for(k=0; k<secndBinNumb-1; k++){
+            BinnedDualParamArray[j][k] = 0.0;
+            mean_firstCol[j][k]        = 0.0;
+            mean_secndCol[j][k]        = 0.0;
+            modesPerBin[j][k]          =   0;    
         }
-    
     }
     
-    for(j=0; j<kBinNumb-1; j++){
-        for(i=losLowerBinIndex; i<n0*n1*n2; i++){
-            if(TwoDpkArray[i][0] > kBinLimits[j+1]){
-                losUpperBinIndex = i;
+    for(j=0; j<firstBinNumb-1; j++){
+        for(i=firstColLowerBinIndex; i<NumberModes; i++){
+            if(DualParamArray[i][0] > firstBinLimits[j+1]){
+                firstColUpperBinIndex = i;
                 break;
             } 
         }
 
-        perpLowerBinIndex = losLowerBinIndex;
+        secndColLowerBinIndex = firstColLowerBinIndex;
 
-	qsort(&TwoDpkArray[losLowerBinIndex], losUpperBinIndex-losLowerBinIndex, sizeof(TwoDpkArray[0]), SecondColumnCompare);
+	qsort(&DualParamArray[firstColLowerBinIndex], firstColUpperBinIndex - firstColLowerBinIndex, sizeof(DualParamArray[0]), SecondColumnCompare);
        
-        for(k=0; k<(kBinNumb-1); k++){
-            for(m=perpLowerBinIndex; m<losUpperBinIndex; m++){
-                if(TwoDpkArray[m][1] > kBinLimits[k+1]){
-                    perpUpperBinIndex = m;
+        for(k=0; k<secndBinNumb-1; k++){
+            for(m=secndColLowerBinIndex; m<firstColUpperBinIndex; m++){
+                if(DualParamArray[m][1] > secondBinLimits[k+1]){
+                    secndColUpperBinIndex = m;
                     break;
                 } 
             }
         
-            for(m=perpLowerBinIndex; m<perpUpperBinIndex; m++){
-                zSpaceBinnedPk[j][k]    += TwoDpkArray[m][2];
-                mean_perpk[j][k]        += TwoDpkArray[m][1];
-                mean_losk[j][k]         += TwoDpkArray[m][0];
-                zSpacemodesPerBin[j][k] += 1;    
+            for(m=secndColLowerBinIndex; m<secndColUpperBinIndex; m++){
+                BinnedDualParamArray[j][k]    += DualParamArray[m][2];
+                mean_firstCol[j][k]           += DualParamArray[m][1];
+                mean_secndCol[j][k]           += DualParamArray[m][0];
+                modesPerBin[j][k]             += 1;    
             }
             
-            if(zSpacemodesPerBin[j][k] != 0)  zSpaceBinnedPk[j][k]  /= zSpacemodesPerBin[j][k];
-            if(zSpacemodesPerBin[j][k] != 0)  mean_perpk[j][k]      /= zSpacemodesPerBin[j][k];
-            if(zSpacemodesPerBin[j][k] != 0)  mean_losk[j][k]       /= zSpacemodesPerBin[j][k];
+            if(modesPerBin[j][k] != 0)  BinnedDualParamArray[j][k] /= modesPerBin[j][k];
+            if(modesPerBin[j][k] != 0)  mean_firstCol[j][k]        /= modesPerBin[j][k];
+            if(modesPerBin[j][k] != 0)  mean_secndCol[j][k]        /= modesPerBin[j][k];
             
-            perpLowerBinIndex = perpUpperBinIndex;
+            secndColLowerBinIndex = secndColUpperBinIndex;
         }
         
-        losLowerBinIndex = losUpperBinIndex;
+        firstColLowerBinIndex = firstColUpperBinIndex;
     }
 
     return 0;

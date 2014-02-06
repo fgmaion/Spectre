@@ -19,8 +19,11 @@ int inputPK(){
     sdlt2d = (float *) realloc(sdlt2d,         294*sizeof(*sdlt2d));
 
     sprintf(filepath, "%s/Data/HODTheoryPk/cambExtendedPk_hod_20.0.dat", root_dir);
+    
     inputfile = fopen(filepath, "r");
+    
     for(j=1; j<294; j++) fscanf(inputfile, "%f\t%f\n", &sdltk[j], &sdltPk[j]);
+    
     fclose(inputfile);
     
     spline(sdltk, sdltPk, 293, 1.0e31, 1.0e31, sdlt2d);
@@ -37,9 +40,12 @@ int inputLinearPk(){
     linear2d = (float *) realloc(linear2d,         471*sizeof(*linear2d));
 
     sprintf(filepath, "%s/Data/HODTheoryPk/LinearPk.dat", root_dir);
+    
     inputfile = fopen(filepath, "r");
-    for(j=1; j<471; j++) fscanf(inputfile, "%f\t%f\n", &lineark[j], &linearPk[j]);
-    fclose(inputfile);
+    
+    for(j=1; j<471; j++) fscanf(inputfile, "%f \t %f \n", &lineark[j], &linearPk[j]);
+    
+    fclose(inputfile); 
     
     spline(lineark, linearPk, 470, 1.0e31, 1.0e31, linear2d);
     
@@ -75,15 +81,15 @@ int formPkCube(){
 
                 Index                              = k*n1*n2 + j*n2 + i;
 
-                kmodulus                           = pow(pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.), 0.5);
+                fkmodulus                          = (float) powf(powf(k_x, 2.) + powf(k_y, 2.) + powf(k_z, 2.), 0.5);
 
 		        // Interpolates the CAMB P(k).
-                splint(lineark, linearPk, linear2d, 470, kmodulus, &PkCubeEntry);
+                splint(sdltk, sdltPk, sdlt2d, 470, fkmodulus, &fPkCubeEntry);
                 
-                PkCube[Index]                      = (double) PkCubeEntry;
+                PkCube[Index]                      = (double) fPkCubeEntry;
   
                 // Convert from CAMB units for P(k), [P_CAMB] = Volume, to [P(k)] dimensionless.
-                PkCube[Index]                     *= linearBias*linearBias/TotalVolume;
+                PkCube[Index]                     *= 1.0/TotalVolume;
 
                 // Impose spherical filter to calculate sigma_8.
                 /*
@@ -96,20 +102,24 @@ int formPkCube(){
                 */
                 
                 mu                                 = k_x/kmodulus;
+                
                 if(kmodulus < 0.000001)       mu   = 0.0;      
                 
                 kaiserFactor                       = pow(1. + beta*mu*mu, 2.);
                 
-                PkCube[Index]                     *= kaiserFactor;
+                // PkCube[Index]                  *= kaiserFactor;
                 
                 // Lorentzian factor for non-linear redshift space distortions. 
-                // PkCube[Index]                     /= 1. + pow(kmodulus*mu, 2.)*velocityDispersion;
+                // PkCube[Index]                  /= 1. + pow(kmodulus*mu, 2.)*velocityDispersion;
                 
                 TwoDpkArray[Index][0]              = fabs(k_x); // Line of sight wavevector. 
+                
                 TwoDpkArray[Index][1]              = pow(k_y*k_y + k_z*k_z, 0.5);
                 
+                TwoDpkArray[Index][2]              = PkCube[Index];
+                
                 // For calculation of the quadrupole.
-                // legendre2weights[Index]            = gsl_sf_legendre_P2((double) mu);
+                // legendre2weights[Index]         = gsl_sf_legendre_P2((double) mu);
             }
         }
     }
@@ -193,79 +203,4 @@ int clipCorrfn(){
     printf("\n\nClipped P(k).");
      
     return 0;    
-}
-
-
-int Theory2Dpk(){
-    for(j=0; j<n0*n1*n2; j++) TwoDpkArray[j][2] =  PkCube[j];
-
-    TwoDpkBinningCalc();
-
-    sprintf(filepath, "%s/Data/ClippedPk/zSpace/2Dpk/2D_kaiser.dat", root_dir);
-    output = fopen(filepath, "w");
-
-    for(j=0; j<kBinNumb-1; j++){
-        for(k=0; k<kBinNumb-1; k++){
-            if(zSpacemodesPerBin[j][k] != 0)  fprintf(output, "%g \t %g \t %g \t %d \n", mean_perpk[j][k], mean_losk[j][k], zSpaceBinnedPk[j][k], zSpacemodesPerBin[j][k]);
-        }
-    }
-
-    fclose(output);
-
-    return 0;
-}
-
-
-int Observed2Dpk(){
-    printf("\n\nAssigning FFT in array.");
-    
-    // Including the normalisation of the mask, TotalVolume/TotalSurveyedVolume, such that the filter fn. has unit mean."
-    for(j=0; j<n0*n1*n2; j++) in[j][0] = densityArray[j]*FKPweights[j]*(TotalVolume/TotalSurveyedVolume)*booldensity[j];
-    for(j=0; j<n0*n1*n2; j++) in[j][1] = 0.0;
-    
-    printf("\nPerforming FFT.");
-    
-    fftw_execute(p);
-    
-    printf("\nFFT complete.");
-    
-    // 0: Subtract shot noise for a real survey, 1: Neglect shot noise subtraction for FFT of window function. 
-    PkCorrections(0);
-    
-    for(k=0; k<n0; k++){
-        for(j=0; j<n1; j++){
-            for(i=0; i<n2; i++){
-                k_x = kIntervalx*i;
-                k_y = kIntervaly*j;
-                k_z = kIntervalz*k;
-
-                if(k_x>NyquistWaveNumber)  k_x    -= n2*kIntervalx;
-                if(k_y>NyquistWaveNumber)  k_y    -= n1*kIntervaly;
-                if(k_z>NyquistWaveNumber)  k_z    -= n0*kIntervalz;
-
-                Index                              = k*n1*n2 + j*n2 + i;
-
-                kmodulus                           = pow(pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.), 0.5);
-    
-                TwoDpkArray[Index][0]              = fabs(k_x);                      // Line of sight wavevector. 
-                TwoDpkArray[Index][1]              = pow(k_y*k_y + k_z*k_z, 0.5);    // perpendicular wavevector.
-                TwoDpkArray[Index][2]              = PkArray[Index][1]/A11;
-            }
-        }
-    }
-
-    TwoDpkBinningCalc();
-
-    sprintf(filepath, "%s/Data/ClippedPk/zSpace/2Dpk/Observed2Dpk_%s.dat", root_dir, surveyType);
-    output = fopen(filepath, "w");
-
-    for(j=0; j<kBinNumb-1; j++){
-        for(k=0; k<kBinNumb-1; k++){
-            if(zSpacemodesPerBin[j][k] != 0)  fprintf(output, "%g \t %g \t %g \t %d \n", mean_perpk[j][k], mean_losk[j][k], TotalVolume*zSpaceBinnedPk[j][k], zSpacemodesPerBin[j][k]);
-        }
-    }
-
-    fclose(output);
-
-    return 0;
 }

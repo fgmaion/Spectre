@@ -32,15 +32,12 @@ int comovDistReshiftCalc(){
   spline(z_Array, ComovingDistance_z, nPoints, 1.0e31, 1.0e31, z_ComovingDistance_2derivatives);
   spline(ComovingDistance_z, z_Array, nPoints, 1.0e31, 1.0e31, ComovingDistance_z_2derivatives);
 
-  LowerChiLimit         =  interp_comovingDistance(redshiftLowLimit);
-  UpperChiLimit         =  interp_comovingDistance(redshiftHiLimit);
-
   return 0;
 }
 
 
 float Integrand(float x){
-    return pow(Om_v + Om_m*pow(1.+ x, 3.) + Om_r*pow(1.+ x, 4.) -(Om_tot -1.)*pow(1.+ x,2.), -0.5);
+    return pow(Om_v + Om_m*pow(1.+ x, 3.) + Om_r*pow(1.+ x, 4.) - (Om_tot -1.)*pow(1.+ x, 2.), -0.5);
 }
 
 
@@ -57,3 +54,9 @@ double interp_inverseComovingDistance(double r){
     splint(ComovingDistance_z, z_Array, ComovingDistance_z_2derivatives, nPoints, (float) r, &InterimInterp_yVal);
     return InterimInterp_yVal;
 }   // Returns z at comoving distance, [h^-1 Mpc]. 
+
+
+double HubbleCnst(double z){
+    // Units of km s^-1 h Mpc^-1   
+    return 100.*pow(Om_v + Om_m*pow(1. + z, 3.), 0.5);
+}

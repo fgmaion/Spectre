@@ -41,7 +41,13 @@ int WindowfuncSlice(double kintervali, int ni, int x0, int y0, int z0, char file
     PkBinningCalc(Num_ModesInInterval, PkArray);
     
     output = fopen(filepath, "w");
-    for(j=0; j<kBinNumb-1; j++)     fprintf(output, "%d \t %e \t %e\n", modesPerBin[j], meanKBin[j], binnedPk[j]);
+    
+    for(j=0; j<kBinNumb-1; j++){    
+        if(modesPerBin[j] > 0 ){
+            fprintf(output, "%d \t %e \t %e\n", modesPerBin[j], meanKBin[j], binnedPk[j]);
+        }
+    }
+    
     fclose(output);
     
     return 0;

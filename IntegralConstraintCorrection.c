@@ -1,3 +1,4 @@
+/*
 int IntegralConstraintCorrection(){    
     ConvPkZeroPoint     = SphConvZeroPoint();
     printf("\nConvolved P(k) zero point calculated to be: %e", ConvPkZeroPoint);
@@ -19,7 +20,7 @@ int IntegralConstraintCorrection(){
 
     return 0;
 }
-
+*/
 
 int AnisoICC(){    
 	// Integral constraint correction in the 3D anisotropic case. 
@@ -31,11 +32,12 @@ int AnisoICC(){
 
     printICC();
 
-	for(kkshift= minKernelshift; kkshift< maxKernelshift + 1; kkshift++){
-	    for(jjshift= minKernelshift; jjshift< maxKernelshift + 1; jjshift++){
-	        for(iishift= minKernelshift; iishift< maxKernelshift + 1; iishift++){
-			    filterIndex   = (kkshift + maxKernelshift)*wfKernelsize*wfKernelsize + (jjshift + maxKernelshift)*wfKernelsize + (iishift + maxKernelshift);
-			    convIndex     = (n0/2 + kkshift)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + (n1/2 + jjshift)*(n2-2*wfKernelsize) + (n2/2 + iishift);
+	for(kkshift= zminKernelshift; kkshift< zmaxKernelshift + 1; kkshift++){
+	    for(jjshift= yminKernelshift; jjshift< ymaxKernelshift + 1; jjshift++){
+	        for(iishift= xminKernelshift; iishift< xmaxKernelshift + 1; iishift++){
+			    filterIndex   = (kkshift + zmaxKernelshift)*ywfKernelsize*xwfKernelsize + (jjshift + ymaxKernelshift)*xwfKernelsize + (iishift + xmaxKernelshift);
+			    
+			    convIndex     = (n0/2 + kkshift)*(n1-2*ywfKernelsize)*(n2-2*xwfKernelsize) + (n1/2 + jjshift)*(n2-2*xwfKernelsize) + (n2/2 + iishift);
 
 			    convolvedPk3d[convIndex] -= ConvPkZeroPoint*windowFunc3D[filterIndex]/ZeroPointNorm();
             }
@@ -47,19 +49,20 @@ int AnisoICC(){
 
 
 int printICC(){
-  printf("\n\nIntegral constraint correction.\n");
+  printf("\n\nIntegral constraint correction. %d \t %d \t %d \n", xmaxKernelshift, ymaxKernelshift, zmaxKernelshift);
 
-  for(kkshift= minKernelshift; kkshift< maxKernelshift + 1; kkshift++){
-      for(jjshift= minKernelshift; jjshift< maxKernelshift + 1; jjshift++){
-          for(iishift= minKernelshift; iishift< maxKernelshift + 1; iishift++){
-	          filterIndex   = (kkshift + maxKernelshift)*wfKernelsize*wfKernelsize + (jjshift + maxKernelshift)*wfKernelsize + (iishift + maxKernelshift);
-	          convIndex     = (n0/2 + kkshift)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + (n1/2 + jjshift)*(n2-2*wfKernelsize) + (n2/2 + iishift);
-
-	          printf("%e \t", (ConvPkZeroPoint*windowFunc3D[filterIndex]/ZeroPointNorm())/convolvedPk3d[convIndex]);
+  for(iishift= xminKernelshift; iishift< xmaxKernelshift + 1; iishift++){
+      for(jjshift= yminKernelshift; jjshift< ymaxKernelshift + 1; jjshift++){
+          for(kkshift= zminKernelshift; kkshift< zmaxKernelshift+1; kkshift++){
+	          filterIndex   = (kkshift + zmaxKernelshift)*ywfKernelsize*xwfKernelsize + (jjshift + ymaxKernelshift)*xwfKernelsize + (iishift + xmaxKernelshift);
+	          
+	          printf("%e \t", ConvPkZeroPoint*windowFunc3D[filterIndex]/ZeroPointNorm());
 	      }
       
           printf("\n");
       }
+      
+      printf("\n\n");
   }
 
   return 0;

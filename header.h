@@ -20,7 +20,7 @@ int          NGPCalc();
 int          PkCalc();
 
 double       splintMatterPk(double EvalPoint);
-double        splintWindowfunc(double EvalPoint);
+double       splintWindowfunc(double EvalPoint);
 double       AnalyticSpherical(double k);
 int          EvaluateConvolution(char type[]);
 
@@ -141,6 +141,7 @@ double        CellVolume;
 double*      densityArray        = NULL;
 double*      FKPweights          = NULL;
 double*      booldensity         = NULL;
+double*      meanCellRedshift    = NULL;
 
 double       SumOfVIPERSbools    = 0.0;
 
@@ -224,6 +225,8 @@ double        kSq;
 double        kIntervalx;
 double        kIntervaly;
 double        kIntervalz;
+
+float         fkmodulus;
 
 double        kmodulus;
 double        mu;
@@ -384,7 +387,11 @@ double       yroll;
 double       zroll;
 
 // Anisotropic convolution
-int 		 wfKernelsize;
+int 		 xwfKernelsize;
+int          ywfKernelsize;
+int          zwfKernelsize;
+
+float        fPkCubeEntry;
 
 double 		 PkCubeEntry;
 double 		 ConvNorm;
@@ -395,7 +402,7 @@ double*		 convolvedPk3d;
 
 double**     flattenedConvolvedPk3D;
 
-double*       AnisoWfKernel;
+double*      AnisoWfKernel;
 int*         AnisoWfKernel_ModeNumb;
 
 
@@ -430,12 +437,18 @@ double LowerDecLimit;
 
 int CatalogueInput(char filepath[]);
 
-double minKernelshift;
-double maxKernelshift;
+int xminKernelshift;
+int xmaxKernelshift;
+
+int yminKernelshift;
+int ymaxKernelshift;
+
+int zminKernelshift;
+int zmaxKernelshift;
 
 int   iishift, kkshift, jjshift;
 
-double MaxkInterval;
+double KernelMaxk;
 
 int   filterIndex;
 int   convIndex;
@@ -478,7 +491,96 @@ double SphConvZeroPoint();
 double ZeroPoint;
 double ConvPkZeroPoint;
 
-int          IntegralConstraintCorrection();
+int    IntegralConstraintCorrection();
 
 double ConvolutionNorm(double array[]);
 
+
+// fitting n(z) using Powell's method.
+int    len;
+ 
+double (*pt2Theoryfn)(float array[], double z);
+
+double*    xdata = NULL;
+double*    ydata = NULL;
+double*    edata = NULL;
+double*  weights = NULL;
+
+double*    zdata = NULL;
+int*      Nzdata = NULL;
+
+int   maxiter    = 20000000;
+
+float returnval;
+
+
+float **unitMatrix;
+
+double HubbleCnst(double z);
+
+int lineNo;
+
+float* stepArray;
+float* nz_startParams;
+float* NewParams;
+
+int mc_jump(float paramsArray[], float* minChi2, int paramNumber, float fracPrecision);
+
+const gsl_rng_type* gsl_rng_T;
+gsl_rng*            gsl_rng_r;
+
+int dof;
+
+int mc_loopCount;
+
+float chiBinWidth;
+
+int chiBinNumber;
+float* NewArray;
+
+double sqdegs2steradians(double inSqdegs);
+
+
+float* filteredNumberAtRedshift;
+float* filtered_divfuncln_Atz;
+
+float nzSigma;
+
+//  Apodise the window fn. to supress the Gibb's phenomenon. 
+double  GibbsSkinDepth;
+
+
+double* Cell_SurveyEdge;
+double* Cell_ApodiseWeights; 
+double* Cell_ShortDist2edge;
+
+double  apodisedVolume;
+
+float   nbarChi2(float Chi);
+float   nbar2Chi2(float Chi);
+float   ShotNoise();
+
+double* loskBinLimits;
+double* perpkBinLimits;
+
+int     loskBinNumb;
+int     perpkBinNumb;
+
+double  perpkInterval;
+
+int     forCount;
+
+int     muBinNumb;
+int     modkBinNumb;
+
+double* muBinLimits;
+
+
+int**    polar_modesPerBin;
+
+double** mean_mu;
+double** mean_modk;
+double** polar2Dpk;
+double** polar2DBinnedPk;
+
+double*  kQuadrupole;

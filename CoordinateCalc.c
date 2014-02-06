@@ -97,6 +97,7 @@ int CoordinateCalc(){
 
             //  Cosmology dependent, HOD mock parameters assumed - see header.h
             rDist[j]              = interp_comovingDistance(zUtilized[j]);      // Comoving distances in h^-1 Mpc
+            
             xCoor[j]              = rDist[j]*sin(polarAngle[j])*cos(ra[j]);
             yCoor[j]              = rDist[j]*sin(polarAngle[j])*sin(ra[j]);
             zCoor[j]              = rDist[j]*cos(polarAngle[j]);

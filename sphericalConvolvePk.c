@@ -149,16 +149,6 @@ double splintWindowfunc(double EvalPoint){
 }
 
 
-double splintMatterPk(double k){
-    // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec). 
-
-    float Interim;
-    
-    splint(sdltk, sdltPk, sdlt2d, 293, (float) k, &Interim);
-    return (double) Interim;
-}
-
-
 int printInterpPk(){
     printf("\nWriting regular spaced, interpolated HOD theory P(k).");
     

@@ -1,47 +1,13 @@
-int AnisoConvolution(){
-    printf("\n\nImplementing anisotropic window fn. convolution.");
-
-    prepAnisoConvolution();
-
-    pt2Pk                       = &splintMatterPk;
-
-    minKernelshift              = -0.5*(wfKernelsize-1);
-    maxKernelshift              =  0.5*(wfKernelsize-1);
-
-    inputPK();
-
-    setInputPk();
-
-    setMeasuredWfKernel();
-
-    convolve3DInputPk(convolvedPk3d, inputPk);
-
-    // AnisoICC();
-
-    flattenConvolvedPk();
-
-    sprintf(filepath, "%s/Data/Del2k/midK_Pk_Convolved_ICCUncorrected%s.dat", root_dir, surveyType);
-    
-    output = fopen(filepath, "w");
-    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%e \t %e \t %e \t %d \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
-    fclose(output);
-    
-    printWfKernel();
-
-    return 0;	
-}
-
-
 double ConvolveCell(int x, int y, int z){
 	double Interim            = 0.0;
 	
 	ConvNorm = ConvolutionNorm(windowFunc3D);
 
-	for(kkshift=minKernelshift; kkshift<maxKernelshift+1; kkshift++){
-	    for(jjshift=minKernelshift; jjshift<maxKernelshift + 1; jjshift++){
-	        for(iishift=minKernelshift; iishift<maxKernelshift + 1; iishift++){
+	for(kkshift=zminKernelshift; kkshift<zmaxKernelshift+1; kkshift++){
+	    for(jjshift=yminKernelshift; jjshift<ymaxKernelshift + 1; jjshift++){
+	        for(iishift=xminKernelshift; iishift<xmaxKernelshift + 1; iishift++){
 	        
-			    filterIndex  = (kkshift + maxKernelshift)*wfKernelsize*wfKernelsize + (jjshift + maxKernelshift)*wfKernelsize + (iishift + maxKernelshift);
+			    filterIndex  = (kkshift + zmaxKernelshift)*ywfKernelsize*xwfKernelsize + (jjshift + ymaxKernelshift)*xwfKernelsize + (iishift + xmaxKernelshift);
 			    PkIndex      = (z + kkshift)*n1*n2 + (y + jjshift)*n2 + (x + iishift);
 
 			    Interim     += pow(ConvNorm, -1.)*windowFunc3D[filterIndex]*inputPk[PkIndex];
@@ -49,19 +15,19 @@ double ConvolveCell(int x, int y, int z){
 	    }
 	}
 
-    Interim /= wfKernelsize*wfKernelsize*wfKernelsize;
+    Interim /= xwfKernelsize*ywfKernelsize*zwfKernelsize;
 
 	return Interim;
 }
 
 
 int convolve3DInputPk(){
-    for(kk=0; kk<n0-2*wfKernelsize; kk++){
-	    for(jj=0; jj<n1-2*wfKernelsize; jj++){
-		    for(ii=0; ii<n2-2*wfKernelsize; ii++){
-				Index = kk*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + jj*(n2-2*wfKernelsize) + ii;
+    for(kk=0; kk<n0-2*zwfKernelsize; kk++){
+	    for(jj=0; jj<n1-2*ywfKernelsize; jj++){
+		    for(ii=0; ii<n2-2*xwfKernelsize; ii++){
+				Index = kk*(n1-2*ywfKernelsize)*(n2-2*xwfKernelsize) + jj*(n2-2*xwfKernelsize) + ii;
 				
-				convolvedPk3d[Index]  = ConvolveCell(ii + wfKernelsize, jj + wfKernelsize, kk + wfKernelsize);
+				convolvedPk3d[Index]  = ConvolveCell(ii + xwfKernelsize, jj + ywfKernelsize, kk + zwfKernelsize);
 			}
 		}
 	}
@@ -70,16 +36,16 @@ int convolve3DInputPk(){
 }
 
 
-int flattenConvolvedPk(){
+int Theory2DPk(){
 	int qqIndex = 0;
 	int kkIndex = 0;
 
 	int totalModes = 0;
 
-	for(k=n0/2; k<n0-wfKernelsize; k++){
-		for(j=n1/2; j<n1-wfKernelsize; j++){
-			for(i=n2/2; i<n2-wfKernelsize; i++){
-				qqIndex 		= (k-wfKernelsize)*(n1-2*wfKernelsize)*(n2-2*wfKernelsize) + (j-wfKernelsize)*(n2-2*wfKernelsize) + (i-wfKernelsize);
+	for(k=n0/2; k<n0-zwfKernelsize; k++){
+		for(j=n1/2; j<n1-ywfKernelsize; j++){
+			for(i=n2/2; i<n2-xwfKernelsize; i++){
+				qqIndex 		= (k-zwfKernelsize)*(n1-2*ywfKernelsize)*(n2-2*xwfKernelsize) + (j-ywfKernelsize)*(n2-2*xwfKernelsize) + (i-xwfKernelsize);
 
 				k_x   	 		= kIntervalx*(i - n2/2.);
                 k_y   	 		= kIntervaly*(j - n1/2.);
@@ -89,15 +55,46 @@ int flattenConvolvedPk(){
 
                 kmodulus 		= pow(kSq, 0.5);
 
-				flattenedConvolvedPk3D[totalModes][0] =  (double) kmodulus;
-				flattenedConvolvedPk3D[totalModes][1] =  (double) convolvedPk3d[qqIndex];
+				flattenedConvolvedPk3D[totalModes][0] = (double) kmodulus;
+				flattenedConvolvedPk3D[totalModes][1] = (double) convolvedPk3d[qqIndex];
+
+                TwoDpkArray[totalModes][0]            = fabs(k_x);
+                
+                TwoDpkArray[totalModes][1]            = pow(k_y*k_y + k_z*k_z, 0.5);
+                
+                TwoDpkArray[totalModes][2]            = (double) convolvedPk3d[qqIndex];
 
 				totalModes     += 1;
 			}
 		}
 	}
 
-
-	PkBinningCalc(totalModes, flattenedConvolvedPk3D);
 	return 0;
+}
+
+
+int AnisoConvolution(){
+    printf("\n\nImplementing anisotropic window fn. convolution.");
+
+    MeasureAnisoWfKernel();
+
+    prepAnisoConvolution();
+
+    pt2Pk = &splintMatterPk;
+
+    inputPK();
+
+    setInputPk();
+
+    setMeasuredWfKernel();
+    
+    printWfKernel();
+
+    convolve3DInputPk(convolvedPk3d, inputPk);
+    
+    // AnisoICC();
+
+    Theory2DPk();
+    
+    return 0;	
 }

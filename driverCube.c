@@ -24,6 +24,7 @@
 
 #include "Scripts/assignMemory.c"
 
+#include "Scripts/CoordinateCalc.c"
 #include "Scripts/CoordinateCalcCube.c"
 #include "Scripts/assignAcceptance.c"
 
@@ -50,7 +51,8 @@
 
 #include "Scripts/IntegralConstraintCorrection.c"
 
-#include "Scripts/ComovingNumberDensityCalc.c"
+// #include "Scripts/ComovingNumberDensityCalc.c"
+#include "Scripts/Marseille_nz.c"
 
 #include "Scripts/InvErrorfn.c"
 
@@ -118,7 +120,6 @@ int main(int argc, char **argv){
     
     A11                       =        1.0;
     
-
     // zCubeCreate();
 
     comovDistReshiftCalc();
@@ -132,13 +133,13 @@ int main(int argc, char **argv){
 
     prepNGP();
     
-    sprintf(surveyType, "Spherical_Jenkins%.1f", JenkinsScalefactor);
+    sprintf(surveyType, "FullCube_Jenkins%.1f", JenkinsScalefactor);
     
-    // FullCube();
+    FullCube();
     // EmbeddedCube(50);
     // Gaussian(250.);
     // PencilBeamSurvey(40, 60, 40, 60);
-    Spherical(250.);
+    // Spherical(250.);
     // AnisoGauss(80., 100., 120.);
 
     Cell_AppliedWindowFn  = &booldensity[0];
@@ -167,10 +168,10 @@ int main(int argc, char **argv){
     
     PkCalc();
 
-    wfPkCalc();
+    // wfPkCalc();
     
     // Window func. convolution assuming spherical symmetry/averaging.
-    ConvolveSphericalSymm();
+    // ConvolveSphericalSymm();
     
     // Anisotropic window func. and/or anisotropic P(k) convolution calc. 
     
@@ -182,7 +183,6 @@ int main(int argc, char **argv){
     // printWindowfuncSlices();
     
     // AnisoConvolution();
-    
     
     // padwfPkCalc(sidepad);
     

@@ -19,7 +19,9 @@ int wfPkCalc(){
     PkBinningCalc(n0*n1*n2, PkArray);
     
     sprintf(filepath, "%s/Data/WindowfuncSpherical/midK_W2q_%s.dat", root_dir, surveyType);
+    
     output = fopen(filepath, "w");
+    
     for(j=0; j<kBinNumb-1; j++)  fprintf(output, "%e \t %e\n", meanKBin[j], binnedPk[j]);
 
     printf("\nWindow function P(k) calculation complete.");
