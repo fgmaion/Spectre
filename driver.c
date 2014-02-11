@@ -83,7 +83,7 @@ sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_ValueAddedHOD");
 
 // With orientation of the -z Cartesian axis to the line of sight. 
 // lower_xlimit & upper_xlimit
-AxisLimsArray[0][0]   =    1190.0;                                                  // h^-1 Mpc
+AxisLimsArray[0][0]   =    1673.0;                                                  // h^-1 Mpc
 AxisLimsArray[1][0]   =    2200.0;                                                  // h^-1 Mpc
 
 // lower_ylimit & upper_ylimit
@@ -95,20 +95,44 @@ AxisLimsArray[0][2]   =     -25.0;                                              
 AxisLimsArray[1][2]   =      55.0;                                                  // h^-1 Mpc
 
 // limits in right asecension.
+// W1 catalogue.
 LowerRAlimit          =      30.1;
 UpperRAlimit          =      38.8;
+CentreRA              =     34.45;
+
+// W4 catalogue.
+// LowerRAlimit       =      330.0;
+// UpperRAlimit       =      335.5;
 
 // limits in declination. 
+// W1 catalogue
 LowerDecLimit         =      -5.4;
 UpperDecLimit         =     -4.15;
+CentreDec             =    -3.525;
 
-CellSize              =       1.0;                                                  // Cell size, comoving distance, h^-1 Mpc
+// W4 catalogue.
+// LowerDecLimit      =      0.82;
+// UpperDecLimit      =      2.42;
+
+// Total angular areas, 
+
+// W1: 10.875 sq. degs.
+W1area                =    10.875;
+
+// W4:  8.8   sq. degs.
+W4area                =       8.8;
+
+// Combined. 
+// 19.675 sq degs. Previously 21.47, 20% difference in P(k).
+TotalW1W4area         =    19.675; 
+
+// Cell size, comoving distance, h^-1 Mpc.
+CellSize              =       1.0;                                                  
 
 // Selection parameters.
+absMagCut             =      20.0;
 redshiftLowLimit      =      0.70;
 redshiftHiLimit       =      0.90;
-
-absMagCut             =      20.0;
 
 // Comoving number density, n(z), measurement. 
 zBinWidth             =      0.05; 
@@ -140,24 +164,29 @@ CatalogNumber         =        26;
 //  Apodise the window fn. to supress the Gibb's phenomenon.
 GibbsSkinDepth        =       5.0;
 
-
+// Checked.
 comovDistReshiftCalc();
 
+// Checked.
 VIPERS_SolidAngle     = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
 
 sprintf(surveyType, "VIPERSparent_GaussSmoothMockAvgNz_%.1f_SkinDepth_%.1f", nzSigma, GibbsSkinDepth);
 
 // JenkinsCoordinates();
 
+// Checked.
 EvaluateGridParameters();
 
+// Checked.
 prepNGP();
 
+// Checked.
 CalcCellraDec();
 
 // Applied window fn.
 Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
 
+// Checked.
 SumOfVIPERSbools      = SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2);
 
 // Initialsed to zero in header.h
@@ -167,16 +196,16 @@ TotalSurveyedVolume   = SumOfVIPERSbools*CellVolume;
 
 // apodisedVolume        = CellVolume*SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2);
 
-// assign binning interval in k, and calcualate number of bins required. 
+// assign binning interval in k, and calcualate number of bins required. Checked. 
 assignbinninginterval(kbinInterval);
 
 prepFFTw(n0, n1, n2);
 
 prepFFTbinning();
 
-assign2DPkMemory();
-/*
-for(loopCount=1; loopCount<27; loopCount++){
+// assign2DPkMemory();
+
+for(loopCount=1; loopCount<2; loopCount++){
     if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
     else              sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
 
@@ -187,7 +216,7 @@ for(loopCount=1; loopCount<27; loopCount++){
 
     CoordinateCalc();
 
-    VIPERSbasis(34.5, -5.10, xCoor, yCoor, zCoor, Vipers_Num);
+    VIPERSbasis(CentreRA, CentreDec, xCoor, yCoor, zCoor, Vipers_Num);
     
     assignAcceptance();
 
@@ -196,25 +225,27 @@ for(loopCount=1; loopCount<27; loopCount++){
 
     // splineGaussfilteredW1_W4_nz();
 
-    splineMockAvg_nz();
+    // splineMockAvg_nz();
     
     // pt2nz = &interp_nz;
 
-    pt2nz = &MockAvg_nz;
+    // pt2nz = &MockAvg_nz;
 
     // ApplyFKPweights();
 
-    CleanNGP();
+    // CleanNGP();
 
-    NGPCalc();
+    // Checked.
+    // NGPCalc();
   
-    CalcWfCorrections();
+    // Checked.
+    // CalcWfCorrections();
 
-    cleanFFTbinning();
+    // cleanFFTbinning();
   
-    PkCalc();
+    // PkCalc();
 }
-*/
+
 // MockAvg2Dpk(14);
 
 // MockAverageComovingdensity();
@@ -236,11 +267,11 @@ for(loopCount=1; loopCount<27; loopCount++){
 // Window func. convolution assuming spherical symmetry/averaging.                                                  
 // ConvolveSphericalSymm();
 
-inputPK();
+// inputPK();
 
-formPkCube();
+// formPkCube();
 
-theoryQuadrupole();
+// theoryQuadrupole();
 
 // clipCorrfn();
 

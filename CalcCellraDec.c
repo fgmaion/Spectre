@@ -4,12 +4,14 @@ int CalcCellraDec(){
 
     double raCell, polarCell, decCell;
 
+    // Compute x, y, z co-ordinates of the grid in the VIPERS basis. 
+
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
-	           xCell      = AxisLimsArray[0][0] + CellSize*(i+0.5);
-	           yCell      = AxisLimsArray[0][1] + CellSize*(j+0.5);
-	           zCell      = AxisLimsArray[0][2] + CellSize*(k+0.5);
+	       xCell      = AxisLimsArray[0][0] + CellSize*(i+0.5);
+	       yCell      = AxisLimsArray[0][1] + CellSize*(j+0.5);
+	       zCell      = AxisLimsArray[0][2] + CellSize*(k+0.5);
 
                Index      = k*n1*n2 + j*n2 + i;
 
@@ -20,7 +22,8 @@ int CalcCellraDec(){
         }
     }
     
-    Celestialbasis(34.5, -5.10, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, n0*n1*n2);
+    // Convert these co-ordinates to the Celestial basis, for Window func application, Wf(ra, dec). 
+    Celestialbasis(CentreRA, CentreDec, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, n0*n1*n2);
 
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
@@ -52,7 +55,7 @@ int CalcCellraDec(){
                 raCell     *= 180./pi;
 
                 // right ascension in degrees.
-	            Cell_raVIPERSsystem[Index]  = raCell;
+	        Cell_raVIPERSsystem[Index]  = raCell;
 		
                 // declination in degrees.
                 Cell_decVIPERSsystem[Index] = decCell;
@@ -89,10 +92,9 @@ int CalcCellraDec(){
     */
     
     for(j=0; j<n0*n1*n2; j++){
-        if((LowerRAlimit<Cell_raVIPERSsystem[j]) && (Cell_raVIPERSsystem[j]<UpperRAlimit) && (LowerDecLimit<Cell_decVIPERSsystem[j]) && (Cell_decVIPERSsystem[j]<UpperDecLimit) 
-            && (LowerChiLimit < Cell_chiVIPERSsystem[j]) && (Cell_chiVIPERSsystem[j] < UpperChiLimit)){
-                Cell_SurveyLimitsMask[j] = 1.0;
-        } 
+        if((LowerRAlimit<Cell_raVIPERSsystem[j]) && (Cell_raVIPERSsystem[j]<UpperRAlimit) && (LowerDecLimit<Cell_decVIPERSsystem[j]) && (Cell_decVIPERSsystem[j]<UpperDecLimit) && (LowerChiLimit < Cell_chiVIPERSsystem[j]) && (Cell_chiVIPERSsystem[j] < UpperChiLimit)){
+	  Cell_SurveyLimitsMask[j] = 1.0;
+	} 
     }
     
     // projectVIPERSsystem();

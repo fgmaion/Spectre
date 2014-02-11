@@ -584,3 +584,11 @@ double** polar2DBinnedPk;
 
 double*  kQuadrupole;
 double*  kMonopole;
+
+float   TotalW1W4area;                                                                          
+
+double  CentreRA;
+double  CentreDec;
+
+double  W1area;
+double  W4area;

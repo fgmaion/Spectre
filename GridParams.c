@@ -14,8 +14,8 @@ int EvaluateGridParameters(){
     CellVolume            = pow(CellSize, 3);                                         // h^-3 Mpc^3
     TotalVolume           = n0*n1*n2*CellVolume;                                      // h^-3 Mpc^3
 
-    LowerChiLimit         =  interp_comovingDistance(redshiftLowLimit);
-    UpperChiLimit         =  interp_comovingDistance(redshiftHiLimit);
+    LowerChiLimit         = interp_comovingDistance(redshiftLowLimit);
+    UpperChiLimit         = interp_comovingDistance(redshiftHiLimit);
     
     // FFTw calc assignment.
     xNyquistIndex         = n2/2 + 1;
@@ -52,7 +52,7 @@ int assignbinninginterval(double interval){
 
 
 double SolidAngleCalc(double decLowerBound, double decUpperBound, double raInterval){
-    double SolidAngle;
+    double SolidAngle    = 0.0;
     
     double thetaLowerRad = pi/2. - decUpperBound*pi/180.;
     double thetaUpperRad = pi/2. - decLowerBound*pi/180.;
@@ -61,6 +61,7 @@ double SolidAngleCalc(double decLowerBound, double decUpperBound, double raInter
 
     printf("\nSolid angle observed in a given mock: %e steradians.", SolidAngle);
     printf("\n                                    : %e sq degrees.", steradians2sqdegs(SolidAngle));
+ 
     return SolidAngle;
 }
 

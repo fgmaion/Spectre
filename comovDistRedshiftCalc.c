@@ -1,38 +1,41 @@
 int comovDistReshiftCalc(){
-  sprintf(filepath, "%s/Data/zComovingDistance/HODmock_params.dat", root_dir);
-  inputfile = fopen(filepath, "rb");
+    sprintf(filepath, "%s/Data/zComovingDistance/HODmock_params.dat", root_dir);
+    inputfile = fopen(filepath, "rb");
   
-  if(inputfile == NULL){
-    printf("\nCreating new z - Comoving distance interpolation file.");
+    if(inputfile == NULL){
+      printf("\nCreating new z - Comoving distance interpolation file.");
 
-    // R_0*r = integral (c/H_0)*pow(Om_Lambda + Om_m*(1+z)^3 + Om_r*(1+z)^4 - (Om_tot -1)*(1+z)^2, -0.5) dz 
-    for(i=1000; i>0; i--)  z_Array[1000-i]            =  2.0 + pow(1000.0, -1.0)*i*(0.0 - (2.0));
-    for(i=1000; i>0; i--)  ComovingDistance_z[1000-i] =  pow(100.0/lightSpeed_kmpersec, -1.0)*qromb(pt2Integrand, 0.0, z_Array[1000-i]);            
+      // R_0*r = integral (c/H_0)*pow(Om_Lambda + Om_m*(1+z)^3 + Om_r*(1+z)^4 - (Om_tot -1)*(1+z)^2, -0.5) dz 
+      for(i=1000; i>0; i--)  z_Array[1000-i]            =  2.0 + pow(1000.0, -1.0)*i*(0.0 - (2.0));
+      for(i=1000; i>0; i--)  ComovingDistance_z[1000-i] =  pow(100.0/lightSpeed_kmpersec, -1.0)*qromb(pt2Integrand, 0.0, z_Array[1000-i]);            
     
-    //Test. 
-    //qromb(pt2Integrand, 0.0, UpperIntegralLimit[i]) in units of [H_0*R_0/c] converted to [h^-1 Mpc] by pow(100.0/lightSpeed_kmpersec, -1.0) factor.
+      //Test. 
+      //qromb(pt2Integrand, 0.0, UpperIntegralLimit[i]) in units of [H_0*R_0/c] converted to [h^-1 Mpc] by pow(100.0/lightSpeed_kmpersec, -1.0) factor.
 
-    printf("\nComoving distance to redshift 1.5: %f Mpc\n\n", pow(100.0*h/lightSpeed_kmpersec, -1.0)*qromb(pt2Integrand, 0.0, 1.5));
+      printf("\nComoving distance to redshift 1.5: %f Mpc\n\n", pow(100.0*h/lightSpeed_kmpersec, -1.0)*qromb(pt2Integrand, 0.0, 1.5));
 
-    output       = fopen(filepath, "wb");
+      output       = fopen(filepath, "wb");
 
-    fwrite(z_Array,            sizeof(z_Array[0]),            sizeof(z_Array)/sizeof(z_Array[0]),                       output);
-    fwrite(ComovingDistance_z, sizeof(ComovingDistance_z[0]), sizeof(ComovingDistance_z)/sizeof(ComovingDistance_z[0]), output);
-    fclose(output);
-  }
+      fwrite(z_Array,            sizeof(z_Array[0]),            sizeof(z_Array)/sizeof(z_Array[0]),                       output);
+      fwrite(ComovingDistance_z, sizeof(ComovingDistance_z[0]), sizeof(ComovingDistance_z)/sizeof(ComovingDistance_z[0]), output);
+      fclose(output);
+    }
 
-  else{
-    printf("\n\nReading z - Comoving distance interpolation file.");
-    fread(z_Array, sizeof(z_Array[0]), sizeof(z_Array)/sizeof(z_Array[0]), inputfile);
-    fread(ComovingDistance_z, sizeof(ComovingDistance_z[0]), sizeof(ComovingDistance_z)/sizeof(ComovingDistance_z[0]), inputfile);
-    fclose(inputfile);
-  }
+    else{
+      printf("\n\nReading z - Comoving distance interpolation file.");
+      fread(z_Array, sizeof(z_Array[0]), sizeof(z_Array)/sizeof(z_Array[0]), inputfile);
+      fread(ComovingDistance_z, sizeof(ComovingDistance_z[0]), sizeof(ComovingDistance_z)/sizeof(ComovingDistance_z[0]), inputfile);
+      fclose(inputfile);
+    }
   
-  // First array must be a monotonically increasing function, start from redshift zero rather than redshift 2.0
-  spline(z_Array, ComovingDistance_z, nPoints, 1.0e31, 1.0e31, z_ComovingDistance_2derivatives);
-  spline(ComovingDistance_z, z_Array, nPoints, 1.0e31, 1.0e31, ComovingDistance_z_2derivatives);
+    // Working correctly, Ned Wright Cosmology calculator.
+    for(j=0; j<991; j=j+110) printf("\n %le \t %le", z_Array[j], ComovingDistance_z[j]);
 
-  return 0;
+    // First array must be a monotonically increasing function, start from redshift zero rather than redshift 2.0
+    spline(z_Array, ComovingDistance_z, nPoints, 1.0e31, 1.0e31, z_ComovingDistance_2derivatives);
+    spline(ComovingDistance_z, z_Array, nPoints, 1.0e31, 1.0e31, ComovingDistance_z_2derivatives);
+
+    return 0;
 }
 
 
@@ -57,6 +60,6 @@ double interp_inverseComovingDistance(double r){
 
 
 double HubbleCnst(double z){
-    // Units of km s^-1 h Mpc^-1   
+    // Units of h km s^-1 Mpc^-1   
     return 100.*pow(Om_v + Om_m*pow(1. + z, 3.), 0.5);
 }

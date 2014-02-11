@@ -27,7 +27,6 @@
     // Column 17: rand_sel, random number from 0 to 1.  Assigned to all galaxies. 
  
     // Calculate number of Galaxies in the ZADE catalogue (line number);
-
     
     ch         = 0;
     Vipers_Num = 0;
@@ -104,13 +103,13 @@ int CoordinateCalc(){
             ra[j]                /= (pi/180.0);                                 // Converted to degrees  
     }
 
-
+    /*
     printf("\n\nOn input...");
     printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
     printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
-    printf("\n\nRedshift max:  %f \t Redshift min:  %f", arrayMax(zUtilized, Vipers_Num), arrayMin(zUtilized, Vipers_Num));
-    printf("\n\nAbs. mag. max:  %f \t Abs. mag. min:  %f", arrayMax(M_B, Vipers_Num), arrayMin(M_B, Vipers_Num));
+    printf("\n\nRedshift max:  %f \t Redshift min:  %f", arrayMax(zUtilized, Vipers_Num), arrayMin(zUtilized, Vipers_Num));*/
+    //printf("\n\nAbs. mag. max:  %f \t Abs. mag. min:  %f", arrayMax(M_B, Vipers_Num), arrayMin(M_B, Vipers_Num));
 
     return 0;
 }

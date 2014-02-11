@@ -7,7 +7,7 @@ double CSR(double z){
 
 
 double sdltNz(double z){
-    // Units of sq. degs
+    // Units of sq. degs. Params as declared in Sylvain's clustering paper.
     double alpha = 8.603; 
     double  beta = 1.448;
     double    z0 = 0.191;
@@ -19,11 +19,7 @@ double sdltNz(double z){
 
 
 double sdltNz_minChi2(double z){
-    // Units of sq. degs.
-    // double alpha =  8.386; 
-    // double  beta =  1.465;
-    // double    z0 =  0.202;
-    // double     A =  126.9; 40% correction?
+    // Units of sq. degs. Params as best fit to N(z).
   
     double alpha =  -5.59693061;
     double beta  =  -2.3637079;
@@ -48,13 +44,10 @@ double minChi2_nz(double Chi){
 
 
 float NChi_dChi(float Chi, float dChi){
-     double doubleChi = (double) Chi;
-
-     double z         = interp_inverseComovingDistance(doubleChi);
-     double w1Area    = 10.837; 
-     double w1w4Area  = 21.47;
+    double doubleChi = (double) Chi;
+    double z         = interp_inverseComovingDistance(doubleChi);
     
-    return (float) sdltNz_minChi2(z)*(w1w4Area/w1Area)*HubbleCnst(z)/(2.9979*pow(10., 5.))*dChi;
+    return (float) sdltNz_minChi2(z)*(TotalW1W4area/W1area)*HubbleCnst(z)/(2.9979*pow(10., 5.))*dChi;
 }
 
 
@@ -74,39 +67,39 @@ float factor_fittedNz_exp(float xVal, int m){
 
 
 int Gaussianfilter(float array[], float xarray[], int len, float sigma){
-  int   newlen;
-  int   kernelSize;
+    int   newlen;
+    int   kernelSize;
   
-  float Sum;
-  float Norm = 0.0;
-  float Interval;
+    float Sum;
+    float Norm = 0.0;
+    float Interval;
 
-  Interval   = xarray[10] - xarray[9];
+    Interval   = xarray[10] - xarray[9];
 
-  kernelSize = (len - 1)/8;
+    kernelSize = (len - 1)/8;
 
-  newlen     = len + 2*kernelSize;
+    newlen     = len + 2*kernelSize;
 
-  NewArray   =  (float *)  realloc(NewArray, newlen*sizeof(*NewArray));
+    NewArray   =  (float *)  realloc(NewArray, newlen*sizeof(*NewArray));
 
-  for(j=0; j<newlen; j++) NewArray[j] = 0.0;
+    for(j=0; j<newlen; j++) NewArray[j] = 0.0;
 
-  // padded array.                                                                                                                                          
-  for(j=kernelSize; j<len+kernelSize;j++)  NewArray[j] = array[j-kernelSize];
+    // padded array.                                                                                                                                          
+    for(j=kernelSize; j<len+kernelSize;j++)  NewArray[j] = array[j-kernelSize];
 
-  for(i=-kernelSize; i<kernelSize+1; i++)  Norm += exp(-0.5*pow(((float) i)*Interval/sigma, 2.0));
+    for(i=-kernelSize; i<kernelSize+1; i++)  Norm += exp(-0.5*pow(((float) i)*Interval/sigma, 2.0));
 
-  for(j=kernelSize; j<len+kernelSize; j++){
-    Sum    = 0.0;
+    for(j=kernelSize; j<len+kernelSize; j++){
+      Sum    = 0.0;
 
-    for(i=-kernelSize; i<kernelSize+1; i++){
-      Sum +=  pow(Norm, -1.)*exp(-0.5*pow(((float) i)*Interval/sigma, 2.0))*NewArray[j+i];
+      for(i=-kernelSize; i<kernelSize+1; i++){
+        Sum +=  pow(Norm, -1.)*exp(-0.5*pow(((float) i)*Interval/sigma, 2.0))*NewArray[j+i];
+      }
+
+      array[j-kernelSize] = Sum;
     }
 
-    array[j-kernelSize] = Sum;
-  }
-
-  return 0;
+    return 0;
 }
 
 
@@ -131,7 +124,6 @@ int NormedGaussianfilter(float (*transformArray)(float, int), float (*inversetra
 
 
 int ComovingNumberDensityCalc(){
-    float   TotalW1W4area = 21.47; // sq. degs.
     double  TotalObservedGalaxies =   0.0;
 
     // Equal intervals in comoving distance, for both W1 and W4 fields.  

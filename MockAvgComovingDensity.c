@@ -1,5 +1,4 @@
 int MockAverageComovingdensity(){
-    float   TotalW1W4area         = 21.47; // sq. degs.
     double  TotalObservedGalaxies =   0.0;
 
     // Equal intervals in comoving distance, for both W1 and W4 fields.  For all mocks.
