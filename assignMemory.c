@@ -33,6 +33,7 @@ int prepNGP(){
     return 0;
 }
 
+
 int CleanNGP(){
     for(j=0; j<n0*n1*n2; j++)             FKPweights[j] = 1.0;
     for(j=0; j<n0*n1*n2; j++)           densityArray[j] = 0.0;
@@ -63,6 +64,7 @@ int prepFFTw(int n0, int n1, int n2){
     return 0;
 }
 
+
 int cleanFFTbinning(){
     for(j=0; j<n0*n1*n2; j++){
         PkArray[j][0] = 0.0;
@@ -72,7 +74,6 @@ int cleanFFTbinning(){
   return 0;
 }
  
-
 
 int prepFFTbinning(){    
     // Memory assigned for Pk binning.  
@@ -84,8 +85,6 @@ int prepFFTbinning(){
     modesPerBin       = (int *)    malloc((kBinNumb-1)*sizeof(*modesPerBin));
     binnedPk          = (double *) malloc((kBinNumb-1)*sizeof(*binnedPk));
     linearErrors      = (double *) malloc((kBinNumb-1)*sizeof(*linearErrors));
-    
-    assign2DPkMemory();
     
     return 0;
 }
@@ -142,7 +141,8 @@ int assign2DPkMemory(){
     polar2DBinnedPk                                      = (double **) malloc((muBinNumb-1)*sizeof(double*));
     for(j=0; j<muBinNumb-1; j++)   polar2DBinnedPk[j]    = (double  *) malloc((kBinNumb-1)*sizeof(double));
     
-    kQuadrupole                                          = (double  *) malloc(kBinNumb*sizeof(*kQuadrupole));
+    kMonopole                                            = (double  *) malloc((kBinNumb-1)*sizeof(*kMonopole));
+    kQuadrupole                                          = (double  *) malloc((kBinNumb-1)*sizeof(*kQuadrupole));
 
     return 0;
 }

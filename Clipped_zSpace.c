@@ -62,7 +62,12 @@ int formPkCube(){
     
     f                  = pow(Om_mz, gamma_GR);
 
+    linearBias         = 1.0;
+
     beta               = f/linearBias;
+
+    // 2dF measurement.
+    beta               = 0.43;
 
     velocityDispersion = pow(3./sqrt(2.), 2.);                  // units of h^-1 Mpc rather than 300 km s^-1
 
@@ -101,29 +106,56 @@ int formPkCube(){
                 }
                 */
                 
-                mu                                 = k_x/kmodulus;
+                mu                                 = k_x/(double) fkmodulus;
                 
-                if(kmodulus < 0.000001)       mu   = 0.0;      
+                if(fkmodulus == 0.0)          mu   = 0.0;      
                 
                 kaiserFactor                       = pow(1. + beta*mu*mu, 2.);
                 
-                // PkCube[Index]                  *= kaiserFactor;
+                PkCube[Index]                     *= kaiserFactor;
                 
                 // Lorentzian factor for non-linear redshift space distortions. 
                 // PkCube[Index]                  /= 1. + pow(kmodulus*mu, 2.)*velocityDispersion;
                 
+                polar2Dpk[Index][0]                = (double) fkmodulus;
+                polar2Dpk[Index][1]                = (double) fabs(mu);
+	            polar2Dpk[Index][2]                = (double) PkCube[Index];
+                
                 TwoDpkArray[Index][0]              = fabs(k_x); // Line of sight wavevector. 
-                
                 TwoDpkArray[Index][1]              = pow(k_y*k_y + k_z*k_z, 0.5);
-                
                 TwoDpkArray[Index][2]              = PkCube[Index];
-                
-                // For calculation of the quadrupole.
-                // legendre2weights[Index]         = gsl_sf_legendre_P2((double) mu);
             }
         }
     }
+
+    printf("\n\nMinimum Kaiser factor:  %e", pow(1. + 0., 2.));
+    printf("\nMaximum Kaiser factor:  %e", pow(1. + beta, 2.));
+
+    // Returning distribution of mu, for modes in the range 0.45 to 0.55
+
+    sprintf(filepath, "%s/Data/Multipoles/mudistribution/VIPERSsurveyModes_0.7z0.9_0.043k0.073_kbin_%.3f.dat", root_dir, kbinInterval);
+
+    output = fopen(filepath, "w");
+
+    for(j=0; j<n0*n1*n2; j++){
+        if((0.043<polar2Dpk[j][1]) && (polar2Dpk[j][1]< 0.073)){
+	        fprintf(output, "%e \n", polar2Dpk[j][0]);
+        }
+    }
+
+    fclose(output);
+
+    return 0;
+}
+
+
+int theoryQuadrupole(){
+    sprintf(filepath, "%s/Data/ClippedPk/zSpace/2Dpk/TheoryPolar2Dpk_%s_%.3f.dat", root_dir, surveyType, kbinInterval);
+
+    polar2DpkBinning(filepath);
     
+    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk);
+
     return 0;
 }
 

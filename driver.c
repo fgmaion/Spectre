@@ -111,7 +111,7 @@ redshiftHiLimit       =      0.90;
 absMagCut             =      20.0;
 
 // Comoving number density, n(z), measurement. 
-zBinWidth             =      0.03; 
+zBinWidth             =      0.05; 
 chiBinWidth           =     10.00;
 nzSigma               =     100.0;
 
@@ -124,15 +124,15 @@ fkpPk                 =     5000.;                                              
 // Binning interval for P(k).
 kbinInterval          =      0.01;
 modkMax               =       0.6;
-muBinNumb             =        20;
+muBinNumb             =       100;
 
 // Interval in k^2 for perp k binning of 2D P(k).
 perpkInterval         =      0.02;
 
 // Must be odd. 2n+1.
-xwfKernelsize         =       15;
-ywfKernelsize         =        9;
-zwfKernelsize         =        9;
+xwfKernelsize         =        15;
+ywfKernelsize         =         9;
+zwfKernelsize         =         9;
 
 // Total number of mocks. 
 CatalogNumber         =        26;
@@ -145,7 +145,7 @@ comovDistReshiftCalc();
 
 VIPERS_SolidAngle     = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
 
-sprintf(surveyType, "VIPERSparent_Mock001_GaussSmoothNz_%.1f_SkinDepth_%.1f", nzSigma, GibbsSkinDepth);
+sprintf(surveyType, "VIPERSparent_GaussSmoothMockAvgNz_%.1f_SkinDepth_%.1f", nzSigma, GibbsSkinDepth);
 
 // JenkinsCoordinates();
 
@@ -163,18 +163,20 @@ SumOfVIPERSbools      = SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2);
 // Initialsed to zero in header.h
 TotalSurveyedVolume   = SumOfVIPERSbools*CellVolume;
 
-apodiseWindowfn();
+// apodiseWindowfn();
 
-apodisedVolume        = CellVolume*SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2);
+// apodisedVolume        = CellVolume*SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2);
 
 // assign binning interval in k, and calcualate number of bins required. 
 assignbinninginterval(kbinInterval);
 
 prepFFTw(n0, n1, n2);
+
 prepFFTbinning();
 
-
-for(loopCount=1; loopCount<2; loopCount++){
+assign2DPkMemory();
+/*
+for(loopCount=1; loopCount<27; loopCount++){
     if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
     else              sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
 
@@ -192,14 +194,13 @@ for(loopCount=1; loopCount<2; loopCount++){
     // Must be run for all 27 mocks in preparation for P(k) calc.
     // ComovingNumberDensityCalc();
 
-    splineGaussfilteredW1_W4_nz();
+    // splineGaussfilteredW1_W4_nz();
 
-    // splineMockAvg_nz();
+    splineMockAvg_nz();
     
-    pt2nz = &interp_nz;
+    // pt2nz = &interp_nz;
 
-    // pt2nz = &MockAvg_nz;
-    // pt2nz = &minChi2_nz;
+    pt2nz = &MockAvg_nz;
 
     // ApplyFKPweights();
 
@@ -213,8 +214,7 @@ for(loopCount=1; loopCount<2; loopCount++){
   
     PkCalc();
 }
-
-
+*/
 // MockAvg2Dpk(14);
 
 // MockAverageComovingdensity();
@@ -236,9 +236,11 @@ for(loopCount=1; loopCount<2; loopCount++){
 // Window func. convolution assuming spherical symmetry/averaging.                                                  
 // ConvolveSphericalSymm();
 
-// inputPK();
+inputPK();
 
-// formPkCube();
+formPkCube();
+
+theoryQuadrupole();
 
 // clipCorrfn();
 

@@ -1,41 +1,3 @@
-int Gaussianfilter(float array[], float xarray[], int len, float sigma){
-  int newlen;
-  int kernelSize;
-  
-  float Sum;
-  float Norm = 0.0;
-  float Interval;
-
-  Interval   = xarray[10] - xarray[9];
-
-  kernelSize = (len - 1)/8;
-
-  newlen     = len + 2*kernelSize;
-
-  NewArray   =  (float *)  realloc(NewArray, newlen*sizeof(*NewArray));
-
-  for(j=0; j<newlen; j++) NewArray[j] = 0.0;
-
-  // padded array.                                                                                                                                          
-  for(j=kernelSize; j<len+kernelSize;j++)  NewArray[j] = array[j-kernelSize];
-
-  for(i=-kernelSize; i<kernelSize+1; i++)  Norm += exp(-0.5*pow(((float) i)*Interval/sigma, 2.0));
-
-  for(j=kernelSize; j<len+kernelSize; j++){
-    Sum    = 0.0;
-
-    for(i=-kernelSize; i<kernelSize+1; i++){
-      Sum +=  pow(Norm, -1.)*exp(-0.5*pow(((float) i)*Interval/sigma, 2.0))*NewArray[j+i];
-    }
-
-    array[j-kernelSize] = Sum;
-  }
-
-  return 0;
-}
-
-
-
 double CSR(double z){
     double  b = 17.465;
     double zt =  0.424;
@@ -85,17 +47,92 @@ double minChi2_nz(double Chi){
 }
 
 
-double NChi_dChi(double Chi, double dChi){
-     double z        = interp_inverseComovingDistance(Chi);
-     double w1Area   = 10.837; 
-     double w1w4Area = 21.47;
+float NChi_dChi(float Chi, float dChi){
+     double doubleChi = (double) Chi;
+
+     double z         = interp_inverseComovingDistance(doubleChi);
+     double w1Area    = 10.837; 
+     double w1w4Area  = 21.47;
     
-    return sdltNz_minChi2(z)*(w1w4Area/w1Area)*HubbleCnst(z)/(2.9979*pow(10., 5.))*dChi;
+    return (float) sdltNz_minChi2(z)*(w1w4Area/w1Area)*HubbleCnst(z)/(2.9979*pow(10., 5.))*dChi;
+}
+
+
+float identitytransform(float xVal, int  j){
+    return xVal;
+}
+
+
+float ln_factor_fittedNz(float xVal, int m){
+    return (float) log(xVal/NChi_dChi(ChiSlices[m], chiBinWidth));
+}
+
+
+float factor_fittedNz_exp(float xVal, int m){
+    return NChi_dChi(ChiSlices[m], chiBinWidth)*exp(xVal);
+}
+
+
+int Gaussianfilter(float array[], float xarray[], int len, float sigma){
+  int   newlen;
+  int   kernelSize;
+  
+  float Sum;
+  float Norm = 0.0;
+  float Interval;
+
+  Interval   = xarray[10] - xarray[9];
+
+  kernelSize = (len - 1)/8;
+
+  newlen     = len + 2*kernelSize;
+
+  NewArray   =  (float *)  realloc(NewArray, newlen*sizeof(*NewArray));
+
+  for(j=0; j<newlen; j++) NewArray[j] = 0.0;
+
+  // padded array.                                                                                                                                          
+  for(j=kernelSize; j<len+kernelSize;j++)  NewArray[j] = array[j-kernelSize];
+
+  for(i=-kernelSize; i<kernelSize+1; i++)  Norm += exp(-0.5*pow(((float) i)*Interval/sigma, 2.0));
+
+  for(j=kernelSize; j<len+kernelSize; j++){
+    Sum    = 0.0;
+
+    for(i=-kernelSize; i<kernelSize+1; i++){
+      Sum +=  pow(Norm, -1.)*exp(-0.5*pow(((float) i)*Interval/sigma, 2.0))*NewArray[j+i];
+    }
+
+    array[j-kernelSize] = Sum;
+  }
+
+  return 0;
+}
+
+
+int NormedGaussianfilter(float (*transformArray)(float, int), float (*inversetransform)(float, int), float array[], float xarray[], int len, float sigma, double externNorm, float output[]){
+
+    float Interim[len];
+  
+    double InterimNorm = 0.0;
+    
+    for(j=1; j<len; j++)  Interim[j]   = (*transformArray)(array[j], j);
+    
+    Gaussianfilter(Interim, xarray, len, sigma);
+    
+    for(j=1; j<len; j++)  Interim[j]   = (*inversetransform)(Interim[j], j);
+      
+    for(j=1; j<len; j++)  InterimNorm += (double) Interim[j];
+    
+    for(j=1; j<len; j++)  output[j]    = (externNorm/InterimNorm)*Interim[j];
+
+    return 0;
 }
 
 
 int ComovingNumberDensityCalc(){
-    float TotalW1W4area = 21.47; // sq. degs.
+    float   TotalW1W4area = 21.47; // sq. degs.
+    double  TotalObservedGalaxies =   0.0;
 
     // Equal intervals in comoving distance, for both W1 and W4 fields.  
     prepNumberDensityCalc();
@@ -105,8 +142,8 @@ int ComovingNumberDensityCalc(){
     // W1 catalogue.
     for(j=0; j<Vipers_Num; j++){
         for(i=1; i<chiBinNumber; i++){
-	        if((ChiSlices[i]<interp_comovingDistance(zUtilized[j])) && (interp_comovingDistance(zUtilized[j]) < ChiSlices[i+1])){
-                NumberAtRedshift[i]   += 1;
+	        if((ChiSlices[i]<interp_comovingDistance(zUtilized[j])) && (interp_comovingDistance(zUtilized[j]) < ChiSlices[i+1]) && (Acceptanceflag[j]  == true)){
+                NumberAtRedshift[i]   += 1.;
                 
                 MeanSliceRedshift[i]  += zUtilized[j];
             
@@ -128,8 +165,8 @@ int ComovingNumberDensityCalc(){
 
     for(j=0; j<Vipers_Num; j++){
         for(i=1; i<chiBinNumber; i++){
-	        if((ChiSlices[i] < interp_comovingDistance(zUtilized[j])) && (interp_comovingDistance(zUtilized[j]) < ChiSlices[i+1])){
-	            NumberAtRedshift[i]   += 1;
+	        if((ChiSlices[i] < interp_comovingDistance(zUtilized[j])) && (interp_comovingDistance(zUtilized[j]) < ChiSlices[i+1]) && (Acceptanceflag[j]  == true)){
+	            NumberAtRedshift[i]   += 1.;
 
 	            MeanSliceRedshift[i]  += zUtilized[j];
 
@@ -138,16 +175,15 @@ int ComovingNumberDensityCalc(){
         }
     }
 
-    for(j=1; j<chiBinNumber; j++) filteredNumberAtRedshift[j] = (float) NumberAtRedshift[j];
-    Gaussianfilter(filteredNumberAtRedshift, ChiSlices, chiBinNumber, nzSigma);
+    for(j=1; j<chiBinNumber; j++)  TotalObservedGalaxies       += (double) NumberAtRedshift[j];
     
-    for(j=1; j<chiBinNumber; j++) filtered_divfuncln_Atz[j] = (float) log((float) NumberAtRedshift[j]/NChi_dChi(ChiSlices[j], chiBinWidth));
-    Gaussianfilter(filtered_divfuncln_Atz, ChiSlices, chiBinNumber, nzSigma);
+    NormedGaussianfilter(&identitytransform,  &identitytransform,   NumberAtRedshift, ChiSlices, chiBinNumber, nzSigma, TotalObservedGalaxies, filteredNumberAtRedshift);
     
-    for(j=1; j<chiBinNumber; j++) filtered_divfuncln_Atz[j] = (float) NChi_dChi(ChiSlices[j], chiBinWidth)*exp(filtered_divfuncln_Atz[j]);
+    NormedGaussianfilter(&ln_factor_fittedNz, &factor_fittedNz_exp, NumberAtRedshift, ChiSlices, chiBinNumber, nzSigma, TotalObservedGalaxies, filtered_divfuncln_Atz);
 
     for(j=1; j<chiBinNumber; j++){      // W1 + W4
         ComovingVolumeAtZ[j]            = sqdegs2steradians(TotalW1W4area)*pow(3., -1.)*(pow(ChiSlices[j+1], 3.) - pow(ChiSlices[j], 3.));
+        
         ComovingNumberDensity[j]        = (float) (filteredNumberAtRedshift[j])/ComovingVolumeAtZ[j];
         
         if(NumberAtRedshift[j] > 0){
@@ -160,7 +196,7 @@ int ComovingNumberDensityCalc(){
     
     output = fopen(filepath, "w");
 
-    for(j=1; j<chiBinNumber; j++) fprintf(output, "%e \t %e \t %d \t %e \t %e \t %e \t %e\n", MeanSliceRedshift[j], ChiSlices[j], NumberAtRedshift[j], filteredNumberAtRedshift[j], ComovingNumberDensity[j], NChi_dChi(ChiSlices[j], chiBinWidth), filtered_divfuncln_Atz[j]);
+    for(j=1; j<chiBinNumber; j++) fprintf(output, "%e \t %e \t %e \t %e \t %e \t %e \t %e\n", MeanSliceRedshift[j], ChiSlices[j], NumberAtRedshift[j]/TotalW1W4area, filteredNumberAtRedshift[j]/TotalW1W4area, ComovingNumberDensity[j], NChi_dChi(ChiSlices[j], chiBinWidth), filtered_divfuncln_Atz[j]/TotalW1W4area);
     
     fclose(output);
     
@@ -178,9 +214,7 @@ int splineGaussfilteredW1_W4_nz(){
 
   for(j=1; j<chiBinNumber; j++){
     // assignment suppression character, %*e.                                                                              
-    fscanf(inputfile, "%le \t %e \t %d \t %e \t %e \t %*e \t %*e \n", &MeanSliceRedshift[j], &ChiSlices[j], &NumberAtRedshift[j], &filteredNumberAtRedshift[j], &ComovingNumberDensity[j]);
-  
-    printf("\n %le \t %e \t %d \t %e \t %e", MeanSliceRedshift[j], ChiSlices[j], NumberAtRedshift[j], filteredNumberAtRedshift[j], ComovingNumberDensity[j]);
+    fscanf(inputfile, "%le \t %e \t %e \t %e \t %e \t %*e \t %*e \n", &MeanSliceRedshift[j], &ChiSlices[j], &NumberAtRedshift[j], &filteredNumberAtRedshift[j], &ComovingNumberDensity[j]);
   }
   
   fclose(inputfile);
@@ -211,7 +245,7 @@ int prepNumberDensityCalc(){
                                                                                                                              
   redshiftSlices           =  (double *)  realloc(redshiftSlices,          (chiBinNumber+1)*sizeof(*redshiftSlices));
   ChiSlices                =  (float  *)  realloc(ChiSlices,               (chiBinNumber+1)*sizeof(*ChiSlices));
-  NumberAtRedshift         =  (int    *)  realloc(NumberAtRedshift,         chiBinNumber*sizeof(*NumberAtRedshift));
+  NumberAtRedshift         =  (float  *)  realloc(NumberAtRedshift,         chiBinNumber*sizeof(*NumberAtRedshift));
   ComovingNumberDensity    =  (float  *)  realloc(ComovingNumberDensity,    chiBinNumber*sizeof(*ComovingNumberDensity));
   ComovingVolumeAtZ        =  (double *)  realloc(ComovingVolumeAtZ,        chiBinNumber*sizeof(*ComovingVolumeAtZ));
   MeanSliceRedshift        =  (double *)  realloc(MeanSliceRedshift,        chiBinNumber*sizeof(*MeanSliceRedshift));
@@ -223,7 +257,7 @@ int prepNumberDensityCalc(){
   ComovingNumberDensity2d  =  (float *)   realloc(ComovingNumberDensity2d,  chiBinNumber*sizeof(*ComovingNumberDensity2d));
 
   for(j=0; j<chiBinNumber;   j++){         
-      NumberAtRedshift[j]         = 0;
+      NumberAtRedshift[j]         = 0.;
       ComovingNumberDensity[j]    = 0.0;  
       ComovingVolumeAtZ[j]        = 0.0;
       MeanSliceRedshift[j]        = 0.0;

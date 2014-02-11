@@ -318,7 +318,7 @@ double       VIPERS_SolidAngle;
 
 double*       redshiftSlices         = NULL;
 float*        ChiSlices              = NULL;
-int*          NumberAtRedshift       = NULL;
+float*       NumberAtRedshift       = NULL;
 double*       ComovingVolumeAtZ      = NULL;
 float*        ComovingNumberDensity  = NULL;
 double*       MeanSliceRedshift      = NULL;
@@ -557,7 +557,7 @@ double* Cell_ShortDist2edge;
 double  apodisedVolume;
 
 float   nbarChi2(float Chi);
-float   nbar2Chi2(float Chi);
+float   Chi2(float Chi);
 float   ShotNoise();
 
 double* loskBinLimits;
@@ -575,7 +575,6 @@ int     modkBinNumb;
 
 double* muBinLimits;
 
-
 int**    polar_modesPerBin;
 
 double** mean_mu;
@@ -584,3 +583,4 @@ double** polar2Dpk;
 double** polar2DBinnedPk;
 
 double*  kQuadrupole;
+double*  kMonopole;
