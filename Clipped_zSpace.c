@@ -3,7 +3,9 @@ int clipDensity(double threshold){
     printf("\n\nTaking a machete to the density field.");
 
     for(j=0; j<n0*n1*n2; j++){
-      if(densityArray[j] > threshold)  densityArray[j] = threshold;
+      if(densityArray[j] > threshold){ 
+	densityArray[j] = threshold;
+      }
     }
     
     return 0;

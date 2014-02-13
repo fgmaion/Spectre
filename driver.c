@@ -204,7 +204,7 @@ prepFFTw(n0, n1, n2);
 prepFFTbinning();
 
 // assign2DPkMemory();
-
+/*
 for(loopCount=1; loopCount<2; loopCount++){
     if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
     else              sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
@@ -245,7 +245,7 @@ for(loopCount=1; loopCount<2; loopCount++){
   
     // PkCalc();
 }
-
+*/
 // MockAvg2Dpk(14);
 
 // MockAverageComovingdensity();
@@ -256,13 +256,13 @@ for(loopCount=1; loopCount<2; loopCount++){
 
 // freeNGP();
 
-// wfPkCalc();
+wfPkCalc();
 
 // printWindowfuncSlices();
 
 // analyticConvTest();
 
-// AnisoConvolution();
+AnisoConvolution();
 
 // Window func. convolution assuming spherical symmetry/averaging.                                                  
 // ConvolveSphericalSymm();
