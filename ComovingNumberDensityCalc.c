@@ -134,12 +134,10 @@ int ComovingNumberDensityCalc(){
     // W1 catalogue.
     for(j=0; j<Vipers_Num; j++){
         for(i=1; i<chiBinNumber; i++){
-	        if((ChiSlices[i]<interp_comovingDistance(zUtilized[j])) && (interp_comovingDistance(zUtilized[j]) < ChiSlices[i+1]) && (Acceptanceflag[j]  == true)){
+	        if((ChiSlices[i]<interp_comovingDistance(zUtilized[j])) && (interp_comovingDistance(zUtilized[j]) < ChiSlices[i+1]) && (M_B[j]<absMagCut)){
                 NumberAtRedshift[i]   += 1.;
                 
                 MeanSliceRedshift[i]  += zUtilized[j];
-            
-                SelectedGalNumber_nz  += 1;
             }
         }
     }
@@ -157,12 +155,10 @@ int ComovingNumberDensityCalc(){
 
     for(j=0; j<Vipers_Num; j++){
         for(i=1; i<chiBinNumber; i++){
-	        if((ChiSlices[i] < interp_comovingDistance(zUtilized[j])) && (interp_comovingDistance(zUtilized[j]) < ChiSlices[i+1]) && (Acceptanceflag[j]  == true)){
+	        if((ChiSlices[i] < interp_comovingDistance(zUtilized[j])) && (interp_comovingDistance(zUtilized[j]) < ChiSlices[i+1]) && (M_B[j]<absMagCut)){
 	            NumberAtRedshift[i]   += 1.;
 
 	            MeanSliceRedshift[i]  += zUtilized[j];
-
-	            SelectedGalNumber_nz  += 1;
 	        }
         }
     }
@@ -183,8 +179,8 @@ int ComovingNumberDensityCalc(){
         }
     }
     
-    if(loopCount<10)  sprintf(filepath, "%s/Data/nz/HODMocks_00%d_Nz_chiSliced_%.1f_W1andW4_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, nzSigma);
-    else              sprintf(filepath, "%s/Data/nz/HODMocks_0%d_Nz_chiSliced_%.1f_W1andW4_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, nzSigma); 
+    if(loopCount<10)  sprintf(filepath, "%s/Data/nz/HODMocks_00%d_Nz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, absMagCut, nzSigma);
+    else              sprintf(filepath, "%s/Data/nz/HODMocks_0%d_Nz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, absMagCut, nzSigma); 
     
     output = fopen(filepath, "w");
 
@@ -199,8 +195,8 @@ int ComovingNumberDensityCalc(){
 int splineGaussfilteredW1_W4_nz(){
   prepNumberDensityCalc();
 
-  if(loopCount<10)  sprintf(filepath, "%s/Data/nz/HODMocks_00%d_Nz_chiSliced_%.1f_W1andW4_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, nzSigma);
-  else              sprintf(filepath, "%s/Data/nz/HODMocks_0%d_Nz_chiSliced_%.1f_W1andW4_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, nzSigma);
+  if(loopCount<10)  sprintf(filepath, "%s/Data/nz/HODMocks_00%d_Nz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, absMagCut, nzSigma);
+  else              sprintf(filepath, "%s/Data/nz/HODMocks_0%d_Nz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, absMagCut, nzSigma);
 
   inputfile     = fopen(filepath, "r");
 
@@ -214,6 +210,16 @@ int splineGaussfilteredW1_W4_nz(){
   spline(ChiSlices, ComovingNumberDensity, chiBinNumber-1, 1.0e31, 1.0e31, ComovingNumberDensity2d);
 
   return 0;
+}
+
+
+double interp_nz(double Chi){
+    float fchi = (float) Chi;    
+    float fInterim;
+    
+    splint(ChiSlices, ComovingNumberDensity, ComovingNumberDensity2d,  chiBinNumber-1, fchi, &fInterim);
+    
+    return (double) fInterim;
 }
 
 
@@ -238,6 +244,7 @@ int prepNumberDensityCalc(){
   redshiftSlices           =  (double *)  realloc(redshiftSlices,          (chiBinNumber+1)*sizeof(*redshiftSlices));
   ChiSlices                =  (float  *)  realloc(ChiSlices,               (chiBinNumber+1)*sizeof(*ChiSlices));
   NumberAtRedshift         =  (float  *)  realloc(NumberAtRedshift,         chiBinNumber*sizeof(*NumberAtRedshift));
+  tophat                   =  (float  *)  realloc(tophat,                   chiBinNumber*sizeof(*tophat));
   ComovingNumberDensity    =  (float  *)  realloc(ComovingNumberDensity,    chiBinNumber*sizeof(*ComovingNumberDensity));
   ComovingVolumeAtZ        =  (double *)  realloc(ComovingVolumeAtZ,        chiBinNumber*sizeof(*ComovingVolumeAtZ));
   MeanSliceRedshift        =  (double *)  realloc(MeanSliceRedshift,        chiBinNumber*sizeof(*MeanSliceRedshift));
@@ -248,27 +255,15 @@ int prepNumberDensityCalc(){
   //Second derivatives.   
   ComovingNumberDensity2d  =  (float *)   realloc(ComovingNumberDensity2d,  chiBinNumber*sizeof(*ComovingNumberDensity2d));
 
-  for(j=0; j<chiBinNumber;   j++){         
-      NumberAtRedshift[j]         = 0.;
+  for(j=0; j<chiBinNumber;   j++){      
+      tophat[j]                   = 1.0;   
+      NumberAtRedshift[j]         = 0.0;
       ComovingNumberDensity[j]    = 0.0;  
       ComovingVolumeAtZ[j]        = 0.0;
       MeanSliceRedshift[j]        = 0.0;
       filteredNumberAtRedshift[j] = 0.0; 
       filtered_divfuncln_Atz[j]   = 0.0;
   }
-  
-  SelectedGalNumber_nz            = 0;
 
   return 0;
-}
-
-
-
-double interp_nz(double Chi){
-    float fchi = (float) Chi;    
-    float fInterim;
-    
-    splint(ChiSlices, ComovingNumberDensity, ComovingNumberDensity2d,  chiBinNumber-1, fchi, &fInterim);
-    
-    return (double) fInterim;
 }

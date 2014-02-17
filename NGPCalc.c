@@ -6,6 +6,7 @@ int NGPCalc(){
     overdensity_varyingSelection();
     
     printSurveyDetails();
+    
     return 0;
 }
 
@@ -43,14 +44,15 @@ int CountGalaxies(){
         }
     }
     
+    
     for(j=0; j<n0*n1*n2; j++){
       if(densityArray[j] > 0.0){
-	// Currently densityArray contains solely galaxy counts per cell.
+	      // Currently densityArray contains solely galaxy counts per cell.
           meanCellRedshift[j] /= densityArray[j];
       }
     }
-
-    TotalZADEWeight = SumDoubleArray(densityArray, n0*n1*n2);
+    
+    // TotalZADEWeight = SumDoubleArray(densityArray, n0*n1*n2);
     
     return 0;
 }
@@ -91,19 +93,15 @@ int overdensity_varyingSelection(){
             for(i=0; i<n2; i++){
                 Index                         = k*n1*n2 + j*n2 + i; 
 
-		// Check these are consistent.
-                // Chi                        = Cell_chiVIPERSsystem[Index];
-		Chi                           = interp_comovingDistance(meanCellRedshift[Index]);
+                Chi                           = Cell_chiVIPERSsystem[Index];
                 
                 // if(densityArray[Index] > 0){
                 //     fkpShotNoiseCorr      += pow(TotalFKPweight, -2.)*pow(CellVolume, -1.)*pow(FKPweights[Index], 2.)/interp_nz(Chi);
                 // }
                 
-                if((*pt2nz)(Chi) > 0.0){
-		            densityArray[Index]       /= CellVolume*(*pt2nz)(Chi);
-		        }
+		        densityArray[Index]          /= CellVolume*(*pt2nz)(Chi);
 
-                densityArray[Index]           -=  1.0;
+                densityArray[Index]          -=  1.0;
             }
         }
     }
@@ -111,6 +109,31 @@ int overdensity_varyingSelection(){
     // printf("\n\nFKP shot noise P(k) expectation:            %e", fkpShotNoiseCorr);
     // printf("\nFKP unweighted shot noise P(k) expectation:   %e", 1./TotalZADEWeight);
 
+    return 0;
+}
+
+
+int ShotNoiseTest(){
+    double expectedGalaxyCount;
+    
+    for(k=0; k<n0; k++){
+        for(j=0; j<n1; j++){ 
+            for(i=0; i<n2; i++){
+                Index                         = k*n1*n2 + j*n2 + i; 
+
+                Chi                           = Cell_chiVIPERSsystem[Index];
+
+                expectedGalaxyCount           = CellVolume*(*pt2nz)(Chi);
+                
+                densityArray[Index]           = gsl_ran_poisson(gsl_ran_r, expectedGalaxyCount);
+                
+		        densityArray[Index]          /= CellVolume*(*pt2nz)(Chi);
+
+                densityArray[Index]          -=  1.0;
+            }
+        }
+    }
+    
     return 0;
 }
 
@@ -132,4 +155,9 @@ int printSurveyDetails(){
     printf("\nfundamental z mode:  %f", kIntervalz);
     
     return 0;
+}
+
+
+double setMeanNumberDensity(double Chi){
+    return 41352./TotalSurveyedVolume;
 }

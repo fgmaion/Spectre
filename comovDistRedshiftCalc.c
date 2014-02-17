@@ -29,7 +29,6 @@ int comovDistReshiftCalc(){
     }
   
     // Working correctly, Ned Wright Cosmology calculator.
-    for(j=0; j<991; j=j+110) printf("\n %le \t %le", z_Array[j], ComovingDistance_z[j]);
 
     // First array must be a monotonically increasing function, start from redshift zero rather than redshift 2.0
     spline(z_Array, ComovingDistance_z, nPoints, 1.0e31, 1.0e31, z_ComovingDistance_2derivatives);

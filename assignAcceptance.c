@@ -41,7 +41,6 @@ double AcceptedMin(double a[], bool b[], int n){
 int assignAcceptance(){
     for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j]  = false;
 
-
     // Cannot apply acceptance based on ra & dec cuts currently, due to the application of Acceptance during
     // Comoving number density calc., which includes both W1 and W4.
 
@@ -55,6 +54,16 @@ int assignAcceptance(){
     printf("\nx max:  %lf \t x min:  %lf", AcceptedMax(xCoor, Acceptanceflag, Vipers_Num), AcceptedMin(xCoor, Acceptanceflag, Vipers_Num));
     printf("\ny max:  %lf \t y min:  %lf", AcceptedMax(yCoor, Acceptanceflag, Vipers_Num), AcceptedMin(yCoor, Acceptanceflag, Vipers_Num));
     printf("\nz max:  %lf \t z min:  %lf", AcceptedMax(zCoor, Acceptanceflag, Vipers_Num), AcceptedMin(zCoor, Acceptanceflag, Vipers_Num));
+
+    int AcceptedNumber = 0;
+    
+    for(j=0; j<Vipers_Num; j++){
+        if(Acceptanceflag[j] == true){
+            AcceptedNumber += 1;
+        }
+    }
+
+    printf("\nNumber of accepted galaxies: %d", AcceptedNumber);
 
     return 0;
 }

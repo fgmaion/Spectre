@@ -294,14 +294,13 @@ int PkCorrections(int WindowFuncParam){
                     PkArray[Index][1]              = pow(H_kReal, 2.) + pow(H_kImag, 2.);
 	            }
 	            
-	            polar2Dpk[Index][0]                = kmodulus;
-	            polar2Dpk[Index][1]                = fabs(mu);
-	            polar2Dpk[Index][2]                = PkArray[Index][1];
+	            // polar2Dpk[Index][0]                = kmodulus;
+	            // polar2Dpk[Index][1]                = fabs(mu);
+	            // polar2Dpk[Index][2]                = PkArray[Index][1];
 	            
-	            TwoDpkArray[Index][0]              = fabs(k_x);                      // Line of sight wavevector. 
-	            TwoDpkArray[Index][1]              = pow(k_y*k_y + k_z*k_z, 0.5);    // perpendicular wavevector.
-                TwoDpkArray[Index][2]              = PkArray[Index][1];
-	            
+	            // TwoDpkArray[Index][0]              = fabs(k_x);                      // Line of sight wavevector. 
+	            // TwoDpkArray[Index][1]              = pow(k_y*k_y + k_z*k_z, 0.5);    // perpendicular wavevector.
+                // TwoDpkArray[Index][2]              = PkArray[Index][1];
 	        }
         }
     }

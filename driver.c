@@ -91,8 +91,8 @@ AxisLimsArray[0][1]   =    -185.0;                                              
 AxisLimsArray[1][1]   =     185.0;                                                  // h^-1 Mpc
 
 // lower_zlimit & upper_zlimit
-AxisLimsArray[0][2]   =     -25.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][2]   =      55.0;                                                  // h^-1 Mpc
+AxisLimsArray[0][2]   =     -80.0;                                                  // h^-1 Mpc
+AxisLimsArray[1][2]   =      -5.0;                                                  // h^-1 Mpc
 
 // limits in right asecension.
 // W1 catalogue.
@@ -130,12 +130,12 @@ TotalW1W4area         =    19.675;
 CellSize              =       1.0;                                                  
 
 // Selection parameters.
-absMagCut             =      20.0;
+absMagCut             =    -20.15;
 redshiftLowLimit      =      0.70;
 redshiftHiLimit       =      0.90;
 
 // Comoving number density, n(z), measurement. 
-zBinWidth             =      0.05; 
+zBinWidth             =      0.03; 
 chiBinWidth           =     10.00;
 nzSigma               =     100.0;
 
@@ -146,8 +146,8 @@ JenkinsScalefactor    =       1.0;
 fkpPk                 =     5000.;                                                  // [h^-1 Mpc]^3, Peeble's convention.
 
 // Binning interval for P(k).
-kbinInterval          =      0.01;
-modkMax               =       0.6;
+kbinInterval          =      0.05;
+modkMax               =       0.8;
 muBinNumb             =       100;
 
 // Interval in k^2 for perp k binning of 2D P(k).
@@ -164,13 +164,19 @@ CatalogNumber         =        26;
 //  Apodise the window fn. to supress the Gibb's phenomenon.
 GibbsSkinDepth        =       5.0;
 
+// Random variable generation.    
+gsl_rng_env_setup();
+
+gsl_ran_T = gsl_rng_default;
+gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
+
 // Checked.
 comovDistReshiftCalc();
 
 // Checked.
 VIPERS_SolidAngle     = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
 
-sprintf(surveyType, "VIPERSparent_GaussSmoothMockAvgNz_%.1f_SkinDepth_%.1f", nzSigma, GibbsSkinDepth);
+sprintf(surveyType, "VIPERSparent_GaussSmoothNz_%.1f_SkinDepth_%.1f_VolLim_%.2f", nzSigma, GibbsSkinDepth, absMagCut);
 
 // JenkinsCoordinates();
 
@@ -204,8 +210,8 @@ prepFFTw(n0, n1, n2);
 prepFFTbinning();
 
 // assign2DPkMemory();
-/*
-for(loopCount=1; loopCount<2; loopCount++){
+
+for(loopCount=1; loopCount<11; loopCount++){
     if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
     else              sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
 
@@ -223,29 +229,29 @@ for(loopCount=1; loopCount<2; loopCount++){
     // Must be run for all 27 mocks in preparation for P(k) calc.
     // ComovingNumberDensityCalc();
 
-    // splineGaussfilteredW1_W4_nz();
+    splineGaussfilteredW1_W4_nz();
 
     // splineMockAvg_nz();
     
-    // pt2nz = &interp_nz;
+    pt2nz = &interp_nz;
 
     // pt2nz = &MockAvg_nz;
-
+    
     // ApplyFKPweights();
 
-    // CleanNGP();
+    CleanNGP();
 
     // Checked.
-    // NGPCalc();
+    NGPCalc();
   
     // Checked.
-    // CalcWfCorrections();
+    CalcWfCorrections();
 
-    // cleanFFTbinning();
+    cleanFFTbinning();
   
-    // PkCalc();
+    PkCalc();
 }
-*/
+
 // MockAvg2Dpk(14);
 
 // MockAverageComovingdensity();
@@ -256,13 +262,13 @@ for(loopCount=1; loopCount<2; loopCount++){
 
 // freeNGP();
 
-wfPkCalc();
+// wfPkCalc();
 
 // printWindowfuncSlices();
 
 // analyticConvTest();
 
-AnisoConvolution();
+// AnisoConvolution();
 
 // Window func. convolution assuming spherical symmetry/averaging.                                                  
 // ConvolveSphericalSymm();

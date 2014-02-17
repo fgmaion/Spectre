@@ -27,7 +27,6 @@ int MockAverageComovingdensity(){
                 
                     MeanSliceRedshift[i]  += zUtilized[j];
             
-                    SelectedGalNumber_nz  += 1;
                 }
             }
         }
@@ -51,8 +50,6 @@ int MockAverageComovingdensity(){
 	                NumberAtRedshift[i]   += 1.;
 
 	                MeanSliceRedshift[i]  += zUtilized[j];
-
-	                SelectedGalNumber_nz  += 1;
 	            }
             }
         }

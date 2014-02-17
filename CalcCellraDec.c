@@ -9,9 +9,9 @@ int CalcCellraDec(){
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
-	       xCell      = AxisLimsArray[0][0] + CellSize*(i+0.5);
-	       yCell      = AxisLimsArray[0][1] + CellSize*(j+0.5);
-	       zCell      = AxisLimsArray[0][2] + CellSize*(k+0.5);
+	           xCell      = AxisLimsArray[0][0] + CellSize*(i+0.5);
+	           yCell      = AxisLimsArray[0][1] + CellSize*(j+0.5);
+	           zCell      = AxisLimsArray[0][2] + CellSize*(k+0.5);
 
                Index      = k*n1*n2 + j*n2 + i;
 

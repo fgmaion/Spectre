@@ -462,8 +462,6 @@ int   CatalogNumber;
 
 double steradians2sqdegs(double inSteradians);
 
-int   SelectedGalNumber_nz; 
-
 double ZeroPointNorm();
 
 
@@ -592,3 +590,8 @@ double  CentreDec;
 
 double  W1area;
 double  W4area;
+
+const gsl_rng_type* gsl_ran_T;
+gsl_rng*            gsl_ran_r;
+
+float* tophat;
