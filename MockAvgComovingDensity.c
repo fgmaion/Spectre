@@ -1,18 +1,17 @@
 int MockAverageComovingdensity(){
-    double  TotalObservedGalaxies =   0.0;
+    TotalObservedGalaxies    = 0.0;
+    dimmestAcceptedMagnitude = -99.;
 
     // Equal intervals in comoving distance, for both W1 and W4 fields.  For all mocks.
     prepNumberDensityCalc();
     
     for(j=1; j<chiBinNumber+1; j++) ChiSlices[j] = interp_comovingDistance(0.4) + chiBinWidth*(j-1);
 
-    for(forCount=1; forCount<CatalogNumber; forCount++){
-        if(forCount < 10)   sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, forCount);
+    for(forCount=1; forCount<CatalogNumber+1; forCount++){
+        if(forCount<10)     sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, forCount);
         else                sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, forCount);
 
         CatalogueInput(filepath);
-        
-        // CoordinateCalc();
         
         // Choice of redshift from zcos, zpec, zphot, zobs.
         zUtilized       =   &zcos[0];
@@ -22,22 +21,19 @@ int MockAverageComovingdensity(){
         // W1 catalogue.
         for(j=0; j<Vipers_Num; j++){
             for(i=1; i<chiBinNumber; i++){
-	            if((ChiSlices[i]<interp_comovingDistance(zUtilized[j])) && (interp_comovingDistance(zUtilized[j]) < ChiSlices[i+1])){
+	            if((ChiSlices[i]<interp_comovingDistance(zUtilized[j])) && (interp_comovingDistance(zUtilized[j]) < ChiSlices[i+1]) && (M_B[j]<absMagCut)){
                     NumberAtRedshift[i]   += 1.;
                 
-                    MeanSliceRedshift[i]  += zUtilized[j];
-            
+                    MeanSliceRedshift[i]  += zUtilized[j];      
                 }
-            }
+           }
         }
- 
+        
         // Now the W4 field. 
         if(forCount<10)   sprintf(filepath, "%s/mocks_W4_v1.2/mock_W4_00%d_ALLINFO.cat", vipersHOD_dir, forCount);
         else              sprintf(filepath, "%s/mocks_W4_v1.2/mock_W4_0%d_ALLINFO.cat",  vipersHOD_dir, forCount);
 
         CatalogueInput(filepath);
-        
-        // CoordinateCalc();
 
         // Choice of redshift from zcos, zpec, zphot, zobs.                                                                                   
         zUtilized       =   &zcos[0];
@@ -46,10 +42,10 @@ int MockAverageComovingdensity(){
 
         for(j=0; j<Vipers_Num; j++){
             for(i=1; i<chiBinNumber; i++){
-	            if((ChiSlices[i] < interp_comovingDistance(zUtilized[j])) && (interp_comovingDistance(zUtilized[j]) < ChiSlices[i+1])){
+	            if((ChiSlices[i] < interp_comovingDistance(zUtilized[j])) && (interp_comovingDistance(zUtilized[j]) < ChiSlices[i+1]) && (M_B[j]<absMagCut)){
 	                NumberAtRedshift[i]   += 1.;
 
-	                MeanSliceRedshift[i]  += zUtilized[j];
+	                MeanSliceRedshift[i]  += zUtilized[j];    
 	            }
             }
         }
@@ -71,15 +67,15 @@ int MockAverageComovingdensity(){
         ComovingNumberDensity[j]     = (float) (filteredNumberAtRedshift[j])/ComovingVolumeAtZ[j];
         
         if(NumberAtRedshift[j] > 0){
-            MeanSliceRedshift[j]    /= NumberAtRedshift[j];
+            MeanSliceRedshift[j]    /= NumberAtRedshift[j]*CatalogNumber;
         }
     }
 
-    sprintf(filepath, "%s/Data/nz/HODMocks_MockAverage_nz_%.2f.dat", root_dir, chiBinWidth);
+    sprintf(filepath, "%s/Data/nz/HODMocks_MockAvgNz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, chiBinWidth, absMagCut, nzSigma);
     output = fopen(filepath, "w");
 
     for(j=1; j<chiBinNumber; j++){
-        fprintf(output, "%e \t %e \t %e \t %e \t %e \t %e \t %e\n", MeanSliceRedshift[j], ChiSlices[j], NumberAtRedshift[j]/TotalW1W4area, filteredNumberAtRedshift[j]/TotalW1W4area, ComovingNumberDensity[j], NChi_dChi(ChiSlices[j], chiBinWidth)/TotalW1W4area, filtered_divfuncln_Atz[j]/TotalW1W4area);
+        fprintf(output, "%e \t %e \t %e \t %e \t %e \t %e \t %e\n", MeanSliceRedshift[j], ChiSlices[j] + 0.5*chiBinWidth, NumberAtRedshift[j]/TotalW1W4area, filteredNumberAtRedshift[j]/TotalW1W4area, ComovingNumberDensity[j], NChi_dChi(ChiSlices[j], chiBinWidth)/TotalW1W4area, filtered_divfuncln_Atz[j]/TotalW1W4area);
     }
     
     fclose(output);
@@ -91,8 +87,10 @@ int MockAverageComovingdensity(){
 int splineMockAvg_nz(){
     prepNumberDensityCalc();
 
-    sprintf(filepath, "%s/Data/nz/HODMocks_MockAverage_nz_%.2f.dat", root_dir, chiBinWidth);
+    sprintf(filepath, "%s/Data/nz/HODMocks_MockAvgNz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, chiBinWidth, absMagCut, nzSigma);
 
+    printf("\nReading n(z) file for NGP calc.\n%s", filepath);
+  
     inputfile     = fopen(filepath, "r"); 
     
     for(j=1; j<chiBinNumber; j++){

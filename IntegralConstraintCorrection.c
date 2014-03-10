@@ -25,12 +25,13 @@ int IntegralConstraintCorrection(){
 int AnisoICC(){    
 	// Integral constraint correction in the 3D anisotropic case. 
 	
-    ConvPkZeroPoint     = ConvolveCell(n2/2, n1/2, n0/2);
+    ConvPkZeroPoint     = ConvolveCell(n2/2 + xwfKernelsize, n1/2 + ywfKernelsize, n0/2 + zwfKernelsize);
+    
     printf("\nConvolved P(vec k) zero point calculated to be: %e", ConvPkZeroPoint);
 
     printf("\nWindow fn. zero point calculated to be:  %f", ZeroPointNorm());
 
-    printICC();
+    // printICC();
 
 	for(kkshift= zminKernelshift; kkshift< zmaxKernelshift + 1; kkshift++){
 	    for(jjshift= yminKernelshift; jjshift< ymaxKernelshift + 1; jjshift++){
@@ -51,12 +52,15 @@ int AnisoICC(){
 int printICC(){
   printf("\n\nIntegral constraint correction. %d \t %d \t %d \n", xmaxKernelshift, ymaxKernelshift, zmaxKernelshift);
 
-  for(iishift= xminKernelshift; iishift< xmaxKernelshift + 1; iishift++){
-      for(jjshift= yminKernelshift; jjshift< ymaxKernelshift + 1; jjshift++){
-          for(kkshift= zminKernelshift; kkshift< zmaxKernelshift+1; kkshift++){
+  for(iishift= -1; iishift< 1 + 1; iishift++){
+      for(jjshift= -1; jjshift< 1 + 1; jjshift++){
+          for(kkshift= -1; kkshift< 1 + 1; kkshift++){
+          
 	          filterIndex   = (kkshift + zmaxKernelshift)*ywfKernelsize*xwfKernelsize + (jjshift + ymaxKernelshift)*xwfKernelsize + (iishift + xmaxKernelshift);
 	          
-	          printf("%e \t", ConvPkZeroPoint*windowFunc3D[filterIndex]/ZeroPointNorm());
+	          convIndex     = (n0/2 + kkshift)*(n1-2*ywfKernelsize)*(n2-2*xwfKernelsize) + (n1/2 + jjshift)*(n2-2*xwfKernelsize) + (n2/2 + iishift);
+	          
+	          printf("%e \t", (ConvPkZeroPoint*windowFunc3D[filterIndex]/ZeroPointNorm())/convolvedPk3d[convIndex]);
 	      }
       
           printf("\n");
@@ -64,6 +68,6 @@ int printICC(){
       
       printf("\n\n");
   }
-
+  
   return 0;
 }

@@ -47,7 +47,10 @@ float NChi_dChi(float Chi, float dChi){
     double doubleChi = (double) Chi;
     double z         = interp_inverseComovingDistance(doubleChi);
     
-    return (float) sdltNz_minChi2(z)*(TotalW1W4area/W1area)*HubbleCnst(z)/(2.9979*pow(10., 5.))*dChi;
+    // Ensure normalisation over Chi Slices is one, to then multipy by Observed number of galaxies norm.
+    // Any previous normalisation, e.g. TotalW1W4area, is irrelevant.
+    
+    return (float) TotalObservedGalaxies*sdltNz_minChi2(z)*(TotalW1W4area/W1area)*HubbleCnst(z)/(2.9979*pow(10., 5.))*dChi/(2.263029e+05);
 }
 
 
@@ -85,7 +88,7 @@ int Gaussianfilter(float array[], float xarray[], int len, float sigma){
     for(j=0; j<newlen; j++) NewArray[j] = 0.0;
 
     // padded array.                                                                                                                                          
-    for(j=kernelSize; j<len+kernelSize;j++)  NewArray[j] = array[j-kernelSize];
+    for(j=kernelSize + 1; j<len+kernelSize;j++)  NewArray[j] = array[j-kernelSize];
 
     for(i=-kernelSize; i<kernelSize+1; i++)  Norm += exp(-0.5*pow(((float) i)*Interval/sigma, 2.0));
 
@@ -123,14 +126,15 @@ int NormedGaussianfilter(float (*transformArray)(float, int), float (*inversetra
 }
 
 
-int ComovingNumberDensityCalc(){
-    double  TotalObservedGalaxies =   0.0;
+int ComovingNumberDensityCalc(){    
+    TotalObservedGalaxies    =  0.0;
+    dimmestAcceptedMagnitude = -99.;
 
     // Equal intervals in comoving distance, for both W1 and W4 fields.  
     prepNumberDensityCalc();
     
     for(j=1; j<chiBinNumber+1; j++) ChiSlices[j] = interp_comovingDistance(0.4) + chiBinWidth*(j-1);
-
+    
     // W1 catalogue.
     for(j=0; j<Vipers_Num; j++){
         for(i=1; i<chiBinNumber; i++){
@@ -138,30 +142,45 @@ int ComovingNumberDensityCalc(){
                 NumberAtRedshift[i]   += 1.;
                 
                 MeanSliceRedshift[i]  += zUtilized[j];
+                
+                if(M_B[j] > dimmestAcceptedMagnitude){
+                    dimmestAcceptedMagnitude = M_B[j];
+                }
             }
         }
     }
 
+    printf("\nDimmest magnitude accepted in W1:  %le", dimmestAcceptedMagnitude);
+    
     // Now the W4 field. 
     if(loopCount<10)  sprintf(filepath, "%s/mocks_W4_v1.2/mock_W4_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
     else              sprintf(filepath, "%s/mocks_W4_v1.2/mock_W4_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
 
     CatalogueInput(filepath);
-
+    
     // Choice of redshift from zcos, zpec, zphot, zobs.                                                                                   
     zUtilized       =   &zcos[0];
 
     assignAcceptance();
-
+    
+    // Reinitialise.
+    dimmestAcceptedMagnitude =  -99.0;
+    
     for(j=0; j<Vipers_Num; j++){
         for(i=1; i<chiBinNumber; i++){
 	        if((ChiSlices[i] < interp_comovingDistance(zUtilized[j])) && (interp_comovingDistance(zUtilized[j]) < ChiSlices[i+1]) && (M_B[j]<absMagCut)){
 	            NumberAtRedshift[i]   += 1.;
 
 	            MeanSliceRedshift[i]  += zUtilized[j];
+	            
+	            if(M_B[j] > dimmestAcceptedMagnitude){
+                    dimmestAcceptedMagnitude = M_B[j];
+                }
 	        }
         }
     }
+    
+    printf("\nDimmest magnitude accepted in W4:  %le", dimmestAcceptedMagnitude);
 
     for(j=1; j<chiBinNumber; j++)  TotalObservedGalaxies       += (double) NumberAtRedshift[j];
     
@@ -175,16 +194,16 @@ int ComovingNumberDensityCalc(){
         ComovingNumberDensity[j]        = (float) (filteredNumberAtRedshift[j])/ComovingVolumeAtZ[j];
         
         if(NumberAtRedshift[j] > 0){
-            MeanSliceRedshift[j]     /= NumberAtRedshift[j];
+            MeanSliceRedshift[j]       /= NumberAtRedshift[j];
         }
     }
     
-    if(loopCount<10)  sprintf(filepath, "%s/Data/nz/HODMocks_00%d_Nz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, absMagCut, nzSigma);
-    else              sprintf(filepath, "%s/Data/nz/HODMocks_0%d_Nz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, absMagCut, nzSigma); 
+    if(loopCount<10)  sprintf(filepath, "%s/Data/nz/HODMocks_00%d_SingleMockNz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, absMagCut, nzSigma);
+    else              sprintf(filepath, "%s/Data/nz/HODMocks_0%d_SingleMockNz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, absMagCut, nzSigma); 
     
     output = fopen(filepath, "w");
 
-    for(j=1; j<chiBinNumber; j++) fprintf(output, "%e \t %e \t %e \t %e \t %e \t %e \t %e\n", MeanSliceRedshift[j], ChiSlices[j], NumberAtRedshift[j]/TotalW1W4area, filteredNumberAtRedshift[j]/TotalW1W4area, ComovingNumberDensity[j], NChi_dChi(ChiSlices[j], chiBinWidth), filtered_divfuncln_Atz[j]/TotalW1W4area);
+    for(j=1; j<chiBinNumber; j++) fprintf(output, "%e \t %e \t %e \t %e \t %e \t %e \t %e\n", MeanSliceRedshift[j], ChiSlices[j], NumberAtRedshift[j]/TotalW1W4area, filteredNumberAtRedshift[j]/TotalW1W4area, ComovingNumberDensity[j], NChi_dChi(ChiSlices[j], chiBinWidth)/TotalW1W4area, filtered_divfuncln_Atz[j]/TotalW1W4area);
     
     fclose(output);
     
@@ -195,8 +214,10 @@ int ComovingNumberDensityCalc(){
 int splineGaussfilteredW1_W4_nz(){
   prepNumberDensityCalc();
 
-  if(loopCount<10)  sprintf(filepath, "%s/Data/nz/HODMocks_00%d_Nz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, absMagCut, nzSigma);
-  else              sprintf(filepath, "%s/Data/nz/HODMocks_0%d_Nz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, absMagCut, nzSigma);
+  if(loopCount<10)  sprintf(filepath, "%s/Data/nz/HODMocks_00%d_SingleMockNz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, absMagCut, nzSigma);
+  else              sprintf(filepath, "%s/Data/nz/HODMocks_0%d_SingleMockNz_chiSliced_%.1f_W1andW4_VolLim_%.2f_Gaussfiltered_%.1f.dat", root_dir, loopCount, chiBinWidth, absMagCut, nzSigma);
+
+  printf("\nReading n(z) file for NGP calc.\n%s", filepath);
 
   inputfile     = fopen(filepath, "r");
 
@@ -244,7 +265,6 @@ int prepNumberDensityCalc(){
   redshiftSlices           =  (double *)  realloc(redshiftSlices,          (chiBinNumber+1)*sizeof(*redshiftSlices));
   ChiSlices                =  (float  *)  realloc(ChiSlices,               (chiBinNumber+1)*sizeof(*ChiSlices));
   NumberAtRedshift         =  (float  *)  realloc(NumberAtRedshift,         chiBinNumber*sizeof(*NumberAtRedshift));
-  tophat                   =  (float  *)  realloc(tophat,                   chiBinNumber*sizeof(*tophat));
   ComovingNumberDensity    =  (float  *)  realloc(ComovingNumberDensity,    chiBinNumber*sizeof(*ComovingNumberDensity));
   ComovingVolumeAtZ        =  (double *)  realloc(ComovingVolumeAtZ,        chiBinNumber*sizeof(*ComovingVolumeAtZ));
   MeanSliceRedshift        =  (double *)  realloc(MeanSliceRedshift,        chiBinNumber*sizeof(*MeanSliceRedshift));
@@ -256,7 +276,6 @@ int prepNumberDensityCalc(){
   ComovingNumberDensity2d  =  (float *)   realloc(ComovingNumberDensity2d,  chiBinNumber*sizeof(*ComovingNumberDensity2d));
 
   for(j=0; j<chiBinNumber;   j++){      
-      tophat[j]                   = 1.0;   
       NumberAtRedshift[j]         = 0.0;
       ComovingNumberDensity[j]    = 0.0;  
       ComovingVolumeAtZ[j]        = 0.0;

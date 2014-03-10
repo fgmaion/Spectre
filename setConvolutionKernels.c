@@ -16,12 +16,13 @@ int setInputPk(){
 
                 inputPk[Index]  = (double) (*pt2Pk)(kmodulus);
                 
-                
+                /*
                 TwoDpkArray[totalModes][0] = fabs(k_x);
                 
                 TwoDpkArray[totalModes][1] = pow(k_y*k_y + k_z*k_z, 0.5);
                 
                 TwoDpkArray[totalModes][2] = (double) inputPk[Index];
+                */
                 
                 totalModes     += 1;
 			}
@@ -29,9 +30,8 @@ int setInputPk(){
 	}
 	
 	// 2D Power spectrum.
-	sprintf(filepath, "%s/Data/ClippedPk/zSpace/2Dpk/InputTheory2Dpk_%s.dat", root_dir, surveyType);
-    
-    Cartesian2Dpk(filepath);
+	// sprintf(filepath, "%s/Data/ClippedPk/zSpace/2Dpk/InputTheory2Dpk_%s.dat", root_dir, surveyType);
+    // Cartesian2Dpk(filepath);
 
 	return 0;
 }
@@ -78,11 +78,15 @@ int SetWfKernel(){
 
 double splintMatterPk(double k){
     // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec). 
+    if(k<0.0004)  return 4.675*pow(10., 6.)*pow(k, 0.96)*pow(linearBias/1.495903, 2.); 
 
-    float Interim;
+    else{
+        float Interim;
     
-    splint(sdltk, sdltPk, sdlt2d, 293, (float) k, &Interim);
-    return (double) Interim;
+        splint(sdltk, sdltPk, sdlt2d, 469, (float) k, &Interim);
+    
+        return (double) Interim*pow(linearBias/1.495903, 2.);
+    }
 }
 
 

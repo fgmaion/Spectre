@@ -55,7 +55,7 @@ int CalcCellraDec(){
                 raCell     *= 180./pi;
 
                 // right ascension in degrees.
-	        Cell_raVIPERSsystem[Index]  = raCell;
+	            Cell_raVIPERSsystem[Index]  = raCell;
 		
                 // declination in degrees.
                 Cell_decVIPERSsystem[Index] = decCell;
@@ -91,20 +91,40 @@ int CalcCellraDec(){
     fclose(inputfile);
     */
     
+    
+    // VIPERS parent geometry.
     for(j=0; j<n0*n1*n2; j++){
         if((LowerRAlimit<Cell_raVIPERSsystem[j]) && (Cell_raVIPERSsystem[j]<UpperRAlimit) && (LowerDecLimit<Cell_decVIPERSsystem[j]) && (Cell_decVIPERSsystem[j]<UpperDecLimit) && (LowerChiLimit < Cell_chiVIPERSsystem[j]) && (Cell_chiVIPERSsystem[j] < UpperChiLimit)){
 	  Cell_SurveyLimitsMask[j] = 1.0;
-	} 
+	    } 
     }
     
-    // projectVIPERSsystem();
+     
+    // Cuboid geometry, simple test. 
+     /*for(k=0; k<n0; k++){
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+	           xCell      = AxisLimsArray[0][0] + CellSize*(i+0.5);
+	           yCell      = AxisLimsArray[0][1] + CellSize*(j+0.5);
+	           zCell      = AxisLimsArray[0][2] + CellSize*(k+0.5);
+
+               Index      = k*n1*n2 + j*n2 + i;
+
+               if((1700<xCell) && (xCell<2000) && (-100<yCell) && (yCell<100) && (-60<zCell) && (zCell<-30)){
+                  Cell_SurveyLimitsMask[Index] = 1.0;
+               }
+            }
+        }
+    }
+    */
+    projectVIPERSsystem();
 
     return 0;
 }
 
 
 int projectVIPERSsystem(){
-    sprintf(filepath, "%s/Data/ra_decCells/xyzwNonemptyCells.dat", root_dir);
+    sprintf(filepath, "%s/Data/ra_decCells/%s_xyz_accepted.dat", root_dir, surveyType);
     output = fopen(filepath, "w");
 
     double xCell, yCell, zCell;
@@ -118,8 +138,8 @@ int projectVIPERSsystem(){
                 yCell       = AxisLimsArray[0][1] + CellSize*(j+0.5);
                 zCell       = AxisLimsArray[0][2] + CellSize*(k+0.5);
 
-                if(Cell_VIPERSweights[Index] > 0.0001){
-                    fprintf(output, "%f \t %f \t %f \t %f\n", xCell, yCell, zCell, Cell_VIPERSweights[Index]);
+                if(Cell_SurveyLimitsMask[Index] > 0.5){
+                    fprintf(output, "%f \t %f \t %f \n", xCell, yCell, zCell);
                 }
             }
         }

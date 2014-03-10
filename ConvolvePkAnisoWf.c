@@ -17,6 +17,7 @@ double ConvolveCell(int x, int y, int z){
 
     Interim /= xwfKernelsize*ywfKernelsize*zwfKernelsize;
 
+    // Looks perfect for full cube. 
 	return Interim;
 }
 
@@ -46,6 +47,7 @@ int Theory2DPk(){
 		for(j=n1/2; j<n1-ywfKernelsize; j++){
 			for(i=n2/2; i<n2-xwfKernelsize; i++){
 				qqIndex 		= (k-zwfKernelsize)*(n1-2*ywfKernelsize)*(n2-2*xwfKernelsize) + (j-ywfKernelsize)*(n2-2*xwfKernelsize) + (i-xwfKernelsize);
+				Index 	 		= k*n1*n2 + j*n2 + i;
 
 				k_x   	 		= kIntervalx*(i - n2/2.);
                 k_y   	 		= kIntervaly*(j - n1/2.);
@@ -58,17 +60,27 @@ int Theory2DPk(){
 				flattenedConvolvedPk3D[totalModes][0] = (double) kmodulus;
 				flattenedConvolvedPk3D[totalModes][1] = (double) convolvedPk3d[qqIndex];
 
+                /*
                 TwoDpkArray[totalModes][0]            = fabs(k_x);
-                
                 TwoDpkArray[totalModes][1]            = pow(k_y*k_y + k_z*k_z, 0.5);
-                
                 TwoDpkArray[totalModes][2]            = (double) convolvedPk3d[qqIndex];
-
+                */
+                
 				totalModes     += 1;
 			}
 		}
 	}
+	
+	PkBinningCalc(totalModes, flattenedConvolvedPk3D);
+	
+	sprintf(filepath, "%s/Data/ConvolvedPk/IntegralConstraint_Corrected/%s_kbinInterval_%.2f.dat", root_dir, surveyType, kbinInterval);
+	
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%e \t %e \t %e \t %d \t %e \t %e\n", meanKBin[j], del2[j], binnedPk[j], modesPerBin[j], linearErrors[j], (*pt2Pk)(meanKBin[j]));
 
+    fclose(output);
+    
 	return 0;
 }
 
@@ -80,10 +92,6 @@ int AnisoConvolution(){
 
     prepAnisoConvolution();
 
-    pt2Pk = &splintMatterPk;
-
-    inputPK();
-
     setInputPk();
 
     setMeasuredWfKernel();
@@ -92,7 +100,9 @@ int AnisoConvolution(){
 
     convolve3DInputPk(convolvedPk3d, inputPk);
     
-    // AnisoICC();
+    printf("\nConvolution norm.:  %e", ConvolutionNorm(windowFunc3D));
+    
+    AnisoICC();
 
     Theory2DPk();
     

@@ -1,34 +1,41 @@
 int clipDensity(double threshold){
-
-    printf("\n\nTaking a machete to the density field.");
+    int CellsClipped = 0;
 
     for(j=0; j<n0*n1*n2; j++){
-      if(densityArray[j] > threshold){ 
-	densityArray[j] = threshold;
-      }
+        if(densityArray[j] > threshold){ 
+	        densityArray[j] = threshold;
+		CellsClipped   += 1; 
+        }
     }
     
+    double clippedVolume;
+
+    clippedVolume = CellVolume*CellsClipped;
+
+    printf("\nClipped volume: %e", clippedVolume/TotalVolume);
+
     return 0;
 }
 
 
 int inputPK(){
     // Interpolated theoretical P(k) on a regular grid in k. 
-    sdltk  = (float *) realloc(sdltk,          294*sizeof(*sdltk));
-    sdltPk = (float *) realloc(sdltPk,         294*sizeof(*sdltPk));
+    sdltk  = (float *) realloc(sdltk,          470*sizeof(*sdltk));
+    sdltPk = (float *) realloc(sdltPk,         470*sizeof(*sdltPk));
               
     // Second derivates of HOD P(k) for cubic spline.           
-    sdlt2d = (float *) realloc(sdlt2d,         294*sizeof(*sdlt2d));
+    sdlt2d = (float *) realloc(sdlt2d,         470*sizeof(*sdlt2d));
 
-    sprintf(filepath, "%s/Data/HODTheoryPk/cambExtendedPk_hod_20.0.dat", root_dir);
+    sprintf(filepath, "%s/Data/HODTheoryPk/cambExtendedPk_hod_20.00.dat", root_dir);
     
     inputfile = fopen(filepath, "r");
     
-    for(j=1; j<294; j++) fscanf(inputfile, "%f\t%f\n", &sdltk[j], &sdltPk[j]);
+    for(j=0; j<470; j++) fscanf(inputfile, "%f \t %f\n", &sdltk[j], &sdltPk[j]);
     
     fclose(inputfile);
-    
-    spline(sdltk, sdltPk, 293, 1.0e31, 1.0e31, sdlt2d);
+
+    spline(sdltk, sdltPk, 469, 1.0e31, 1.0e31, sdlt2d);
+   
     return 0;
 }
 
@@ -64,14 +71,10 @@ int formPkCube(){
     
     f                  = pow(Om_mz, gamma_GR);
 
-    linearBias         = 1.0;
-
     beta               = f/linearBias;
 
     // 2dF measurement.
     beta               = 0.43;
-
-    velocityDispersion = pow(3./sqrt(2.), 2.);                  // units of h^-1 Mpc rather than 300 km s^-1
 
     // Take line of sight wavevector to be (1, 0, 0), i.e unit vector along kx. 
 
@@ -88,12 +91,9 @@ int formPkCube(){
 
                 Index                              = k*n1*n2 + j*n2 + i;
 
-                fkmodulus                          = (float) powf(powf(k_x, 2.) + powf(k_y, 2.) + powf(k_z, 2.), 0.5);
+                kmodulus                           = pow(pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.), 0.5);
 
-		        // Interpolates the CAMB P(k).
-                splint(sdltk, sdltPk, sdlt2d, 470, fkmodulus, &fPkCubeEntry);
-                
-                PkCube[Index]                      = (double) fPkCubeEntry;
+		        PkCube[Index]                      = (*pt2Pk)(kmodulus);
   
                 // Convert from CAMB units for P(k), [P_CAMB] = Volume, to [P(k)] dimensionless.
                 PkCube[Index]                     *= 1.0/TotalVolume;
@@ -108,55 +108,38 @@ int formPkCube(){
                 }
                 */
                 
-                mu                                 = k_x/(double) fkmodulus;
+                mu                                 = k_x/(double) kmodulus;
                 
-                if(fkmodulus == 0.0)          mu   = 0.0;      
+                if(kmodulus == 0.0)          mu   = 0.0;      
                 
                 kaiserFactor                       = pow(1. + beta*mu*mu, 2.);
                 
                 PkCube[Index]                     *= kaiserFactor;
                 
                 // Lorentzian factor for non-linear redshift space distortions. 
-                // PkCube[Index]                  /= 1. + pow(kmodulus*mu, 2.)*velocityDispersion;
+                PkCube[Index]                     /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
                 
-                polar2Dpk[Index][0]                = (double) fkmodulus;
-                polar2Dpk[Index][1]                = (double) fabs(mu);
-	            polar2Dpk[Index][2]                = (double) PkCube[Index];
+                // Gaussian factor for non-linear redshift space distortion.
+                // PkCube[Index]                     *= exp(-kmodulus*kmodulus*mu*mu*velDispersion*velDispersion);
                 
-                TwoDpkArray[Index][0]              = fabs(k_x); // Line of sight wavevector. 
-                TwoDpkArray[Index][1]              = pow(k_y*k_y + k_z*k_z, 0.5);
-                TwoDpkArray[Index][2]              = PkCube[Index];
-            }
+                polar2Dpk[Index][0]                = kmodulus;
+		        polar2Dpk[Index][1]                = fabs(mu);
+		        polar2Dpk[Index][2]                = PkCube[Index];
+             }
         }
     }
 
     printf("\n\nMinimum Kaiser factor:  %e", pow(1. + 0., 2.));
     printf("\nMaximum Kaiser factor:  %e", pow(1. + beta, 2.));
 
-    // Returning distribution of mu, for modes in the range 0.45 to 0.55
-
-    sprintf(filepath, "%s/Data/Multipoles/mudistribution/VIPERSsurveyModes_0.7z0.9_0.043k0.073_kbin_%.3f.dat", root_dir, kbinInterval);
-
-    output = fopen(filepath, "w");
-
-    for(j=0; j<n0*n1*n2; j++){
-        if((0.043<polar2Dpk[j][1]) && (polar2Dpk[j][1]< 0.073)){
-	        fprintf(output, "%e \n", polar2Dpk[j][0]);
-        }
-    }
-
-    fclose(output);
-
     return 0;
 }
 
 
-int theoryQuadrupole(){
-    sprintf(filepath, "%s/Data/ClippedPk/zSpace/2Dpk/TheoryPolar2Dpk_%s_%.3f.dat", root_dir, surveyType, kbinInterval);
-
-    polar2DpkBinning(filepath);
+int theoryHexadecapole(){
+    sprintf(filepath, "%s/Data/Multipoles/TheoryPolar2Dpk_%s_%.3f.dat", root_dir, surveyType, kbinInterval);
     
-    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk);
+    HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, modesPerBin, polar2Dpk);
 
     return 0;
 }

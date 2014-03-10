@@ -284,7 +284,7 @@ float*      linear2d            = NULL;
 
 // Factors for theoretical prediction of redshift space P(k).
 double       kaiserFactor;
-double       velocityDispersion;
+double       velDispersion;
 double       f;
 double       beta;
 double       y;
@@ -580,6 +580,7 @@ double** mean_modk;
 double** polar2Dpk;
 double** polar2DBinnedPk;
 
+double*  kHexadecapole; 
 double*  kQuadrupole;
 double*  kMonopole;
 
@@ -595,3 +596,13 @@ const gsl_rng_type* gsl_ran_T;
 gsl_rng*            gsl_ran_r;
 
 float* tophat;
+
+double  TotalObservedGalaxies    =    0.0;
+double  dimmestAcceptedMagnitude =  -99.0;
+
+double xtranslateDist;
+double ytranslateDist;
+
+double kaiserGauss_Monofactor(double ks, double beta);
+double kaiserGauss_Quadfactor(double ks, double beta);
+double kaiserGauss_Hexfactor(double ks, double beta);

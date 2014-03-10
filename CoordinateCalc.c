@@ -70,17 +70,21 @@
     yCoor          =  (double *)  realloc(yCoor,          Vipers_Num*sizeof(*yCoor));
     zCoor          =  (double *)  realloc(zCoor,          Vipers_Num*sizeof(*zCoor));
     
-    for(j=0; j<Vipers_Num; j++){
-        pointing[j] =  (char *) realloc(pointing[j], 20*sizeof(char));
-        quadrant[j] =  (char *) realloc(quadrant[j], 20*sizeof(char));
+    /*
+    for(j=0; j<1000; j++){
+       pointing[j] =  (char *)    realloc(pointing[j], 20*sizeof(char));
+       quadrant[j] =  (char *)    realloc(quadrant[j], 20*sizeof(char));
     }
+    */
+    
+    for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%d \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %d \t %lf \t %lf \t %lf \t %*s \t %*s \t %d \t %d \t %d \t %lf \n", &id[j], &ra[j], &dec[j], &zcos[j], &zpec[j], &zobs[j], &zphot[j], &M_B[j], &type[j], &csr[j], &sampling[j], &sampling35[j], &flag_Nagoya[j], &flag_SSPOC[j], &flag_SSPOC35[j], &rand_sel[j]);
 
-    for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%d \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %d \t %lf \t %lf \t %lf \t %s \t %s \t %d \t %d \t %d \t %lf \n", &id[j], &ra[j], &dec[j], &zcos[j], &zpec[j], &zobs[j], &zphot[j], &M_B[j], &type[j], &csr[j], &sampling[j], &sampling35[j], pointing[j], quadrant[j], &flag_Nagoya[j], &flag_SSPOC[j], &flag_SSPOC35[j], &rand_sel[j]);
+    //  pointing[j], quadrant[j]
 
     // Note: &pointing[j] must be passed to any printf statement. 
     
     fclose(inputfile);
-
+    
     printf("\nHOD catalogue input successful.");
     printf("\nNumber of galaxies in catalogue:  %d", Vipers_Num);
 

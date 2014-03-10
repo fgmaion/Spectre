@@ -3,7 +3,6 @@ int prepNGP(){
     meanCellRedshift        =  (double *)  realloc(meanCellRedshift, n0*n1*n2*sizeof(*meanCellRedshift));  
 
     FKPweights              =  (double *)  realloc(FKPweights,       n0*n1*n2*sizeof(*FKPweights));
-    booldensity             =  (double *)  realloc(booldensity,      n0*n1*n2*sizeof(*booldensity));
 
     Cell_rotatedXvals       =  (double *)  realloc(Cell_rotatedXvals,       n0*n1*n2*sizeof(*Cell_rotatedXvals));
     Cell_rotatedYvals       =  (double *)  realloc(Cell_rotatedYvals,       n0*n1*n2*sizeof(*Cell_rotatedYvals));
@@ -143,6 +142,7 @@ int assign2DPkMemory(){
     
     kMonopole                                            = (double  *) malloc((kBinNumb-1)*sizeof(*kMonopole));
     kQuadrupole                                          = (double  *) malloc((kBinNumb-1)*sizeof(*kQuadrupole));
+    kHexadecapole                                        = (double  *) malloc((kBinNumb-1)*sizeof(*kHexadecapole));
 
     return 0;
 }

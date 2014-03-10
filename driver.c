@@ -28,6 +28,7 @@
 #include "Scripts/CoordinateCalc.c"
 #include "Scripts/assignAcceptance.c"
 
+#include "Scripts/Padding.c"
 #include "Scripts/NGPCalc.c"
 #include "Scripts/BasisChange.c"
 #include "Scripts/CalcCellraDec.c"
@@ -62,9 +63,11 @@
 #include "Scripts/Powells_Brent.c"
 
 #include "Scripts/fitting_nz.c"
+// #include "Scripts/KaiserGaussMultipoles.c"
+#include "Scripts/KaiserLorentzMultipoles.c"
 
-#include "Scripts/MockAvg2D_Pk.c"
-#include "Scripts/MultipoleCovariance.c"
+// #include "Scripts/MockAvgMultipole.c"
+// #include "Scripts/MultipoleCovariance.c"
 
 #include "Scripts/freeMemory.c"
 
@@ -83,16 +86,16 @@ sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_ValueAddedHOD");
 
 // With orientation of the -z Cartesian axis to the line of sight. 
 // lower_xlimit & upper_xlimit
-AxisLimsArray[0][0]   =    1673.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][0]   =    2200.0;                                                  // h^-1 Mpc
+AxisLimsArray[0][0]   =    1550.0;                                                  // h^-1 Mpc
+AxisLimsArray[1][0]   =    2180.0;                                                  // h^-1 Mpc
 
 // lower_ylimit & upper_ylimit
-AxisLimsArray[0][1]   =    -185.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][1]   =     185.0;                                                  // h^-1 Mpc
+AxisLimsArray[0][1]   =    -170.0;                                                  // h^-1 Mpc
+AxisLimsArray[1][1]   =     170.0;                                                  // h^-1 Mpc
 
 // lower_zlimit & upper_zlimit
-AxisLimsArray[0][2]   =     -80.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][2]   =      -5.0;                                                  // h^-1 Mpc
+AxisLimsArray[0][2]   =     -75.0;                                                  // h^-1 Mpc
+AxisLimsArray[1][2]   =     -10.0;                                                  // h^-1 Mpc
 
 // limits in right asecension.
 // W1 catalogue.
@@ -127,17 +130,35 @@ W4area                =       8.8;
 TotalW1W4area         =    19.675; 
 
 // Cell size, comoving distance, h^-1 Mpc.
-CellSize              =       1.0;                                                  
+CellSize              =      16.0;                                                  
 
 // Selection parameters.
-absMagCut             =    -20.15;
-redshiftLowLimit      =      0.70;
+absMagCut             =     22.00;
+redshiftLowLimit      =      0.60;
 redshiftHiLimit       =      0.90;
+
+// Non-linear RSD
+velDispersion         =  2.*3./sqrt(2.);                  // units of h^-1 Mpc rather than 300 km s^-1
+
+// -20.0 mags lim. sample. See linearBias.txt in HODTheoryPk dir.
+linearBias            =  1.495903;
+
+/* linearBias.txt in dir. HODTheoryPk.
+-22.0  2.924277
+-21.5  2.199471
+-21.0  1.824770
+-20.5  1.618792
+-20.0  1.495903
+-19.5  1.415186
+-20.75 1.707502
+-20.25 1.550205
+-20.15 1.527030
+*/
 
 // Comoving number density, n(z), measurement. 
 zBinWidth             =      0.03; 
-chiBinWidth           =     10.00;
-nzSigma               =     100.0;
+chiBinWidth           =     15.00;
+nzSigma               =      50.0;
 
 // Apply Jenkins contraction to beat aliasing. 
 JenkinsScalefactor    =       1.0;
@@ -146,8 +167,8 @@ JenkinsScalefactor    =       1.0;
 fkpPk                 =     5000.;                                                  // [h^-1 Mpc]^3, Peeble's convention.
 
 // Binning interval for P(k).
-kbinInterval          =      0.05;
-modkMax               =       0.8;
+kbinInterval          =      0.01;
+modkMax               =      0.15;
 muBinNumb             =       100;
 
 // Interval in k^2 for perp k binning of 2D P(k).
@@ -170,13 +191,15 @@ gsl_rng_env_setup();
 gsl_ran_T = gsl_rng_default;
 gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
 
+padVolume(14.0, 14.0, 25.0);
+
 // Checked.
 comovDistReshiftCalc();
 
 // Checked.
 VIPERS_SolidAngle     = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
 
-sprintf(surveyType, "VIPERSparent_GaussSmoothNz_%.1f_SkinDepth_%.1f_VolLim_%.2f", nzSigma, GibbsSkinDepth, absMagCut);
+sprintf(surveyType, "VIPERSparent_zPad_12.5.5_GaussSmoothNz_%.1f_SkinDepth_%.1f_VolLim_%.2f_Mesh_%.2f", nzSigma, GibbsSkinDepth, absMagCut, CellSize);
 
 // JenkinsCoordinates();
 
@@ -209,15 +232,20 @@ prepFFTw(n0, n1, n2);
 
 prepFFTbinning();
 
-// assign2DPkMemory();
+assign2DPkMemory();
 
-for(loopCount=1; loopCount<11; loopCount++){
+pt2Pk = &splintMatterPk;
+
+inputPK();
+/*
+for(loopCount=1; loopCount<2; loopCount++){
     if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
     else              sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
-
-    CatalogueInput(filepath);
       
     // Choice of redshift from zcos, zpec, zphot, zobs.
+    
+    CatalogueInput(filepath);
+    
     zUtilized = &zcos[0];
 
     CoordinateCalc();
@@ -243,7 +271,7 @@ for(loopCount=1; loopCount<11; loopCount++){
 
     // Checked.
     NGPCalc();
-  
+   
     // Checked.
     CalcWfCorrections();
 
@@ -251,7 +279,7 @@ for(loopCount=1; loopCount<11; loopCount++){
   
     PkCalc();
 }
-
+*/
 // MockAvg2Dpk(14);
 
 // MockAverageComovingdensity();
@@ -273,11 +301,15 @@ for(loopCount=1; loopCount<11; loopCount++){
 // Window func. convolution assuming spherical symmetry/averaging.                                                  
 // ConvolveSphericalSymm();
 
-// inputPK();
-
 // formPkCube();
 
-// theoryQuadrupole();
+// theoryHexadecapole();
+
+// kaiser_nonlinearSuppression_Multipoles();
+
+for(j=0; j<20; j++){
+    printf("\n %le")
+}
 
 // clipCorrfn();
 

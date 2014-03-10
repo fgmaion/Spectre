@@ -1,5 +1,4 @@
-int CoordinateCalcCube(){
-    sprintf(filepath, "%s/Data/HODCube/cube_gal_-20.0.dat", root_dir);
+int CoordinateCalcCube(char filepath[]){
 
     printf("\nOpening catalogue: %s", filepath);
     

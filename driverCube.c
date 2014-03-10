@@ -44,15 +44,14 @@
 #include "Scripts/axesWfSlices.c"
 
 #include "Scripts/MeasureWfKernel.c"
-#include "Scripts/sphericalConvolvePk.c"
+// #include "Scripts/sphericalConvolvePk.c"
 #include "Scripts/setConvolutionKernels.c"
-#include "Scripts/AnalyticTestConvolution.c"
+// #include "Scripts/AnalyticTestConvolution.c"
 #include "Scripts/ConvolvePkAnisoWf.c"
 
 #include "Scripts/IntegralConstraintCorrection.c"
 
-// #include "Scripts/ComovingNumberDensityCalc.c"
-#include "Scripts/Marseille_nz.c"
+#include "Scripts/ComovingNumberDensityCalc.c"
 
 #include "Scripts/InvErrorfn.c"
 
@@ -62,6 +61,8 @@
 #include "Scripts/rollCube.c"
 
 #include "Scripts/freeMemory.c"
+
+#include "/disk1/mjw/EisensteinHu/power.c"
 
 
 int main(int argc, char **argv){
@@ -95,7 +96,7 @@ int main(int argc, char **argv){
     // Selection parameters. Volume limited sample between redshift 0.7 and 0.9
     redshiftLowLimit          =       0.78;
     redshiftHiLimit           =       0.82;
-    absMagCut                 =      -20.0;
+    absMagCut                 =     -20.00;
 
     // Apply Jenkin's scaling to beat aliasing.
     JenkinsScalefactor        =        1.0;
@@ -104,21 +105,28 @@ int main(int argc, char **argv){
     fkpPk                     =      5000.;                                               // [P(k)] = [h^-1 Mpc]^3, Peeble's convention.
 
     // Binning interval for P(k).
-    kbinInterval              =      0.007;
-    modkMax                   =        0.5;
+    kbinInterval              =       0.01;
+    modkMax                   =        0.8;
+    muBinNumb                 =         50;
 
-    // Must be odd. 2n + 1.
-    wfKernelsize              =          7;
+    // Must be odd. 2n+1.
+    xwfKernelsize             =         35;
+    ywfKernelsize             =         35;
+    zwfKernelsize             =          3;
 
-    // padded window fn. calculation.
-    sidepad                   =          0; 
+    gsl_rng_env_setup();
 
+    gsl_ran_T = gsl_rng_default;
+    gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
+    
+    // Translate cube to boot strap slice samples.
+    xtranslateDist            =      120.0;
+    ytranslateDist            =      120.0;
+    
     // Clipping variables. 
-    appliedClippingThreshold  =        5.0;
-    
-    linearBias                = sqrt(2.90);
-    
-    A11                       =        1.0;
+    // appliedClippingThreshold  =        5.0;    
+    // linearBias                = sqrt(2.90);
+    // A11                       =        1.0;
     
     // zCubeCreate();
 
@@ -127,63 +135,85 @@ int main(int argc, char **argv){
     // JenkinsCoordinates();
 
     EvaluateGridParameters();
-    
+   
     // assign binning interval in k, and calculate number of bins required. 
     assignbinninginterval(kbinInterval);
 
     prepNGP();
-    
-    sprintf(surveyType, "FullCube_Jenkins%.1f", JenkinsScalefactor);
+  
+    sprintf(filepath, "%s/Data/HODCube/cube_gal_-20.0.dat", root_dir);
     
     FullCube();
     // EmbeddedCube(50);
     // Gaussian(250.);
-    // PencilBeamSurvey(40, 60, 40, 60);
+    // PencilBeamSurvey(25, 55, 25, 55);
     // Spherical(250.);
-    // AnisoGauss(80., 100., 120.);
+    // AnisoGauss(20., 30., 40.);
+    
+    Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
 
-    Cell_AppliedWindowFn  = &booldensity[0];
-
-    SumOfVIPERSbools      = SumDoubleArray(booldensity, n0*n1*n2);
+    SumOfVIPERSbools      = SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2);
 
     // TotalSurveyedVolume initialised to zero in header.h
-    TotalSurveyedVolume   = SumOfVIPERSbools*CellVolume*pow(JenkinsScalefactor, 3.0);
+    TotalSurveyedVolume   = SumOfVIPERSbools*CellVolume;
 
     prepFFTw(n0, n1, n2);
+    
     prepFFTbinning();
 
-    CoordinateCalcCube();  
+    assign2DPkMemory();                
+                                                                                             
+    CoordinateCalcCube(filepath);  
     
-    // rollcube(xCoor, yCoor, zCoor, Vipers_Num);
+    pt2nz = &CubeMeanNumberDensity;
     
-    // Currently all galaxies accepted. 
-    assignAcceptanceCube();
+    inputPK();
 
-    NGPCalcCube();
+    pt2Pk = &splintMatterPk;
+    /*
+    sprintf(surveyType, "Cube_Jenkins%.1f", JenkinsScalefactor);
     
-    // A11                      =   (1./2.6); // Empirical estimate from suppressed Del2k. 
-    // clipDensity(appliedClippingThreshold); // Clipping at 5.0
+    // for(ii=0; ii<8; ii++){ 
+       // for(jj=0; jj<8; jj++){
+         //   printf("\n%d \t %d", ii, jj);
+        
+            sprintf(surveyType, "Clipped_zPencilBeamCube_Jenkins%.1f_xtrans_%.2f_ytrans_%.2f", JenkinsScalefactor, ii*xtranslateDist, jj*ytranslateDist);
+        
+            // rollxy(ii*xtranslateDist, jj*ytranslateDist, Vipers_Num);
     
-    CalcWfCorrections();
+            // rollcube(xCoor, yCoor, zCoor, Vipers_Num);
     
-    PkCalc();
+            // Currently all galaxies accepted. 
+            assignAcceptanceCube();
 
+            CleanNGP();
+
+            NGPCalcCube();
+	    
+	        // clipDensity(5.0);
+
+            // A11                      =   (1./2.6); // Empirical estimate from suppressed Del2k. 
+                
+            CalcWfCorrections();
+            
+            cleanFFTbinning();
+    
+            PkCalc();
+     //   }
+    //}
+    */
     // wfPkCalc();
     
     // Window func. convolution assuming spherical symmetry/averaging.
     // ConvolveSphericalSymm();
     
     // Anisotropic window func. and/or anisotropic P(k) convolution calc. 
-    
     // MeasureAnisoWfKernel();
-
-    // analyticConvTest();
-    // analyticConvTest_MeasuredWf(); 
-    
+      
     // printWindowfuncSlices();
     
     // AnisoConvolution();
-    
+
     // padwfPkCalc(sidepad);
     
     // assign2DPkMemory();
@@ -202,7 +232,12 @@ int main(int argc, char **argv){
 
     // Stacpolly run. 
     // MPI_Finalize();
-
+    
+    
+    sprintf(surveyType, "zPencilBeamCube_Jenkins%.1f_xtrans_%.2f_ytrans_%.2f", JenkinsScalefactor, ii*xtranslateDist, jj*ytranslateDist);
+    
+    MockAvgMultipole(26);
+    
     printf("\n\n");
     
 return 0; 

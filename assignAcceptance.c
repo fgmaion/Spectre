@@ -50,11 +50,12 @@ int assignAcceptance(){
         }
     }
 
+    /*
     printf("\n\nAccepted limits (in the VIPERS basis..)");
     printf("\nx max:  %lf \t x min:  %lf", AcceptedMax(xCoor, Acceptanceflag, Vipers_Num), AcceptedMin(xCoor, Acceptanceflag, Vipers_Num));
     printf("\ny max:  %lf \t y min:  %lf", AcceptedMax(yCoor, Acceptanceflag, Vipers_Num), AcceptedMin(yCoor, Acceptanceflag, Vipers_Num));
     printf("\nz max:  %lf \t z min:  %lf", AcceptedMax(zCoor, Acceptanceflag, Vipers_Num), AcceptedMin(zCoor, Acceptanceflag, Vipers_Num));
-
+    */
     int AcceptedNumber = 0;
     
     for(j=0; j<Vipers_Num; j++){
