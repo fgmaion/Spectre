@@ -606,3 +606,25 @@ double ytranslateDist;
 double kaiserGauss_Monofactor(double ks, double beta);
 double kaiserGauss_Quadfactor(double ks, double beta);
 double kaiserGauss_Hexfactor(double ks, double beta);
+
+double splintLinearPk(double k);
+
+int**  wfKernel_minAmpIndices;
+int    largeAmpIndices = 0;
+double minAmp_ConvolutionNorm(double array[]);
+
+double**  Covariance;
+double**  MeanMultipoles;
+
+double*   mvGauss;
+double**  invCov;
+double*   kMultipoles;
+
+double    A11Sq;
+double    LikelihoodEval();
+
+int       Res;
+double    dRes;
+
+double*** ChiSqGrid;
+double     minChiSq;

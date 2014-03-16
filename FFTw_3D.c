@@ -20,20 +20,20 @@ int PkCalc(){
     
     Monopole(filepath);
 
-    // observedQuadrupole();
+    observedQuadrupole();
     
     return 0;
 }
 
 
 int observedQuadrupole(){
-    sprintf(filepath, "%s/Data/Multipoles/Polar2Dpk_%s_%.3f.dat", root_dir, surveyType, kbinInterval);
+    sprintf(filepath, "%s/Data/Multipoles/Polar2Dpk_%s_%.3f_%d.dat", root_dir, surveyType, kbinInterval, loopCount);
 
     polar2DpkBinning(filepath);
 
     // MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk);
   
-    HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, modesPerBin, polar2Dpk);
+    // HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, modesPerBin, polar2Dpk);
 
   return 0;
 }
@@ -404,9 +404,9 @@ int PkCorrections(int WindowFuncParam){
                     PkArray[Index][1]              = pow(H_kReal, 2.) + pow(H_kImag, 2.);
 	            }
 	            
-		        // polar2Dpk[Index][0]                = kmodulus;
-		        // polar2Dpk[Index][1]                = fabs(mu);
-		        // polar2Dpk[Index][2]                = PkArray[Index][1];
+		        polar2Dpk[Index][0]                = kmodulus;
+		        polar2Dpk[Index][1]                = fabs(mu);
+		        polar2Dpk[Index][2]                = PkArray[Index][1];
 	            
 	            // TwoDpkArray[Index][0]              = fabs(k_x);                      // Line of sight wavevector. 
 	            // TwoDpkArray[Index][1]              = pow(k_y*k_y + k_z*k_z, 0.5);    // perpendicular wavevector.

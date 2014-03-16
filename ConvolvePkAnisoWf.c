@@ -22,13 +22,45 @@ double ConvolveCell(int x, int y, int z){
 }
 
 
+double minAmp_ConvolveCell(int x, int y, int z){
+	double Interim            = 0.0;
+    
+    for(k=0; k<largeAmpIndices; k++){
+    	PkIndex  = (z + wfKernel_minAmpIndices[k][2])*n1*n2 + (y + wfKernel_minAmpIndices[k][1])*n2 + (x + wfKernel_minAmpIndices[k][0]);
+    
+		Interim += pow(ConvNorm, -1.)*windowFunc3D[wfKernel_minAmpIndices[k][3]]*inputPk[PkIndex];
+	}
+    
+    Interim /= largeAmpIndices;
+
+    // Looks perfect for full cube. 
+	return Interim;
+}
+
+
 int convolve3DInputPk(){
-    for(kk=0; kk<n0-2*zwfKernelsize; kk++){
-	    for(jj=0; jj<n1-2*ywfKernelsize; jj++){
-		    for(ii=0; ii<n2-2*xwfKernelsize; ii++){
-				Index = kk*(n1-2*ywfKernelsize)*(n2-2*xwfKernelsize) + jj*(n2-2*xwfKernelsize) + ii;
+    // Now convolves solely the positive modes. 
+    
+    double kx, ky, kz, kSq;
+
+    for(kk=n0/2 - zwfKernelsize; kk<n0-2*zwfKernelsize; kk++){
+	    for(jj=n1/2 - ywfKernelsize; jj<n1-2*ywfKernelsize; jj++){
+		    for(ii=n2/2 - xwfKernelsize; ii<n2-2*xwfKernelsize; ii++){
+		        kx  = (ii -n2/2 + xwfKernelsize)*kIntervalx; 
+		        
+		        ky  = (jj -n1/2 + ywfKernelsize)*kIntervaly; 
+		        
+		        kz  = (kk -n0/2 + zwfKernelsize)*kIntervalz; 
+		        
+		        kSq = kx*kx + ky*ky + kz*kz; 
+		    
+                if((0.01*0.01 < kSq) && (kSq < 0.50*0.50)){
+    				Index = kk*(n1-2*ywfKernelsize)*(n2-2*xwfKernelsize) + jj*(n2-2*xwfKernelsize) + ii;
 				
-				convolvedPk3d[Index]  = ConvolveCell(ii + xwfKernelsize, jj + ywfKernelsize, kk + zwfKernelsize);
+	    			// convolvedPk3d[Index]  = ConvolveCell(ii + xwfKernelsize, jj + ywfKernelsize, kk + zwfKernelsize);
+	    			
+	    			convolvedPk3d[Index]     = minAmp_ConvolveCell(ii + xwfKernelsize, jj + ywfKernelsize, kk + zwfKernelsize);
+	            }
 			}
 		}
 	}
@@ -47,6 +79,7 @@ int Theory2DPk(){
 		for(j=n1/2; j<n1-ywfKernelsize; j++){
 			for(i=n2/2; i<n2-xwfKernelsize; i++){
 				qqIndex 		= (k-zwfKernelsize)*(n1-2*ywfKernelsize)*(n2-2*xwfKernelsize) + (j-ywfKernelsize)*(n2-2*xwfKernelsize) + (i-xwfKernelsize);
+				
 				Index 	 		= k*n1*n2 + j*n2 + i;
 
 				k_x   	 		= kIntervalx*(i - n2/2.);
@@ -57,16 +90,18 @@ int Theory2DPk(){
 
                 kmodulus 		= pow(kSq, 0.5);
 
-				flattenedConvolvedPk3D[totalModes][0] = (double) kmodulus;
-				flattenedConvolvedPk3D[totalModes][1] = (double) convolvedPk3d[qqIndex];
+                if((0.01*0.01 < kSq) && (kSq < 0.50*0.50)){
+    				flattenedConvolvedPk3D[totalModes][0] = (double) kmodulus;
+	    			flattenedConvolvedPk3D[totalModes][1] = (double) convolvedPk3d[qqIndex];
 
-                /*
-                TwoDpkArray[totalModes][0]            = fabs(k_x);
-                TwoDpkArray[totalModes][1]            = pow(k_y*k_y + k_z*k_z, 0.5);
-                TwoDpkArray[totalModes][2]            = (double) convolvedPk3d[qqIndex];
-                */
+                    /*
+                    TwoDpkArray[totalModes][0]            = fabs(k_x);
+                    TwoDpkArray[totalModes][1]            = pow(k_y*k_y + k_z*k_z, 0.5);
+                    TwoDpkArray[totalModes][2]            = (double) convolvedPk3d[qqIndex];
+                    */
                 
-				totalModes     += 1;
+	    			totalModes     += 1;
+	    		}
 			}
 		}
 	}
@@ -96,14 +131,16 @@ int AnisoConvolution(){
 
     setMeasuredWfKernel();
     
-    printWfKernel();
+    // printWfKernel();
+    
+    ConvNorm = minAmp_ConvolutionNorm(windowFunc3D);
 
     convolve3DInputPk(convolvedPk3d, inputPk);
     
-    printf("\nConvolution norm.:  %e", ConvolutionNorm(windowFunc3D));
+    printf("\nConvolution norm.:  %e", minAmp_ConvolutionNorm(windowFunc3D));
     
-    AnisoICC();
-
+    // minAmp_AnisoICC();
+    
     Theory2DPk();
     
     return 0;	

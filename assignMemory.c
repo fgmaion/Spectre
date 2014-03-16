@@ -64,6 +64,22 @@ int prepFFTw(int n0, int n1, int n2){
 }
 
 
+int prep_wfKernelminAmp(){
+    wfKernel_minAmpIndices            = (int **) malloc(xwfKernelsize*ywfKernelsize*zwfKernelsize*sizeof(*wfKernel_minAmpIndices));
+    
+    for(j=0; j<xwfKernelsize*ywfKernelsize*zwfKernelsize; j++){  
+        wfKernel_minAmpIndices[j]     = (int *)  malloc(4*sizeof(int));                     // columns 
+        
+        wfKernel_minAmpIndices[j][0]  = 0;
+        wfKernel_minAmpIndices[j][1]  = 0;
+        wfKernel_minAmpIndices[j][2]  = 0;
+        wfKernel_minAmpIndices[j][3]  = 0;
+    }
+
+    return 0;
+}
+
+
 int cleanFFTbinning(){
     for(j=0; j<n0*n1*n2; j++){
         PkArray[j][0] = 0.0;

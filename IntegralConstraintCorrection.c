@@ -22,6 +22,39 @@ int IntegralConstraintCorrection(){
 }
 */
 
+
+int minAmp_AnisoICC(){    
+	// Integral constraint correction in the 3D anisotropic case. 
+    
+    double ICCcorrection;
+	
+    // ConvPkZeroPoint  = minAmp_ConvolveCell(n2/2 + xwfKernelsize, n1/2 + ywfKernelsize, n0/2 + zwfKernelsize);
+    
+    ConvPkZeroPoint     = minAmp_ConvolveCell(n2/2, n1/2, n0/2);
+    
+    printf("\nConvolved P(vec k) zero point calculated to be: %e", ConvPkZeroPoint);
+
+    printf("\nWindow fn. zero point calculated to be:  %e", ZeroPointNorm());
+
+    for(k=0; k<largeAmpIndices; k++){
+		filterIndex   = wfKernel_minAmpIndices[k][3];
+			    
+		convIndex     = (n0/2 + wfKernel_minAmpIndices[k][2])*(n1-2*ywfKernelsize)*(n2-2*xwfKernelsize) + (n1/2 + wfKernel_minAmpIndices[k][1])*(n2-2*xwfKernelsize) + (n2/2 + wfKernel_minAmpIndices[k][0]);
+
+        ICCcorrection = ConvPkZeroPoint*windowFunc3D[filterIndex]/ZeroPointNorm();
+
+        if((wfKernel_minAmpIndices[k][0] >= 0) && (wfKernel_minAmpIndices[k][1] >= 0) && (wfKernel_minAmpIndices[k][2] >= 0)){
+    		printf("\n %d \t %d \t %d \t %e", wfKernel_minAmpIndices[k][0], wfKernel_minAmpIndices[k][1], wfKernel_minAmpIndices[k][2], ICCcorrection);
+    		
+    		// convolvedPk3d[convIndex] -= ICCcorrection;
+	    }
+
+	}
+    
+    return 0;
+}
+
+
 int AnisoICC(){    
 	// Integral constraint correction in the 3D anisotropic case. 
 	

@@ -42,16 +42,20 @@ int printWfKernel(){
 
     printf("\nApplied window fn. normalisation(convolution):  %e", ConvNorm);
     printf("\nApplied window fn. normalisation(zero point) :  %e", ZeroPointNorm());
-    
-    printf("\n\nFilter measured as: \n\n");
- 
+  
+    sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/wfKernel.dat");
+  
+    output = fopen(filepath, "w");
+  
     for(i=0; i<xwfKernelsize*ywfKernelsize*zwfKernelsize; i=i+zwfKernelsize){
         for(j=0; j<zwfKernelsize; j++){
-            printf("%e \t", windowFunc3D[i + j]);
+            fprintf(output, "%e \t", windowFunc3D[i + j]);
         }
         
-        printf("\n");
+        fprintf(output, "\n");
     }
+    
+    fclose(output);
  
     return 0;
 }
@@ -76,7 +80,7 @@ int SetWfKernel(){
 }
 
 
-double splintMatterPk(double k){
+double splintHODpk(double k){
     // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec). 
     if(k<0.0004)  return 4.675*pow(10., 6.)*pow(k, 0.96)*pow(linearBias/1.495903, 2.); 
 
@@ -84,6 +88,39 @@ double splintMatterPk(double k){
         float Interim;
     
         splint(sdltk, sdltPk, sdlt2d, 469, (float) k, &Interim);
+    
+        return (double) Interim*pow(linearBias/1.495903, 2.);
+    }
+}
+
+
+int  printHODMatterPk(){
+    double waveNumber    = 0.0;
+    
+    sprintf(filepath, "%s/Data/Del2k/spline_HODmatterPk.dat", root_dir);
+    
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<100000; j++){
+        waveNumber = pow(10., -5.)*j;
+
+        fprintf(output, "%le \t %le \n", waveNumber, splintHODpk(waveNumber));
+    }
+    
+    fclose(output);
+
+    return 0;
+}
+
+
+double splintLinearPk(double k){
+    // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec). 
+    if(k<0.0004)  return 4.675*pow(10., 6.)*pow(k, 0.96)*pow(linearBias/1.495903, 2.); 
+
+    else{
+        float Interim;
+    
+        splint(lineark, linearPk, linear2d, 469, (float) k, &Interim);
     
         return (double) Interim*pow(linearBias/1.495903, 2.);
     }
@@ -111,8 +148,22 @@ double ConvolutionNorm(double array[]){
 }
 
 
+double minAmp_ConvolutionNorm(double array[]){
+    double Interim = 0.0;
+
+	for(k=0; k<largeAmpIndices; k++){
+		Interim += array[wfKernel_minAmpIndices[k][3]];
+	}
+	
+	Interim /= largeAmpIndices;
+
+    return Interim;
+}
+
+
+
 double ZeroPointNorm(){
-    return windowFunc3D[(zwfKernelsize-1)/2*ywfKernelsize*xwfKernelsize + xwfKernelsize*(ywfKernelsize-1)/2 + (xwfKernelsize-1)/2];
+    return AnisoWfKernel[(zwfKernelsize-1)/2*ywfKernelsize*xwfKernelsize + xwfKernelsize*(ywfKernelsize-1)/2 + (xwfKernelsize-1)/2];
 }
 
 
