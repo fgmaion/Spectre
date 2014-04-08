@@ -6,7 +6,6 @@ int randGenerate(){
   
   IntervalChi3       = MaxChi3 - MinChi3;
 
-
   sprintf(filepath, "/disk1/mjw/VIPERS/pointing_locations.txt");
   inputfile = fopen(filepath, "r");  
 

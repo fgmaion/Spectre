@@ -31,7 +31,7 @@ int observedQuadrupole(){
 
     polar2DpkBinning(filepath);
 
-    // MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk);
+    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk);
   
     // HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, modesPerBin, polar2Dpk);
 
@@ -134,8 +134,8 @@ int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQ
         ModesPerBin[k] =   0;
     }
     
-    if(loopCount<10)  sprintf(filepath, "%s/Data/Multipoles/Observed_Multipoles_%s_kbin_%.3f_00%d.dat", root_dir,  surveyType, kbinInterval, loopCount);
-    else              sprintf(filepath, "%s/Data/Multipoles/Observed_Multipoles_%s__kbin_%.3f_0%d.dat", root_dir, surveyType, kbinInterval, loopCount);
+    if(loopCount<10)  sprintf(filepath, "%s/Data/Multipoles/Multipoles_%s_kbin_%.3f_00%d.dat", root_dir,  surveyType, kbinInterval, loopCount);
+    else              sprintf(filepath, "%s/Data/Multipoles/Multipoles_%s__kbin_%.3f_0%d.dat", root_dir, surveyType, kbinInterval, loopCount);
 
     output = fopen(filepath, "w");
     
@@ -197,7 +197,7 @@ int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQ
           kMonopole[j]  = (1./detA)*(Sum_Li2*Sum_Pi - Sum_Li*Sum_PiLi);
         kQuadrupole[j]  = (1./detA)*(-1.*Sum_Li*Sum_Pi + modesPerBin[j]*Sum_PiLi);
         
-        fprintf(output, "%f \t %f \t %f \t %d \n", (float) meanKBin[j], (float) TotalVolume*kMonopole[j], (float) TotalVolume*kQuadrupole[j], modesPerBin[j]);   
+        fprintf(output, "%f \t %f \t %f \t %d \t %f \t %f \n", (float) meanKBin[j], (float) TotalVolume*kMonopole[j], (float) TotalVolume*kQuadrupole[j], modesPerBin[j], (*pt2Pk)(meanKBin[j])*kaiserLorentz_Monofactor(meanKBin[j]*3.5, beta), (*pt2Pk)(meanKBin[j])*kaiserLorentz_Quadfactor(meanKBin[j]*3.5, beta));   
     
         LowerBinIndex = UpperBinIndex;
     } 
@@ -383,9 +383,9 @@ int PkCorrections(int WindowFuncParam){
                 H_kReal                            = pow(n0*n1*n2, -1.0)*out[Index][0];
                 H_kImag                            = pow(n0*n1*n2, -1.0)*out[Index][1];
 
-                // The NGP window function is a real, scale dependent quantity.
-                H_kReal                           /= WindowFunc;
-                H_kImag                           /= WindowFunc;
+                // Cloud in cell. NGP corresponds to WindowFunc rather than WindowFunc^2.
+                H_kReal                           /= pow(WindowFunc, 2.);
+                H_kImag                           /= pow(WindowFunc, 2.);
 
                 PkArray[Index][0]                  = pow(kSq, 0.5);
 				
@@ -406,6 +406,7 @@ int PkCorrections(int WindowFuncParam){
 	            
 		        polar2Dpk[Index][0]                = kmodulus;
 		        polar2Dpk[Index][1]                = fabs(mu);
+		        
 		        polar2Dpk[Index][2]                = PkArray[Index][1];
 	            
 	            // TwoDpkArray[Index][0]              = fabs(k_x);                      // Line of sight wavevector. 

@@ -4,7 +4,7 @@ int clipDensity(double threshold){
     for(j=0; j<n0*n1*n2; j++){
         if(densityArray[j] > threshold){ 
 	        densityArray[j] = threshold;
-		CellsClipped   += 1; 
+		    CellsClipped   += 1; 
         }
     }
     

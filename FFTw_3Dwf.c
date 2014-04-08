@@ -13,21 +13,23 @@ int wfPkCalc(){
     fftw_execute(p);
     
     printf("\nFFT complete.");
+    
+    printWindowfuncSlices();
 
     // 0: Subtract shot noise for a real survey, 1: Neglect shot noise subtraction for FFT of window function. 
-    PkCorrections(1);
+    // PkCorrections(1);
 
-    PkBinningCalc(n0*n1*n2, PkArray);
+    // PkBinningCalc(n0*n1*n2, PkArray);
     
-    sprintf(filepath, "%s/Data/WindowfuncSpherical/midK_W2q_%s.dat", root_dir, surveyType);
+    // sprintf(filepath, "%s/Data/WindowfuncSpherical/midK_W2q_%s.dat", root_dir, surveyType);
     
-    output = fopen(filepath, "w");
+    // output = fopen(filepath, "w");
     
-    for(j=0; j<kBinNumb-1; j++)  fprintf(output, "%e \t %e\n", meanKBin[j], binnedPk[j]);
+    // for(j=0; j<kBinNumb-1; j++)  fprintf(output, "%e \t %e\n", meanKBin[j], binnedPk[j]);
 
-    printf("\nWindow function P(k) calculation complete.");
+    // printf("\nWindow function P(k) calculation complete.");
     
-    fclose(output);
+    // fclose(output);
     
     return 0;
 }

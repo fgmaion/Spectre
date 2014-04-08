@@ -1,5 +1,4 @@
 int CovarianceMatrix(){
-  
     double***     Multipoles;
 
     int mockNumber = 64;
@@ -52,49 +51,56 @@ int CovarianceMatrix(){
         }
     }
 
-    for(j=0; j<3; j++){
-        for(k=0; k<(kBinNumb-1); k++){
+    for(k=0; k<(kBinNumb-1); k++){
+        for(j=0; j<3; j++){
+
             for(i=0; i<mockNumber; i++){
                 MeanMultipoles[j][k] += (1./mockNumber)*Multipoles[i][j][k];
             }
         }
+        
+        // printf("\n%e \t %e \t %e", MeanMultipoles[0][k], MeanMultipoles[1][k], MeanMultipoles[2][k]);
     }
 
     // Covariance is an N x N matrix, where N corresponds to 3*(kBinNumb-1), here 3 is due to Mono-Mono, Mono-Quad, Mono-Hex, Quad-Quad, etc... elements.     
-    Covariance                                              = (double **) malloc((kBinNumb-1)*sizeof(*Covariance));
+    Covariance                                                = (double **) malloc(2*(kBinNumb-1)*sizeof(*Covariance));
     
-    for(j=0; j<(kBinNumb-1); j++) Covariance[j]             = (double  *) malloc((kBinNumb-1)*sizeof(**Covariance));
+    for(j=0; j<2*(kBinNumb-1); j++) Covariance[j]             = (double  *) malloc(2*(kBinNumb-1)*sizeof(**Covariance));
 
-    for(k=0; k<(kBinNumb-1); k++){
-        for(j=0; j<(kBinNumb-1); j++){
+    for(k=0; k<2*(kBinNumb-1); k++){
+        for(j=0; j<2*(kBinNumb-1); j++){
             Covariance[j][k] = 0.0;
         }
     }
 
-    for(j=0; j<kBinNumb-1; j++){
-        for(k=0; k<kBinNumb-1; k++){
-            for(i=0; i<mockNumber; i++){
-            
-                if(j == k){
-                    Covariance[j][k]                           +=  (1./mockNumber)*(Multipoles[i][0][j] - MeanMultipoles[0][j])*(Multipoles[i][0][k] - MeanMultipoles[0][k]);            
+    int MonoCount; 
+    int QuadCount;
+    
+    for(MonoCount=0; MonoCount<2; MonoCount++){
+        for(QuadCount=0; QuadCount<2; QuadCount++){
+            for(j=0; j<(kBinNumb-1); j++){
+                for(k=0; k<(kBinNumb-1); k++){
+                    for(i=0; i<mockNumber; i++){
+                           Covariance[MonoCount*(kBinNumb-1) + j][QuadCount*(kBinNumb-1) + k] +=  (1./mockNumber)*(Multipoles[i][MonoCount][j] - MeanMultipoles[MonoCount][j])*(Multipoles[i][QuadCount][k] - MeanMultipoles[QuadCount][k]);
+                
+                    }
+                    
+                    // printf("\n%d\t%d\t%e", MonoCount, QuadCount, Covariance[j][k]);
                 }
             }
-        }
-    }
-				     
-    sprintf(filepath, "%s/Data/Covariance/Clipped_HODCubeColumns_MonoMono.dat", root_dir);
+	    }	
+	}
+     
+    sprintf(filepath, "%s/Data/Covariance/Clipped_HODCubeColumns_Covariance.dat", root_dir);
 
     output = fopen(filepath, "w"); 
 
-    for(j=0; j<(kBinNumb-1); j++){
-        for(k=0; k<(kBinNumb-1); k++){
-            fprintf(output, "%e \t", Covariance[j][k]/(sqrt(Covariance[j][j])*sqrt(Covariance[k][k])));                  
-        
-            // printf("%e \t", Covariance[j][k]);
+    for(j=0; j<2*(kBinNumb-1); j++){
+        for(k=0; k<2*(kBinNumb-1); k++){
+            fprintf(output, "%e \t", fabs(Covariance[j][k]));                  
         }
     
         fprintf(output, "\n");
-        // printf("\n");
     }
 
     fclose(output);

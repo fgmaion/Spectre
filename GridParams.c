@@ -17,6 +17,8 @@ int EvaluateGridParameters(){
     LowerChiLimit         = interp_comovingDistance(redshiftLowLimit);
     UpperChiLimit         = interp_comovingDistance(redshiftHiLimit);
     
+    printf("\nRedshift limits, lower bound: %e \t %e, upper bound: %e \t %e", redshiftLowLimit, LowerChiLimit, redshiftHiLimit, UpperChiLimit);
+    
     // FFTw calc assignment.
     xNyquistIndex         = n2/2 + 1;
     yNyquistIndex         = n1/2 + 1;

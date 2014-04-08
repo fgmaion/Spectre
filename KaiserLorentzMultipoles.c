@@ -52,20 +52,34 @@ double muOrderEight(double ks){
 
 
 
-// Multipoles for the Kaiser-Gauss redshift space distortion model.
+// Multipoles for the Kaiser-Lorentz redshift space distortion model.
 
-double kaiserGauss_Monofactor(double ks, double beta){
+double kaiserLorentz_Monofactor(double ks, double beta){
     return muOrderZero(ks) + 2.*beta*muOrderTwo(ks) + beta*beta*muOrderFour(ks);
 }
 
 
-double kaiserGauss_Quadfactor(double ks, double beta){
+double kaiserLorentz_Quadfactor(double ks, double beta){
     return (5./2.)*(-1.*muOrderZero(ks) + muOrderTwo(ks)*(3. - 2.*beta) + muOrderFour(ks)*(-beta*beta + 6.*beta) + 3.*beta*beta*muOrderSix(ks));
 }
 
 
-double kaiserGauss_Hexfactor(double ks, double beta){
+double kaiserLorentz_Hexfactor(double ks, double beta){
     return (9./8.)*(35.*beta*beta*muOrderEight(ks)  -30.*beta*beta*muOrderSix(ks) + 3.*beta*beta*muOrderFour(ks) + 70.*beta*muOrderSix(ks) - 60.*beta*muOrderFour(ks)  + 6.*beta*muOrderTwo(ks) + 35.*muOrderFour(ks) - 30.*muOrderTwo(ks) + 3.*muOrderZero(ks));
+}
+
+
+double kaiserLorentz_multipole(double ks, double beta, int monoQuad){
+    // Mono, L_0 corresponds to 0. Quad, L_2 corresponds to 1.
+    
+    switch(monoQuad){
+        case 0:
+            return kaiserLorentz_Monofactor(ks, beta);
+        case 1:
+            return kaiserLorentz_Quadfactor(ks, beta);
+        case 2:
+            return kaiserLorentz_Hexfactor(ks, beta);
+    }
 }
 
 // Print model to file. 
@@ -73,14 +87,14 @@ double kaiserGauss_Hexfactor(double ks, double beta){
 int kaiser_nonlinearSuppression_Multipoles(){
     double waveNumber    = 0.0;
     
-    sprintf(filepath, "%s/Data/Multipoles/KaiserLorentzMultipoles_beta_%.2f_velDispersion_%.2f.dat", root_dir, beta, velDispersion);
+    sprintf(filepath, "%s/Data/Multipoles/KaiserLorentzMultipoles_Pk_%s_beta_%.2f_velDispersion_%.2f.dat", root_dir, theoryPk_flag, beta, velDispersion);
     
     output = fopen(filepath, "w");
     
     for(j=0; j<100000; j++){
         waveNumber = pow(10., -5.)*j;
 
-        fprintf(output, "%le \t %le \t %le \t %le \t %le \n", waveNumber, (*pt2Pk)(waveNumber), (*pt2Pk)(waveNumber)*kaiserGauss_Monofactor(waveNumber*velDispersion, beta), (*pt2Pk)(waveNumber)*kaiserGauss_Quadfactor(waveNumber*velDispersion, beta), (*pt2Pk)(waveNumber)*kaiserGauss_Hexfactor(waveNumber*velDispersion, beta));
+        fprintf(output, "%le \t %le \t %le \t %le \t %le \n", waveNumber, (*pt2Pk)(waveNumber), (*pt2Pk)(waveNumber)*kaiserLorentz_Monofactor(waveNumber*velDispersion, beta), (*pt2Pk)(waveNumber)*kaiserLorentz_Quadfactor(waveNumber*velDispersion, beta), (*pt2Pk)(waveNumber)*kaiserLorentz_Hexfactor(waveNumber*velDispersion, beta));
         
     }
     

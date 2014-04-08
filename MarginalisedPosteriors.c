@@ -22,12 +22,12 @@ int Calc_betaPosterior(){
     
     for(i=0; i<Res; i++)    betaPosterior[i] /= PosteriorNorm;
        
-    sprintf(filepath, "%s/Data/Posteriors/test_betaPosterior.dat", root_dir);
+    sprintf(filepath, "%s/Data/Posteriors/test_betaPosterior_LowRes.dat", root_dir);
     
     output = fopen(filepath, "w");
     
     for(i=0; i<Res; i++){
-        beta = 0.25 + 0.2*(i/dRes);
+        beta = min_beta + (max_beta - min_beta)*(i/dRes);
         
         fprintf(output, "%e \t %e \n", beta, betaPosterior[i]);
     }
@@ -63,12 +63,12 @@ int Calc_sigmaPosterior(){
     
     for(i=0; i<Res; i++)    sigmaPosterior[i] /= PosteriorNorm;
        
-    sprintf(filepath, "%s/Data/Posteriors/test_sigmaPosterior.dat", root_dir);
+    sprintf(filepath, "%s/Data/Posteriors/test_sigmaPosterior_LowRes.dat", root_dir);
     
     output = fopen(filepath, "w");
     
     for(i=0; i<Res; i++){
-        velDispersion = 1.35 + 0.5*(i/dRes);
+        velDispersion = min_velDisperse + (max_velDisperse - min_velDisperse)*(i/dRes);
     
         fprintf(output, "%e \t %e \n", velDispersion, sigmaPosterior[i]);
     }
@@ -80,6 +80,5 @@ int Calc_sigmaPosterior(){
 
 
 int Calc_A11SqPosterior(){
-
     return 0;
 }

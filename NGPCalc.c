@@ -1,7 +1,9 @@
 int NGPCalc(){
     // ApplyJenkins();
     
-    CountGalaxies();
+    // CountGalaxies();
+    
+    cic_Assignment(); 
     
     overdensity_varyingSelection();
     
@@ -14,7 +16,9 @@ int NGPCalc(){
 int NGPCalcCube(){
     // ApplyJenkins();
     
-    CountGalaxiesCube();
+    // CountGalaxiesCube();
+    
+    cic_Assignment();
     
     overdensity_volumeLimitedTracer();    
     
@@ -31,6 +35,17 @@ int boxCoordinates(int rowNumber){
     boxlabel                = (int)                        xlabel + n2*ylabel + n2*n1*zlabel;
 
     return boxlabel;
+}
+
+
+int cic_Assignment(){
+    for(j=0; j<Vipers_Num; j++){
+        if(Acceptanceflag[j] == true){
+            cic_assign(xCoor[j], yCoor[j], zCoor[j], CellSize, densityArray, 1.0);
+        }
+    }
+    
+    return 0;
 }
 
 
@@ -75,7 +90,8 @@ int CountGalaxiesCube(){
 
 int overdensity_volumeLimitedTracer(){
     // The true density field. 
-    MeanNumberDensity                           = TotalZADEWeight/TotalVolume;
+        
+    MeanNumberDensity                           = 5481349.*pow(1000., -3.);
 
     for(j=0; j<n0*n1*n2; j++)  densityArray[j] /= CellVolume*MeanNumberDensity;
     for(j=0; j<n0*n1*n2; j++)  densityArray[j] -= 1.0;
@@ -103,8 +119,9 @@ int overdensity_varyingSelection(){
                 //     fkpShotNoiseCorr      += pow(TotalFKPweight, -2.)*pow(CellVolume, -1.)*pow(FKPweights[Index], 2.)/interp_nz(Chi);
                 // }
                 
-		        densityArray[Index]          /= CellVolume*(*pt2nz)(Chi);
 
+		        densityArray[Index]          /= CellVolume*(*pt2nz)(Chi);
+                
                 densityArray[Index]          -=  1.0;
             }
         }

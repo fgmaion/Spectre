@@ -31,11 +31,16 @@
 #include "Scripts/ArtificialWf.c"
 
 #include "Scripts/NGPCalc.c"
+#include "Scripts/CloudInCell.c"
 #include "Scripts/BasisChange.c"
 #include "Scripts/CalcCellraDec.c"
 
 #include "Scripts/FKPweights.c"
 #include "Scripts/Windowfn_PkCorrections.c"
+
+// #include "Scripts/KaiserMultipoles.c"
+// #include "Scripts/KaiserGaussMultipoles.c"
+#include "Scripts/KaiserLorentzMultipoles.c"
 
 #include "Scripts/qSortCompare.c"
 #include "Scripts/FFTw_3D.c"
@@ -58,6 +63,7 @@
 #include "Scripts/Clipped_zSpace.c"
 
 #include "Scripts/zCubeCreate.c"
+#include "Scripts/wedgeMockCreate.c"
 #include "Scripts/rollCube.c"
 
 #include "Scripts/freeMemory.c"
@@ -101,7 +107,7 @@ int main(int argc, char **argv){
     // Apply Jenkin's scaling to beat aliasing.
     JenkinsScalefactor        =        1.0;
 
-    // FKP P(k) of interest;
+    // FKP P(k) of interest.
     fkpPk                     =      5000.;                                               // [P(k)] = [h^-1 Mpc]^3, Peeble's convention.
 
     // Binning interval for P(k).
@@ -116,12 +122,19 @@ int main(int argc, char **argv){
 
     gsl_rng_env_setup();
 
-    gsl_ran_T = gsl_rng_default;
-    gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
+    gsl_ran_T                 = gsl_rng_default;
+    gsl_ran_r                 = gsl_rng_alloc(gsl_ran_T);
     
     // Translate cube to boot strap slice samples.
-    xtranslateDist            =      120.0;
-    ytranslateDist            =      120.0;
+    // xtranslateDist            =      120.0;
+    // ytranslateDist            =      120.0;
+    
+    // Non-linear RSD
+    velDispersion             =       2.00;                  // units of h^-1 Mpc rather than 300 km s^-1
+    beta                      =       0.54;                  // 2dF measurement, beta = 0.43
+    // A11Sq                  =       2.58;
+    
+    linearBias                =   1.495903;
     
     // Clipping variables. 
     // appliedClippingThreshold  =        5.0;    
@@ -129,11 +142,13 @@ int main(int argc, char **argv){
     // A11                       =        1.0;
     
     // zCubeCreate();
+    
+    // wedgeMockCreate(400., 150., 600., 150., 700., 850., 300., 850., 475., 525.);
 
     comovDistReshiftCalc();
 
     // JenkinsCoordinates();
-
+    
     EvaluateGridParameters();
    
     // assign binning interval in k, and calculate number of bins required. 
@@ -141,7 +156,7 @@ int main(int argc, char **argv){
 
     prepNGP();
   
-    sprintf(filepath, "%s/Data/HODCube/cube_gal_-20.0.dat", root_dir);
+    sprintf(filepath, "%s/Data/HODCube/zcube_gal_-20.0.dat", root_dir);
     
     FullCube();
     // EmbeddedCube(50);
@@ -167,42 +182,35 @@ int main(int argc, char **argv){
     
     pt2nz = &CubeMeanNumberDensity;
     
-    inputPK();
+    sprintf(theoryPk_flag, "Linear_-20.0");
+    // pt2Pk = &splintHODpk;
+    pt2Pk = &splintLinearPk;
 
-    pt2Pk = &splintMatterPk;
-    /*
-    sprintf(surveyType, "Cube_Jenkins%.1f", JenkinsScalefactor);
+    // inputHODPk();
+    inputLinearPk();
     
-    // for(ii=0; ii<8; ii++){ 
-       // for(jj=0; jj<8; jj++){
-         //   printf("\n%d \t %d", ii, jj);
-        
-            sprintf(surveyType, "Clipped_zPencilBeamCube_Jenkins%.1f_xtrans_%.2f_ytrans_%.2f", JenkinsScalefactor, ii*xtranslateDist, jj*ytranslateDist);
-        
-            // rollxy(ii*xtranslateDist, jj*ytranslateDist, Vipers_Num);
+    sprintf(surveyType, "zCube_Jenkins%.1f", JenkinsScalefactor);
     
-            // rollcube(xCoor, yCoor, zCoor, Vipers_Num);
-    
-            // Currently all galaxies accepted. 
-            assignAcceptanceCube();
+    // Currently all galaxies accepted. 
+    assignAcceptanceCube();
 
-            CleanNGP();
+    CleanNGP();
 
-            NGPCalcCube();
+    NGPCalcCube();
 	    
-	        // clipDensity(5.0);
+	// clipDensity(5.0);
 
-            // A11                      =   (1./2.6); // Empirical estimate from suppressed Del2k. 
+    // A11                      =   (1./2.6); // Empirical estimate from suppressed Del2k. 
                 
-            CalcWfCorrections();
+    CalcWfCorrections();
             
-            cleanFFTbinning();
+    cleanFFTbinning();
     
-            PkCalc();
-     //   }
-    //}
-    */
+    PkCalc();
+
     // wfPkCalc();
+    
+    // kaiser_nonlinearSuppression_Multipoles();
     
     // Window func. convolution assuming spherical symmetry/averaging.
     // ConvolveSphericalSymm();
@@ -233,10 +241,9 @@ int main(int argc, char **argv){
     // Stacpolly run. 
     // MPI_Finalize();
     
+    // sprintf(surveyType, "zPencilBeamCube_Jenkins%.1f_xtrans_%.2f_ytrans_%.2f", JenkinsScalefactor, ii*xtranslateDist, jj*ytranslateDist);
     
-    sprintf(surveyType, "zPencilBeamCube_Jenkins%.1f_xtrans_%.2f_ytrans_%.2f", JenkinsScalefactor, ii*xtranslateDist, jj*ytranslateDist);
-    
-    MockAvgMultipole(26);
+    // MockAvgMultipole(26);
     
     printf("\n\n");
     

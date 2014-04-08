@@ -244,6 +244,43 @@ double interp_nz(double Chi){
 }
 
 
+int splineStefano_nz(){
+    ChiSlices                =  (float  *)  realloc(ChiSlices,                101*sizeof(*ChiSlices));    
+    ComovingNumberDensity    =  (float  *)  realloc(ComovingNumberDensity,    101*sizeof(*ComovingNumberDensity));
+    ComovingNumberDensity2d  =  (float  *)  realloc(ComovingNumberDensity2d,  101*sizeof(*ComovingNumberDensity2d));
+    
+    sprintf(filepath, "%s/Stefano/nz.txt", root_dir);
+    
+    inputfile = fopen(filepath, "r");
+    
+    for(j=0; j<101; j++){
+        ChiSlices[j]               = 0.0;
+        ComovingNumberDensity[j]   = 0.0;
+        ComovingNumberDensity2d[j] = 0.0;
+    }  
+    
+    for(j=1; j<101; j++)  fscanf(inputfile, "%f \t %*f \t %*f \t %f \n", &ChiSlices[j], &ComovingNumberDensity[j]);
+    
+    fclose(inputfile);
+    
+    // for(j=1; j<101; j++)  printf("%f \t %f \n", ChiSlices[j], ComovingNumberDensity[j]);
+    
+    spline(ChiSlices, ComovingNumberDensity, 100, 1.0e31, 1.0e31, ComovingNumberDensity2d);
+    
+    return 0;
+}
+
+
+double interp_Stefano_nz(double Chi){
+    float fchi = (float) Chi;    
+    float fInterim;
+    
+    splint(ChiSlices, ComovingNumberDensity, ComovingNumberDensity2d,  100, fchi, &fInterim);
+    
+    return (double) fInterim;
+}
+
+
 int prepNumberDensityCalc(){
   chiBinNumber             =  (int)       ceil((interp_comovingDistance(1.2) - interp_comovingDistance(0.4))/chiBinWidth);   
 

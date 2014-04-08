@@ -49,17 +49,22 @@ int rollcube(double xCoor[], double yCoor[], double zCoor[], int galNumber){
 }
 
 
-int rollxy(double xdist, double ydist, int galNumber){
+int rollxyz(double xdist, double ydist, double zdist, double xii[], double yii[], double zii[], int galNumber){
     for(j=0; j<galNumber; j++){
-        xCoor[j] += xdist;
+        xii[j] += xdist;
     
-        if(xCoor[j] > AxisLimsArray[1][0]) xCoor[j] -= (AxisLimsArray[1][0] - AxisLimsArray[0][0]);
-        if(xCoor[j] < AxisLimsArray[0][0]) xCoor[j] += (AxisLimsArray[1][0] - AxisLimsArray[0][0]);
+        if(xii[j] > AxisLimsArray[1][0]) xii[j] -= (AxisLimsArray[1][0] - AxisLimsArray[0][0]);
+        if(xii[j] < AxisLimsArray[0][0]) xii[j] += (AxisLimsArray[1][0] - AxisLimsArray[0][0]);
     
-        yCoor[j] += ydist;
+        yii[j] += ydist;
         
-        if(yCoor[j] > AxisLimsArray[1][1]) yCoor[j] -= (AxisLimsArray[1][1] - AxisLimsArray[0][1]);
-        if(yCoor[j] < AxisLimsArray[0][1]) yCoor[j] += (AxisLimsArray[1][1] - AxisLimsArray[0][1]);
+        if(yii[j] > AxisLimsArray[1][1]) yii[j] -= (AxisLimsArray[1][1] - AxisLimsArray[0][1]);
+        if(yii[j] < AxisLimsArray[0][1]) yii[j] += (AxisLimsArray[1][1] - AxisLimsArray[0][1]);
+        
+        zii[j] += zdist;
+        
+        if(zii[j] > AxisLimsArray[1][1]) zii[j] -= (AxisLimsArray[1][1] - AxisLimsArray[0][1]);
+        if(zii[j] < AxisLimsArray[0][1]) zii[j] += (AxisLimsArray[1][1] - AxisLimsArray[0][1]);
     }
 
     return 0;

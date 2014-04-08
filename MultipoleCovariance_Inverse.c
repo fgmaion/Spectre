@@ -7,31 +7,29 @@ int CovarianceInverse(){
     // double Covariance[3*(kBinNumb-1)][3*(kBinNumb-1)];
 
     double* flatCov;
-    flatCov     = malloc((kBinNumb-1)*(kBinNumb-1)*sizeof(*flatCov));
+    flatCov     = malloc(2*(kBinNumb-1)*2*(kBinNumb-1)*sizeof(*flatCov));
 
-    invCov      = (double **) malloc((kBinNumb-1)*sizeof(*invCov));
+    invCov      = (double **) malloc(2*(kBinNumb-1)*sizeof(*invCov));
 
-    for(j=0; j<(kBinNumb-1); j++){
-      invCov[j] = malloc((kBinNumb-1)*sizeof(**invCov));
+    for(j=0; j<2*(kBinNumb-1); j++){
+      invCov[j] = malloc(2*(kBinNumb-1)*sizeof(**invCov));
     }
 
-    int count =0;
+    int count   = 0;
 
-    for(j=0; j<(kBinNumb-1); j++) flatCov[j] = 0.0;
+    for(j=0; j<4*(kBinNumb-1); j++) flatCov[j] = 0.0;
  
-    // Assuming diagonal covariance. 
-    for(j=0; j<(kBinNumb-1); j++){
-        for(k=0; k<(kBinNumb-1); k++){
+    for(j=0; j<2*(kBinNumb-1); j++){
+        for(k=0; k<2*(kBinNumb-1); k++){
             flatCov[count] = Covariance[j][k];
 		  
-		  count += 1;
+   		    count += 1;
 	    }
-
     }
-    
+
     int    order, order2;
     
-    order  = (kBinNumb-1);
+    order  = 2*(kBinNumb-1);
     order2 = order*order;
 
     // length of N+1
@@ -52,12 +50,22 @@ int CovarianceInverse(){
             invCov[j][k] = flatCov[count];
             
            	count += 1; 
-	        
-	        // printf("%e \t", invCov[j][k]);
+        }
+    }
+    
+    sprintf(filepath, "%s/Data/Covariance/Clipped_HODCubeColumns_InverseCovariance.dat", root_dir);
+
+    output = fopen(filepath, "w"); 
+
+    for(j=0; j<2*(kBinNumb-1); j++){
+        for(k=0; k<2*(kBinNumb-1); k++){
+            fprintf(output, "%e \t", fabs(invCov[j][k]));                  
         }
     
-        // printf("\n");
+        fprintf(output, "\n");
     }
+
+    fclose(output);
     
     return 0;
 }

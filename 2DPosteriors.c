@@ -18,6 +18,7 @@ int Calc_betaSigmaPosterior(){
         }
     }
     
+    
     for(i=0; i<Res; i++){
         for(j=0; j<Res; j++){
             betaSigmaPosterior[i][j] /= Res;
@@ -31,22 +32,22 @@ int Calc_betaSigmaPosterior(){
             }
         }
     }
-           
+         
     for(i=0; i<Res; i++){
         for(j=0; j<Res; j++){
             betaSigmaPosterior[i][j] /= maxPosterior;
         }
     }
     
-    sprintf(filepath, "%s/Data/Posteriors/test_betaSigmaPosterior.dat", root_dir);
+    sprintf(filepath, "%s/Data/Posteriors/test_betaSigmaPosterior_lowRes.dat", root_dir);
     
     output = fopen(filepath, "w");
     
     for(i=0; i<Res; i++){
         for(j=0; j<Res; j++){
-            beta          = 0.25 + 0.2*(i/dRes);
+            beta          = min_beta + (max_beta - min_beta)*(i/dRes);
             
-            velDispersion = 1.35 + 0.5*(j/dRes);
+            velDispersion = min_velDisperse + (max_velDisperse - min_velDisperse)*(j/dRes);
         
             fprintf(output, "%e \t", betaSigmaPosterior[i][j]);
         }

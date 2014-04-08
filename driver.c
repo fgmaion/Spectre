@@ -30,12 +30,17 @@
 
 #include "Scripts/Padding.c"
 #include "Scripts/NGPCalc.c"
+#include "Scripts/CloudInCell.c"
 #include "Scripts/BasisChange.c"
 #include "Scripts/CalcCellraDec.c"
 #include "Scripts/ApodiseWindowFunc.c"
 
 #include "Scripts/FKPweights.c"
 #include "Scripts/Windowfn_PkCorrections.c"
+
+#include "Scripts/KaiserMultipoles.c"
+// #include "Scripts/KaiserGaussMultipoles.c"
+#include "Scripts/KaiserLorentzMultipoles.c"
 
 #include "Scripts/qSortCompare.c"
 #include "Scripts/FFTw_3D.c"
@@ -63,13 +68,11 @@
 #include "Scripts/Powells_Brent.c"
 
 #include "Scripts/fitting_nz.c"
+#include "Scripts/randGen.c"
 
-#include "Scripts/KaiserMultipoles.c"
-#include "Scripts/KaiserGaussMultipoles.c"
-// #include "Scripts/KaiserLorentzMultipoles.c"
 
 #include "Scripts/slowDFT.c"
-
+/*
 // #include "Scripts/MockAvgMultipole.c"
 #include "Scripts/MultipoleCovariance.c"
 #include "Scripts/MultipoleCovariance_Inverse.c"
@@ -77,7 +80,7 @@
 #include "Scripts/MarginalisedPosteriors.c"
 #include "Scripts/2DPosteriors.c"
 #include "Scripts/LikelihoodEval.c"
-
+*/
 #include "Scripts/freeMemory.c"
 
 
@@ -95,16 +98,27 @@ sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_ValueAddedHOD");
 
 // With orientation of the -z Cartesian axis to the line of sight. 
 // lower_xlimit & upper_xlimit
-AxisLimsArray[0][0]   =    1550.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][0]   =    2180.0;                                                  // h^-1 Mpc
+// AxisLimsArray[0][0]   =    1550.0;                                                  // h^-1 Mpc
+// AxisLimsArray[1][0]   =    2180.0;                                                  // h^-1 Mpc
 
 // lower_ylimit & upper_ylimit
-AxisLimsArray[0][1]   =    -170.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][1]   =     170.0;                                                  // h^-1 Mpc
+// AxisLimsArray[0][1]   =    -170.0;                                                  // h^-1 Mpc
+// AxisLimsArray[1][1]   =     170.0;                                                  // h^-1 Mpc
 
 // lower_zlimit & upper_zlimit
-AxisLimsArray[0][2]   =     -75.0;                                                  // h^-1 Mpc
-AxisLimsArray[1][2]   =     -10.0;                                                  // h^-1 Mpc
+// AxisLimsArray[0][2]   =     -75.0;                                                  // h^-1 Mpc
+// AxisLimsArray[1][2]   =     -10.0;                                                  // h^-1 Mpc
+
+
+// Stefano basis. 
+AxisLimsArray[0][0]   =       0.0;                                                     // h^-1 Mpc
+AxisLimsArray[1][0]   =     800.0;                                                     // h^-1 Mpc
+
+AxisLimsArray[0][1]   =       0.0;                                                     // h^-1 Mpc
+AxisLimsArray[1][1]   =     800.0;                                                     // h^-1 Mpc
+
+AxisLimsArray[0][2]   =       0.0;                                                     // h^-1 Mpc
+AxisLimsArray[1][2]   =     800.0;                                                     // h^-1 Mpc
 
 // limits in right asecension.
 // W1 catalogue.
@@ -120,7 +134,7 @@ CentreRA              =     34.45;
 // W1 catalogue
 LowerDecLimit         =      -5.4;
 UpperDecLimit         =     -4.15;
-CentreDec             =    -3.525;
+CentreDec             =    -4.775;
 
 // W4 catalogue.
 // LowerDecLimit      =      0.82;
@@ -139,7 +153,9 @@ W4area                =       8.8;
 TotalW1W4area         =    19.675; 
 
 // Cell size, comoving distance, h^-1 Mpc.
-CellSize              =      16.0;                                                  
+CellSize              =       2.0;     
+// CellSize           =    7.8125;     
+// CellSize           =     5.208;
 
 // Selection parameters.
 absMagCut             =     22.00;
@@ -147,13 +163,25 @@ redshiftLowLimit      =      0.60;
 redshiftHiLimit       =      0.90;
 
 // Non-linear RSD
-velDispersion         =      1.70;                  // units of h^-1 Mpc rather than 300 km s^-1
-beta                  =      0.40;                  // 2dF measurement, beta = 0.43
+velDispersion         =      3.00;                  // units of h^-1 Mpc rather than 300 km s^-1
+beta                  =      0.35;                  // 2dF measurement, beta = 0.43
+A11Sq                 =      2.58;
 
-// -20.0 mags lim. sample. See linearBias.txt in HODTheoryPk dir.
-linearBias            =  1.495903;
+// Priors on the model params.
+min_beta              =      0.30;
+max_beta              =      0.50;
 
-/* linearBias.txt in dir. HODTheoryPk.
+min_velDisperse       =      1.60;
+max_velDisperse       =      1.80;
+ 
+min_A11Sq             =       2.2;
+max_A11Sq             =       3.0;
+
+// Resolution of the Likelihood evaluation [voxel number].
+ Res                  =        40;
+dRes                  =      40.0;
+
+/* linearBias.txt in dir. /HODTheoryPk/
 -22.0  2.924277
 -21.5  2.199471
 -21.0  1.824770
@@ -164,6 +192,9 @@ linearBias            =  1.495903;
 -20.25 1.550205
 -20.15 1.527030
 */
+
+// -20.0 mags lim. sample. See linearBias.txt in HODTheoryPk dir.
+linearBias            =  1.495903;
 
 // Comoving number density, n(z), measurement. 
 zBinWidth             =      0.03; 
@@ -178,7 +209,7 @@ fkpPk                 =     5000.;                                              
 
 // Binning interval for P(k).
 kbinInterval          =      0.01;
-modkMax               =      0.15;
+modkMax               =      0.80;
 muBinNumb             =       100;
 
 // Interval in k^2 for perp k binning of 2D P(k).
@@ -205,7 +236,7 @@ gsl_rng_env_setup();
 gsl_ran_T = gsl_rng_default;
 gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
 
-padVolume(15.0, 12.0, 12.0);
+padVolume(0.0, 0.0, 0.0);
 
 // Checked.
 comovDistReshiftCalc();
@@ -213,7 +244,7 @@ comovDistReshiftCalc();
 // Checked.
 VIPERS_SolidAngle     = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
 
-sprintf(surveyType, "VIPERSparent_zPad_12.0_8.0_8.0_GaussSmoothNz_%.1f_SkinDepth_%.1f_VolLim_%.2f_Mesh_%.2f", nzSigma, GibbsSkinDepth, absMagCut, CellSize);
+sprintf(surveyType, "VIPERSparent_StefanoBasis_Cic_GaussSmoothNz_%.1f_SkinDepth_%.1f_VolLim_%.2f_Mesh_%.2f", nzSigma, GibbsSkinDepth, absMagCut, CellSize);
 
 // JenkinsCoordinates();
 
@@ -224,16 +255,8 @@ EvaluateGridParameters();
 prepNGP();
 
 // Checked.
-CalcCellraDec();
-
-// Applied window fn.
-Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
-
-// Checked.
-SumOfVIPERSbools      = SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2);
-
-// Initialsed to zero in header.h
-TotalSurveyedVolume   = SumOfVIPERSbools*CellVolume;
+// CalcCellraDec();
+// StefanoMask();
 
 // apodiseWindowfn();
 
@@ -246,14 +269,14 @@ prepFFTw(n0, n1, n2);
 
 prepFFTbinning();
 
-assign2DPkMemory();
+// assign2DPkMemory();
 
-// pt2Pk = &splintHODpk;
-pt2Pk = &splintLinearPk;
+sprintf(theoryPk_flag, "HOD_-20.0");
+pt2Pk = &splintHODpk;
+//pt2Pk = &splintLinearPk;
 
-// inputHODPk();
-inputLinearPk();
-
+inputHODPk();
+// inputLinearPk();
 /*
 for(loopCount=1; loopCount<27; loopCount++){
     if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
@@ -263,22 +286,42 @@ for(loopCount=1; loopCount<27; loopCount++){
     
     CatalogueInput(filepath);
     
-    zUtilized = &zobs[0];
+    zUtilized = &zcos[0];
 
-    CoordinateCalc();
+    // CoordinateCalc();
+    
+    StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);
+    
+    StefanoRotated(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
+    
+    // randomGeneration();
+    
+    loadRand();
+    
+    // Applied window fn.
+    Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
 
-    VIPERSbasis(CentreRA, CentreDec, xCoor, yCoor, zCoor, Vipers_Num);
+    // Initialsed to zero in header.h
+    TotalSurveyedVolume   = SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2)*CellVolume;
+    
+    printf("\n\nSurveyed volume:  %e", TotalSurveyedVolume/TotalVolume);
+    
+    // projectVIPERSsystem();
+
+    // VIPERSbasis(CentreRA, CentreDec, xCoor, yCoor, zCoor, Vipers_Num);
     
     assignAcceptance();
 
     // Must be run for all 27 mocks in preparation for P(k) calc.
     // ComovingNumberDensityCalc();
 
-    splineGaussfilteredW1_W4_nz();
-
-    // splineMockAvg_nz();
+    // splineGaussfilteredW1_W4_nz();
+    splineStefano_nz();
     
-    pt2nz = &interp_nz;
+    // splineMockAvg_nz();
+    pt2nz    =  &interp_Stefano_nz;
+    
+    // pt2nz = &interp_nz;
 
     // pt2nz = &MockAvg_nz;
     
@@ -313,8 +356,6 @@ for(loopCount=1; loopCount<27; loopCount++){
 
 // wfPkCalc();
 
-// printWindowfuncSlices();
-
 // analyticConvTest();
 
 // AnisoConvolution();
@@ -326,21 +367,21 @@ for(loopCount=1; loopCount<27; loopCount++){
 
 // theoryHexadecapole();
 
-CovarianceMatrix();
+// CovarianceMatrix();
 
-CovarianceInverse();
+// CovarianceInverse();
 
-multipolesRealisation();
+// multipolesRealisation();
 
 // LikelihoodEval();
 
-minimiseChiSq();
+// minimiseChiSq();
 
-Calc_betaPosterior();
+// Calc_betaPosterior();
 
-Calc_sigmaPosterior();
+// Calc_sigmaPosterior();
 
-Calc_betaSigmaPosterior();
+// Calc_betaSigmaPosterior();
 
 // kaiser_Multipoles();
 

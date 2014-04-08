@@ -56,6 +56,13 @@ int assignAcceptance(){
     printf("\ny max:  %lf \t y min:  %lf", AcceptedMax(yCoor, Acceptanceflag, Vipers_Num), AcceptedMin(yCoor, Acceptanceflag, Vipers_Num));
     printf("\nz max:  %lf \t z min:  %lf", AcceptedMax(zCoor, Acceptanceflag, Vipers_Num), AcceptedMin(zCoor, Acceptanceflag, Vipers_Num));
     */
+    
+    printf("\n\nRedshift acceptance");
+    printf("\nx max:  %e \t x min:  %e",     AcceptedMax(xCoor, Acceptanceflag, Vipers_Num), AcceptedMin(xCoor, Acceptanceflag, Vipers_Num));
+    printf("\ny max:  %e \t y min:  %e",     AcceptedMax(yCoor, Acceptanceflag, Vipers_Num), AcceptedMin(yCoor, Acceptanceflag, Vipers_Num));
+    printf("\nz max:  %e \t z min:  %e",     AcceptedMax(zCoor, Acceptanceflag, Vipers_Num), AcceptedMin(zCoor, Acceptanceflag, Vipers_Num));
+    printf("\nchi max:  %e \t chi min:  %e", AcceptedMax(rDist, Acceptanceflag, Vipers_Num), AcceptedMin(rDist, Acceptanceflag, Vipers_Num));
+        
     int AcceptedNumber = 0;
     
     for(j=0; j<Vipers_Num; j++){

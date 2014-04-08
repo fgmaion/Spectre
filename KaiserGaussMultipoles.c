@@ -70,12 +70,26 @@ double kaiserGauss_Hexfactor(double ks, double beta){
     return (9./8.)*(35.*beta*beta*muOrderEight(ks)  -30.*beta*beta*muOrderSix(ks) + 3.*beta*beta*muOrderFour(ks) + 70.*beta*muOrderSix(ks) - 60.*beta*muOrderFour(ks)  + 6.*beta*muOrderTwo(ks) + 35.*muOrderFour(ks) - 30.*muOrderTwo(ks) + 3.*muOrderZero(ks));
 }
 
-// Print model to file. 
 
+double kaiserGauss_multipole(double ks, double beta, int monoQuad){
+    // Mono, L_0 corresponds to 0. Quad, L_2 corresponds to 1.
+    
+    switch(monoQuad){
+        case 0:
+            return kaiserGauss_Monofactor(ks, beta);
+        case 1:
+            return kaiserGauss_Quadfactor(ks, beta);
+        case 2:
+            return kaiserGauss_Hexfactor(ks, beta);
+    }
+}
+
+
+// Print model to file. 
 int kaiser_nonlinearSuppression_Multipoles(){
     double waveNumber    = 0.0;
     
-    sprintf(filepath, "%s/Data/Multipoles/KaiserGaussMultipoles_Beta_%.2f_velDispersion_%.2f.dat", root_dir, beta, velDispersion);
+    sprintf(filepath, "%s/Data/Multipoles/KaiserGaussMultipoles_Pk_%s_beta_%.2f_velDispersion_%.2f.dat", root_dir, theoryPk_flag, beta, velDispersion);
     
     output = fopen(filepath, "w");
     

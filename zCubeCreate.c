@@ -38,7 +38,9 @@ int zCubeCreate(){
     zVel  = (float *) realloc(zVel, Vipers_Num*sizeof(*zVel));
 
 
-    for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%f \t %f \t %f \t %f \t %f \t %f \n", &xCoor[j], &yCoor[j], &zCoor[j], &xVel[j], &yVel[j], &zVel[j]);
+    for(j=0; j<Vipers_Num; j++){
+        fscanf(inputfile, "%lf \t %lf \t %lf \t %lf \t %lf \t %lf \n", &xCoor[j], &yCoor[j], &zCoor[j], &xVel[j], &yVel[j], &zVel[j]);
+    }
 
     printf("\nInput of catalogue for z cube creation successful.");
 
@@ -53,16 +55,19 @@ int zCubeCreate(){
     // Add reshift space distortion in the plane parallel approximation, along the x axis direction. 
     
     for(j=0; j<Vipers_Num; j++){
-        xCoor[j]                      += xVel[j]/(100.*hz);
+        xCoor[j]                      += (1. + 0.8)*xVel[j]/(100.*hz);
         
         if(xCoor[j] > 1000.) xCoor[j] -= 1000.;
         if(xCoor[j] <    0.) xCoor[j] += 1000.;
     }
     
-    sprintf(filepath, "%s/Data/HODCube/zcube_gal_-20.0.dat", root_dir);
+    sprintf(filepath, "%s/Data/HODCube/zcube_gal_-20.0_2.dat", root_dir);
     
     output = fopen(filepath, "w");
-    for(j=0; j<Vipers_Num; j++)  fprintf(output, "%f \t %f \t %f\n", xCoor[j], yCoor[j], zCoor[j]);
+    
+    for(j=0; j<Vipers_Num; j++){
+        fprintf(output, "%f \t %f \t %f\n", xCoor[j], yCoor[j], zCoor[j]);
+    }
     
     fclose(output);
 

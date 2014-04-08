@@ -207,6 +207,18 @@ double*          xVel   = NULL;
 double*          yVel   = NULL;
 double*          zVel   = NULL; 
 
+// randoms.
+double       alpha;
+
+int          rand_number;
+
+double*      rand_ra    = NULL;
+double*      rand_dec   = NULL;
+double*      rand_chi   = NULL; 
+double*      rand_x     = NULL;
+double*      rand_y     = NULL;
+double*      rand_z     = NULL;
+
 // TotalWeight is the sum of ZADE weight for the ZADE catalogue = Number of spec z + Number of used Photometric galaxies used (including compensation for sampling).
 double       TotalZADEWeight   = 0.0;
 double       MeanNumberDensity = 0.0;
@@ -628,3 +640,14 @@ double    dRes;
 
 double*** ChiSqGrid;
 double     minChiSq;
+
+double    min_beta;
+double    max_beta;
+
+double    min_velDisperse;
+double    max_velDisperse;
+
+double    min_A11Sq;
+double    max_A11Sq;
+
+char      theoryPk_flag[200];

@@ -99,7 +99,6 @@ int CalcCellraDec(){
 	    } 
     }
     
-     
     // Cuboid geometry, simple test. 
      /*for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
@@ -122,6 +121,34 @@ int CalcCellraDec(){
     return 0;
 }
 
+
+
+int StefanoMask(){
+    double xCell, yCell, zCell, rCell;
+
+    for(k=0; k<n0; k++){
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+	           xCell      = AxisLimsArray[0][0] + CellSize*(i+0.5);
+	           yCell      = AxisLimsArray[0][1] + CellSize*(j+0.5);
+	           zCell      = AxisLimsArray[0][2] + CellSize*(k+0.5);
+
+               Index      = k*n1*n2 + j*n2 + i;
+
+               rCell      = pow(xCell*xCell + yCell*yCell + zCell*zCell, 0.5);
+
+               Cell_chiVIPERSsystem[Index] = rCell;
+/*
+               if((70.7 < xCell) && (xCell<129.) && (99.5<yCell) && (yCell<502.5) && (LowerChiLimit < rCell) && (rCell < UpperChiLimit)){
+                  Cell_SurveyLimitsMask[Index] = 1.0;
+               }
+*/
+            }
+        }
+    }
+
+    return 0;
+}
 
 int projectVIPERSsystem(){
     sprintf(filepath, "%s/Data/ra_decCells/%s_xyz_accepted.dat", root_dir, surveyType);

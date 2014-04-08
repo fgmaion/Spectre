@@ -117,3 +117,78 @@ int CoordinateCalc(){
 
     return 0;
 }
+
+
+int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoor[], double yCoor[], double zCoor[]){
+    for(j=0; j<Num; j++){
+         ra[j]               *= (pi/180.0);                                 // Converted to radians.
+        dec[j]               *= (pi/180.0);                                 // Converted to radians.
+        
+        rDist[j]              = interp_comovingDistance(zUtilized[j]);      // Comoving distances in h^-1 Mpc
+    
+        xCoor[j]              =     rDist[j]*cos(dec[j])*cos(ra[j]);        
+        yCoor[j]              =     rDist[j]*cos(dec[j])*sin(ra[j]);
+        zCoor[j]              = -1.*rDist[j]*sin(dec[j]);
+        
+        ra[j]                *= (pi/180.0);                                 // Converted to degrees.
+        dec[j]               *= (pi/180.0);                                 // Converted to degrees.
+    }
+    
+    printf("\n\nVIPERS successfully loaded. Original.");
+    printf("\nMax:  %e \t %e \t %e", arrayMax(xCoor, Vipers_Num), arrayMax(yCoor, Vipers_Num), arrayMax(zCoor, Vipers_Num));
+    printf("\nMin:  %e \t %e \t %e", arrayMin(xCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
+    printf("\nChi:  %e \t %e", arrayMin(rDist, Vipers_Num), arrayMax(rDist, Vipers_Num));
+    
+    /*
+    sprintf(filepath, "%s/Data/ra_decCells/OriginalCoordinates.dat", root_dir);
+    
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<Vipers_Num; j++)  fprintf(output, "%e \t %e \t %e \n", xCoor[j], yCoor[j], zCoor[j]);
+    
+    fclose(output);
+    */
+    
+    return 0;
+}
+
+int StefanoRotated(int Number, double centreRA, double centreDec, double xCoors[], double yCoors[], double zCoors[]){
+    double x1, y1, z1;
+    double x2, y2, z2;
+    double c_ra, c_dec;
+    
+    c_ra    =  centreRA*(pi/180.);
+    c_dec   = centreDec*(pi/180.);
+
+    for(j=0; j<Number; j++){
+        // Rotation by mean RA about z-axis. Counter-clockwise rotation by - mean_RA.
+        x1  =     cos(c_ra)*xCoors[j] + sin(c_ra)*yCoors[j];
+        y1  = -1.*sin(c_ra)*xCoors[j] + cos(c_ra)*yCoors[j];
+        z1  = zCoors[j];
+        
+        x2  = cos(c_dec + pi/2.)*x1  - sin(c_dec + pi/2.)*z1;
+        y2  = y1;
+        z2  = sin(c_dec + pi/2.)*x1  + cos(c_dec + pi/2.)*z1;
+    
+        rDist[j] = pow(pow(xCoor[j], 2.) + pow(yCoor[j], 2.) + pow(zCoor[j], 2.), 0.5);
+    
+        xCoor[j] = x2 +  100.;
+        yCoor[j] = y2 +  300.;
+        zCoor[j] = z2 - 1500.;   
+    }
+
+    sprintf(filepath, "%s/Data/ra_decCells/StefanoCoordinates.dat", root_dir);
+    
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<Vipers_Num; j++)  fprintf(output, "%e \t %e \t %e \n", xCoor[j], yCoor[j], zCoor[j]);
+    
+    fclose(output);
+
+    printf("\n\nVIPERS successfully loaded. Rotated + translated");
+    printf("\nMax:  %e \t %e \t %e", arrayMax(xCoor, Vipers_Num), arrayMax(yCoor, Vipers_Num), arrayMax(zCoor, Vipers_Num));
+    printf("\nMin:  %e \t %e \t %e", arrayMin(xCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
+    printf("\nChi:  %e \t %e", arrayMin(rDist, Vipers_Num), arrayMax(rDist, Vipers_Num));
+
+    return 0;
+}
