@@ -61,10 +61,10 @@ int CountGalaxies(){
     
     
     for(j=0; j<n0*n1*n2; j++){
-      if(densityArray[j] > 0.0){
-	      // Currently densityArray contains solely galaxy counts per cell.
-          meanCellRedshift[j] /= densityArray[j];
-      }
+        if(densityArray[j] > 0.0){
+	        // Currently densityArray contains solely galaxy counts per cell.
+            meanCellRedshift[j] /= densityArray[j];
+        }
     }
     
     // TotalZADEWeight = SumDoubleArray(densityArray, n0*n1*n2);
@@ -87,21 +87,21 @@ int CountGalaxiesCube(){
 }
 
 
-
-int overdensity_volumeLimitedTracer(){
-    // The true density field. 
-        
-    MeanNumberDensity                           = 5481349.*pow(1000., -3.);
-
-    for(j=0; j<n0*n1*n2; j++)  densityArray[j] /= CellVolume*MeanNumberDensity;
-    for(j=0; j<n0*n1*n2; j++)  densityArray[j] -= 1.0;
-
-    return 0;
+double CubeMeanNumberDensity(double chi){
+    // Galaxies in cube/comoving volume. 
+    
+    return 5481349.*pow(1000., -3.); 
 }
 
 
-double CubeMeanNumberDensity(double chi){
-    return MeanNumberDensity; 
+int overdensity_volumeLimitedTracer(){
+    // The true density field. 
+
+    for(j=0; j<n0*n1*n2; j++)  densityArray[j] /= CellVolume*CubeMeanNumberDensity(1500.);
+
+    for(j=0; j<n0*n1*n2; j++)  densityArray[j] -= 1.0;
+
+    return 0;
 }
 
 
@@ -112,13 +112,12 @@ int overdensity_varyingSelection(){
         for(j=0; j<n1; j++){ 
             for(i=0; i<n2; i++){
                 Index                         = k*n1*n2 + j*n2 + i; 
-
+                
                 Chi                           = Cell_chiVIPERSsystem[Index];
                 
                 // if(densityArray[Index] > 0){
                 //     fkpShotNoiseCorr      += pow(TotalFKPweight, -2.)*pow(CellVolume, -1.)*pow(FKPweights[Index], 2.)/interp_nz(Chi);
                 // }
-                
 
 		        densityArray[Index]          /= CellVolume*(*pt2nz)(Chi);
                 
@@ -134,51 +133,18 @@ int overdensity_varyingSelection(){
 }
 
 
-int ShotNoiseTest(){
-    double expectedGalaxyCount;
-    
-    for(k=0; k<n0; k++){
-        for(j=0; j<n1; j++){ 
-            for(i=0; i<n2; i++){
-                Index                         = k*n1*n2 + j*n2 + i; 
-
-                Chi                           = Cell_chiVIPERSsystem[Index];
-
-                expectedGalaxyCount           = CellVolume*(*pt2nz)(Chi);
-                
-                densityArray[Index]           = gsl_ran_poisson(gsl_ran_r, expectedGalaxyCount);
-                
-		        densityArray[Index]          /= CellVolume*(*pt2nz)(Chi);
-
-                densityArray[Index]          -=  1.0;
-            }
-        }
-    }
-    
-    return 0;
-}
-
-
 int printSurveyDetails(){
     printf("\n\nSurvey type:  %s", surveyType);
     printf("\nChi limits:              %f to %f", LowerChiLimit, UpperChiLimit);
     printf("\nright ascension limits:  %f to %f", UpperRAlimit, LowerRAlimit);
     printf("\ndeclination limits:      %f to %f", UpperDecLimit, LowerDecLimit);
-    printf("\nTotal ZADE weight:             %e.", TotalZADEWeight);
     printf("\nCell volume:                   %f.",        CellVolume); 
-    printf("\n\nNon-empty cells:             %e  [n0*n1*n2]", SumOfVIPERSbools/(n0*n1*n2));
     printf("\n\nTotal volume:            %f", TotalVolume);
     printf("\nTotal surveyed volume:   %f", TotalSurveyedVolume);
-    printf("\nApodised       volume:   %f", apodisedVolume);
 
     printf("\n\nfundamental x mode:  %f", kIntervalx);
     printf("\nfundamental y mode:  %f", kIntervaly);
     printf("\nfundamental z mode:  %f", kIntervalz);
     
     return 0;
-}
-
-
-double setMeanNumberDensity(double Chi){
-    return 41352./TotalSurveyedVolume;
 }

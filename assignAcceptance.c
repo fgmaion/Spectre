@@ -57,7 +57,7 @@ int assignAcceptance(){
     printf("\nz max:  %lf \t z min:  %lf", AcceptedMax(zCoor, Acceptanceflag, Vipers_Num), AcceptedMin(zCoor, Acceptanceflag, Vipers_Num));
     */
     
-    printf("\n\nRedshift acceptance");
+    printf("\n\nVIPERS gals. meeting redshift acceptance.");
     printf("\nx max:  %e \t x min:  %e",     AcceptedMax(xCoor, Acceptanceflag, Vipers_Num), AcceptedMin(xCoor, Acceptanceflag, Vipers_Num));
     printf("\ny max:  %e \t y min:  %e",     AcceptedMax(yCoor, Acceptanceflag, Vipers_Num), AcceptedMin(yCoor, Acceptanceflag, Vipers_Num));
     printf("\nz max:  %e \t z min:  %e",     AcceptedMax(zCoor, Acceptanceflag, Vipers_Num), AcceptedMin(zCoor, Acceptanceflag, Vipers_Num));
@@ -71,15 +71,30 @@ int assignAcceptance(){
         }
     }
 
-    printf("\nNumber of accepted galaxies: %d", AcceptedNumber);
+    printf("\nNumber of accepted VIPERS gals.: %d", AcceptedNumber);
 
     return 0;
 }
 
 
 int assignAcceptanceCube(){
-    for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j]  = true;
+    int subVolAccepted = 0;
+
+    for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j] = false;
     
+    for(j=0; j<Vipers_Num; j++){
+        if((AxisLimsArray[0][0]<xCoor[j]) && (xCoor[j]<AxisLimsArray[1][0])){
+            if((AxisLimsArray[0][1]<yCoor[j]) && (yCoor[j]<AxisLimsArray[1][1])){
+                if((AxisLimsArray[0][2]<zCoor[j]) && (zCoor[j]<AxisLimsArray[1][2])){
+                    Acceptanceflag[j]  = true;
+                    
+                    subVolAccepted    +=    1;
+                }
+            }
+        }
+    }
+
+    printf("\nNumber of galaxies in sub volume: %d", subVolAccepted);
+
     return 0;
 }
-

@@ -1,86 +1,69 @@
-int multipolesRealisation(){
+int multipolesRealisation(int kBinNumb){
   // Multivariate Gaussian realisation of Multipoles.
-  
-  int kBinNumb = 20;
   
   double** CholDecomCov;
   double*  cholVector_y;
   
-  double jWaveNumber, mu_j;
+  double   mu_j;
+  
+  double   Mono_j;
+  double   Quad_j;
 
-  CholDecomCov = malloc(2*(kBinNumb-1)*sizeof(*CholDecomCov));
+  mvGauss             = malloc(2*(kBinNumb-1)*sizeof(*mvGauss));
+
+  cholVector_y        = malloc(2*(kBinNumb-1)*sizeof(*cholVector_y));
+
+  CholDecomCov        = malloc(2*(kBinNumb-1)*sizeof(*CholDecomCov));
 
   for(j=0; j<2*(kBinNumb-1); j++){
       CholDecomCov[j] = malloc(2*(kBinNumb-1)*sizeof(**CholDecomCov));
+      
+      cholVector_y[j] = 0.0;
+      
+      // Gaussian distributed variable, of sigma = 1.
+      mvGauss[j]      =  rand_gaussian(gsl_ran_r, 1.);  
   }
 
   CholeskyDecomposition(Covariance, 2*(kBinNumb-1), CholDecomCov);
-  
-  /*
-  for(j=0; j<2*(kBinNumb-1); j++){
-    for(k=0; k<2*(kBinNumb-1); k++){
-        
-        printf("%d \t %d \t %e \t %e \n", j, k, Covariance[j][k], CholDecomCov[j][k]);
-    }  
-  }
-  */
-  
-  mvGauss = malloc(2*(kBinNumb-1)*sizeof(*mvGauss));
 
-  for(j=0; j<2*(kBinNumb-1); j++){
-      mvGauss[j]     =  gsl_ran_gaussian(gsl_ran_r, 1.0);
-  }  
-  
-  cholVector_y       = (double *)  malloc(2*(kBinNumb-1)*sizeof(*cholVector_y));
-
-  for(j=0; j<2*(kBinNumb-1); j++) cholVector_y[j] = 0.0;
-
+  // See Numerical Recipes. 
   for(j=0; j<2*(kBinNumb-1); j++){
       for(k=j; k<2*(kBinNumb-1); k++){
-          // printf("\n%e \t %e", Covariance[j][k], CholDecomCov[k][j]);
-      
-	      cholVector_y[j] += CholDecomCov[j][k]*mvGauss[k];   
+	      cholVector_y[j] += mvGauss[k]*CholDecomCov[j][k];   
       }
   }
 
-  // See Numerical Recipes. 
+  sprintf(filepath, "%s/Data/Multipoles/Multipoles_zCube_clipThreshold_1.0e+03_fullCube_kbin_0.010_000.dat", root_dir, k);
 
-  double bestfit;
-  double Mono_j;
-  double Quad_j;
+  inputfile = fopen(filepath, "r");
+
+  for(i=0; i<kBinNumb-1; i++){
+	fscanf(inputfile, "%*lf \t %lf \t %lf \t %*d \t %*lf \t %*lf \n", &mvGauss[i], &mvGauss[(kBinNumb-1) + i]);
+  }
+
+  fclose(inputfile);
   
-  sprintf(filepath, "%s/Data/Multipoles/Realisation.dat", root_dir);
+  
+  sprintf(filepath, "%s/Data/Multipoles/zCube_clipThreshold_1.0e+03_subVols_Realisation_beta_%.2f_sigma_%.2f.dat", root_dir, beta, velDispersion);
 
   output = fopen(filepath, "w");
-
-  for(j=0; j<(kBinNumb-1); j++){
-      jWaveNumber = kMultipoles[j];
-
-      Mono_j      = (*pt2Pk)(jWaveNumber)*kaiserGauss_Monofactor(jWaveNumber*velDispersion, beta);
-
-      mvGauss[j]  = Mono_j; // + cholVector_y[j];
-
-      bestfit     = (*pt2Pk)(jWaveNumber)*kaiserGauss_Monofactor(jWaveNumber*velDispersion, beta)/A11Sq;
-
-      mvGauss[j] /= A11Sq;
-
-      fprintf(output, "\n%e \t %e \t %e", jWaveNumber, mvGauss[j], bestfit);
-  }  
   
   for(j=0; j<(kBinNumb-1); j++){
-      jWaveNumber = kMultipoles[j];
+      Mono_j                     = (*pt2Pk)(kMultipoles[j])*kaiserLorentz_Monofactor(kMultipoles[j]*velDispersion, beta);
+      
+      Quad_j                     = (*pt2Pk)(kMultipoles[j])*kaiserLorentz_Quadfactor(kMultipoles[j]*velDispersion, beta);
 
-      Quad_j      = (*pt2Pk)(jWaveNumber)*kaiserGauss_Quadfactor(jWaveNumber*velDispersion, beta);
-
-      mvGauss[(kBinNumb-1) + j]  = Quad_j; //  + cholVector_y[j];
-
+      // mvGauss[j]                 = Mono_j + cholVector_y[j];
+      
+      // mvGauss[(kBinNumb-1) + j]  = Quad_j + cholVector_y[(kBinNumb-1) + j];
+      
+      mvGauss[j]                /= A11Sq;
+      
       mvGauss[(kBinNumb-1) + j] /= A11Sq;
-      
-      bestfit     = (*pt2Pk)(jWaveNumber)*kaiserGauss_Quadfactor(jWaveNumber*velDispersion, beta)/A11Sq;
-      
-      fprintf(output, "\n%e \t %e \t %e", jWaveNumber, mvGauss[(kBinNumb-1) + j], bestfit);
+
+      fprintf(output, "%e \t %e \t %e \t %e \t %e \t %e \t %e\n", kMultipoles[j], mvGauss[j], mvGauss[(kBinNumb-1) + j], Mono_j, Quad_j, Mono_j/A11Sq, Quad_j/A11Sq);
   }  
- 
+  
   fclose(output);
 
   return 0;

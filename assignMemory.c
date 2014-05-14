@@ -50,11 +50,18 @@ int prepFFTw(int n0, int n1, int n2){
     printf("\n\nAssigning Pk array.");
     PkArray            = (double **)     malloc(n0*n1*n2*sizeof(double*));             // rows
     
+    muIntervalPk       = (double **)     malloc(n0*n1*n2*sizeof(*muIntervalPk));
+    
     for(j=0; j<n0*n1*n2; j++){  
         PkArray[j]     = (double *)      malloc(2*sizeof(double));                     // columns 
         
         PkArray[j][0]  = 0.0;
         PkArray[j][1]  = 0.0;
+    
+        muIntervalPk[j]    = (double *)     malloc(2*sizeof(double));
+        
+        muIntervalPk[j][0] = 0.0;
+        muIntervalPk[j][1] = 0.0; 
     }
 
     printf("\nCreating FFTw plan.");
@@ -64,17 +71,11 @@ int prepFFTw(int n0, int n1, int n2){
 }
 
 
-int prep_wfKernelminAmp(){
-    wfKernel_minAmpIndices            = (int **) malloc(xwfKernelsize*ywfKernelsize*zwfKernelsize*sizeof(*wfKernel_minAmpIndices));
+int prepFFTw1D(int n0){
+    in1D               = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0);
+    out1D              = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0);
     
-    for(j=0; j<xwfKernelsize*ywfKernelsize*zwfKernelsize; j++){  
-        wfKernel_minAmpIndices[j]     = (int *)  malloc(4*sizeof(int));                     // columns 
-        
-        wfKernel_minAmpIndices[j][0]  = 0;
-        wfKernel_minAmpIndices[j][1]  = 0;
-        wfKernel_minAmpIndices[j][2]  = 0;
-        wfKernel_minAmpIndices[j][3]  = 0;
-    }
+    p1D                = fftw_plan_dft_1d(n0, in1D, out1D, FFTW_FORWARD, FFTW_ESTIMATE);
 
     return 0;
 }
@@ -194,15 +195,13 @@ int prepSphericalConv(int inputWindowfnBinNumb, int evalConvPkNumb){
 
 
 int prepAnisoConvolution(){
-    inputPk                          = (double *)   malloc(n0*n1*n2*sizeof(*inputPk));
+    inputPk                          = (double *)   malloc((n0+1)*(n1+1)*(n2+1)*sizeof(*inputPk));
     
-    windowFunc3D                     = (double *)   malloc(xwfKernelsize*ywfKernelsize*zwfKernelsize*sizeof(*windowFunc3D));       
-    
-    convolvedPk3d                    = (double *)   malloc((n0-2*zwfKernelsize)*(n1-2*ywfKernelsize)*(n2-2*xwfKernelsize)*sizeof(*convolvedPk3d)); 
+    convolvedPk3d                    = (double *)   malloc((n0+1)*(n1+1)*(n2+1)*sizeof(*convolvedPk3d)); 
 
-    flattenedConvolvedPk3D           = (double **)  malloc((n0-2*zwfKernelsize)*(n1-2*ywfKernelsize)*(n2-2*xwfKernelsize)*sizeof(*flattenedConvolvedPk3D));
+    flattenedConvolvedPk3D           = (double **)  malloc((n0+1)*(n1+1)*(n2+1)*sizeof(*flattenedConvolvedPk3D));
 
-    for(j=0; j<(n0-2*zwfKernelsize)*(n1-2*ywfKernelsize)*(n2-2*xwfKernelsize); j++){
+    for(j=0; j<(n0+1)*(n1+1)*(n2+1); j++){
         flattenedConvolvedPk3D[j]    = (double *)   malloc(2*sizeof(double));
 
         flattenedConvolvedPk3D[j][0] = 0.0;
@@ -213,14 +212,142 @@ int prepAnisoConvolution(){
 }
 
 
-int assignAnisoWfKernel(){
-    AnisoWfKernel                    = (double *) malloc(xwfKernelsize*ywfKernelsize*zwfKernelsize*sizeof(*AnisoWfKernel));
-    AnisoWfKernel_ModeNumb           = (int *)    malloc(xwfKernelsize*ywfKernelsize*zwfKernelsize*sizeof(*AnisoWfKernel_ModeNumb));
-
-    for(j=0; j<xwfKernelsize*ywfKernelsize*zwfKernelsize; j++){
-        AnisoWfKernel[j]             = 0.0;
-        AnisoWfKernel_ModeNumb[j]    = 0;
+int prep_wfKernelminAmp(){
+    wfKernel_minAmpIndices            = (int **)   malloc(largeAmpIndices*sizeof(*wfKernel_minAmpIndices));
+    
+    windowFunc3D                      = (double *) malloc(largeAmpIndices*sizeof(*windowFunc3D));       
+    
+    for(j=0; j<largeAmpIndices; j++){  
+        wfKernel_minAmpIndices[j]     = (int *)  malloc(4*sizeof(int));                     // columns 
+        
+        wfKernel_minAmpIndices[j][0]  = 0;
+        wfKernel_minAmpIndices[j][1]  = 0;
+        wfKernel_minAmpIndices[j][2]  = 0;
+        wfKernel_minAmpIndices[j][3]  = 0;
     }
+
+    return 0;
+}
+
+
+int LikelihoodMemory(){
+    // Parameter grid of evaluated Chi sq values. 
+    ChiSqGrid  = (double ***) malloc(Res*sizeof(*ChiSqGrid));
+  
+    for(j=0; j<Res; j++)  ChiSqGrid[j] = (double **) malloc(Res*sizeof(**ChiSqGrid));
+  
+    for(j=0; j<Res; j++){
+        for(k=0; k<Res; k++){
+            ChiSqGrid[j][k]    = (double *) malloc(Res*sizeof(***ChiSqGrid));
+        }
+    }
+
+    // Likelihood values. 
+    lnLikelihoodGrid  = (double ***) malloc(Res*sizeof(*lnLikelihoodGrid));
+  
+    for(j=0; j<Res; j++)  lnLikelihoodGrid[j] = (double **) malloc(Res*sizeof(**lnLikelihoodGrid));
+  
+    for(j=0; j<Res; j++){
+        for(k=0; k<Res; k++){
+            lnLikelihoodGrid[j][k]    = (double *) malloc(Res*sizeof(***lnLikelihoodGrid));
+        }
+    }
+
+
+    betaPosterior = (double *)  malloc(Res*sizeof(*betaPosterior));    
+    
+    for(i=0; i<Res; i++)  betaPosterior[i] = 0.0;
+    
+    sigmaPosterior = (double *)  malloc(Res*sizeof(*sigmaPosterior));    
+
+    for(i=0; i<Res; i++)  sigmaPosterior[i] = 0.0;
+    
+    
+    betaSigmaPosterior = (double **) malloc(Res*sizeof(*betaSigmaPosterior));
+    
+    for(j=0; j<Res; j++)  betaSigmaPosterior[j] = malloc(Res*sizeof(**betaSigmaPosterior));
+    
+    
+    for(i=0; i<Res; i++){
+        for(j=0; j<Res; j++){
+            betaSigmaPosterior[i][j] = 0.0;
+        }
+    }
+    
+    return 0;
+}
+
+
+int assignCovMat(int mockNumber, int kBinNumb, int hiMultipoleOrder){
+    // Multipoles is a [CatalogNumber][hiMultipoleOrder][kBinNumb] object, where [x][][] corresponds to mock number, [][x][] corresponds to x e [Mono, Quad, Hex], [][][x] mid or mean k bin. 
+    Multipoles                                             = (double ***) malloc(mockNumber*sizeof(*Multipoles));
+        
+    for(j=0; j<mockNumber; j++) Multipoles[j]              = (double  **) malloc(hiMultipoleOrder*sizeof(**Multipoles));
+    
+    for(j=0; j<mockNumber; j++){
+        for(k=0; k<hiMultipoleOrder; k++){      
+            Multipoles[j][k]                               = (double   *) malloc((kBinNumb-1)*sizeof(***Multipoles));
+        }
+    }
+
+    for(i=0; i<mockNumber; i++){
+        for(j=0; j<hiMultipoleOrder; j++){
+            for(k=0; k<kBinNumb-1; k++){
+                Multipoles[i][j][k] = 0.0;
+            }
+        }
+    }
+    
+    kMultipoles                                            = (double  *) malloc((kBinNumb-1)*sizeof(*kMultipoles));
+
+    MeanMultipoles                                         = (double **) malloc(hiMultipoleOrder*sizeof(*MeanMultipoles));    
+    
+    for(j=0; j<hiMultipoleOrder; j++)  MeanMultipoles[j]   = (double  *) malloc((kBinNumb-1)*sizeof(**MeanMultipoles));
+    
+    for(j=0; j<hiMultipoleOrder; j++){
+        for(k=0; k<(kBinNumb-1); k++){
+            MeanMultipoles[j][k] = 0.0;
+        }
+    }
+    
+    
+    // Covariance is an N x N matrix, where N corresponds to hiMultipoleOrder*(kBinNumb-1), here hiMultipoleOrder is due to Mono-Mono, Mono-Quad, Quad-Quad, etc... elements. Here hex-blah elements are 
+    // ignored. 
+         
+    Covariance                                                      = (double **) malloc(2*(kBinNumb-1)*sizeof(*Covariance));
+    
+    Covariance_CofactorMatrix                                       = (double **) malloc(2*(kBinNumb-1)*sizeof(*Covariance_CofactorMatrix));
+    
+    for(j=0; j<2*(kBinNumb-1); j++) Covariance[j]                   = (double  *) malloc(2*(kBinNumb-1)*sizeof(**Covariance));
+    for(j=0; j<2*(kBinNumb-1); j++) Covariance_CofactorMatrix[j]    = (double  *) malloc(2*(kBinNumb-1)*sizeof(**Covariance_CofactorMatrix));
+    
+    flatCov     = malloc(2*(kBinNumb-1)*2*(kBinNumb-1)*sizeof(*flatCov));
+    
+    for(k=0; k<2*(kBinNumb-1); k++){
+        for(j=0; j<2*(kBinNumb-1); j++){
+            Covariance[j][k]                = 0.0;
+            Covariance_CofactorMatrix[j][k] = 0.0;
+        }
+    }
+    
+    
+    invCov      = (double **) malloc(2*(kBinNumb-1)*sizeof(*invCov));
+    
+    for(j=0; j<2*(kBinNumb-1); j++){
+        invCov[j] = malloc(2*(kBinNumb-1)*sizeof(**invCov));
+    }
+    
+    return 0;
+}
+
+
+int ClippingModelling(){
+    PkCube             = (double *) realloc(PkCube,          n0*n1*n2*sizeof(*PkCube));
+    
+    Corrfn            = (double *) realloc(Corrfn,             n0*n1*n2*sizeof(*Corrfn));
+    suppressedCorrfn  = (double *) realloc(suppressedCorrfn,   n0*n1*n2*sizeof(*suppressedCorrfn));
+    distortedCorrfn   = (double *) realloc(distortedCorrfn,    n0*n1*n2*sizeof(*distortedCorrfn));
+    clippedPk         = (double *) realloc(clippedPk,          n0*n1*n2*sizeof(*clippedPk));
 
     return 0;
 }
