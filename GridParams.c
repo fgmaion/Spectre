@@ -9,7 +9,7 @@ int EvaluateGridParameters(){
     if(n1%2 == 1)  n1    += 1;
     if(n2%2 == 1)  n2    += 1;
 
-    printf("\nDimensions:  %d \t %d \t %d", n0, n1, n2);
+    printf("\n\nDimensions:  %d \t %d \t %d", n0, n1, n2);
 
     CellVolume            = pow(CellSize, 3);                                         // h^-3 Mpc^3
     TotalVolume           = n0*n1*n2*CellVolume;                                      // h^-3 Mpc^3
@@ -17,7 +17,7 @@ int EvaluateGridParameters(){
     LowerChiLimit         = interp_comovingDistance(redshiftLowLimit);
     UpperChiLimit         = interp_comovingDistance(redshiftHiLimit);
     
-    printf("\nRedshift limits, lower bound: %e \t %e, upper bound: %e \t %e", redshiftLowLimit, LowerChiLimit, redshiftHiLimit, UpperChiLimit);
+    printf("\nRedshift limits, lower bound: %e \t %e, \n\t\t upper bound: %e \t %e", redshiftLowLimit, LowerChiLimit, redshiftHiLimit, UpperChiLimit);
     
     // FFTw calc assignment.
     xNyquistIndex         = n2/2 + 1;
@@ -39,7 +39,7 @@ int assignbinninginterval(double interval){
     
     kBinNumb          =  (int) ceil(modkMax/kbinInterval);   
     
-    loskBinNumb       =  (int) ceil(0.5*modkMax/kbinInterval); 
+    loskBinNumb       =  (int) ceil(modkMax/kbinInterval); 
     
     perpkBinNumb      =  loskBinNumb;
 

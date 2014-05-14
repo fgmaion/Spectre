@@ -122,8 +122,7 @@ int CalcCellraDec(){
 }
 
 
-
-int StefanoMask(){
+int CalcCellChi(){
     double xCell, yCell, zCell, rCell;
 
     for(k=0; k<n0; k++){
@@ -134,15 +133,15 @@ int StefanoMask(){
 	           zCell      = AxisLimsArray[0][2] + CellSize*(k+0.5);
 
                Index      = k*n1*n2 + j*n2 + i;
+               
+               // Grid is established in the translated co-ordinate system, which obviously affects chi. 
+               xCell     -= stefano_trans_x;
+               yCell     -= stefano_trans_y;
+               zCell     -= stefano_trans_z;
 
                rCell      = pow(xCell*xCell + yCell*yCell + zCell*zCell, 0.5);
 
                Cell_chiVIPERSsystem[Index] = rCell;
-/*
-               if((70.7 < xCell) && (xCell<129.) && (99.5<yCell) && (yCell<502.5) && (LowerChiLimit < rCell) && (rCell < UpperChiLimit)){
-                  Cell_SurveyLimitsMask[Index] = 1.0;
-               }
-*/
             }
         }
     }

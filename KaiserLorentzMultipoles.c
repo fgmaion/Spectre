@@ -100,6 +100,7 @@ int kaiser_nonlinearSuppression_Multipoles(){
     
     fclose(output);
     
+    /*
     sprintf(filepath, "%s/Data/Multipoles/muOrder_nLorentzIntegrals.dat", root_dir);
     
     output = fopen(filepath, "w");
@@ -111,6 +112,7 @@ int kaiser_nonlinearSuppression_Multipoles(){
     }
     
     fclose(output);
+    */
     
     return 0;
 }

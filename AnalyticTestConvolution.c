@@ -1,36 +1,52 @@
 int analyticConvTest(){
-  printf("\n\nImplementing anisotropic window fn. analytic test case.");
+    printf("\n\nImplementing anisotropic window fn. analytic test case.");
 
-  prepAnisoConvolution();
+    prepAnisoConvolution();
 
-  pt2Pk                       = &Analytic2powerlaw;
-  pt2AnisoWf                  = &anisokGauss;
+    pt2Pk                       = &Analytic2powerlaw;
+    pt2AnisoWf                  = &anisokGauss;
+    
+    assignAnisoWfKernel();
+    
+    xminKernelshift              = -(xwfKernelsize-1)/2;
+    xmaxKernelshift              =  (xwfKernelsize-1)/2;
+    
+    yminKernelshift              = -(ywfKernelsize-1)/2;
+    ymaxKernelshift              =  (ywfKernelsize-1)/2;
+    
+    zminKernelshift              = -(zwfKernelsize-1)/2;
+    zmaxKernelshift              =  (zwfKernelsize-1)/2;
+    
+    prep_wfKernelminAmp();
+    
+    // Largest size of the kernel, in k.
+    KernelMaxk = fmax(fmax(xmaxKernelshift*kIntervalx, ymaxKernelshift*kIntervaly), zmaxKernelshift*kIntervalz);
 
-  minKernelshift              = -0.5*(wfKernelsize-1);
-  maxKernelshift              =  0.5*(wfKernelsize-1);
+    setInputPk();
 
-  setInputPk();
-
-  SetWfKernel();
+    // SetWfKernel();
   
-  convolve3DInputPk(convolvedPk3d, inputPk);
+    SetWfKernel_minAmp();
+    
+    ConvNorm = minAmp_ConvolutionNorm(windowFunc3D);
+  
+    printf("\nConvolution norm. is %e ", ConvNorm);
+  
+    convolve3DInputPk(convolvedPk3d, inputPk);
 
-  flattenConvolvedPk();
 
-  sprintf(filepath, "%s/Data/Del2k/midK_Pk_ConvolvedAnisoGaussTestCase.dat", root_dir);
+    sprintf(filepath, "%s/Data/Del2k/midK_Pk_ConvolvedAnisoGaussTestCase2.dat", root_dir);
 
-  output = fopen(filepath, "w");
+    output = fopen(filepath, "w");
   
-  for(j=0; j<kBinNumb-1; j++) fprintf(output, "%g \t %g \t %g \t %d \t %g \n", midKBin[j], del2[j], binnedPk[j], modesPerBin[j]);
+    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%e \t %e \t %d \n", midKBin[j], binnedPk[j], modesPerBin[j]);
   
-  fclose(output);
-  
-  printWfKernel();
-  
-  return 0;
+    fclose(output);  
+      
+    return 0;
 }
 
-
+/*
 int analyticConvTest_MeasuredWf(){
   printf("\n\nImplementing anisotropic window fn. analytic test case, measured Window fn.");
 
@@ -61,3 +77,4 @@ int analyticConvTest_MeasuredWf(){
     
   return 0;
 }
+*/

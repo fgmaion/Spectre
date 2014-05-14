@@ -23,7 +23,7 @@ int CoordinateCalcCube(char filepath[]){
        	  Vipers_Num += 1;
     } while (ch != EOF);
 
-    printf("\nNumber of galaxies in catalogue:  %d", Vipers_Num);
+    printf("\n\nNumber of galaxies in catalogue:  %d", Vipers_Num);
 
     rewind(inputfile);
     
@@ -38,7 +38,7 @@ int CoordinateCalcCube(char filepath[]){
     
     fclose(inputfile);
    
-    printf("\nCatalogue input successful.");
+    printf("\n\nCatalogue input successful.");
     printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
     printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));

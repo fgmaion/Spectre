@@ -1,19 +1,22 @@
 int clipDensity(double threshold){
-    int CellsClipped = 0;
+    int    CellsClipped =  0;
+
+    printf("\n\nMax overdensity: %e", arrayMax(densityArray, n0*n1*n2));
 
     for(j=0; j<n0*n1*n2; j++){
         if(densityArray[j] > threshold){ 
 	        densityArray[j] = threshold;
+	        
 		    CellsClipped   += 1; 
         }
     }
-    
+
     double clippedVolume;
 
     clippedVolume = CellVolume*CellsClipped;
 
     printf("\nClipped volume: %e", clippedVolume/TotalVolume);
-
+    
     return 0;
 }
 
@@ -65,8 +68,6 @@ int inputLinearPk(){
 
 
 int formPkCube(){
-    PkCube             = (double *) realloc(PkCube,          n0*n1*n2*sizeof(*PkCube));
-
     // hz                 = pow(Om_v + Om_m*pow(1. + 0.8, 3.), 0.5);  // Units of h, [h]
  
     // Om_mz              = Om_m*pow(1. + 0.8, 3.)/pow(hz, 2.);
@@ -116,28 +117,17 @@ int formPkCube(){
                 PkCube[Index]                     *= kaiserFactor;
                 
                 // Lorentzian factor for non-linear redshift space distortions. 
-                // PkCube[Index]                     /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
+                PkCube[Index]                     /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
                 
                 // Gaussian factor for non-linear redshift space distortion.
-                PkCube[Index]                     *= exp(-kmodulus*kmodulus*mu*mu*velDispersion*velDispersion);
+                // PkCube[Index]                  *= exp(-kmodulus*kmodulus*mu*mu*velDispersion*velDispersion);
                 
-                polar2Dpk[Index][0]                = kmodulus;
-		        polar2Dpk[Index][1]                = fabs(mu);
-		        polar2Dpk[Index][2]                = PkCube[Index];
+                // polar2Dpk[Index][0]             = kmodulus;
+		        // polar2Dpk[Index][1]             = fabs(mu);
+		        // polar2Dpk[Index][2]             = PkCube[Index];
              }
         }
     }
-
-    printf("\n\nMinimum Kaiser factor:  %e", pow(1. + 0., 2.));
-    printf("\nMaximum Kaiser factor:  %e", pow(1. + beta, 2.));
-
-    return 0;
-}
-
-
-int theoryHexadecapole(){
-    
-    HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, modesPerBin, polar2Dpk);
 
     return 0;
 }
@@ -177,11 +167,6 @@ double C_n(double x, int n){                                                // (
 
 
 int clipCorrfn(){
-    Corrfn            = (double *) realloc(Corrfn,             n0*n1*n2*sizeof(*Corrfn));
-    suppressedCorrfn  = (double *) realloc(suppressedCorrfn,   n0*n1*n2*sizeof(*suppressedCorrfn));
-    distortedCorrfn   = (double *) realloc(distortedCorrfn,    n0*n1*n2*sizeof(*distortedCorrfn));
-    clippedPk         = (double *) realloc(clippedPk,          n0*n1*n2*sizeof(*clippedPk));
-
     for(j=0; j<n0*n1*n2; j++) in[j][0] = (double) PkCube[j];
     for(j=0; j<n0*n1*n2; j++) in[j][1] = (double) 0.0;
    
@@ -191,24 +176,25 @@ int clipCorrfn(){
 
     for(j=0; j<n0*n1*n2; j++) Corrfn[j] = out[j][0];
 
-    double variance    =  Corrfn[0];
+    double variance;
     double u0;
-
-    u0      = inverse_erf(2.*sqrt(A11) -1.);
     
-    printf("\nu0 estimated  from suppression factor:  %f", u0);
+    variance =  Corrfn[0];
+    
+    u0       = inverse_erf(2.*sqrt(A11Sq) -1.);
     
     for(j=0; j<n0*n1*n2; j++) suppressedCorrfn[j]      = 0.25*pow(1.0 + gsl_sf_erf(u0), 2.)*Corrfn[j]; 
     for(j=0; j<n0*n1*n2; j++) distortedCorrfn[j]       = suppressedCorrfn[j]; 
     
-    for(i=1; i<10; i++){
-                                 distortedCorrfn[0]   += variance*C_n(u0, i);
-      for(j=1; j<n0*n1*n2; j++)  distortedCorrfn[j]   += variance*pow(Corrfn[j]/variance, i + 1)*C_n(u0, i);
+    for(i=1; i<10; i++){      
+        for(j=0; j<n0*n1*n2; j++){  
+            distortedCorrfn[j]   += variance*pow(Corrfn[j]/variance, i + 1)*C_n(u0, i);
+        }
     }
     
     iplan   = fftw_plan_dft_3d(n0, n1, n2, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
     
-    for(j=0; j<n0*n1*n2; j++) in[j][0] = distortedCorrfn[j]/A11;
+    for(j=0; j<n0*n1*n2; j++) in[j][0] = distortedCorrfn[j];
     for(j=0; j<n0*n1*n2; j++) in[j][1] = 0.0;
     
     fftw_execute(iplan);
@@ -216,6 +202,56 @@ int clipCorrfn(){
     for(j=0; j<n0*n1*n2; j++) clippedPk[j] = pow(n0*n1*n2, -1.)*out[j][0];
 
     printf("\n\nClipped P(k).");
-     
+    
+    ClippedMonopole();
+   
     return 0;    
+}
+
+
+int ClippedMonopole(){
+    int modeCount = 0;
+
+    for(k=0; k<n0; k++){
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+                k_x = kIntervalx*i;
+                k_y = kIntervaly*j;
+                k_z = kIntervalz*k;
+
+                if(k_x>NyquistWaveNumber)  k_x    -= n2*kIntervalx;
+                if(k_y>NyquistWaveNumber)  k_y    -= n1*kIntervaly;
+                if(k_z>NyquistWaveNumber)  k_z    -= n0*kIntervalz;
+
+                Index                              = k*n1*n2 + j*n2 + i;
+
+                kSq                                = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
+                
+                kmodulus                           = pow(pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.), 0.5);
+
+                PkArray[Index][0]                  = kmodulus;
+                PkArray[Index][1]                  = clippedPk[modeCount];
+                
+                modeCount                         += 1;
+            }
+        }
+    }
+    
+    double u0;
+    
+    u0       = inverse_erf(2.*sqrt(A11Sq) -1.);
+    
+    printf("\nu0:  %.2f", u0);
+    
+    PkBinningCalc(n0*n1*n2, PkArray);
+    
+    sprintf(filepath, "%s/Data/ClippedPk/Distorted/KaiserLorentzian_monopole_kInterval_%.2f_beta_%.2f_velDispersion_%.2f_u0_%.2f.dat", root_dir, kbinInterval, beta, velDispersion, u0);
+
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%e \t %e \t %e \t %d \t %e \t %e \t %e\n", meanKBin[j], del2[j], TotalVolume*binnedPk[j], modesPerBin[j], linearErrors[j], (*pt2Pk)(meanKBin[j])*kaiserLorentz_Monofactor(meanKBin[j]*velDispersion, beta), 0.25*pow(1.0 + gsl_sf_erf(u0), 2.)*(*pt2Pk)(meanKBin[j])*kaiserLorentz_Monofactor(meanKBin[j]*velDispersion, beta));
+
+    fclose(output);   
+
+    return 0;
 }

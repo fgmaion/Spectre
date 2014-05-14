@@ -20,22 +20,22 @@ int PkCalc(){
     
     Monopole(filepath);
 
-    observedQuadrupole();
+    // observedQuadrupole();
+    
+    // sprintf(filepath, "%s/Data/Multipoles/Cartesian2Dpk_%s_%.3f_%d.dat", root_dir, surveyType, kbinInterval, loopCount);
+    
+    // Cartesian2Dpk(filepath);
+    
+    // sprintf(filepath, "%s/Data/muSlicedPk/%s_muSlicedPk_0.0mu0.2.dat", root_dir, surveyType);
+    // BinnedPkForMuInterval(0.0, 0.2, filepath, PkCube);
+
+    // sprintf(filepath, "%s/Data/muSlicedPk/%s_muSlicedPk_0.3mu0.5.dat", root_dir, surveyType);
+    // BinnedPkForMuInterval(0.3, 0.5, filepath, clippedPk);
+
+    // sprintf(filepath, "%s/Data/muSlicedPk/%s_muSlicedPk_0.6mu0.8.dat", root_dir, surveyType);
+    // BinnedPkForMuInterval(0.6, 0.8, filepath, clippedPk);
     
     return 0;
-}
-
-
-int observedQuadrupole(){
-    sprintf(filepath, "%s/Data/Multipoles/Polar2Dpk_%s_%.3f_%d.dat", root_dir, surveyType, kbinInterval, loopCount);
-
-    polar2DpkBinning(filepath);
-
-    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk);
-  
-    // HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, modesPerBin, polar2Dpk);
-
-  return 0;
 }
 
 
@@ -54,17 +54,34 @@ int Monopole(char filepath[]){
 }
 
 
+int observedQuadrupole(int modeCount){
+    // sprintf(filepath, "%s/Data/Multipoles/Polar2Dpk_%s_%.3f_%d.dat", root_dir, surveyType, kbinInterval, loopCount);
+
+    polar2DpkBinning(filepath, modeCount);
+
+    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, modeCount);
+  
+    // HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, modesPerBin, polar2Dpk);
+
+  return 0;
+}
+
+
 int Cartesian2Dpk(char filepath[]){
-    for(j=0;  j<loskBinNumb;  j++)   loskBinLimits[j]  = j*2.*kbinInterval;
-    for(j=0; j<perpkBinNumb;  j++)   perpkBinLimits[j] = loskBinLimits[j];
+    for(j=0;  j<loskBinNumb;  j++)   loskBinLimits[j]  = (j+1)*kbinInterval;
+    for(j=0; j<perpkBinNumb;  j++)   perpkBinLimits[j] = (j+1)*kbinInterval;
     
     DualBinning(n0*n1*n2, loskBinNumb, loskBinLimits, perpkBinNumb, perpkBinLimits, TwoDpkArray, zSpaceBinnedPk, mean_losk, mean_perpk, zSpacemodesPerBin);
     
     output = fopen(filepath, "w");
 
+    double kmodulus = 0.0;
+
     for(j=0; j<loskBinNumb-1; j++){
         for(k=0; k<perpkBinNumb-1; k++){
-            fprintf(output, "%g \t %g \t %g \t %d \n", mean_losk[j][k], mean_perpk[j][k], TotalVolume*zSpaceBinnedPk[j][k], zSpacemodesPerBin[j][k]);
+            kmodulus = pow(pow(mean_losk[j][k], 2.) + pow(mean_perpk[j][k], 2.), 0.5);
+        
+            fprintf(output, "%e \t %e %e \t %e \t %e \t %d \n", kmodulus, (*pt2Pk)(kmodulus), mean_losk[j][k], mean_perpk[j][k], TotalVolume*zSpaceBinnedPk[j][k], zSpacemodesPerBin[j][k]);
         }
     }
 
@@ -74,12 +91,13 @@ int Cartesian2Dpk(char filepath[]){
 }
 
 
-int polar2DpkBinning(char filepath[]){
-    for(j=0; j<kBinNumb;  j++)        kBinLimits[j]  =               kbinInterval*j;
-    for(j=0; j<muBinNumb; j++)       muBinLimits[j]  =   (1.0/(double) (muBinNumb - 1))*j;
+int polar2DpkBinning(char filepath[], int modeCount){
+    for(j=0; j<kBinNumb;  j++)        kBinLimits[j]  =                     kbinInterval*(j+1);
+    for(j=0; j<muBinNumb; j++)       muBinLimits[j]  =   (1.0/(double) (muBinNumb - 1))*(j+1);
 
-    DualBinning(n0*n1*n2, muBinNumb, muBinLimits, kBinNumb, kBinLimits, polar2Dpk, polar2DBinnedPk, mean_mu, mean_modk, polar_modesPerBin);
+    DualBinning(modeCount, muBinNumb, muBinLimits, kBinNumb, kBinLimits, polar2Dpk, polar2DBinnedPk, mean_mu, mean_modk, polar_modesPerBin);
     
+    /*
     output = fopen(filepath, "w");
 
     for(j=0; j<muBinNumb-1; j++){
@@ -89,6 +107,7 @@ int polar2DpkBinning(char filepath[]){
     }
 
     fclose(output);
+    */
     
     return 0;
 }
@@ -108,7 +127,7 @@ double legendrePolynomials(int Order, double mu){
 }
 
 
-int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQuadrupole[], int ModesPerBin[], double** Array){
+int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQuadrupole[], int ModesPerBin[], double** Array, int modeCount){
     // monopole     factor:        1. + (2./3.)*beta + 0.2*beta*beta;
     // quadrupole   factor:    (4./3.)*beta + (4./7.)*beta**2 = 0.68;
     // hexadecapole factor:   (8./35.)*beta*beta); 
@@ -117,14 +136,15 @@ int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQ
     // Least squares fit between theory prediction, P(k, mu_i) and measured.  (Linear regression).
 
     printf("\n\nPerforming multipole calculation.");
-    for(j=0; j<kBinNumb; j++)  kBinLimits[j]  = j*kbinInterval;
+
+    for(j=0; j<kBinNumb; j++)  kBinLimits[j]  = (j+1)*kbinInterval;
 
     // Order by mod k to ensure binning is the mean between LowerBinIndex and UpperBinIndex.
     printf("\nSorting mod k array.");
     
-    qsort(Array, n0*n1*n2, sizeof(Array[0]), FirstColumnCompare);
+    qsort(Array, modeCount, sizeof(Array[0]), FirstColumnCompare);
 
-    LowerBinIndex = 1;
+    LowerBinIndex = 0;
     UpperBinIndex = 0;
     
     for(k=0; k<kBinNumb-1; k++){
@@ -138,6 +158,15 @@ int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQ
     else              sprintf(filepath, "%s/Data/Multipoles/Multipoles_%s__kbin_%.3f_0%d.dat", root_dir, surveyType, kbinInterval, loopCount);
 
     output = fopen(filepath, "w");
+    
+    for(i=0; i<modeCount; i++){
+        if(Array[i][0] >= kBinLimits[0]){
+            LowerBinIndex = i; 
+            break;
+        }
+    }
+    
+    // for(j=0; j<LowerBinIndex+1; j++)  printf("\n%d \t %e \t %e \t %e", j, Array[j][0], Array[j][1], kBinLimits[0]);
     
     for(j=0; j<kBinNumb-1; j++){
         //  Linear regression against P_i(k, \mu_i)  
@@ -154,7 +183,7 @@ int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQ
         double Sum_PiLi    = 0.0;
         
         // Find the range of indices corresponding to the modes in a given k interval. 
-        for(i=LowerBinIndex; i<n0*n1*n2; i++){
+        for(i=LowerBinIndex; i<modeCount; i++){
             if(Array[i][0] > kBinLimits[j+1]){
                 UpperBinIndex = i;
                 break;
@@ -175,6 +204,8 @@ int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQ
             
             Sum_Pi         += Pi;
             Sum_PiLi       += Pi*Li;
+        
+            // printf("\n%d \t %e \t %e \t %e", i, Array[i][0], Array[i][1], Array[i][2]);
         }
     
         meankBin[j]        /= modesPerBin[j];
@@ -197,7 +228,7 @@ int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQ
           kMonopole[j]  = (1./detA)*(Sum_Li2*Sum_Pi - Sum_Li*Sum_PiLi);
         kQuadrupole[j]  = (1./detA)*(-1.*Sum_Li*Sum_Pi + modesPerBin[j]*Sum_PiLi);
         
-        fprintf(output, "%f \t %f \t %f \t %d \t %f \t %f \n", (float) meanKBin[j], (float) TotalVolume*kMonopole[j], (float) TotalVolume*kQuadrupole[j], modesPerBin[j], (*pt2Pk)(meanKBin[j])*kaiserLorentz_Monofactor(meanKBin[j]*3.5, beta), (*pt2Pk)(meanKBin[j])*kaiserLorentz_Quadfactor(meanKBin[j]*3.5, beta));   
+        fprintf(output, "%e \t %e \t %e \t %d \t %e \t %e \n", meanKBin[j], TotalVolume*kMonopole[j], TotalVolume*kQuadrupole[j], modesPerBin[j], (*pt2Pk)(meanKBin[j])*kaiser_Monofactor(meanKBin[j], beta), (*pt2Pk)(meanKBin[j])*kaiser_Quadfactor(meanKBin[j], beta));   
     
         LowerBinIndex = UpperBinIndex;
     } 
@@ -238,6 +269,13 @@ int HexadecapoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double
     else              sprintf(filepath, "%s/Data/Multipoles/Observed_Hexadecapole_%s__kbin_%.3f_0%d.dat", root_dir, surveyType, kbinInterval, loopCount);
 
     output = fopen(filepath, "w");
+    
+    for(i=0; i<n0*n1*n2; i++){
+        if(Array[i][0] >= kBinLimits[0]){
+            LowerBinIndex = i; 
+            break;
+        }
+    }
     
     for(j=0; j<kBinNumb-1; j++){
         //  Linear regression against P_i(k, \mu_i)  
@@ -317,7 +355,13 @@ int HexadecapoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double
 }
 
 
-float ShotNoise(){
+double CubeShot(double irrev){
+    // Comoving distance for evaluation is irrelevant. 
+    return pow(CubeMeanNumberDensity(1500.), -1.);
+}
+
+
+double lightconeShot(double irrev){
     // Shot noise correction for a varying background number density. In the Peeble's convention for P(k).
     
     float numerator;
@@ -332,7 +376,7 @@ float ShotNoise(){
     numerator   =  qromb(&nbarChi2, flowChi, fhiChi);
     denominator =  qromb(&Chi2, flowChi, fhiChi);
     
-    return numerator/denominator;
+    return (double) numerator/denominator;
 }
 
 
@@ -396,7 +440,7 @@ int PkCorrections(int WindowFuncParam){
 				    // The true density field is multiplied by a mask, correct for this with the measured P(k).
                     PkArray[Index][1]             *= TotalVolume*pow(fkpSqWeightsVolume, -1.);
                     
-                    PkArray[Index][1]             -= (1./TotalVolume)*ShotNoise();
+                    PkArray[Index][1]             -= (1./TotalVolume)*(*pt2shot)(1.);
                  }
                 
                 // PkCorrections called to correct NGP for survey window function.
@@ -404,14 +448,22 @@ int PkCorrections(int WindowFuncParam){
                     PkArray[Index][1]              = pow(H_kReal, 2.) + pow(H_kImag, 2.);
 	            }
 	            
-		        polar2Dpk[Index][0]                = kmodulus;
-		        polar2Dpk[Index][1]                = fabs(mu);
-		        
-		        polar2Dpk[Index][2]                = PkArray[Index][1];
-	            
-	            // TwoDpkArray[Index][0]              = fabs(k_x);                      // Line of sight wavevector. 
-	            // TwoDpkArray[Index][1]              = pow(k_y*k_y + k_z*k_z, 0.5);    // perpendicular wavevector.
-                // TwoDpkArray[Index][2]              = PkArray[Index][1];
+	            /*
+	            if(kmodulus > 0.000001){	            
+		            // Issue with mu for a zeroth length vector being ill defined. 
+		            polar2Dpk[polarPk_modeCount][0]    = kmodulus;
+		            polar2Dpk[polarPk_modeCount][1]    = fabs(mu);
+		            polar2Dpk[polarPk_modeCount][2]    = PkArray[Index][1];
+		            
+		            // printf("\n%e \t %e \t %e \t %e \t %e", k_x, k_y, k_z, kmodulus, fabs(mu));
+		            
+		            // TwoDpkArray[Index][0]           = fabs(k_x);                      // Line of sight wavevector. 
+	                // TwoDpkArray[Index][1]           = pow(k_y*k_y + k_z*k_z, 0.5);    // perpendicular wavevector.
+                    // TwoDpkArray[Index][2]           = PkArray[Index][1];
+                    
+                    polarPk_modeCount                 += 1;
+	            }
+	            */
 	        }
         }
     }
@@ -420,10 +472,38 @@ int PkCorrections(int WindowFuncParam){
 }
 
 
+int BinnedPkForMuInterval(double lowerMuLimit, double upperMuLimit, char filepath[], double Array[]){
+    printf("\nPerforming P(k) binning for given mu interval, %f < mu < %f", lowerMuLimit, upperMuLimit);
+
+    int muInterval_modeCount = 0; 
+
+    for(k=0; k<polarPk_modeCount; k++){
+        if((lowerMuLimit<polar2Dpk[k][1]) && (polar2Dpk[k][1] < upperMuLimit)){
+            muIntervalPk[k][0]    = polar2Dpk[k][0];
+            muIntervalPk[k][1]    = polar2Dpk[k][2];  
+        
+            muInterval_modeCount += 1;
+        }
+    }
+    
+    printf("\nNumber of modes in interval:  %d", muInterval_modeCount);
+    
+    PkBinningCalc(muInterval_modeCount, muIntervalPk);
+    
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<kBinNumb-1; j++)     fprintf(output, "%e \t %e \t %d\n", midKBin[j], TotalVolume*binnedPk[j], modesPerBin[j]);
+    
+    fclose(output);
+    
+    return 0;
+}
+
+
 int PkBinningCalc(int NumberModes, double** Array){
     printf("\n\nPerforming binning calculation.");
     
-    for(j=0; j<kBinNumb; j++)  kBinLimits[j]  = j*kbinInterval;
+    for(j=0; j<kBinNumb; j++)  kBinLimits[j]  = (j+1)*kbinInterval;
 
     // Order by mod k to ensure binning is the mean between LowerBinIndex and UpperBinIndex.
     printf("\nSorting mod k array.");
@@ -439,6 +519,14 @@ int PkBinningCalc(int NumberModes, double** Array){
         meanKBin[j]     =            0.0;
         binnedPk[j]     =            0.0;
         linearErrors[j] =            0.0;
+    }
+    
+    for(j=0; j<NumberModes; j++){
+        if(Array[j][0]   >= kBinLimits[0]){
+            LowerBinIndex = j; 
+        
+            break;
+        }
     }
     
     for(j=0; j<kBinNumb-1; j++){
@@ -474,51 +562,6 @@ int PkBinningCalc(int NumberModes, double** Array){
 }
 
 
-int BinnedPkForMuInterval(double lowerMuLimit, double upperMuLimit, char filepath[], double Array[]){
-    printf("\nPerforming P(k) binning for given mu interval, %f < mu < %f", lowerMuLimit, upperMuLimit);
-
-    for(k=0; k<n0; k++){
-        for(j=0; j<n1; j++){
-            for(i=0; i<n2; i++){
-                k_x = kIntervalx*i;
-                k_y = kIntervaly*j;
-                k_z = kIntervalz*k;
-
-                if(k_x>NyquistWaveNumber)  k_x    -= n2*kIntervalx;
-                if(k_y>NyquistWaveNumber)  k_y    -= n1*kIntervaly;
-                if(k_z>NyquistWaveNumber)  k_z    -= n0*kIntervalz;
-
-                Index                              = k*n1*n2 + j*n2 + i;
-
-                kmodulus                           = pow(pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.), 0.5);
-
-                mu                                 = k_x/kmodulus;
-                
-                if(kmodulus == 0.)            mu   = 0.0;      
-
-                if((lowerMuLimit < fabs(mu)) && (fabs(mu) < upperMuLimit)){
-                    PkArray[Num_ModesInMuInterval][0]              = kmodulus;
-                    PkArray[Num_ModesInMuInterval][1]              = Array[Index];
-                    Num_ModesInMuInterval                         += 1;
-                }
-            }
-        }
-    }
-    
-    printf("\nNumber of modes in interval:  %d", Num_ModesInMuInterval);
-    
-    PkBinningCalc(Num_ModesInMuInterval, PkArray);
-    
-    output = fopen(filepath, "w");
-    
-    for(j=0; j<kBinNumb-1; j++)     fprintf(output, "%d \t %g \t %g\n", modesPerBin[j], midKBin[j], binnedPk[j]);
-    
-    fclose(output);
-    
-    return 0;
-}
-
-
 int DualBinning(int NumberModes, int firstBinNumb, double firstBinLimits[], int secndBinNumb, double secondBinLimits[], double** DualParamArray, double** BinnedDualParamArray, double** mean_firstCol, double** mean_secndCol, int** modesPerBin){
     int m;
     
@@ -544,6 +587,14 @@ int DualBinning(int NumberModes, int firstBinNumb, double firstBinLimits[], int 
         }
     }
     
+    for(j=0; j<NumberModes; j++){
+        if(DualParamArray[j][0]   >= firstBinLimits[0]){
+            firstColLowerBinIndex = j; 
+        
+            break;
+        }
+    }
+    
     for(j=0; j<firstBinNumb-1; j++){
         for(i=firstColLowerBinIndex; i<NumberModes; i++){
             if(DualParamArray[i][0] > firstBinLimits[j+1]){
@@ -553,8 +604,16 @@ int DualBinning(int NumberModes, int firstBinNumb, double firstBinLimits[], int 
         }
 
         secndColLowerBinIndex = firstColLowerBinIndex;
-
-	qsort(&DualParamArray[firstColLowerBinIndex], firstColUpperBinIndex - firstColLowerBinIndex, sizeof(DualParamArray[0]), SecondColumnCompare);
+    
+	    qsort(&DualParamArray[firstColLowerBinIndex], firstColUpperBinIndex - firstColLowerBinIndex, sizeof(DualParamArray[0]), SecondColumnCompare);
+    
+        for(i=secndColLowerBinIndex; i<NumberModes; i++){
+            if(DualParamArray[i][1]   >= secondBinLimits[0]){
+                secndColLowerBinIndex = i; 
+        
+                break;
+            }
+        }      
        
         for(k=0; k<secndBinNumb-1; k++){
             for(m=secndColLowerBinIndex; m<firstColUpperBinIndex; m++){

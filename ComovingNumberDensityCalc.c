@@ -69,58 +69,57 @@ float factor_fittedNz_exp(float xVal, int m){
 }
 
 
-int Gaussianfilter(float array[], float xarray[], int len, float sigma){
+int Gaussianfilter(float array[], float xarray[], int len, double Interval, float sigma){
     int   newlen;
     int   kernelSize;
   
     float Sum;
     float Norm = 0.0;
-    float Interval;
 
-    Interval   = xarray[10] - xarray[9];
-
-    kernelSize = (len - 1)/8;
+    kernelSize = len/8;
+    
+    printf("\nKernel Size: %d", kernelSize);
 
     newlen     = len + 2*kernelSize;
 
-    NewArray   =  (float *)  realloc(NewArray, newlen*sizeof(*NewArray));
+    NewArray   =  (float *) realloc(NewArray, newlen*sizeof(*NewArray));
 
     for(j=0; j<newlen; j++) NewArray[j] = 0.0;
 
     // padded array.                                                                                                                                          
-    for(j=kernelSize + 1; j<len+kernelSize;j++)  NewArray[j] = array[j-kernelSize];
+    for(j=kernelSize; j<len+kernelSize; j++)   NewArray[j] = array[j-kernelSize];
 
-    for(i=-kernelSize; i<kernelSize+1; i++)  Norm += exp(-0.5*pow(((float) i)*Interval/sigma, 2.0));
+    for(i=-kernelSize; i<kernelSize+1; i++)    Norm       += exp(-0.5*pow(i*Interval/sigma, 2.0));
 
     for(j=kernelSize; j<len+kernelSize; j++){
-      Sum    = 0.0;
+        Sum    = 0.0;
 
-      for(i=-kernelSize; i<kernelSize+1; i++){
-        Sum +=  pow(Norm, -1.)*exp(-0.5*pow(((float) i)*Interval/sigma, 2.0))*NewArray[j+i];
-      }
+        for(i=-kernelSize; i<kernelSize +1; i++){
+            Sum +=  pow(Norm, -1.)*exp(-0.5*pow(i*Interval/sigma, 2.0))*NewArray[j+i];
+        }
 
-      array[j-kernelSize] = Sum;
+        array[j-kernelSize] = Sum;
     }
 
     return 0;
 }
 
 
-int NormedGaussianfilter(float (*transformArray)(float, int), float (*inversetransform)(float, int), float array[], float xarray[], int len, float sigma, double externNorm, float output[]){
+int NormedGaussianfilter(float (*transformArray)(float, int), float (*inversetransform)(float, int), float array[], float xarray[], int len, double Interval, float sigma, double externNorm, float output[]){
 
     float Interim[len];
   
     double InterimNorm = 0.0;
     
-    for(j=1; j<len; j++)  Interim[j]   = (*transformArray)(array[j], j);
+    for(j=0; j<len; j++)  Interim[j]   = (*transformArray)(array[j], j);
     
-    Gaussianfilter(Interim, xarray, len, sigma);
+    Gaussianfilter(Interim, xarray, len,  Interval, sigma);
     
-    for(j=1; j<len; j++)  Interim[j]   = (*inversetransform)(Interim[j], j);
+    for(j=0; j<len; j++)  Interim[j]   = (*inversetransform)(Interim[j], j);
       
-    for(j=1; j<len; j++)  InterimNorm += (double) Interim[j];
+    for(j=0; j<len; j++)  InterimNorm += (double) Interim[j];
     
-    for(j=1; j<len; j++)  output[j]    = (externNorm/InterimNorm)*Interim[j];
+    for(j=0; j<len; j++)  output[j]    = (externNorm/InterimNorm)*Interim[j];
 
     return 0;
 }
@@ -133,7 +132,7 @@ int ComovingNumberDensityCalc(){
     // Equal intervals in comoving distance, for both W1 and W4 fields.  
     prepNumberDensityCalc();
     
-    for(j=1; j<chiBinNumber+1; j++) ChiSlices[j] = interp_comovingDistance(0.4) + chiBinWidth*(j-1);
+    for(j=1; j<chiBinNumber+1; j++) ChiSlices[j] = interp_comovingDistance(0.2) + chiBinWidth*(j-1);
     
     // W1 catalogue.
     for(j=0; j<Vipers_Num; j++){
@@ -184,9 +183,9 @@ int ComovingNumberDensityCalc(){
 
     for(j=1; j<chiBinNumber; j++)  TotalObservedGalaxies       += (double) NumberAtRedshift[j];
     
-    NormedGaussianfilter(&identitytransform,  &identitytransform,   NumberAtRedshift, ChiSlices, chiBinNumber, nzSigma, TotalObservedGalaxies, filteredNumberAtRedshift);
+    NormedGaussianfilter(&identitytransform,  &identitytransform,   NumberAtRedshift, ChiSlices, chiBinNumber, chiBinWidth, nzSigma, TotalObservedGalaxies, filteredNumberAtRedshift);
     
-    NormedGaussianfilter(&ln_factor_fittedNz, &factor_fittedNz_exp, NumberAtRedshift, ChiSlices, chiBinNumber, nzSigma, TotalObservedGalaxies, filtered_divfuncln_Atz);
+    NormedGaussianfilter(&ln_factor_fittedNz, &factor_fittedNz_exp, NumberAtRedshift, ChiSlices, chiBinNumber, chiBinWidth, nzSigma, TotalObservedGalaxies, filtered_divfuncln_Atz);
 
     for(j=1; j<chiBinNumber; j++){      // W1 + W4
         ComovingVolumeAtZ[j]            = sqdegs2steradians(TotalW1W4area)*pow(3., -1.)*(pow(ChiSlices[j+1], 3.) - pow(ChiSlices[j], 3.));
@@ -244,70 +243,36 @@ double interp_nz(double Chi){
 }
 
 
-int splineStefano_nz(){
-    ChiSlices                =  (float  *)  realloc(ChiSlices,                101*sizeof(*ChiSlices));    
-    ComovingNumberDensity    =  (float  *)  realloc(ComovingNumberDensity,    101*sizeof(*ComovingNumberDensity));
-    ComovingNumberDensity2d  =  (float  *)  realloc(ComovingNumberDensity2d,  101*sizeof(*ComovingNumberDensity2d));
-    
-    sprintf(filepath, "%s/Stefano/nz.txt", root_dir);
-    
-    inputfile = fopen(filepath, "r");
-    
-    for(j=0; j<101; j++){
-        ChiSlices[j]               = 0.0;
-        ComovingNumberDensity[j]   = 0.0;
-        ComovingNumberDensity2d[j] = 0.0;
-    }  
-    
-    for(j=1; j<101; j++)  fscanf(inputfile, "%f \t %*f \t %*f \t %f \n", &ChiSlices[j], &ComovingNumberDensity[j]);
-    
-    fclose(inputfile);
-    
-    // for(j=1; j<101; j++)  printf("%f \t %f \n", ChiSlices[j], ComovingNumberDensity[j]);
-    
-    spline(ChiSlices, ComovingNumberDensity, 100, 1.0e31, 1.0e31, ComovingNumberDensity2d);
-    
-    return 0;
-}
-
-
-double interp_Stefano_nz(double Chi){
-    float fchi = (float) Chi;    
-    float fInterim;
-    
-    splint(ChiSlices, ComovingNumberDensity, ComovingNumberDensity2d,  100, fchi, &fInterim);
-    
-    return (double) fInterim;
-}
-
-
 int prepNumberDensityCalc(){
-  chiBinNumber             =  (int)       ceil((interp_comovingDistance(1.2) - interp_comovingDistance(0.4))/chiBinWidth);   
+  chiBinNumber             =  (int)       ceil((interp_comovingDistance(1.4) - interp_comovingDistance(0.2))/chiBinWidth);   
 
   for(j=0; j<8; j++){
-    if(chiBinNumber%8 != 0){
-      chiBinNumber    += 1;
-    } 
+      if(chiBinNumber%8 != 0){
+          chiBinNumber    += 1;
+      } 
   
-    else{
-      break;
-    }
+      else{
+          break;
+      }
   }
 
   printf("\n\nChi bin width:  %f", chiBinWidth);
   printf("\nChi bin number: %d", chiBinNumber);
-
-  // Numerical recipes indexing for spline. arrays begin at a[1].                                                      
                                                                                                                              
   redshiftSlices           =  (double *)  realloc(redshiftSlices,          (chiBinNumber+1)*sizeof(*redshiftSlices));
   ChiSlices                =  (float  *)  realloc(ChiSlices,               (chiBinNumber+1)*sizeof(*ChiSlices));
+  
   NumberAtRedshift         =  (float  *)  realloc(NumberAtRedshift,         chiBinNumber*sizeof(*NumberAtRedshift));
   ComovingNumberDensity    =  (float  *)  realloc(ComovingNumberDensity,    chiBinNumber*sizeof(*ComovingNumberDensity));
+
   ComovingVolumeAtZ        =  (double *)  realloc(ComovingVolumeAtZ,        chiBinNumber*sizeof(*ComovingVolumeAtZ));
   MeanSliceRedshift        =  (double *)  realloc(MeanSliceRedshift,        chiBinNumber*sizeof(*MeanSliceRedshift));
+  LuminosityDistance       =  (double *)  realloc(LuminosityDistance,       chiBinNumber*sizeof(*LuminosityDistance));
+  Schechter_fn             =  (double *)  realloc(Schechter_fn,             chiBinNumber*sizeof(*Schechter_fn));
 
   filteredNumberAtRedshift =  (float  *)  realloc(filteredNumberAtRedshift, chiBinNumber*sizeof(*filteredNumberAtRedshift));
   filtered_divfuncln_Atz   =  (float  *)  realloc(filtered_divfuncln_Atz,   chiBinNumber*sizeof(*filtered_divfuncln_Atz));
+  filteredComovingNumberDensity    =  (float  *)  realloc(filteredComovingNumberDensity,    chiBinNumber*sizeof(*filteredComovingNumberDensity));
 
   //Second derivatives.   
   ComovingNumberDensity2d  =  (float *)   realloc(ComovingNumberDensity2d,  chiBinNumber*sizeof(*ComovingNumberDensity2d));

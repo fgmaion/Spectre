@@ -9,26 +9,42 @@ int MeasureAnisoWfKernel(){
     fftw_execute(p);
     
     printf("\nFFT complete.");
-
-    // Allocates memory for (the averaging of) the measured window fn. kernel.
-    assignAnisoWfKernel();
-    
-    xminKernelshift              = -(xwfKernelsize-1)/2;
-    xmaxKernelshift              =  (xwfKernelsize-1)/2;
-    
-    yminKernelshift              = -(ywfKernelsize-1)/2;
-    ymaxKernelshift              =  (ywfKernelsize-1)/2;
-    
-    zminKernelshift              = -(zwfKernelsize-1)/2;
-    zmaxKernelshift              =  (zwfKernelsize-1)/2;
-    
-    prep_wfKernelminAmp();
-    
-    // Largest size of the kernel, in k.
-    KernelMaxk = fmax(fmax(xmaxKernelshift*kIntervalx, ymaxKernelshift*kIntervaly), zmaxKernelshift*kIntervalz);
     
     printf("\nAssigning window function kernel.");
     
+    double W2k = 0.0;
+    
+    largeAmpIndices = 0;
+    
+    int W2x, W2y, W2z;
+    
+    // sprintf(filepath, "%s/Data/windowfuncHist.data", root_dir);
+    
+    // output = fopen(filepath, "w");
+    
+    for(k=0; k<n0; k++){
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+                Index                              = k*n1*n2 + j*n2 + i;
+
+                H_kReal                            = pow(n0*n1*n2, -1.0)*out[Index][0];
+                H_kImag                            = pow(n0*n1*n2, -1.0)*out[Index][1];
+                
+                W2k                                = pow(H_kReal, 2.) + pow(H_kImag, 2.);
+                
+                if(W2k > wfKernel_minAmp){
+                    largeAmpIndices               += 1;  
+                }             
+            }
+        }                
+    }
+
+    printf("\n\nRetained window fn. elements: %d", largeAmpIndices);
+    
+    prep_wfKernelminAmp();
+    
+    int modeCount = 0;
+        
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
@@ -49,73 +65,47 @@ int MeasureAnisoWfKernel(){
                 H_kReal                            = pow(n0*n1*n2, -1.0)*out[Index][0];
                 H_kImag                            = pow(n0*n1*n2, -1.0)*out[Index][1];
                 
-                // The kernel only extends to kx, ky, kz limited by e.g 0.037699, can ignore modes which have a modulus much greater than this, (safety factor of 1.1) 
-                if((fabs(k_x) < xmaxKernelshift*kIntervalx) && (fabs(k_y) < ymaxKernelshift*kIntervaly) && (fabs(k_z) < zmaxKernelshift*kIntervalz)){
+                W2k                                = pow(H_kReal, 2.) + pow(H_kImag, 2.);
+                
+                if((i==0) && (j==0) && (k==0)){
+                    Wfzeropoint = W2k;
+                }
+                                        
+                W2x                                = i;
+                W2y                                = j;
+                W2z                                = k;
+                
+                if(i>n2/2)  W2x                   -= n2;
+                if(j>n1/2)  W2y                   -= n1;
+                if(k>n0/2)  W2z                   -= n0;
+                
+                if(W2k > wfKernel_minAmp){
+                    wfKernel_minAmpIndices[modeCount][0] = W2x;
+                    wfKernel_minAmpIndices[modeCount][1] = W2y;
+                    wfKernel_minAmpIndices[modeCount][2] = W2z;
+                                                                
+                    windowFunc3D[modeCount]              = W2k;
+                                                                  
+                    modeCount                           += 1; 
                     
-                    kk = (int) ceil(k_z/kIntervalz) + zmaxKernelshift;
+                    // printf("\n%d \t %d \t %d \t %e", W2x, W2y, W2z, W2k);
                     
-                    jj = (int) ceil(k_y/kIntervaly) + ymaxKernelshift;
+                    if(W2x>max_xShift) max_xShift = W2x;
+                    if(W2x<min_xShift) min_xShift = W2x;
+    
+                    if(W2y>max_yShift) max_yShift = W2y;
+                    if(W2y<min_yShift) min_yShift = W2y;
                     
-                    ii = (int) ceil(k_x/kIntervalx) + xmaxKernelshift;
-                    
-                    Index = kk*ywfKernelsize*xwfKernelsize + jj*xwfKernelsize + ii; 
-                 
-                   /*
-                    for(kkshift= zminKernelshift; kkshift<zmaxKernelshift + 1; kkshift++){
-                        for(jjshift= yminKernelshift; jjshift<ymaxKernelshift + 1; jjshift++){ 
-                            for(iishift= xminKernelshift; iishift<xmaxKernelshift + 1; iishift++){
-                   */         
-                                
-                    // Index    = (kkshift + zmaxKernelshift)*ywfKernelsize*xwfKernelsize + (jjshift + ymaxKernelshift)*xwfKernelsize + (iishift + xmaxKernelshift); 
-                                
-                                /* if(    ((iishift - 0.1)*kIntervalx < k_x) && (k_x<(iishift + 0.1)*kIntervalx) 
-                                    && ((jjshift - 0.1)*kIntervaly < k_y) && (k_y<(jjshift + 0.1)*kIntervaly) 
-                                    && ((kkshift - 0.1)*kIntervalz < k_z) && (k_z<(kkshift + 0.1)*kIntervalz)){
-                                */     
-                                            AnisoWfKernel[Index]                      += pow(H_kReal, 2.) + pow(H_kImag, 2.);
-                                            AnisoWfKernel_ModeNumb[Index]             += 1;
-                                            
-                                            if(AnisoWfKernel[Index] > pow(10., -9.)){
-                                                wfKernel_minAmpIndices[largeAmpIndices][0] = ii - xmaxKernelshift;
-                                                wfKernel_minAmpIndices[largeAmpIndices][1] = jj - ymaxKernelshift;
-                                                wfKernel_minAmpIndices[largeAmpIndices][2] = kk - zmaxKernelshift;
-                                                
-                                                wfKernel_minAmpIndices[largeAmpIndices][3] = Index;
-                 
-                                                largeAmpIndices                           += 1;  
-                                            } 
-                                            
-                                            
-                                // }
-                        /*
-                            }                        
-                        }
-                    }
-                    */
-                }        
+                    if(W2z>max_zShift) max_zShift = W2z;
+                    if(W2z<min_zShift) min_zShift = W2z;
+                }             
             }
         }                
     }
     
-    /*
-    for(kk=0; kk<zwfKernelsize; kk++){
-        for(jj=0; jj<ywfKernelsize; jj++){
-            for(ii=0; ii<xwfKernelsize; ii++){
-                Index = kk*ywfKernelsize*xwfKernelsize + jj*xwfKernelsize + ii;   
-            
-                if(AnisoWfKernel_ModeNumb[Index] != 0){
-                    AnisoWfKernel[Index] /= (double) AnisoWfKernel_ModeNumb[Index];
-                }
-            }
-        }
-    }
-    */
-
-    printf("\n\nUpper Wf kernel x limit: %g", xmaxKernelshift*kIntervalx);
-    printf("\nUpper Wf kernel y limit: %g",   ymaxKernelshift*kIntervaly);
-    printf("\nUpper Wf kernel z limit: %g\n\n",   zmaxKernelshift*kIntervalz);
-    
-    printf("\nPercentage of required cells in wk Kernel: %f", (float) 100.*largeAmpIndices/(xwfKernelsize*ywfKernelsize*zwfKernelsize));
-
+    printf("\nx shift range: %d, %d", min_xShift, max_xShift);
+    printf("\ny shift range: %d, %d", min_yShift, max_yShift);
+    printf("\nz shift range: %d, %d", min_zShift, max_zShift);
+        
     return 0;
 }
