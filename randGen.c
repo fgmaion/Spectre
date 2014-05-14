@@ -69,50 +69,74 @@ int loadRand(){
 
     rewind(inputfile);
     
-    printf("\nRandom number: %d", rand_number);
+    printf("\n\nRandom number: %d", rand_number);
     
-    rand_x     = (double *) malloc(rand_number*sizeof(*rand_x));
-    rand_y     = (double *) malloc(rand_number*sizeof(*rand_y));
-    rand_z     = (double *) malloc(rand_number*sizeof(*rand_z));
-    rand_chi   = (double *) malloc(rand_number*sizeof(*rand_chi));
+    rand_x      = (double *) malloc(rand_number*sizeof(*rand_x));
+    rand_y      = (double *) malloc(rand_number*sizeof(*rand_y));
+    rand_z      = (double *) malloc(rand_number*sizeof(*rand_z));
+    rand_chi    = (double *) malloc(rand_number*sizeof(*rand_chi));
+    
+    rand_accept = (bool   *) malloc(rand_number*sizeof(*rand_accept));
+    
+    for(j=0; j<rand_number; j++) rand_accept[j] = false;
+    
     
     for(j=0; j<rand_number; j++){
         fscanf(inputfile, "%lf \t %lf \t %lf \n", &rand_x[j], &rand_y[j], &rand_z[j]);
         
         rand_chi[j] = pow(pow(rand_x[j], 2.) + pow(rand_y[j], 2.) + pow(rand_z[j], 2.), 0.5); 
         
-        rand_x[j]   = rand_x[j] +  100.;
-        rand_y[j]   = rand_y[j] +  300.;
-        rand_z[j]   = rand_z[j] - 1500.;   
+        rand_x[j]   = rand_x[j] + stefano_trans_x;
+        rand_y[j]   = rand_y[j] + stefano_trans_y;
+        rand_z[j]   = rand_z[j] + stefano_trans_z;   
+    
+        if((LowerChiLimit < rand_chi[j]) && (rand_chi[j] < UpperChiLimit)){
+            rand_accept[j] = true;
+        }
+    
     }
     
     fclose(inputfile);
     
     printf("\n\nRandoms successfully loaded. + translated");
-    printf("\nMax:  %e \t %e \t %e", arrayMax(rand_x, rand_number), arrayMax(rand_y, rand_number), arrayMax(rand_z, rand_number));
-    printf("\nMin:  %e \t %e \t %e", arrayMin(rand_x, rand_number), arrayMin(rand_y, rand_number), arrayMin(rand_z, rand_number));
-    printf("\nChi:  %e \t %e",       arrayMin(rand_chi, rand_number), arrayMax(rand_chi, rand_number));
 
+    printf("\nx max:  %f \t x min:  %f", arrayMax(rand_x, rand_number), arrayMin(rand_x, rand_number));
+    printf("\ny max:  %f \t y min:  %f", arrayMax(rand_y, rand_number), arrayMin(rand_y, rand_number));
+    printf("\nz max:  %f \t z min:  %f", arrayMax(rand_z, rand_number), arrayMin(rand_z, rand_number));
+    printf("\nr max:  %f \t r min %f",   arrayMax(rand_chi, rand_number), arrayMin(rand_chi, rand_number));
+
+    
     for(j=0; j<rand_number; j++){        
         xlabel                  = (int) floor((rand_x[j] - AxisLimsArray[0][0])/CellSize);    
         ylabel                  = (int) floor((rand_y[j] - AxisLimsArray[0][1])/CellSize);
         zlabel                  = (int) floor((rand_z[j] - AxisLimsArray[0][2])/CellSize);
     
-        boxlabel                = (int)                        xlabel + n2*ylabel + n2*n1*zlabel;
-    
-        Cell_chiVIPERSsystem[boxlabel]   = rand_chi[j];
+        boxlabel                = (int)                 xlabel + n2*ylabel + n2*n1*zlabel;
     
         if((LowerChiLimit < rand_chi[j]) && (rand_chi[j] < UpperChiLimit)){
             Cell_SurveyLimitsMask[boxlabel]  += 1.;
+	        accepted_rand                    +=  1;
 	    }
     }
     
-    double ranCount = 0.0;
+    /*
+    for(j=0; j<rand_number; j++){ 
+        if((LowerChiLimit < rand_chi[j]) && (rand_chi[j] < UpperChiLimit)){ 
+            accepted_rand += 1;
     
-    for(j=0; j<n0*n1*n2; j++) ranCount += Cell_SurveyLimitsMask[j];
+            cic_assign(rand_x[j], rand_y[j], rand_z[j], CellSize, Cell_SurveyLimitsMask, 1.0);
+        }
+    }
+    */
     
-    printf("\naccepted randoms: %e", ranCount);
+    printf("\n\nAccepted number of randoms:  %d", accepted_rand);
     
+    printf("\n\nAccepted co-ordinates. ");
+    printf("\nx max:  %f \t x min:  %f", AcceptedMax(rand_x, rand_accept, rand_number), AcceptedMin(rand_x, rand_accept, rand_number));
+    printf("\ny max:  %f \t y min:  %f", AcceptedMax(rand_y, rand_accept, rand_number), AcceptedMin(rand_y, rand_accept, rand_number));
+    printf("\nz max:  %f \t z min:  %f", AcceptedMax(rand_z, rand_accept, rand_number), AcceptedMin(rand_z, rand_accept, rand_number));
+    printf("\nr max:  %f \t r min %f",   AcceptedMax(rand_chi, rand_accept, rand_number), AcceptedMin(rand_chi, rand_accept, rand_number));
+        
     return 0;
 } 
 

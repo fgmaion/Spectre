@@ -1,20 +1,24 @@
 int setInputPk(){
-    int totalModes = 0;
+    double checkMax = 0.0;
 
-	for(k=0; k<n0; k++){
-		for(j=0; j<n1; j++){
-			for(i=0; i<n2; i++){
+	for(k=0; k<(n0+1); k++){
+		for(j=0; j<(n1+1); j++){
+			for(i=0; i<(n2+1); i++){
 				k_x   	 		= kIntervalx*(i - n2/2.);
                 k_y   	 		= kIntervaly*(j - n1/2.);
                 k_z   	 		= kIntervalz*(k - n0/2.);
 
-                Index 	 		= k*n1*n2 + j*n2 + i;
+                Index 	 		= k*(n1+1)*(n2+1) + j*(n2+1) + i;
 
                 kSq      		= pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
 
                 kmodulus 		= pow(kSq, 0.5);
 
                 inputPk[Index]  = (double) (*pt2Pk)(kmodulus);
+                
+                if(inputPk[Index] >= checkMax){
+                    checkMax    = inputPk[Index];
+                }
                 
                 /*
                 TwoDpkArray[totalModes][0] = fabs(k_x);
@@ -24,61 +28,52 @@ int setInputPk(){
                 TwoDpkArray[totalModes][2] = (double) inputPk[Index];
                 */
                 
-                totalModes     += 1;
 			}
 		}
 	}
 	
-	// 2D Power spectrum.
-	// sprintf(filepath, "%s/Data/ClippedPk/zSpace/2Dpk/InputTheory2Dpk_%s.dat", root_dir, surveyType);
-    // Cartesian2Dpk(filepath);
-
+	printf("\nMaximum input P(k) is %e", checkMax);
+	
 	return 0;
 }
 
-
-int printWfKernel(){
-    ConvNorm = ConvolutionNorm(windowFunc3D);
-
-    printf("\nApplied window fn. normalisation(convolution):  %e", ConvNorm);
-    printf("\nApplied window fn. normalisation(zero point) :  %e", ZeroPointNorm());
-  
-    sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/wfKernel.dat");
-  
-    output = fopen(filepath, "w");
-  
-    for(i=0; i<xwfKernelsize*ywfKernelsize*zwfKernelsize; i=i+zwfKernelsize){
-        for(j=0; j<zwfKernelsize; j++){
-            fprintf(output, "%e \t", windowFunc3D[i + j]);
-        }
-        
-        fprintf(output, "\n");
-    }
+/*
+int SetWfKernel_minAmp(){
+    double amplitude = 0.0;
     
-    fclose(output);
- 
-    return 0;
-}
+    largeAmpIndices  =   0;
 
-
-int SetWfKernel(){
-	for(k=0; k<zwfKernelsize; k++){
+    for(k=0; k<zwfKernelsize; k++){
 		for(j=0; j<ywfKernelsize; j++){
 			for(i=0; i<xwfKernelsize; i++){
-			  k_x			   		= kIntervalx*(i-(xwfKernelsize-1)/2.);
-			  k_y 		   		    = kIntervaly*(j-(ywfKernelsize-1)/2.);
-			  k_z			   		= kIntervalz*(k-(zwfKernelsize-1.)/2.);
+			    k_x			   		= kIntervalx*(xminKernelshift + i);
+			    k_y 		   		= kIntervaly*(yminKernelshift + j);
+			    k_z			   		= kIntervalz*(zminKernelshift + k);
 
-			  Index 		   		= k*ywfKernelsize*xwfKernelsize + j*xwfKernelsize + i;
+			    Index 		   		= k*ywfKernelsize*xwfKernelsize + j*xwfKernelsize + i;
+			    
+			    windowFunc3D[Index] = (*pt2AnisoWf)(k_x, k_y, k_z);
 
-			  windowFunc3D[Index]   = (*pt2AnisoWf)(k_x, k_y, k_z);
+			    amplitude           = (*pt2AnisoWf)(k_x, k_y, k_z);
+			    
+			    printf("\n %e \t %e \t %e \t %e", k_x, k_y, k_z, amplitude);
+			
+			    if(amplitude > pow(10., -9.)){
+                    wfKernel_minAmpIndices[largeAmpIndices][0] = xminKernelshift + i;
+                    wfKernel_minAmpIndices[largeAmpIndices][1] = yminKernelshift + j;
+                    wfKernel_minAmpIndices[largeAmpIndices][2] = zminKernelshift + k;
+                                                   
+                    wfKernel_minAmpIndices[largeAmpIndices][3] = Index;
+                 
+                    largeAmpIndices                           += 1;  
+                } 
 			}
 		}
-	}
-
-	return 0;
+	}      
+                                            
+    return 0;
 }
-
+*/
 
 double splintHODpk(double k){
     // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec). 
@@ -93,7 +88,7 @@ double splintHODpk(double k){
     }
 }
 
-
+/*
 int  printHODMatterPk(){
     double waveNumber    = 0.0;
     
@@ -112,7 +107,7 @@ int  printHODMatterPk(){
     return 0;
 }
 
-
+*/
 double splintLinearPk(double k){
     // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec). 
     if(k<0.0004)  return 4.675*pow(10., 6.)*pow(k, 0.96)*pow(linearBias/1.495903, 2.); 
@@ -126,7 +121,7 @@ double splintLinearPk(double k){
     }
 }
 
-
+/*
 double ConvolutionNorm(double array[]){
 	int   qIndex;
 	
@@ -147,24 +142,20 @@ double ConvolutionNorm(double array[]){
 	return Interim;
 }
 
+*/
 
 double minAmp_ConvolutionNorm(double array[]){
     double Interim = 0.0;
 
 	for(k=0; k<largeAmpIndices; k++){
-		Interim += array[wfKernel_minAmpIndices[k][3]];
+		Interim += array[k];
 	}
-	
-	Interim /= largeAmpIndices;
+
+    printf("\nConvolution norm. is %e ", Interim);
 
     return Interim;
 }
-
-
-
-double ZeroPointNorm(){
-    return AnisoWfKernel[(zwfKernelsize-1)/2*ywfKernelsize*xwfKernelsize + xwfKernelsize*(ywfKernelsize-1)/2 + (xwfKernelsize-1)/2];
-}
+/*
 
 
 int setMeasuredWfKernel(){
@@ -187,6 +178,7 @@ double AnalyticGaussian(double q){
     return exp(-q*q*r0*r0);
 }
 
+*/
 
 double Analytic2powerlaw(double k){
     float p0 = 150.;

@@ -14,7 +14,7 @@ int          CalcCorrections();
 
 int          randNGP();
 
-float        Integrand(float x);
+float        zChi_Integrand(float x);
 int          CoordinateCalc();
 int          NGPCalc();
 int          PkCalc();
@@ -29,6 +29,9 @@ double       (*pt2Windowfn)(double)                 = NULL;
 double       (*pt2Pk)(double)       				= NULL;
 
 double       (*pt2nz)(double)                       = NULL;
+double       (*pt2shot)(double)                     = NULL;
+
+double       CubeShot();
 
 // Artificial window fn's for cubic run
 int          FullCube();
@@ -95,7 +98,7 @@ double       interp_comovingDistance(double z);
 double       interp_inverseComovingDistance(double r);
 
 // Pointers to interpolation functions. 
-float        (*pt2Integrand)(float)                        = &Integrand;
+float        (*pt2zChiIntegrand)(float);
 double       (*pt2interp_comovingDistance)(double)         = &interp_comovingDistance;
 double       (*pt2interp_inverseComovingDistance)(double)  = &interp_inverseComovingDistance;
 
@@ -122,6 +125,11 @@ const double  sigma_8   =   0.82;
 const double  ns        =   0.95;
 
 double        hz        =    0.0;
+
+double        H_0;
+double        H_0inPerSec;
+double        HubbleTime;
+
 // Selection parameters. Volume limited sample between redshift 0.7 and 0.9
 double        redshiftHiLimit;
 double        redshiftLowLimit;
@@ -142,8 +150,6 @@ double*      densityArray        = NULL;
 double*      FKPweights          = NULL;
 double*      booldensity         = NULL;
 double*      meanCellRedshift    = NULL;
-
-double       SumOfVIPERSbools    = 0.0;
 
 double       TotalVolume         = 0.0;
 double       TotalSurveyedVolume = 0.0;
@@ -210,14 +216,16 @@ double*          zVel   = NULL;
 // randoms.
 double       alpha;
 
-int          rand_number;
+int          rand_number   = 0;
+int          accepted_rand = 0;
 
-double*      rand_ra    = NULL;
-double*      rand_dec   = NULL;
-double*      rand_chi   = NULL; 
-double*      rand_x     = NULL;
-double*      rand_y     = NULL;
-double*      rand_z     = NULL;
+double*      rand_ra     = NULL;
+double*      rand_dec    = NULL;
+double*      rand_chi    = NULL; 
+double*      rand_x      = NULL;
+double*      rand_y      = NULL;
+double*      rand_z      = NULL;
+bool*        rand_accept = NULL;
 
 // TotalWeight is the sum of ZADE weight for the ZADE catalogue = Number of spec z + Number of used Photometric galaxies used (including compensation for sampling).
 double       TotalZADEWeight   = 0.0;
@@ -258,6 +266,8 @@ double        NyquistWaveNumber;
 // First column is mod k, second Pk.
 double**     PkArray            = NULL;
 double**     TwoDpkArray        = NULL;
+
+double**     muIntervalPk       = NULL;
 
 double*      legendre2weights   = NULL;
 // Binned Pk parameters.
@@ -328,19 +338,18 @@ int          zBinNumber;
 double       zBinWidth;
 double       VIPERS_SolidAngle;
 
-double*       redshiftSlices         = NULL;
-float*        ChiSlices              = NULL;
-float*       NumberAtRedshift       = NULL;
-double*       ComovingVolumeAtZ      = NULL;
-float*        ComovingNumberDensity  = NULL;
-double*       MeanSliceRedshift      = NULL;
+double*       redshiftSlices                = NULL;
+float*        ChiSlices                     = NULL;
+float*        NumberAtRedshift              = NULL;
+double*       ComovingVolumeAtZ             = NULL;
+float*        ComovingNumberDensity         = NULL;
+float*        filteredComovingNumberDensity = NULL;
+double*       MeanSliceRedshift             = NULL;
+double*       LuminosityDistance            = NULL;
+double*       Schechter_fn                  = NULL;
 
 // spline and splint comoving number density, n(z).
-float*       ComovingNumberDensity2d = NULL;
-
-// 
-double       linearBias;
-double       A11;
+float*       ComovingNumberDensity2d        = NULL;
 
 // FKP weights. 
 double        fkpPk;
@@ -399,9 +408,9 @@ double       yroll;
 double       zroll;
 
 // Anisotropic convolution
-int 		 xwfKernelsize;
-int          ywfKernelsize;
-int          zwfKernelsize;
+// int 		 xwfKernelsize;
+// int          ywfKernelsize;
+// int          zwfKernelsize;
 
 float        fPkCubeEntry;
 
@@ -568,7 +577,8 @@ double  apodisedVolume;
 
 float   nbarChi2(float Chi);
 float   Chi2(float Chi);
-float   ShotNoise();
+double  lightconeShot();
+double  CubeShot();
 
 double* loskBinLimits;
 double* perpkBinLimits;
@@ -625,7 +635,119 @@ int**  wfKernel_minAmpIndices;
 int    largeAmpIndices = 0;
 double minAmp_ConvolutionNorm(double array[]);
 
+char      theoryPk_flag[200];
+
+double    shotNoiseCorrection_clipfactor;
+
+
+// translation parameters for Stefano's co-ordinates. 
+double    stefano_trans_x;
+double    stefano_trans_y;
+double    stefano_trans_z;
+
+// mean sampling rate, e.g for FKP calc. 
+double    meanSampling;
+
+int min_zShift = 99, max_zShift = 0;
+int min_yShift = 99, max_yShift = 0;
+int min_xShift = 99, max_xShift = 0;
+
+double wfKernel_minAmp;
+
+double Wfzeropoint;
+double convolution_modkmax;
+int     subVol1, subVol2, subVol3, subVolCount;
+
+int polarPk_modeCount = 0;
+
+
+// Calculation fof the age of the universe, leading to linear growth rate. 
+float*  AgeOftheUniverse;  // Units of H_0
+float*  HubbleCnstWithTime;
+
+// Calculation of the linear growth rate. 
+void  (*pt2derivs)(float, float[], float[]) = NULL;
+void  (*pt2rkqs)(float [], float [], int, float *, float, float, float [], float *, float *, void (*)(float, float [], float[])) = NULL;
+
+int    nVar    = 2;
+
+float* yStartArray;
+float* yFinalArray;
+float* y2derivsStartArray;
+
+int   linearGrowth_nPoints;
+
+float eps                = 0.00001;
+float defaultStepSize    = 0.001;
+float MinAllowedStepSize = 0.000001;
+
+float InitialStartTime;
+float FinalTime;
+float Initial_lnScalefactor;
+float Final_lnScalefactor;
+
+float (*pt2f_Om_545)(float);
+float (*pt2AgeIntegrand)(float);
+
+float (*pt2linearGrowthRate)(float)         = NULL;
+float (*pt2lnlinearGrowthRate)(float)       = NULL;
+float (*pt2linearGrowthRate_deriv)(float)   = NULL;
+float (*pt2linearGrowthRate_2deriv)(float)  = NULL;
+    
+    // Defining declarations for these variables, with memory allocation xp[1..kmax] and yp[1..nvar][1..kmax]
+    // for the arrays, should be in the calling program.
+
+// float* TimeArray;
+float* Age2derivatives;
+float* Om_mOfa;
+float* f_Om_mOfa545;
+float* f_Om_mOfa545_2derivs;
+float* approx2linear_growthfactor;
+
+float* lnAarray;
+float* lnA2derivatives;
+float* linear_growthfactor;
+float* SplineParams_ofgrowthfactor;
+float* SplineParams_ofgdot;
+float* xVals;
+float* length_scales;
+float* gdot;
+float* derivs_error;
+
+float* Second_derivs;
+float* Second_derivs_error;
+float* Second_deriv_lengthscales;
+
+float* SplineParams_ofgdotdot;
+
+int    nDerivs;
+double growthfactor_today;
+double approx_growthfactor_today;
+
+// float* HubbleConstantArray;
+float* HubbleConstant2derivatives;
+
+// Likelihood calculation.
+double***     Multipoles;
+
+// flattened covariance matrix. 
+double* flatCov;
+
+double  ChiSqEval_kmax;
+double  ChiSqEval_kmin;
+
+double* betaPosterior;
+double* sigmaPosterior;
+double** betaSigmaPosterior;
+
+double  PosteriorNorm = 0.0;
+
+
+double    detCovariance;
+
 double**  Covariance;
+double**  Covariance_CofactorMatrix;
+
 double**  MeanMultipoles;
 
 double*   mvGauss;
@@ -633,13 +755,15 @@ double**  invCov;
 double*   kMultipoles;
 
 double    A11Sq;
-double    LikelihoodEval();
+double    linearBias;
+double    ChiSqEval();
 
 int       Res;
 double    dRes;
 
 double*** ChiSqGrid;
-double     minChiSq;
+double*** lnLikelihoodGrid;
+double    minChiSq;
 
 double    min_beta;
 double    max_beta;
@@ -649,5 +773,3 @@ double    max_velDisperse;
 
 double    min_A11Sq;
 double    max_A11Sq;
-
-char      theoryPk_flag[200];

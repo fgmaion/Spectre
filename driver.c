@@ -1,12 +1,6 @@
 // Stacpolly run. 
 // #define AUXfn_DIR "/home/mjw/Aux_functions/header.h"
 
-#define   AUXfn_header "/disk1/mjw/Aux_functions/header.h"
-#include  AUXfn_header
-
-#define   AUXfn_funcs  "/disk1/mjw/Aux_functions/Aux_functions.c"
-#include  AUXfn_funcs
-
 #include <stdbool.h>
 
 #include <gsl/gsl_sf_bessel.h>
@@ -15,8 +9,18 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_sf_legendre.h>
+#include <gsl/gsl_linalg.h>
+// #include "omp.h"
+
+#define   AUXfn_header "/disk1/mjw/Aux_functions/header.h"
+#include  AUXfn_header
+
+#define   AUXfn_funcs  "/disk1/mjw/Aux_functions/Aux_functions.c"
+#include  AUXfn_funcs
 
 #include "Scripts/header.h"
+
+#include "/disk1/mjw/Aux_functions/SVD.c"
 
 #include "Scripts/comovDistRedshiftCalc.c"
 
@@ -49,16 +53,21 @@
 
 #include "Scripts/MeasureWfKernel.c"
 // #include "Scripts/sphericalConvolvePk.c"
-#include "Scripts/ConvolvePkAnisoWf.c"
 #include "Scripts/setConvolutionKernels.c"
 // #include "Scripts/AnalyticTestConvolution.c"
+#include "Scripts/ConvolvePkAnisoWf.c"
 
 #include "Scripts/IntegralConstraintCorrection.c"
 
 #include "Scripts/ComovingNumberDensityCalc.c"
 #include "Scripts/MockAvgComovingDensity.c"
 
+#include "Scripts/AgeOftheUniverse.c"
+#include "Scripts/linearGrowthRate.c"
+#include "Scripts/growthfactor_derivative.c"
+
 #include "Scripts/InvErrorfn.c"
+#include "Scripts/MatrixInverse.c"
 
 #include "Scripts/Clipped_zSpace.c"
 
@@ -120,6 +129,12 @@ AxisLimsArray[1][1]   =     800.0;                                              
 AxisLimsArray[0][2]   =       0.0;                                                     // h^-1 Mpc
 AxisLimsArray[1][2]   =     800.0;                                                     // h^-1 Mpc
 
+
+// degree of translation for Stefano's co-ordinates, fit survey into surrounding volume. 
+stefano_trans_x       =    + 100.;
+stefano_trans_y       =    + 300.;
+stefano_trans_z       =   - 1500.;
+
 // limits in right asecension.
 // W1 catalogue.
 LowerRAlimit          =      30.1;
@@ -164,8 +179,8 @@ redshiftHiLimit       =      0.90;
 
 // Non-linear RSD
 velDispersion         =      3.00;                  // units of h^-1 Mpc rather than 300 km s^-1
-beta                  =      0.35;                  // 2dF measurement, beta = 0.43
-A11Sq                 =      2.58;
+beta                  =      0.542;                 // 2dF measurement, beta = 0.43
+A11Sq                 =      2.58;                  // beta = 0.542 for the cube. 
 
 // Priors on the model params.
 min_beta              =      0.30;
@@ -198,31 +213,26 @@ linearBias            =  1.495903;
 
 // Comoving number density, n(z), measurement. 
 zBinWidth             =      0.03; 
-chiBinWidth           =     15.00;
+chiBinWidth           =     16.00;
 nzSigma               =      50.0;
 
 // Apply Jenkins contraction to beat aliasing. 
 JenkinsScalefactor    =       1.0;
 
 // FKP P(k) of interest;
-fkpPk                 =     5000.;                                                  // [h^-1 Mpc]^3, Peeble's convention.
+fkpPk                 =    1000.0;                                                  // [h^-1 Mpc]^3, Peeble's convention.
+meanSampling          =       0.4;
 
 // Binning interval for P(k).
 kbinInterval          =      0.01;
-modkMax               =      0.80;
+modkMax               =      1.50;
 muBinNumb             =       100;
 
 // Interval in k^2 for perp k binning of 2D P(k).
 perpkInterval         =      0.02;
 
-// Must be odd. 2n+1.
-// xwfKernelsize      =        15;
-// ywfKernelsize      =         9;
-// zwfKernelsize      =         9;
-
-// xwfKernelsize         =       165;
-// ywfKernelsize         =        95;
-// zwfKernelsize         =        50;
+wfKernel_minAmp       = pow(10., -8.);
+convolution_modkmax   =           0.6;
 
 // Total number of mocks. 
 CatalogNumber         =        26;
@@ -236,6 +246,19 @@ gsl_rng_env_setup();
 gsl_ran_T = gsl_rng_default;
 gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
 
+// Non-linear RSD
+velDispersion             =       2.00;                  // units of h^-1 Mpc rather than 300 km s^-1
+beta                      =       0.54;                  // 2dF measurement, beta = 0.43
+// A11Sq                  =       2.58;
+    
+linearBias                =   1.495903;
+    
+// Clipping variables. 
+appliedClippingThreshold  =        5.0;    
+// linearBias             = sqrt(2.90);
+A11Sq                     =        1.0;
+
+
 padVolume(0.0, 0.0, 0.0);
 
 // Checked.
@@ -244,7 +267,7 @@ comovDistReshiftCalc();
 // Checked.
 VIPERS_SolidAngle     = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
 
-sprintf(surveyType, "VIPERSparent_StefanoBasis_Cic_GaussSmoothNz_%.1f_SkinDepth_%.1f_VolLim_%.2f_Mesh_%.2f", nzSigma, GibbsSkinDepth, absMagCut, CellSize);
+sprintf(surveyType, "HODmocks");
 
 // JenkinsCoordinates();
 
@@ -256,7 +279,7 @@ prepNGP();
 
 // Checked.
 // CalcCellraDec();
-// StefanoMask();
+CalcCellChi();
 
 // apodiseWindowfn();
 
@@ -272,13 +295,17 @@ prepFFTbinning();
 // assign2DPkMemory();
 
 sprintf(theoryPk_flag, "HOD_-20.0");
+
 pt2Pk = &splintHODpk;
-//pt2Pk = &splintLinearPk;
 
 inputHODPk();
+
+// pt2Pk = &splintLinearPk;
 // inputLinearPk();
-/*
-for(loopCount=1; loopCount<27; loopCount++){
+
+pt2shot = &lightconeShot;
+
+for(loopCount=1; loopCount<2; loopCount++){
     if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
     else              sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
       
@@ -288,11 +315,11 @@ for(loopCount=1; loopCount<27; loopCount++){
     
     zUtilized = &zcos[0];
 
+    // My basis, otherwise use Stefano basis. Never use both in conjuction. 
     // CoordinateCalc();
     
+    // Convert from ra, dec, z to x, y, z in Stefano's basis. 
     StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);
-    
-    StefanoRotated(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
     
     // randomGeneration();
     
@@ -314,23 +341,20 @@ for(loopCount=1; loopCount<27; loopCount++){
 
     // Must be run for all 27 mocks in preparation for P(k) calc.
     // ComovingNumberDensityCalc();
-
-    // splineGaussfilteredW1_W4_nz();
-    splineStefano_nz();
-    
-    // splineMockAvg_nz();
-    pt2nz    =  &interp_Stefano_nz;
-    
     // pt2nz = &interp_nz;
 
-    // pt2nz = &MockAvg_nz;
+    // splineGaussfilteredW1_W4_nz();
     
-    // ApplyFKPweights();
+    splineMockAvg_nz();
+    
+    pt2nz = &MockAvg_nz;
 
     CleanNGP();
 
     // Checked.
     NGPCalc();
+    
+    // ApplyFKPweights(meanSampling);
    
     // Checked.
     CalcWfCorrections();
@@ -341,7 +365,7 @@ for(loopCount=1; loopCount<27; loopCount++){
     
     // slowDFTcalc();
 }
-*/
+
 // MockAvg2Dpk(14);
 
 // MockAverageComovingdensity();
@@ -358,7 +382,22 @@ for(loopCount=1; loopCount<27; loopCount++){
 
 // analyticConvTest();
 
+// free(rand_x);
+// free(rand_y);
+// free(rand_z);
+// free(rand_chi);
+
 // AnisoConvolution();
+
+/*
+#pragma omp parallel{
+    int ID = omp_get_thread_num();
+    
+    printf(’Hello(%d) ’, ID);
+    printf(’World(%d) \n’, ID);
+}
+*/
+
 
 // Window func. convolution assuming spherical symmetry/averaging.                                                  
 // ConvolveSphericalSymm();
@@ -367,7 +406,8 @@ for(loopCount=1; loopCount<27; loopCount++){
 
 // theoryHexadecapole();
 
-// CovarianceMatrix();
+// Columns embedded in cube. 
+// CovarianceMatrix(64, 20, 3);
 
 // CovarianceInverse();
 
@@ -393,107 +433,11 @@ for(loopCount=1; loopCount<27; loopCount++){
 
 // TwoDbinnedRedshiftSpacePk();
 
-// sprintf(filepath, "%s/Scripts/Normal_PkTheory_KaiserLorentzian_0.6mu0.8.dat", root_dir);
-// BinnedPkForMuInterval(0.6, 0.8, filepath, PkCube);
-
-// sprintf(filepath, "%s/Scripts/zSuppressed_PkTheory_KaiserLorentzian_0.6mu0.8.dat", root_dir);
-// BinnedPkForMuInterval(0.6, 0.8, filepath, clippedPk);
-
-// sprintf(filepath, "%s/Scripts/zDistorted_PkTheory_KaiserLorentzian_0.6mu0.8.dat", root_dir);
-// BinnedPkForMuInterval(0.6, 0.8, filepath, clippedPk);
-
 // TwoColumnCompareTest();
 
 // Stacpolly run. 
 // MPI_Finalize();
-    
-    
-    // Inverse of M using LAPACK.
-/*
-    double** M;
-    
-    M = (double **) malloc(3*sizeof(*M));
-    
-    for(j=0; j<3; j++)  M[j] = malloc(3*sizeof(**M));
-    
-    for(k=0; k<3; k++){
-        for(j=0; j<3; j++){
-            M[j][k] = 0.0;
-        }
-    }
-    
-    M[0][0] = 4.0;
-    M[0][1] = 12.0;
-    M[0][2] = -16.0;
-
-    M[1][0] = 12.0;
-    M[1][1] = 37.0;
-    M[1][2] = -43.0;
-    
-    M[2][0] = -16.0;
-    M[2][1] = -43.0;
-    M[2][2] =  98.0;
-
-    int    order  = 3;
-    int    order2 = 9;
-
-    // length of N+1
-    double pivotArray[4];
-    
-    int    errorHandler; 
-
-    double lapackWorkspace[9];
-
-    double flattenedM[9];
-
-    int count = 0;
-
-    // Note: FORTRAN Ordering. M = {{a, b, c},
-    //                              {d, e, f},
-    //                              {g, h, i}};
-
-    // Assigned via: M[0][0] = a, M[0][1] = b, M[0][2] = c, M[1][0] = d, etc.
-
-    for(j=0; j<3; j++){
-      for(k=0; k<3; k++){
-	flattenedM[count] = M[j][k];
-	count            += 1;
-      }
-    }
-    */
-    // dgetrf_(&order, &order, flattenedM, &order, pivotArray, &errorHandler);
-    
-    // dgetri_(&order, flattenedM, &order, pivotArray, lapackWorkspace, &order2, &errorHandler);
-    /*
-    printf("\n %e \t %e \t %e", flattenedM[0], flattenedM[1], flattenedM[2]);
-    printf("\n %e \t %e \t %e", flattenedM[3], flattenedM[4], flattenedM[5]);
-    printf("\n %e \t %e \t %e", flattenedM[6], flattenedM[7], flattenedM[8]);
-    */  
-    
-    // Cholesky decomposition of a Matrix, with LAPACK. 
-    /*
-    int INFO, size;
-    char UPLO;
-    
-    UPLO ='L';
-
-    size = 3;
-
-    // Cholesky decomposition. Upper triangular matrix, lower triangular
-    // left as original matrix. 
-
-    dpotrf_(&UPLO, &size, flattenedM, &size, &INFO);
-    
-    count = 0;
-
-    for(j=0; j<3; j++){
-      printf("\n");
-      for(k=0; k<3; k++){
-	printf("%e \t", flattenedM[count]);
-	count += 1;
-      }
-    }
-    */
+  
     printf("\n\n");
 
     return 0; 
