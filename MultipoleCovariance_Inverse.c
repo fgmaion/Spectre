@@ -1,10 +1,9 @@
 int CovarianceInverse(int kBinNumb){
     // Inverse of C_ij using LAPACK.
     
-    /*
-    int order, order2;
+    int order, order2, nrotations;
 
-    order  = 2;
+    order  = 4;
     order2 = order*order;
     
     double** A;
@@ -26,34 +25,78 @@ int CovarianceInverse(int kBinNumb){
     }
     
     A[0][0] = 1;
-    A[0][1] = 3;
+    A[0][1] = 1;
+    A[0][2] = 3;
     
-    A[1][0] = 4;
-    A[1][1] = 9;
+    A[1][0] = 1;
+    A[1][1] = 1;
+    A[1][2] = -3;
     
-    CoFactor(A, order, A_co);
+    A[2][0] = 3;
+    A[2][1] = -3;
+    A[2][2] = -3;
     
-    Transpose(A_co, order);
+    float** U;
+    float*  eigenVals;
+    float** eigenVecs;
     
-    double detA = 0;
+    U         = malloc(order*sizeof(*U));
+    eigenVecs = malloc(order*sizeof(*eigenVecs)); 
     
-    detA = Determinant(A, order);
+    eigenVals = malloc(order*sizeof(*eigenVals));
+    
+    for(j=0; j<order; j++){  
+        U[j]         = malloc(order*sizeof(**U));
+        eigenVecs[j] = malloc(order*sizeof(**eigenVecs));
+    }
+    
+    for(j=1; j<order; j++){
+        for(k=1; k<order; k++){
+            U[j][k] = A[j-1][k-1];
+        }
+    }
+    
+    jacobi(U, order-1, eigenVals, eigenVecs, &nrotations);
+    
+    printf("\nJacobi rotations: %d", nrotations); 
+    
+    eigsrt(eigenVals, eigenVecs, order-1);
+    
+    for(j=1; j<order; j++)  printf("\n%e", eigenVals[j]);
+    
+    
+    printf("\n\nEigen vectors: \n\n");
+    
+    for(j=1; j<order; j++){    
+        for(k=1; k<order; k++)  printf("%e \t", eigenVecs[k][j]);
+    
+        printf("\n");
+    }
+    
+    // CoFactor(A, order, A_co);
+    
+    // Transpose(A_co, order);
+    
+    // double detA = 0;
+    
+    // detA = Determinant(A, order);
 
-    printf("\ndet A: %e", detA);
+    // printf("\ndet A: %e", detA);
 
-    for(j=0; j<order; j++){
-        for(k=0; k<order; k++){
-            A_inv[j][k] = (1./detA)*A_co[j][k];
+    // for(j=0; j<order; j++){
+    //    for(k=0; k<order; k++){
+    //        A_inv[j][k] = (1./detA)*A_co[j][k];
         
             // A_flat[count] = A[j][k];
             // count        += 1;
-        }    
-    }
+    //    }    
+    // }
     
-    printf("\n\n A inverse.");
-    printf("\n%e \t %e", A_inv[0][0], A_inv[0][1]);
-    printf("\n%e \t %e", A_inv[1][0], A_inv[1][1]);
+    // printf("\n\n A inverse.");
+    // printf("\n%e \t %e", A_inv[0][0], A_inv[0][1]);
+    // printf("\n%e \t %e", A_inv[1][0], A_inv[1][1]);
     
+    /*
     double sum = 0.0;
         
     printf("\n\n");
@@ -120,15 +163,19 @@ int CovarianceInverse(int kBinNumb){
         
         printf("\n");
     }
-    */
+    
     
     
     int count   = 0;
     int order, order2;
     int errorHandler; 
 
-    order  = 2*(kBinNumb-1);
+    order  = 2*(kBinNumb-1) + 1;
+    
+    printf("\nOrder: %d", order);
+    
     order2 = order*order;
+    */
     
     // length of N+1
     // double pivotArray[order+1];
@@ -174,6 +221,7 @@ int CovarianceInverse(int kBinNumb){
     }
     */
     
+    /*
     double** U;
     double** V;
     double*  W;
@@ -210,6 +258,28 @@ int CovarianceInverse(int kBinNumb){
             }
         }
     }
+    */
+    
+    /*
+    float** U;
+    float** V;
+    float*  W;
+    
+    W = malloc(order*sizeof(*W));
+    V = malloc(order*sizeof(*V));
+    U = malloc(order*sizeof(*U));
+    
+    for(j=0; j<order; j++){
+        V[j] = malloc(order*sizeof(**V));
+        U[j] = malloc(order*sizeof(**U));
+    }
+    
+    for(i=1; i<order; i++){
+        for(j=1; j<order; j++){        
+            U[i][j] = (float) Covariance[i-1][j-1];
+        }
+    }
+    */    
     
     // printf("\n\nInverse covariance from SVD:\n");
     // printMatrix(invCov, order, order);
@@ -224,7 +294,8 @@ int CovarianceInverse(int kBinNumb){
     }
     */
     
-    sprintf(filepath, "%s/Data/Covariance/zCube_clipThreshold_1.0e+03_subVols_InverseCovariance.dat", root_dir);
+    /*
+    sprintf(filepath, "%s/Data/Covariance/%s_InverseCovariance.dat", root_dir, surveyType);
 
     output = fopen(filepath, "w"); 
 
@@ -237,6 +308,7 @@ int CovarianceInverse(int kBinNumb){
     }
 
     fclose(output);
+    */
 
     return 0;
 }

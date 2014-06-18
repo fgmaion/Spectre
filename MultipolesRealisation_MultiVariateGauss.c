@@ -1,20 +1,21 @@
-int multipolesRealisation(int kBinNumb){
+int multipolesRealisation(){
   // Multivariate Gaussian realisation of Multipoles.
   
-  double** CholDecomCov;
-  double*  cholVector_y;
+  // double** CholDecomCov;
+  // double*  cholVector_y;
   
-  double   mu_j;
+  double     mu_j;
   
   double   Mono_j;
   double   Quad_j;
 
-  mvGauss             = malloc(2*(kBinNumb-1)*sizeof(*mvGauss));
+  mvGauss                = malloc(2*chiSq_kmaxIndex*sizeof(*mvGauss));
 
-  cholVector_y        = malloc(2*(kBinNumb-1)*sizeof(*cholVector_y));
+  // cholVector_y        = malloc(2*(kBinNumb-1)*sizeof(*cholVector_y));
 
-  CholDecomCov        = malloc(2*(kBinNumb-1)*sizeof(*CholDecomCov));
+  // CholDecomCov        = malloc(2*(kBinNumb-1)*sizeof(*CholDecomCov));
 
+  /*
   for(j=0; j<2*(kBinNumb-1); j++){
       CholDecomCov[j] = malloc(2*(kBinNumb-1)*sizeof(**CholDecomCov));
       
@@ -32,20 +33,23 @@ int multipolesRealisation(int kBinNumb){
 	      cholVector_y[j] += mvGauss[k]*CholDecomCov[j][k];   
       }
   }
+  */
 
-  sprintf(filepath, "%s/Data/Multipoles/Multipoles_zCube_clipThreshold_1.0e+03_fullCube_kbin_0.010_000.dat", root_dir, k);
-
+  sprintf(filepath, "%s/Data/Multipoles/zCube_xVel/Multipoles_zCube_xvel_clipThreshold_1.0e+03_fullCube_kbin_0.010_001.dat", root_dir);
+  
   inputfile = fopen(filepath, "r");
 
-  for(i=0; i<kBinNumb-1; i++){
-	fscanf(inputfile, "%*lf \t %lf \t %lf \t %*d \t %*lf \t %*lf \n", &mvGauss[i], &mvGauss[(kBinNumb-1) + i]);
+  // printf("\n\nInput data");
+
+  for(i=0; i<chiSq_kmaxIndex; i++){
+	fscanf(inputfile, "%*lf \t %lf \t %lf \t %*d \t %*lf \t %*lf \n", &mvGauss[i], &mvGauss[chiSq_kmaxIndex + i]);
+  
+    // printf("\n%e \t %e \t %e", kMultipoles[i], mvGauss[i], mvGauss[(kBinNumb-1) + i]);
   }
 
   fclose(inputfile);
   
-  
-  sprintf(filepath, "%s/Data/Multipoles/zCube_clipThreshold_1.0e+03_subVols_Realisation_beta_%.2f_sigma_%.2f.dat", root_dir, beta, velDispersion);
-
+  /*  
   output = fopen(filepath, "w");
   
   for(j=0; j<(kBinNumb-1); j++){
@@ -53,19 +57,11 @@ int multipolesRealisation(int kBinNumb){
       
       Quad_j                     = (*pt2Pk)(kMultipoles[j])*kaiserLorentz_Quadfactor(kMultipoles[j]*velDispersion, beta);
 
-      // mvGauss[j]                 = Mono_j + cholVector_y[j];
-      
-      // mvGauss[(kBinNumb-1) + j]  = Quad_j + cholVector_y[(kBinNumb-1) + j];
-      
-      mvGauss[j]                /= A11Sq;
-      
-      mvGauss[(kBinNumb-1) + j] /= A11Sq;
-
-      fprintf(output, "%e \t %e \t %e \t %e \t %e \t %e \t %e\n", kMultipoles[j], mvGauss[j], mvGauss[(kBinNumb-1) + j], Mono_j, Quad_j, Mono_j/A11Sq, Quad_j/A11Sq);
+      fprintf(output, "%e \t %e \t %e \t %e \t %e \t %e \t %e \n", kMultipoles[j], mvGauss[j], mvGauss[(kBinNumb-1) + j], Mono_j*A11Sq, Quad_j*A11Sq, splint_kMonopole(kMultipoles[j]), splint_kQuadrupole(kMultipoles[j]));
   }  
   
   fclose(output);
-
+  */
   return 0;
 }
 

@@ -23,6 +23,44 @@ int NGPCalcCube(){
     overdensity_volumeLimitedTracer();    
     
     printSurveyDetails();
+    
+    return 0;
+}
+
+
+int GaussCube(){
+    sprintf(filepath, "%s/Data/HODCube/GaussianRandomField_256.txt", root_dir);
+
+    inputfile = fopen(filepath, "r");
+    
+    float* input;
+    
+    input = malloc(256*256*256*sizeof(float));
+    
+    for(k=0; k<256; k++){
+        for(j=0; j<256; j++){
+            for(i=0; i<256; i++){
+                Index        = k*n1*n2 + j*n2 + i; 
+                
+                fscanf(inputfile, "%f \n", &input[Index]);
+            }
+        }
+    }
+
+    fclose(inputfile);
+    
+    for(j=0; j<256*256*256; j++) densityArray[j] = (double) input[j];
+    
+    /*
+    sprintf(filepath, "%s/Data/HODCube/GaussianRandomField_256.dat", root_dir);
+    
+    output = fopen(filepath, "wb");
+    
+    for(j=0; j<256*256*256; j++) fprintf(output, "%e \n");
+    
+    fclose(output);
+    */
+    
     return 0;
 }
 
@@ -96,6 +134,7 @@ double CubeMeanNumberDensity(double chi){
 
 int overdensity_volumeLimitedTracer(){
     // The true density field. 
+    printf("\nMax counts: %f", arrayMax(densityArray, n0*n1*n2));
 
     for(j=0; j<n0*n1*n2; j++)  densityArray[j] /= CellVolume*CubeMeanNumberDensity(1500.);
 
@@ -114,10 +153,6 @@ int overdensity_varyingSelection(){
                 Index                         = k*n1*n2 + j*n2 + i; 
                 
                 Chi                           = Cell_chiVIPERSsystem[Index];
-                
-                // if(densityArray[Index] > 0){
-                //     fkpShotNoiseCorr      += pow(TotalFKPweight, -2.)*pow(CellVolume, -1.)*pow(FKPweights[Index], 2.)/interp_nz(Chi);
-                // }
 
 		        densityArray[Index]          /= CellVolume*(*pt2nz)(Chi);
                 
@@ -139,8 +174,8 @@ int printSurveyDetails(){
     printf("\nright ascension limits:  %f to %f", UpperRAlimit, LowerRAlimit);
     printf("\ndeclination limits:      %f to %f", UpperDecLimit, LowerDecLimit);
     printf("\nCell volume:                   %f.",        CellVolume); 
-    printf("\n\nTotal volume:            %f", TotalVolume);
-    printf("\nTotal surveyed volume:   %f", TotalSurveyedVolume);
+    printf("\n\nTotal volume:            %e", TotalVolume);
+    printf("\nTotal surveyed volume:   %e", TotalSurveyedVolume);
 
     printf("\n\nfundamental x mode:  %f", kIntervalx);
     printf("\nfundamental y mode:  %f", kIntervaly);
