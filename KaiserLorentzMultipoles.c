@@ -82,6 +82,16 @@ double kaiserLorentz_multipole(double ks, double beta, int monoQuad){
     }
 }
 
+
+int setLorentzianRSD(){
+    pt2RSD  = &kaiserLorentz_multipole;
+    
+    sprintf(theoryRSD_flag, "LorentzianRSD");
+
+    return 0;
+}
+
+
 // Print model to file. 
 
 int kaiser_nonlinearSuppression_Multipoles(){

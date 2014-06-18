@@ -88,7 +88,7 @@ int MeasureAnisoWfKernel(){
                                                                   
                     modeCount                           += 1; 
                     
-                    // printf("\n%d \t %d \t %d \t %e", W2x, W2y, W2z, W2k);
+                    printf("\n%d \t %d \t %d \t %e", W2x, W2y, W2z, W2k);
                     
                     if(W2x>max_xShift) max_xShift = W2x;
                     if(W2x<min_xShift) min_xShift = W2x;
