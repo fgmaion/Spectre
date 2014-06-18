@@ -78,23 +78,7 @@ int assignAcceptance(){
 
 
 int assignAcceptanceCube(){
-    int subVolAccepted = 0;
-
-    for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j] = false;
-    
-    for(j=0; j<Vipers_Num; j++){
-        if((AxisLimsArray[0][0]<xCoor[j]) && (xCoor[j]<AxisLimsArray[1][0])){
-            if((AxisLimsArray[0][1]<yCoor[j]) && (yCoor[j]<AxisLimsArray[1][1])){
-                if((AxisLimsArray[0][2]<zCoor[j]) && (zCoor[j]<AxisLimsArray[1][2])){
-                    Acceptanceflag[j]  = true;
-                    
-                    subVolAccepted    +=    1;
-                }
-            }
-        }
-    }
-
-    printf("\nNumber of galaxies in sub volume: %d", subVolAccepted);
+    for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j] = true;
 
     return 0;
 }

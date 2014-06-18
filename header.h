@@ -27,6 +27,7 @@ int          EvaluateConvolution(char type[]);
 double 		 (*pt2AnisoWf)(double, double, double)  = NULL;
 double       (*pt2Windowfn)(double)                 = NULL;
 double       (*pt2Pk)(double)       				= NULL;
+double       (*pt2RSD)(double, double, int)         = NULL;
 
 double       (*pt2nz)(double)                       = NULL;
 double       (*pt2shot)(double)                     = NULL;
@@ -156,6 +157,7 @@ double       TotalSurveyedVolume = 0.0;
 
 double       fkpWeightedVolume   = 0.0;
 double       fkpSqWeightsVolume  = 0.0;
+double       SumOverStates_W2k   = 0.0;
 double       fkpShotNoiseCorr    = 0.0;
 
 // Dimensions of the padded volume (TotalVolume) in units of CellSize. 
@@ -606,6 +608,13 @@ double*  kHexadecapole;
 double*  kQuadrupole;
 double*  kMonopole;
 
+float*   f_kMonopole;
+float*   f_kQuadrupole;
+float*   f_meanKBin;
+
+float*   f_kMonopole2d;
+float*  f_kQuadrupole2d;
+
 float   TotalW1W4area;                                                                          
 
 double  CentreRA;
@@ -636,9 +645,9 @@ int    largeAmpIndices = 0;
 double minAmp_ConvolutionNorm(double array[]);
 
 char      theoryPk_flag[200];
+char      theoryRSD_flag[200];
 
 double    shotNoiseCorrection_clipfactor;
-
 
 // translation parameters for Stefano's co-ordinates. 
 double    stefano_trans_x;
@@ -656,7 +665,7 @@ double wfKernel_minAmp;
 
 double Wfzeropoint;
 double convolution_modkmax;
-int     subVol1, subVol2, subVol3, subVolCount;
+int    subVol1, subVol2, subVol3, subVolCount;
 
 int polarPk_modeCount = 0;
 
@@ -745,6 +754,7 @@ double  PosteriorNorm = 0.0;
 
 double    detCovariance;
 
+int*      ModeNumber;
 double**  Covariance;
 double**  Covariance_CofactorMatrix;
 
@@ -765,6 +775,10 @@ double*** ChiSqGrid;
 double*** lnLikelihoodGrid;
 double    minChiSq;
 
+double    minChiSq_beta;
+double    minChiSq_A11Sq;
+double    minChiSq_sigma;
+
 double    min_beta;
 double    max_beta;
 
@@ -773,3 +787,35 @@ double    max_velDisperse;
 
 double    min_A11Sq;
 double    max_A11Sq;
+
+double    clippedVolume;
+
+// Boot strap catalogue generation.
+int*      BootStrap_flag;
+double*   BootStrap_Wght;
+
+double*   xBoot;
+double*   yBoot;
+double*   zBoot;
+double*   deltaBoot;
+
+
+float** U;
+float*  eigenVals;
+float** eigenVecs;
+    
+double** sigmaNorm;
+int order, order2, nrotations, l;
+
+
+double* xdata;
+double* xtheory;
+    
+double* ydata;
+double* ytheory;
+
+double  lowestKeptEigenvalue      = pow(10., 12.);
+int     chiSq_kmaxIndex;
+
+int     hiMultipoleOrder;
+int     lineNo;

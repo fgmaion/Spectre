@@ -65,7 +65,8 @@ int prepFFTw(int n0, int n1, int n2){
     }
 
     printf("\nCreating FFTw plan.");
-    p                  = fftw_plan_dft_3d(n0, n1, n2, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+    p                  = fftw_plan_dft_3d(n0, n1, n2, in, out, FFTW_FORWARD,  FFTW_ESTIMATE);
+    iplan              = fftw_plan_dft_3d(n0, n1, n2, out, in, FFTW_BACKWARD, FFTW_ESTIMATE);
 
     return 0;
 }
@@ -160,6 +161,13 @@ int assign2DPkMemory(){
     kMonopole                                            = (double  *) malloc((kBinNumb-1)*sizeof(*kMonopole));
     kQuadrupole                                          = (double  *) malloc((kBinNumb-1)*sizeof(*kQuadrupole));
     kHexadecapole                                        = (double  *) malloc((kBinNumb-1)*sizeof(*kHexadecapole));
+
+    f_meanKBin                                           = (float  *) malloc((kBinNumb-1)*sizeof(*f_meanKBin));
+    f_kMonopole                                          = (float  *) malloc((kBinNumb-1)*sizeof(*kMonopole));
+    f_kQuadrupole                                        = (float  *) malloc((kBinNumb-1)*sizeof(*kQuadrupole));
+
+    f_kMonopole2d                                        = (float  *) malloc((kBinNumb-1)*sizeof(*f_kMonopole2d));
+    f_kQuadrupole2d                                      = (float  *) malloc((kBinNumb-1)*sizeof(*f_kQuadrupole2d));
 
     return 0;
 }
@@ -286,26 +294,28 @@ int assignCovMat(int mockNumber, int kBinNumb, int hiMultipoleOrder){
     
     for(j=0; j<mockNumber; j++){
         for(k=0; k<hiMultipoleOrder; k++){      
-            Multipoles[j][k]                               = (double   *) malloc((kBinNumb-1)*sizeof(***Multipoles));
+            Multipoles[j][k]                               = (double   *) malloc(kBinNumb*sizeof(***Multipoles));
         }
     }
 
     for(i=0; i<mockNumber; i++){
         for(j=0; j<hiMultipoleOrder; j++){
-            for(k=0; k<kBinNumb-1; k++){
+            for(k=0; k<kBinNumb; k++){
                 Multipoles[i][j][k] = 0.0;
             }
         }
     }
     
-    kMultipoles                                            = (double  *) malloc((kBinNumb-1)*sizeof(*kMultipoles));
+    kMultipoles                                            = (double  *) malloc(kBinNumb*sizeof(*kMultipoles));
+
+    ModeNumber                                             = (int     *) malloc(kBinNumb*sizeof(*ModeNumber));
 
     MeanMultipoles                                         = (double **) malloc(hiMultipoleOrder*sizeof(*MeanMultipoles));    
     
-    for(j=0; j<hiMultipoleOrder; j++)  MeanMultipoles[j]   = (double  *) malloc((kBinNumb-1)*sizeof(**MeanMultipoles));
+    for(j=0; j<hiMultipoleOrder; j++)  MeanMultipoles[j]   = (double  *) malloc(kBinNumb*sizeof(**MeanMultipoles));
     
     for(j=0; j<hiMultipoleOrder; j++){
-        for(k=0; k<(kBinNumb-1); k++){
+        for(k=0; k<kBinNumb; k++){
             MeanMultipoles[j][k] = 0.0;
         }
     }
@@ -314,28 +324,29 @@ int assignCovMat(int mockNumber, int kBinNumb, int hiMultipoleOrder){
     // Covariance is an N x N matrix, where N corresponds to hiMultipoleOrder*(kBinNumb-1), here hiMultipoleOrder is due to Mono-Mono, Mono-Quad, Quad-Quad, etc... elements. Here hex-blah elements are 
     // ignored. 
          
-    Covariance                                                      = (double **) malloc(2*(kBinNumb-1)*sizeof(*Covariance));
+    Covariance                                                      = (double **) malloc(2*kBinNumb*sizeof(*Covariance));
     
-    Covariance_CofactorMatrix                                       = (double **) malloc(2*(kBinNumb-1)*sizeof(*Covariance_CofactorMatrix));
+    // Covariance_CofactorMatrix                                    = (double **) malloc(2*(kBinNumb-1)*sizeof(*Covariance_CofactorMatrix));
     
-    for(j=0; j<2*(kBinNumb-1); j++) Covariance[j]                   = (double  *) malloc(2*(kBinNumb-1)*sizeof(**Covariance));
-    for(j=0; j<2*(kBinNumb-1); j++) Covariance_CofactorMatrix[j]    = (double  *) malloc(2*(kBinNumb-1)*sizeof(**Covariance_CofactorMatrix));
+    for(j=0; j<2*kBinNumb; j++) Covariance[j]                       = (double  *) malloc(2*kBinNumb*sizeof(**Covariance));
+    // for(j=0; j<2*(kBinNumb-1); j++) Covariance_CofactorMatrix[j] = (double  *) malloc(2*(kBinNumb-1)*sizeof(**Covariance_CofactorMatrix));
     
-    flatCov     = malloc(2*(kBinNumb-1)*2*(kBinNumb-1)*sizeof(*flatCov));
+    // flatCov     = malloc(2*(kBinNumb-1)*2*(kBinNumb-1)*sizeof(*flatCov));
     
-    for(k=0; k<2*(kBinNumb-1); k++){
-        for(j=0; j<2*(kBinNumb-1); j++){
+    for(k=0; k<2*kBinNumb; k++){
+        for(j=0; j<2*kBinNumb; j++){
             Covariance[j][k]                = 0.0;
-            Covariance_CofactorMatrix[j][k] = 0.0;
+            // Covariance_CofactorMatrix[j][k] = 0.0;
         }
     }
     
-    
+    /*
     invCov      = (double **) malloc(2*(kBinNumb-1)*sizeof(*invCov));
     
     for(j=0; j<2*(kBinNumb-1); j++){
         invCov[j] = malloc(2*(kBinNumb-1)*sizeof(**invCov));
     }
+    */
     
     return 0;
 }

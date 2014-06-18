@@ -168,7 +168,7 @@ W4area                =       8.8;
 TotalW1W4area         =    19.675; 
 
 // Cell size, comoving distance, h^-1 Mpc.
-CellSize              =       2.0;     
+CellSize              =       4.0;     
 // CellSize           =    7.8125;     
 // CellSize           =     5.208;
 
@@ -225,13 +225,13 @@ meanSampling          =       0.4;
 
 // Binning interval for P(k).
 kbinInterval          =      0.01;
-modkMax               =      1.50;
+modkMax               =      0.80;
 muBinNumb             =       100;
 
 // Interval in k^2 for perp k binning of 2D P(k).
 perpkInterval         =      0.02;
 
-wfKernel_minAmp       = pow(10., -8.);
+wfKernel_minAmp       = pow(10., -2.);
 convolution_modkmax   =           0.6;
 
 // Total number of mocks. 
@@ -245,13 +245,7 @@ gsl_rng_env_setup();
 
 gsl_ran_T = gsl_rng_default;
 gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
-
-// Non-linear RSD
-velDispersion             =       2.00;                  // units of h^-1 Mpc rather than 300 km s^-1
-beta                      =       0.54;                  // 2dF measurement, beta = 0.43
-// A11Sq                  =       2.58;
     
-linearBias                =   1.495903;
     
 // Clipping variables. 
 appliedClippingThreshold  =        5.0;    
@@ -267,7 +261,7 @@ comovDistReshiftCalc();
 // Checked.
 VIPERS_SolidAngle     = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
 
-sprintf(surveyType, "HODmocks");
+sprintf(surveyType, "HODmocks_RedshiftSpace_Mesh_%.2f_CicWf", CellSize);
 
 // JenkinsCoordinates();
 
@@ -292,7 +286,7 @@ prepFFTw(n0, n1, n2);
 
 prepFFTbinning();
 
-// assign2DPkMemory();
+assign2DPkMemory();
 
 sprintf(theoryPk_flag, "HOD_-20.0");
 
@@ -328,10 +322,8 @@ for(loopCount=1; loopCount<2; loopCount++){
     // Applied window fn.
     Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
 
-    // Initialsed to zero in header.h
-    TotalSurveyedVolume   = SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2)*CellVolume;
-    
-    printf("\n\nSurveyed volume:  %e", TotalSurveyedVolume/TotalVolume);
+    // Checked.
+    CalcWfCorrections();
     
     // projectVIPERSsystem();
 
@@ -355,9 +347,6 @@ for(loopCount=1; loopCount<2; loopCount++){
     NGPCalc();
     
     // ApplyFKPweights(meanSampling);
-   
-    // Checked.
-    CalcWfCorrections();
 
     cleanFFTbinning();
   

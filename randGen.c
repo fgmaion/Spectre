@@ -20,7 +20,7 @@ int randomGeneration(){
             ylabel                  = (int) floor((rand_y[j] - AxisLimsArray[0][1])/CellSize);
             zlabel                  = (int) floor((rand_z[j] - AxisLimsArray[0][2])/CellSize);
     
-            boxlabel                = (int)                        xlabel + n2*ylabel + n2*n1*zlabel;
+            boxlabel                = (int)                 xlabel + n2*ylabel + n2*n1*zlabel;
     
             /*
             if(Cell_SurveyLimitsMask[boxlabel]  == 0){
@@ -104,7 +104,6 @@ int loadRand(){
     printf("\ny max:  %f \t y min:  %f", arrayMax(rand_y, rand_number), arrayMin(rand_y, rand_number));
     printf("\nz max:  %f \t z min:  %f", arrayMax(rand_z, rand_number), arrayMin(rand_z, rand_number));
     printf("\nr max:  %f \t r min %f",   arrayMax(rand_chi, rand_number), arrayMin(rand_chi, rand_number));
-
     
     for(j=0; j<rand_number; j++){        
         xlabel                  = (int) floor((rand_x[j] - AxisLimsArray[0][0])/CellSize);    
@@ -114,9 +113,15 @@ int loadRand(){
         boxlabel                = (int)                 xlabel + n2*ylabel + n2*n1*zlabel;
     
         if((LowerChiLimit < rand_chi[j]) && (rand_chi[j] < UpperChiLimit)){
-            Cell_SurveyLimitsMask[boxlabel]  += 1.;
-	        accepted_rand                    +=  1;
+            Cell_SurveyLimitsMask[boxlabel]  +=  1.;
+	        accepted_rand                    +=  1.;
 	    }
+    }
+    
+    for(j=0; j<n0*n1*n2; j++){
+        if(Cell_SurveyLimitsMask[j] <=4.){
+            Cell_SurveyLimitsMask[j] = 0.0;
+        }
     }
     
     /*
@@ -129,6 +134,20 @@ int loadRand(){
     }
     */
     
+    /*
+    sprintf(filepath, "%s/Data/RandomsAssigned2Cells_cic.dat", root_dir);
+    
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<n0*n1*n2; j++){  
+        if(Cell_SurveyLimitsMask[j] > 0.0){
+            fprintf(output, "\n %e", Cell_SurveyLimitsMask[j]);
+        }
+    }
+    
+    fclose(output);
+    */
+    
     printf("\n\nAccepted number of randoms:  %d", accepted_rand);
     
     printf("\n\nAccepted co-ordinates. ");
@@ -136,6 +155,11 @@ int loadRand(){
     printf("\ny max:  %f \t y min:  %f", AcceptedMax(rand_y, rand_accept, rand_number), AcceptedMin(rand_y, rand_accept, rand_number));
     printf("\nz max:  %f \t z min:  %f", AcceptedMax(rand_z, rand_accept, rand_number), AcceptedMin(rand_z, rand_accept, rand_number));
     printf("\nr max:  %f \t r min %f",   AcceptedMax(rand_chi, rand_accept, rand_number), AcceptedMin(rand_chi, rand_accept, rand_number));
+    
+    free(rand_x);
+    free(rand_y);
+    free(rand_z);
+    free(rand_chi);
         
     return 0;
 } 

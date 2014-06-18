@@ -56,30 +56,29 @@ int zCubeCreate(){
     printf("\nh(z) at redshift 0.8:  %f", hz);
     
     // Add reshift space distortion in the plane parallel approximation, along the x axis direction. 
-
-    for(j=0; j<Vipers_Num; j++){
-        xCoor[j]                      += (1. + 0.8)*xVel[j]/(100.*hz);
-        
-        if(xCoor[j] > 1000.) xCoor[j] -= 1000.;
-        if(xCoor[j] <    0.) xCoor[j] += 1000.;
-    }
-    
-    sprintf(filepath, "%s/Data/HODCube/zcube_xvel_gal_-20.0.dat", root_dir);
-    
-    
-    double xprime, yprime, zprime;
-    
     /*
-    // along the y axis direction. then relabel to x direction.  
+    for(j=0; j<Vipers_Num; j++){
+        zCoor[j]                      += (1. + 0.8)*zVel[j]/(100.*hz);
+        
+        if(zCoor[j] > 1000.) zCoor[j] -= 1000.;
+        if(zCoor[j] <    0.) zCoor[j] += 1000.;
+    }
+
+    sprintf(filepath, "%s/Data/HODCube/zcube_zvel_gal_-20.0.dat", root_dir);
+
+    */
+    double xprime, yprime, zprime;
+    /*
+    // along the y axis direction. then relabel to z direction.  
     for(j=0; j<Vipers_Num; j++){
         yCoor[j]                      += (1. + 0.8)*yVel[j]/(100.*hz);
         
         if(yCoor[j] > 1000.) yCoor[j] -= 1000.;
         if(yCoor[j] <    0.) yCoor[j] += 1000.;
     
-        xprime                         =   yCoor[j];
-        yprime                         =  -xCoor[j] + 1000.;
-        zprime                         =   zCoor[j];
+        zprime                         =   yCoor[j];
+        yprime                         =  -zCoor[j] + 1000.;
+        xprime                         =   xCoor[j];
     
         xCoor[j]                       =   xprime;
         yCoor[j]                       =   yprime;
@@ -92,17 +91,17 @@ int zCubeCreate(){
     
     sprintf(filepath, "%s/Data/HODCube/zcube_yvel_gal_-20.0.dat", root_dir);
     */
-    /*
-    // along the z axis direction. then relabel to x direction.  
-    for(j=0; j<Vipers_Num; j++){
-        zCoor[j]                      += (1. + 0.8)*zVel[j]/(100.*hz);
-        
-        if(zCoor[j] > 1000.) zCoor[j] -= 1000.;
-        if(zCoor[j] <    0.) zCoor[j] += 1000.;
     
-        xprime                         =   zCoor[j];
+    // along the x axis direction. then relabel to z direction.  
+    for(j=0; j<Vipers_Num; j++){
+        xCoor[j]                      += (1. + 0.8)*xVel[j]/(100.*hz);
+        
+        if(xCoor[j] > 1000.) xCoor[j] -= 1000.;
+        if(xCoor[j] <    0.) xCoor[j] += 1000.;
+    
+        zprime                         =   xCoor[j];
         yprime                         =   yCoor[j];
-        zprime                         =  -xCoor[j] + 1000.;
+        xprime                         =  -zCoor[j] + 1000.;
     
         xCoor[j]                       =   xprime;
         yCoor[j]                       =   yprime;
@@ -113,8 +112,8 @@ int zCubeCreate(){
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
     printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
     
-    sprintf(filepath, "%s/Data/HODCube/zcube_zvel_gal_-20.0.dat", root_dir);
-    */
+    sprintf(filepath, "%s/Data/HODCube/zcube_xvel_gal_-20.0.dat", root_dir);
+    
     
     output = fopen(filepath, "w");
     

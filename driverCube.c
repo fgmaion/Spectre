@@ -41,7 +41,7 @@
 #include "Scripts/FKPweights.c"
 #include "Scripts/Windowfn_PkCorrections.c"
 
-// #include "Scripts/KaiserMultipoles.c"
+#include "Scripts/KaiserMultipoles.c"
 // #include "Scripts/KaiserGaussMultipoles.c"
 #include "Scripts/KaiserLorentzMultipoles.c"
 
@@ -75,12 +75,14 @@
 #include "Scripts/rollCube.c"
 
 #include "Scripts/MultipoleCovariance.c"
+#include "Scripts/Multipoles_EigenVecsCovariance.c"
 #include "Scripts/MultipoleCovariance_Inverse.c"
 #include "Scripts/MultipolesRealisation_MultiVariateGauss.c"
 #include "Scripts/Multipole_minimiseChiSq.c"
 #include "Scripts/Multipole_MarginalisedPosteriors.c"
 #include "Scripts/Multipole_2DPosteriors.c"
 
+#include "Scripts/BootStrap.c"
 #include "Scripts/freeMemory.c"
 
 #include "/disk1/mjw/EisensteinHu/power.c"
@@ -99,32 +101,6 @@ int main(int argc, char **argv){
     // MPI_Comm_size(MPI_COMM_WORLD, &process_number);
 
     // Co-ordinate limits (Volume) defined by the random catalogue. 
-
-    /*
-    subVol1 = subVol2 = subVol3 = subVolCount = 0;
-
-    for(subVol3=1; subVol3<2; subVol3++){        
-        for(subVol2=0; subVol2<2; subVol2++){
-            for(subVol1=0; subVol1<2; subVol1++){
-                // lower_xlimit & upper_xlimit
-                AxisLimsArray[0][0]       =      500.0*subVol1;                                       // h^-1 Mpc
-                AxisLimsArray[1][0]       =      500.0*(subVol1 + 1);                                 // h^-1 Mpc
-
-                // lower_ylimit & upper_ylimit
-                AxisLimsArray[0][1]       =      500.0*subVol2;                                       // h^-1 Mpc
-                AxisLimsArray[1][1]       =      500.0*(subVol2 + 1);                                 // h^-1 Mpc
-
-                // lower_zlimit & upper_zlimit
-                AxisLimsArray[0][2]       =      500.0*subVol3;                                       // h^-1 Mpc
-                AxisLimsArray[1][2]       =      500.0*(subVol3 + 1);                                 // h^-1 Mpc
-        
-                subVolCount               =      subVol1 + 2*subVol2 + 2*2*subVol3;
-                
-                cubeCalc();
-            }
-        }
-    }
-    */
     
     // lower_xlimit & upper_xlimit
     AxisLimsArray[0][0]       =        0.0;                                 // h^-1 Mpc
@@ -138,16 +114,7 @@ int main(int argc, char **argv){
     AxisLimsArray[0][2]       =        0.0;                                 // h^-1 Mpc
     AxisLimsArray[1][2]       =      1000.;                                 // h^-1 Mpc
                 
-    cubeCalc();
-    
-    printf("\n\n");
-
-    return 0; 
-}
-
-
-int cubeCalc(){
-    CellSize                  =         4.0;                                               // Cell size, comoving distance, h^-1 Mpc
+    CellSize                  =        4.0;                                 // Cell size, comoving distance, h^-1 Mpc
 
     // Selection parameters. Mag 20.0 galaxies at redshift 0.8;
     redshiftLowLimit          =       0.795;
@@ -162,39 +129,39 @@ int cubeCalc(){
 
     // Binning interval for P(k).
     kbinInterval              =       0.01;
-    modkMax                   =        0.8;
+    modkMax                   =        1.2;
     muBinNumb                 =         50;
 
     gsl_rng_env_setup();
 
     gsl_ran_T                 = gsl_rng_default;
     gsl_ran_r                 = gsl_rng_alloc(gsl_ran_T);
-        
-    // Translate cube to boot strap slice samples.
-    // xtranslateDist         =      120.0;
-    // ytranslateDist         =      120.0;
     
     // Non-linear RSD
-    beta                      =       0.56;                  // 2dF measurement, beta = 0.43
-    velDispersion             =       3.93;                  // units of h^-1 Mpc rather than 300 km s^-1
-    A11Sq                     =       0.20;
+    beta                      =       0.493;                  // beta = 0.542
+    velDispersion             =       2.53;                   // units of h^-1 Mpc rather than 300 km s^-1
+    A11Sq                     =       0.567;
     
     // Priors on the model params.
-    min_beta                  =      0.40;
-    max_beta                  =      0.60;
+    min_beta                  =      0.45;
+    max_beta                  =      0.55;
 
     min_velDisperse           =       2.0;
     max_velDisperse           =       4.0;
  
-    min_A11Sq                 =      0.99;
-    max_A11Sq                 =      1.01;
+    // down weight theory. 
+    min_A11Sq                 =       0.9999999;
+    max_A11Sq                 =       1.0000001;
 
     // Resolution of the Likelihood evaluation [voxel number].
      Res                      =        30;
     dRes                      =      30.0;
     
-    ChiSqEval_kmax            =       0.1; 
     ChiSqEval_kmin            =      0.02;
+    ChiSqEval_kmax            =      0.40; 
+    
+    // Fit solely the monopole (1) or both mono and Quad (2).
+    hiMultipoleOrder          =         2;
     
     /* linearBias.txt in dir. /HODTheoryPk/
     -22.0  2.924277
@@ -211,7 +178,7 @@ int cubeCalc(){
     linearBias                =   1.495903;
     
     // Clipping variables. 
-    appliedClippingThreshold  =        1.5;    
+    appliedClippingThreshold  =     1000.0;    
     // linearBias             = sqrt(2.90);
     
     // zCubeCreate();
@@ -239,10 +206,12 @@ int cubeCalc(){
     // AnisoGauss(20., 30., 40.);
     
     Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
+    
+    CalcCellraDec();
 
     // TotalSurveyedVolume initialised to zero in header.h
     TotalSurveyedVolume   = SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2)*CellVolume;
-
+    
     prepFFTw(n0, n1, n2);
     
     prepFFTbinning();
@@ -250,56 +219,70 @@ int cubeCalc(){
     assign2DPkMemory();                
     
     // Choice of real or redshift space, zcube or cube. 
-    sprintf(filepath, "%s/Data/HODCube/zcube_xvel_gal_-20.0.dat", root_dir);                                                                                         
-    CoordinateCalcCube(filepath);  
+    // sprintf(filepath, "%s/Data/HODCube/zcube_zvel_gal_-20.0.dat", root_dir);       
+                                                                                     
+    // CoordinateCalcCube(filepath);  
     
-    // Mean number density is the same when boot strapping. 
-    pt2nz = &CubeMeanNumberDensity;
-    
-    sprintf(theoryPk_flag, "HOD_-20.0");
-
     inputHODPk();
     
-    pt2Pk   = &splintHODpk;
-/*
-    pt2shot = &CubeShot;
- 
     // inputLinearPk();
-    // pt2Pk = &splintLinearPk;
     
-    sprintf(surveyType, "zCube_xvel_clipThreshold_%.1e_fullCube", appliedClippingThreshold);
+    setLorentzianRSD();
+    
+    // setGaussianRSD();
+
+    pt2shot = &CubeShot;
+    
+    // Mean number density is the same when boot strapping. 
+    pt2nz   = &CubeMeanNumberDensity;
     
     // Currently all galaxies accepted. 
+    /*
     assignAcceptanceCube();
-
+    
     CleanNGP();
-
+    */
+    sprintf(surveyType, "zCube_xvel_BootStrap_clipThreshold_%.1e_fullCube", appliedClippingThreshold);
+    /*
     NGPCalcCube();
 	    
 	clipDensity(appliedClippingThreshold);
+       
+    prepBootStrap(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
+       
+    for(loopCount=0; loopCount<100; loopCount++){
+        sprintf(surveyType, "zCube_xvel_clipThreshold_%.1e_fullCube", appliedClippingThreshold);
+    
+    	BootStrapGen(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
                 
-    CalcWfCorrections();
+        CalcWfCorrections();
             
-    cleanFFTbinning();
+        cleanFFTbinning();
     
-    PkCalc();
+        PkCalc();
+    }
     */
-    
     // wfPkCalc();
     
     // kaiser_nonlinearSuppression_Multipoles();
     
-    // LikelihoodMemory();
+    LikelihoodMemory();
     
-    // CovarianceMatrix(8,  80, 2);
+    CovarianceMatrix(100);
+        
+    CovarianceEigenVecs();
     
-    // CovarianceInverse(80);
+    // ClippingModelling();
+    
+    // formPkCube();
 
-    // multipolesRealisation(80);
+    // clipCorrfn();
 
-    // minimiseChiSq(80);
+    multipolesRealisation();
     
-    // Calc_betaPosterior();
+    minimiseChiSq();
+    
+    Calc_betaPosterior();
 
     // Calc_sigmaPosterior();
 
@@ -308,12 +291,6 @@ int cubeCalc(){
     // ConfidenceLimits_2D();
     
     // assign2DPkMemory();
-    
-    // ClippingModelling();
-    
-    // formPkCube();
-
-    // clipCorrfn();
 
     // InvErrorfnTest();
 
@@ -329,6 +306,8 @@ int cubeCalc(){
     // MockAvgMultipole(26);
     
     // growthfactor_derivative();
+    
+    printf("\n\n");
 
     return 0;
 }
