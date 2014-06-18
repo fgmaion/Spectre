@@ -15,7 +15,7 @@ double minAmp_ConvolveCell(int x, int y, int z){
         mu                                 = k_x/kmodulus;
         if(kmodulus < 0.000001)       mu   = 0.0;  
 	
-	    Interim        += windowFunc3D[k]*(*pt2Pk)(kmodulus)*pow(1. + beta*mu*mu, 2.)/TotalVolume;
+	    Interim        += windowFunc3D[k]*pow(1. + beta*mu*mu, 2.)*(*pt2Pk)(kmodulus)/TotalVolume;
 	}
 
 	return Interim/ConvNorm;

@@ -47,7 +47,7 @@ int wfPkCalc(){
     
     printf("\nFFT complete.");
     
-    printWindowfuncSlices();
+    // printWindowfuncSlices();
     
     // char xaxis = 'x';
     // char yaxis = 'y';
@@ -61,19 +61,41 @@ int wfPkCalc(){
     // WfSlice1D(5000, rand_z, 2, zaxis);
 
     // 0: Subtract shot noise for a real survey, 1: Neglect shot noise subtraction for FFT of window function. 
-    // PkCorrections(1);
+    PkCorrections(1);
+    
+    /*
+    for(j=0; j<n0*n1*n2; j++){  
+        k_x = kIntervalx*i;
+        k_y = kIntervaly*j;
+        k_z = kIntervalz*k;
 
-    // PkBinningCalc(n0*n1*n2, PkArray);
+        if(k_x>NyquistWaveNumber)  k_x    -= n2*kIntervalx;
+        if(k_y>NyquistWaveNumber)  k_y    -= n1*kIntervaly;
+        if(k_z>NyquistWaveNumber)  k_z    -= n0*kIntervalz;
+
+        kSq                                = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
+                
+        kmodulus                           = pow(pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.), 0.5);
+
+        if(kmodulus < 0.25*NyquistWaveNumber){
+            SumOverStates_W2k += PkArray[j][1];
+        }
+    }
+    */
     
-    // sprintf(filepath, "%s/Data/WindowfuncSpherical/midK_W2q_%s.dat", root_dir, surveyType);
+    printf("\nSum over states of W2k: %e", SumOverStates_W2k);
+
+    PkBinningCalc(n0*n1*n2, PkArray);
     
-    // output = fopen(filepath, "w");
+    sprintf(filepath, "%s/Data/WindowfuncSpherical/midK_W2q_%s.dat", root_dir, surveyType);
     
-    // for(j=0; j<kBinNumb-1; j++)  fprintf(output, "%e \t %e\n", meanKBin[j], binnedPk[j]);
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<kBinNumb-1; j++)  fprintf(output, "%e \t %e\n", meanKBin[j], binnedPk[j]);
 
     // printf("\nWindow function P(k) calculation complete.");
     
-    // fclose(output);
+    fclose(output);
     
     return 0;
 }

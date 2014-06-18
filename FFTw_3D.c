@@ -2,7 +2,7 @@ int PkCalc(){
     printf("\n\nAssigning FFT in array.");
     
     // The true density field multiplied by a mask, W(x). 
-    for(j=0; j<n0*n1*n2; j++) in[j][0] = densityArray[j]*Cell_AppliedWindowFn[j];
+    for(j=0; j<n0*n1*n2; j++) in[j][0] = densityArray[j]*Cell_AppliedWindowFn[j]*BootStrap_Wght[j];
     
     for(j=0; j<n0*n1*n2; j++) in[j][1] = 0.0;
     
@@ -20,7 +20,7 @@ int PkCalc(){
     
     Monopole(filepath);
 
-    // observedQuadrupole();
+    observedQuadrupole(polarPk_modeCount);
     
     // sprintf(filepath, "%s/Data/Multipoles/Cartesian2Dpk_%s_%.3f_%d.dat", root_dir, surveyType, kbinInterval, loopCount);
     
@@ -46,7 +46,8 @@ int Monopole(char filepath[]){
 
     output = fopen(filepath, "w");
     
-    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%e \t %e \t %e \t %d \t %e \t %e\n", meanKBin[j], del2[j], TotalVolume*binnedPk[j], modesPerBin[j], linearErrors[j], (*pt2Pk)(meanKBin[j]));
+    // Only half the modes are independent. 
+    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%e \t %e \t %e \t %d \t %e \t %e\n", meanKBin[j], del2[j], TotalVolume*binnedPk[j], modesPerBin[j]/2, linearErrors[j], (*pt2Pk)(meanKBin[j]));
 
     fclose(output);
 
@@ -57,9 +58,12 @@ int Monopole(char filepath[]){
 int observedQuadrupole(int modeCount){
     // sprintf(filepath, "%s/Data/Multipoles/Polar2Dpk_%s_%.3f_%d.dat", root_dir, surveyType, kbinInterval, loopCount);
 
-    polar2DpkBinning(filepath, modeCount);
+    polar2DpkBinning(modeCount);
+    
+    if(loopCount<10)  sprintf(filepath, "%s/Data/Multipoles/Multipoles_%s_kbin_%.3f_00%d.dat", root_dir,  surveyType, kbinInterval, loopCount);
+    else              sprintf(filepath, "%s/Data/Multipoles/Multipoles_%s_kbin_%.3f_0%d.dat", root_dir, surveyType, kbinInterval, loopCount);
 
-    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, modeCount);
+    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, modeCount, filepath);
   
     // HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, modesPerBin, polar2Dpk);
 
@@ -91,7 +95,7 @@ int Cartesian2Dpk(char filepath[]){
 }
 
 
-int polar2DpkBinning(char filepath[], int modeCount){
+int polar2DpkBinning(int modeCount){
     for(j=0; j<kBinNumb;  j++)        kBinLimits[j]  =                     kbinInterval*(j+1);
     for(j=0; j<muBinNumb; j++)       muBinLimits[j]  =   (1.0/(double) (muBinNumb - 1))*(j+1);
 
@@ -127,7 +131,7 @@ double legendrePolynomials(int Order, double mu){
 }
 
 
-int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQuadrupole[], int ModesPerBin[], double** Array, int modeCount){
+int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQuadrupole[], int ModesPerBin[], double** Array, int modeCount, char filepath[]){
     // monopole     factor:        1. + (2./3.)*beta + 0.2*beta*beta;
     // quadrupole   factor:    (4./3.)*beta + (4./7.)*beta**2 = 0.68;
     // hexadecapole factor:   (8./35.)*beta*beta); 
@@ -154,9 +158,6 @@ int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQ
         ModesPerBin[k] =   0;
     }
     
-    if(loopCount<10)  sprintf(filepath, "%s/Data/Multipoles/Multipoles_%s_kbin_%.3f_00%d.dat", root_dir,  surveyType, kbinInterval, loopCount);
-    else              sprintf(filepath, "%s/Data/Multipoles/Multipoles_%s__kbin_%.3f_0%d.dat", root_dir, surveyType, kbinInterval, loopCount);
-
     output = fopen(filepath, "w");
     
     for(i=0; i<modeCount; i++){
@@ -391,6 +392,8 @@ float Chi2(float Chi){
 
 
 int PkCorrections(int WindowFuncParam){
+    polarPk_modeCount = 0;
+
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
@@ -408,7 +411,7 @@ int PkCorrections(int WindowFuncParam){
                 
                 kmodulus                           = pow(pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.), 0.5);
                 
-                mu                                 = k_x/kmodulus;
+                mu                                 = k_z/kmodulus;
                 if(kmodulus < 0.000001)       mu   = 0.0;      
                 
                 GaussianFilter                     = exp(-1.*kSq*0.5*(pow(1., 2.)));
@@ -428,19 +431,22 @@ int PkCorrections(int WindowFuncParam){
                 H_kImag                            = pow(n0*n1*n2, -1.0)*out[Index][1];
 
                 // Cloud in cell. NGP corresponds to WindowFunc rather than WindowFunc^2.
+                
                 H_kReal                           /= pow(WindowFunc, 2.);
                 H_kImag                           /= pow(WindowFunc, 2.);
-
+                
                 PkArray[Index][0]                  = pow(kSq, 0.5);
 				
 				// Subtract shot noise contribution for a real survey.  Neglect this for window function calculation.  FKP corrections. 
 				if(WindowFuncParam == 0){
 				    PkArray[Index][1]              = pow(H_kReal, 2.) + pow(H_kImag, 2.);
-				    
+				
+				        
 				    // The true density field is multiplied by a mask, correct for this with the measured P(k).
                     PkArray[Index][1]             *= TotalVolume*pow(fkpSqWeightsVolume, -1.);
                     
-                    PkArray[Index][1]             -= (1./TotalVolume)*(*pt2shot)(1.);
+                    // Clipping corrected shot noise estimate. 
+                    PkArray[Index][1]             -= (1./TotalVolume)*(*pt2shot)(1.)*(1. - clippedVolume/TotalVolume);
                  }
                 
                 // PkCorrections called to correct NGP for survey window function.
@@ -448,7 +454,6 @@ int PkCorrections(int WindowFuncParam){
                     PkArray[Index][1]              = pow(H_kReal, 2.) + pow(H_kImag, 2.);
 	            }
 	            
-	            /*
 	            if(kmodulus > 0.000001){	            
 		            // Issue with mu for a zeroth length vector being ill defined. 
 		            polar2Dpk[polarPk_modeCount][0]    = kmodulus;
@@ -457,17 +462,114 @@ int PkCorrections(int WindowFuncParam){
 		            
 		            // printf("\n%e \t %e \t %e \t %e \t %e", k_x, k_y, k_z, kmodulus, fabs(mu));
 		            
-		            // TwoDpkArray[Index][0]           = fabs(k_x);                      // Line of sight wavevector. 
-	                // TwoDpkArray[Index][1]           = pow(k_y*k_y + k_z*k_z, 0.5);    // perpendicular wavevector.
-                    // TwoDpkArray[Index][2]           = PkArray[Index][1];
+		            TwoDpkArray[Index][0]              = fabs(k_z);                      // Line of sight wavevector. 
+	                TwoDpkArray[Index][1]              = pow(k_y*k_y + k_x*k_x, 0.5);    // perpendicular wavevector.
+                    TwoDpkArray[Index][2]              = PkArray[Index][1];
                     
                     polarPk_modeCount                 += 1;
 	            }
-	            */
 	        }
         }
     }
     
+    return 0;
+}
+
+
+int Gaussianfield(){
+    int m0, m1, m2;
+    
+    double Power, amplitude, phase, expectation; 
+    
+    for(k=0; k<n0; k++){
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+                m0 = k;
+                m1 = j;
+                m2 = i;
+
+                if(m2>n2/2)  m2                   -= n2;
+                if(m1>n1/2)  m1                   -= n1;
+                if(m0>n0/2)  m0                   -= n0;
+                
+                k_x = kIntervalx*m2;
+                k_y = kIntervaly*m1;
+                k_z = kIntervalz*m0;
+                
+                Index                              = k*n1*n2 + j*n2 + i;
+                
+                kSq                                = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
+                
+                kmodulus                           = pow(pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.), 0.5);
+
+                                                                                    // shot noise contribution. 
+                expectation                        = (*pt2Pk)(kmodulus)/TotalVolume  + (1./TotalVolume)*(*pt2shot)(1.);
+
+                Power                              = -log(gsl_rng_uniform(gsl_ran_r))*expectation;
+                
+                amplitude                          = sqrt(Power);
+                
+                phase                              = 2.*pi*gsl_rng_uniform(gsl_ran_r);
+                
+                // purely real.
+                if(k_x == NyquistWaveNumber) phase = 0.0;
+                if(k_y == NyquistWaveNumber) phase = 0.0;
+                if(k_z == NyquistWaveNumber) phase = 0.0;
+                
+                // printf("\n%le %le \t %le \t %le \t %le", kmodulus, (*pt2Pk)(kmodulus), Power, amplitude, phase);
+                
+                // Assuming Cic assignment scheme
+                out[Index][0]                      = amplitude*cos(phase)*pow(n0*n1*n2, 1.);
+                out[Index][1]                      = amplitude*sin(phase)*pow(n0*n1*n2, 1.);
+                
+                WindowFunc                         = 1.;
+
+                if(k_x != 0.){
+		            WindowFunc                    *= sin(pi*k_x*0.5/NyquistWaveNumber)/(pi*k_x*0.5/NyquistWaveNumber);}
+                
+                if(k_y != 0.){
+		            WindowFunc                    *= sin(pi*k_y*0.5/NyquistWaveNumber)/(pi*k_y*0.5/NyquistWaveNumber);}
+                
+                if(k_z != 0.){
+		            WindowFunc                    *= sin(pi*k_z*0.5/NyquistWaveNumber)/(pi*k_z*0.5/NyquistWaveNumber);}		      
+	        
+	            out[Index][0]                     *= pow(WindowFunc, 2.);
+	        	out[Index][1]                     *= pow(WindowFunc, 2.);
+	        }
+        }
+    }
+    
+    // Zero mean. 
+    out[0][0] = 0.0;
+    out[0][1] = 0.0;
+    
+    int negkIndex, blah;
+            
+    // Hermitian condition. 
+    for(k=0; k<n0/2 +1; k++){
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+                Index     = k*n1*n2 + j*n2 + i;
+                       
+                negkIndex = 0;
+                     
+                if(i != 0) negkIndex += (n2-i); 
+                if(j != 0) negkIndex += (n1-j)*n2; 
+                if(k != 0) negkIndex += (n0-k)*n1*n2; 
+
+                out[negkIndex][0] =     out[Index][0];
+                out[negkIndex][1] = -1.*out[Index][1];
+            }
+        }
+    }
+    
+    
+    fftw_execute(iplan);
+    
+    for(j=0; j<n0*n2*n1; j++) densityArray[j] = pow(n0*n1*n2, -1.)*in[j][0];
+    
+    printf("\n\ndensity array: \n\n");
+ 
     return 0;
 }
 

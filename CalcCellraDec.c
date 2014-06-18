@@ -23,8 +23,8 @@ int CalcCellraDec(){
     }
     
     // Convert these co-ordinates to the Celestial basis, for Window func application, Wf(ra, dec). 
-    Celestialbasis(CentreRA, CentreDec, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, n0*n1*n2);
-
+    // Celestialbasis(CentreRA, CentreDec, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, n0*n1*n2);
+    /*
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
@@ -73,7 +73,7 @@ int CalcCellraDec(){
     fwrite(Cell_decVIPERSsystem, sizeof(double), n0*n1*n2, output);
     fclose(output);
 
-    /* // Read in the VIPERS weights. 
+    // Read in the VIPERS weights. 
     
     sprintf(filepath, "%s/Data/ra_decCells/ra_dec_wght.dat", root_dir);
     inputfile = fopen(filepath, "rb");
@@ -89,7 +89,7 @@ int CalcCellraDec(){
     }
     
     fclose(inputfile);
-    */
+    
     
     
     // VIPERS parent geometry.
@@ -100,7 +100,7 @@ int CalcCellraDec(){
     }
     
     // Cuboid geometry, simple test. 
-     /*for(k=0; k<n0; k++){
+    for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
 	           xCell      = AxisLimsArray[0][0] + CellSize*(i+0.5);
@@ -115,9 +115,9 @@ int CalcCellraDec(){
             }
         }
     }
-    */
+    
     projectVIPERSsystem();
-
+    */
     return 0;
 }
 

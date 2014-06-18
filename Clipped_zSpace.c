@@ -1,7 +1,9 @@
 int clipDensity(double threshold){
     int    CellsClipped =  0;
 
-    printf("\n\nMax overdensity: %e", arrayMax(densityArray, n0*n1*n2));
+    printf("\n\nClipping threshold: %e", appliedClippingThreshold);
+
+    printf("\nMax overdensity: %f", arrayMax(densityArray, n0*n1*n2));
 
     for(j=0; j<n0*n1*n2; j++){
         if(densityArray[j] > threshold){ 
@@ -11,11 +13,9 @@ int clipDensity(double threshold){
         }
     }
 
-    double clippedVolume;
-
     clippedVolume = CellVolume*CellsClipped;
 
-    printf("\nClipped volume: %e", clippedVolume/TotalVolume);
+    printf("\nUnclipped volume: %e", 1. - clippedVolume/TotalVolume);
     
     return 0;
 }
@@ -38,6 +38,10 @@ int inputHODPk(){
     fclose(inputfile);
 
     spline(sdltk, sdltPk, 469, 1.0e31, 1.0e31, sdlt2d);
+    
+    pt2Pk   = &splintHODpk;
+    
+    sprintf(theoryPk_flag, "HOD_-20.0");
    
     return 0;
 }
@@ -62,6 +66,11 @@ int inputLinearPk(){
     fclose(inputfile); 
     
     spline(lineark, linearPk, 469, 1.0e31, 1.0e31, linear2d);
+    
+
+    pt2Pk = &splintLinearPk;
+    
+    sprintf(theoryPk_flag, "linear_-20.0");
     
     return 0;
 }
@@ -183,6 +192,8 @@ int clipCorrfn(){
     
     u0       = inverse_erf(2.*sqrt(A11Sq) -1.);
     
+    printf("\n\nu0:  %e", u0);
+    
     for(j=0; j<n0*n1*n2; j++) suppressedCorrfn[j]      = 0.25*pow(1.0 + gsl_sf_erf(u0), 2.)*Corrfn[j]; 
     for(j=0; j<n0*n1*n2; j++) distortedCorrfn[j]       = suppressedCorrfn[j]; 
     
@@ -203,14 +214,32 @@ int clipCorrfn(){
 
     printf("\n\nClipped P(k).");
     
-    ClippedMonopole();
+    ClippedMultipole();
    
     return 0;    
 }
 
 
-int ClippedMonopole(){
-    int modeCount = 0;
+double splint_kMonopole(double k){
+    float Interim;
+    
+    splint(f_meanKBin, f_kMonopole, f_kMonopole2d, kBinNumb-2, (float) k, &Interim);
+
+    return (double) Interim*TotalVolume;
+}
+
+
+double splint_kQuadrupole(double k){
+    float Interim;
+    
+    splint(f_meanKBin, f_kQuadrupole, f_kQuadrupole2d, kBinNumb-2, (float) k, &Interim);
+    
+    return (double) Interim*TotalVolume;
+}
+
+
+int ClippedMultipole(){
+    polarPk_modeCount = 0;
 
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
@@ -227,31 +256,42 @@ int ClippedMonopole(){
 
                 kSq                                = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
                 
-                kmodulus                           = pow(pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.), 0.5);
-
-                PkArray[Index][0]                  = kmodulus;
-                PkArray[Index][1]                  = clippedPk[modeCount];
+                kmodulus                           = pow(kSq, 0.5);
                 
-                modeCount                         += 1;
+                mu                                 = k_x/kmodulus;
+                if(kmodulus < 0.000001)       mu   = 0.0;  
+
+                if(kmodulus > 0.000001){	            
+		            // Issue with mu for a zeroth length vector being ill defined. 
+		            polar2Dpk[polarPk_modeCount][0]    = kmodulus;
+		            polar2Dpk[polarPk_modeCount][1]    = fabs(mu);
+		            polar2Dpk[polarPk_modeCount][2]    = clippedPk[Index];
+
+                    // printf("\n%e \t %e \t %e", kmodulus, fabs(mu), clippedPk[Index]);
+
+                    polarPk_modeCount                 += 1;
+	            }
             }
         }
     }
     
-    double u0;
+    polar2DpkBinning(polarPk_modeCount);
     
-    u0       = inverse_erf(2.*sqrt(A11Sq) -1.);
-    
-    printf("\nu0:  %.2f", u0);
-    
-    PkBinningCalc(n0*n1*n2, PkArray);
-    
-    sprintf(filepath, "%s/Data/ClippedPk/Distorted/KaiserLorentzian_monopole_kInterval_%.2f_beta_%.2f_velDispersion_%.2f_u0_%.2f.dat", root_dir, kbinInterval, beta, velDispersion, u0);
+    sprintf(filepath, "%s/Data/Multipoles/Multipoles_clipped_%s_beta_%.2f_sigma_%.2f_kbin_%.3f.dat", root_dir, theoryPk_flag, beta, velDispersion, kbinInterval);
 
-    output = fopen(filepath, "w");
+    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, polarPk_modeCount, filepath);
     
-    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%e \t %e \t %e \t %d \t %e \t %e \t %e\n", meanKBin[j], del2[j], TotalVolume*binnedPk[j], modesPerBin[j], linearErrors[j], (*pt2Pk)(meanKBin[j])*kaiserLorentz_Monofactor(meanKBin[j]*velDispersion, beta), 0.25*pow(1.0 + gsl_sf_erf(u0), 2.)*(*pt2Pk)(meanKBin[j])*kaiserLorentz_Monofactor(meanKBin[j]*velDispersion, beta));
-
-    fclose(output);   
+    for(j=0; j<kBinNumb; j++){
+        f_meanKBin[j]    = (float)  meanKBin[j];
+    
+        f_kMonopole[j]   = (float)  kMonopole[j];
+        
+        f_kQuadrupole[j] = (float) kQuadrupole[j];
+    }  
+    
+    spline(f_meanKBin, f_kMonopole,   kBinNumb-2, 1.0e31, 1.0e31, f_kMonopole2d);
+    
+    spline(f_meanKBin, f_kQuadrupole, kBinNumb-2, 1.0e31, 1.0e31, f_kQuadrupole2d);
 
     return 0;
 }

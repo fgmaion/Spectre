@@ -85,6 +85,15 @@ double kaiserGauss_multipole(double ks, double beta, int monoQuad){
 }
 
 
+int setGaussianRSD(){
+    pt2RSD  = &kaiserGauss_multipole;
+    
+    sprintf(theoryRSD_flag, "GaussianRSD");
+
+    return 0;
+}
+
+
 // Print model to file. 
 int kaiser_nonlinearSuppression_Multipoles(){
     double waveNumber    = 0.0;

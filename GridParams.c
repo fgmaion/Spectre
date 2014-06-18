@@ -13,6 +13,8 @@ int EvaluateGridParameters(){
 
     CellVolume            = pow(CellSize, 3);                                         // h^-3 Mpc^3
     TotalVolume           = n0*n1*n2*CellVolume;                                      // h^-3 Mpc^3
+    
+    clippedVolume         = 0.0;
 
     LowerChiLimit         = interp_comovingDistance(redshiftLowLimit);
     UpperChiLimit         = interp_comovingDistance(redshiftHiLimit);
