@@ -3,6 +3,8 @@ int prepBootStrap(int objectNumber, double* xVal, double* yVal, double* zVal, do
     BootStrap_Wght = realloc(BootStrap_Wght, objectNumber*sizeof(double));
 
     for(j=0; j<objectNumber; j++)  BootStrap_flag[j] = SubVolAssign(xVal[j], yVal[j], zVal[j], CubeSize);
+    
+    for(j=0; j<objectNumber; j++)  BootStrap_Wght[j] = 1.0;
 
     return 0;
 }
@@ -73,8 +75,7 @@ int BootStrapGen(int objectNumber, double* xVal, double* yVal, double* zVal, dou
         // Note due to sample/Cosmic variance number of galaxies in boot strap catalogue need not match number
         // in input catalogue.
     }
-    
-    
+
     // Re-assignment of number of galaxies in original catalogue to number in boot strap catalogue.
     /*
     objectNumber = BootStrap_Count;

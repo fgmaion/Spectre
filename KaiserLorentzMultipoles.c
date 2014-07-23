@@ -51,7 +51,6 @@ double muOrderEight(double ks){
 }
 
 
-
 // Multipoles for the Kaiser-Lorentz redshift space distortion model.
 
 double kaiserLorentz_Monofactor(double ks, double beta){
@@ -70,14 +69,14 @@ double kaiserLorentz_Hexfactor(double ks, double beta){
 
 
 double kaiserLorentz_multipole(double ks, double beta, int monoQuad){
-    // Mono, L_0 corresponds to 0. Quad, L_2 corresponds to 1.
+    // Mono, L_0 corresponds to 0. Quad, L_2 corresponds to 2.  Hex, L_4 corresponds to 4.
     
     switch(monoQuad){
         case 0:
             return kaiserLorentz_Monofactor(ks, beta);
-        case 1:
-            return kaiserLorentz_Quadfactor(ks, beta);
         case 2:
+            return kaiserLorentz_Quadfactor(ks, beta);
+        case 4:
             return kaiserLorentz_Hexfactor(ks, beta);
     }
 }

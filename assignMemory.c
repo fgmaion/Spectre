@@ -355,10 +355,10 @@ int assignCovMat(int mockNumber, int kBinNumb, int hiMultipoleOrder){
 int ClippingModelling(){
     PkCube             = (double *) realloc(PkCube,          n0*n1*n2*sizeof(*PkCube));
     
-    Corrfn            = (double *) realloc(Corrfn,             n0*n1*n2*sizeof(*Corrfn));
-    suppressedCorrfn  = (double *) realloc(suppressedCorrfn,   n0*n1*n2*sizeof(*suppressedCorrfn));
-    distortedCorrfn   = (double *) realloc(distortedCorrfn,    n0*n1*n2*sizeof(*distortedCorrfn));
-    clippedPk         = (double *) realloc(clippedPk,          n0*n1*n2*sizeof(*clippedPk));
+    Corrfn            = (double *)  realloc(Corrfn,             n0*n1*n2*sizeof(*Corrfn));
+    suppressedCorrfn  = (double *)  realloc(suppressedCorrfn,   n0*n1*n2*sizeof(*suppressedCorrfn));
+    distortedCorrfn   = (double *)  realloc(distortedCorrfn,    n0*n1*n2*sizeof(*distortedCorrfn));
+    clippedPk         = (double *)  realloc(clippedPk,          n0*n1*n2*sizeof(*clippedPk));
 
     return 0;
 }

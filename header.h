@@ -819,3 +819,30 @@ int     chiSq_kmaxIndex;
 
 int     hiMultipoleOrder;
 int     lineNo;
+
+float   (*pt2_pkIntegrand)(float);
+
+int     besseltransform_order;
+float   q0;
+
+double Pk_powerlaw(double k, double r0, double gamma);
+
+
+double* mono;
+double* quad;
+double*  hex;
+
+double* monop;
+double* quadp;
+double*  hexp;
+
+double*  cmono;
+double* cmonop;
+
+float* rVals;
+float* fcmono;
+float* fcmono2D;
+
+int    FFTlogRes;
+
+double splint_cmono(double r);

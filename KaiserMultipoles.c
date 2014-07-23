@@ -14,6 +14,28 @@ double kaiser_Hexfactor(double k, double beta){
     return (8./35.)*beta*beta;
 }
 
+
+double kaiser_multipole(double k, double beta, int monoQuad){
+    // Mono, L_0 corresponds to 0. Quad, L_2 corresponds to 2, Hex, L_4 corresponds to 4.
+    
+    switch(monoQuad){
+        case 0:
+            return kaiser_Monofactor(k, beta);
+        case 2:
+            return kaiser_Quadfactor(k, beta);
+        case 4:
+            return kaiser_Hexfactor(k, beta);
+    }
+}
+
+int setKaiserRSD(){
+    pt2RSD  = &kaiser_multipole;
+    
+    sprintf(theoryRSD_flag, "KaiserRSD");
+
+    return 0;
+}
+
 // Print model to file. 
 
 int kaiser_Multipoles(){

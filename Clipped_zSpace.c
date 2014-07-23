@@ -1,12 +1,12 @@
 int clipDensity(double threshold){
     int    CellsClipped =  0;
 
-    printf("\n\nClipping threshold: %e", appliedClippingThreshold);
+    printf("\n\nClipping threshold: %e",    appliedClippingThreshold);
 
     printf("\nMax overdensity: %f", arrayMax(densityArray, n0*n1*n2));
 
     for(j=0; j<n0*n1*n2; j++){
-        if(densityArray[j] > threshold){ 
+        if(densityArray[j]  > threshold){ 
 	        densityArray[j] = threshold;
 	        
 		    CellsClipped   += 1; 
@@ -101,12 +101,14 @@ int formPkCube(){
                 Index                              = k*n1*n2 + j*n2 + i;
 
                 kmodulus                           = pow(pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.), 0.5);
+                
+                mu                                 = k_z/(double) kmodulus;
+                
+                if(kmodulus == 0.0)          mu    = 0.0;  
 
-		        PkCube[Index]                      = (*pt2Pk)(kmodulus);
-  
-                // Convert from CAMB units for P(k), [P_CAMB] = Volume, to [P(k)] dimensionless.
+		        PkCube[Index]                      = Pk_powerlaw(kmodulus, 5., 1.8);         // Convert from CAMB units for P(k), [P_CAMB] = Volume, to [P(k)] dimensionless.
                 PkCube[Index]                     *= 1.0/TotalVolume;
-
+                
                 // Impose spherical filter to calculate sigma_8.
                 /*
                 y                                  = kmodulus*8.;  
@@ -115,28 +117,35 @@ int formPkCube(){
                     PkCube[Index]                 *= 3.*pow(y, -3.)*(sin(y) - y*cos(y));
                     PkCube[Index]                 *= 3.*pow(y, -3.)*(sin(y) - y*cos(y));
                 }
-                */
+                */    
                 
-                mu                                 = k_x/(double) kmodulus;
-                
-                if(kmodulus == 0.0)          mu   = 0.0;      
-                
-                kaiserFactor                       = pow(1. + beta*mu*mu, 2.);
-                
-                PkCube[Index]                     *= kaiserFactor;
+                PkCube[Index]                     *= pow(1. + beta*mu*mu, 2.);
                 
                 // Lorentzian factor for non-linear redshift space distortions. 
-                PkCube[Index]                     /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
+                // PkCube[Index]                     /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
+                
+                WindowFunc                         = 1.;
+
+                if(k_x != 0.){
+		            WindowFunc                    *= sin(pi*k_x*0.5/NyquistWaveNumber)/(pi*k_x*0.5/NyquistWaveNumber);}
+                
+                if(k_y != 0.){
+		            WindowFunc                    *= sin(pi*k_y*0.5/NyquistWaveNumber)/(pi*k_y*0.5/NyquistWaveNumber);}
+                
+                if(k_z != 0.){
+		            WindowFunc                    *= sin(pi*k_z*0.5/NyquistWaveNumber)/(pi*k_z*0.5/NyquistWaveNumber);}		      
+	        
+	            PkCube[Index]                     *= pow(WindowFunc, 2.);
+	        	PkCube[Index]                     *= pow(WindowFunc, 2.);
                 
                 // Gaussian factor for non-linear redshift space distortion.
                 // PkCube[Index]                  *= exp(-kmodulus*kmodulus*mu*mu*velDispersion*velDispersion);
-                
-                // polar2Dpk[Index][0]             = kmodulus;
-		        // polar2Dpk[Index][1]             = fabs(mu);
-		        // polar2Dpk[Index][2]             = PkCube[Index];
              }
         }
     }
+    
+    // zero mean density field. 
+    PkCube[0] = 0.0;
 
     return 0;
 }
@@ -190,12 +199,13 @@ int clipCorrfn(){
     
     variance =  Corrfn[0];
     
-    u0       = inverse_erf(2.*sqrt(A11Sq) -1.);
+    // inverse error fn. defined between -1 and 1. | A11Sq | < 1, i.e suppression factor. 
+    u0       = appliedClippingThreshold/(sqrt(2.*variance));
     
-    printf("\n\nu0:  %e", u0);
+    printf("\n\nu0:  %e, variance: %e", u0, variance);
     
     for(j=0; j<n0*n1*n2; j++) suppressedCorrfn[j]      = 0.25*pow(1.0 + gsl_sf_erf(u0), 2.)*Corrfn[j]; 
-    for(j=0; j<n0*n1*n2; j++) distortedCorrfn[j]       = suppressedCorrfn[j]; 
+    for(j=0; j<n0*n1*n2; j++)  distortedCorrfn[j]      = suppressedCorrfn[j]; 
     
     for(i=1; i<10; i++){      
         for(j=0; j<n0*n1*n2; j++){  
@@ -258,8 +268,23 @@ int ClippedMultipole(){
                 
                 kmodulus                           = pow(kSq, 0.5);
                 
-                mu                                 = k_x/kmodulus;
+                mu                                 = k_z/kmodulus;
                 if(kmodulus < 0.000001)       mu   = 0.0;  
+                
+                WindowFunc                         = 1.;
+
+                if(k_x != 0.){
+		            WindowFunc                    *= sin(pi*k_x*0.5/NyquistWaveNumber)/(pi*k_x*0.5/NyquistWaveNumber);}
+                
+                if(k_y != 0.){
+		            WindowFunc                    *= sin(pi*k_y*0.5/NyquistWaveNumber)/(pi*k_y*0.5/NyquistWaveNumber);}
+                
+                if(k_z != 0.){
+		            WindowFunc                    *= sin(pi*k_z*0.5/NyquistWaveNumber)/(pi*k_z*0.5/NyquistWaveNumber);}
+
+                // Cloud in cell. NGP corresponds to WindowFunc rather than WindowFunc^2.
+                
+                clippedPk[Index]                  /= pow(WindowFunc, 2.)*pow(WindowFunc, 2.);
 
                 if(kmodulus > 0.000001){	            
 		            // Issue with mu for a zeroth length vector being ill defined. 
@@ -277,10 +302,10 @@ int ClippedMultipole(){
     
     polar2DpkBinning(polarPk_modeCount);
     
-    sprintf(filepath, "%s/Data/Multipoles/Multipoles_clipped_%s_beta_%.2f_sigma_%.2f_kbin_%.3f.dat", root_dir, theoryPk_flag, beta, velDispersion, kbinInterval);
+    sprintf(filepath, "%s/Data/Multipoles/Multipoles_clippedPrediction_%s_%s_beta_%.2f_sigma_%.2f_kbin_%.3f.dat", root_dir, surveyType, theoryPk_flag, beta, velDispersion, kbinInterval);
 
     MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, polarPk_modeCount, filepath);
-    
+    /*
     for(j=0; j<kBinNumb; j++){
         f_meanKBin[j]    = (float)  meanKBin[j];
     
@@ -292,6 +317,6 @@ int ClippedMultipole(){
     spline(f_meanKBin, f_kMonopole,   kBinNumb-2, 1.0e31, 1.0e31, f_kMonopole2d);
     
     spline(f_meanKBin, f_kQuadrupole, kBinNumb-2, 1.0e31, 1.0e31, f_kQuadrupole2d);
-
+    */
     return 0;
 }

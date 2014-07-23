@@ -22,7 +22,7 @@ int PkCalc(){
 
     observedQuadrupole(polarPk_modeCount);
     
-    // sprintf(filepath, "%s/Data/Multipoles/Cartesian2Dpk_%s_%.3f_%d.dat", root_dir, surveyType, kbinInterval, loopCount);
+    sprintf(filepath, "%s/Data/Multipoles/Cartesian2Dpk_%s_%.3f_%d.dat", root_dir, surveyType, kbinInterval, loopCount);
     
     // Cartesian2Dpk(filepath);
     
@@ -446,7 +446,7 @@ int PkCorrections(int WindowFuncParam){
                     PkArray[Index][1]             *= TotalVolume*pow(fkpSqWeightsVolume, -1.);
                     
                     // Clipping corrected shot noise estimate. 
-                    PkArray[Index][1]             -= (1./TotalVolume)*(*pt2shot)(1.)*(1. - clippedVolume/TotalVolume);
+                    // PkArray[Index][1]             -= (1./TotalVolume)*(*pt2shot)(1.)*(1. - clippedVolume/TotalVolume);
                  }
                 
                 // PkCorrections called to correct NGP for survey window function.
@@ -502,8 +502,13 @@ int Gaussianfield(){
                 
                 kmodulus                           = pow(pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.), 0.5);
 
-                                                                                    // shot noise contribution. 
-                expectation                        = (*pt2Pk)(kmodulus)/TotalVolume  + (1./TotalVolume)*(*pt2shot)(1.);
+                mu                                 = k_z/kmodulus;
+                if(kmodulus < 0.000001)       mu   = 0.0;
+                                                                                     // shot noise contribution. 
+                // expectation                     = (*pt2Pk)(kmodulus)/TotalVolume; //  + (1./TotalVolume)*(*pt2shot)(1.);
+
+                // Monopole and Quadrupole components, with z taken as the line of sight direction. 
+                expectation                        = (kaiser_multipole(kmodulus, beta, 0) + kaiser_multipole(kmodulus, beta, 2)*0.5*(3.*mu*mu -1.))*Pk_powerlaw(kmodulus, 5., 1.8)/TotalVolume;
 
                 Power                              = -log(gsl_rng_uniform(gsl_ran_r))*expectation;
                 

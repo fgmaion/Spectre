@@ -6,6 +6,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_sf_legendre.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_sf_bessel.h>
 
 // Stacpolly run. 
 // #define AUXfn_DIR "/home/mjw/Aux_functions/header.h"
@@ -69,6 +70,7 @@
 #include "Scripts/MatrixInverse.c"
 
 #include "Scripts/Clipped_zSpace.c"
+#include "Scripts/SpectralDistortion.c"
 
 #include "Scripts/zCubeCreate.c"
 #include "Scripts/wedgeMockCreate.c"
@@ -86,6 +88,9 @@
 #include "Scripts/freeMemory.c"
 
 #include "/disk1/mjw/EisensteinHu/power.c"
+
+#include "Scripts/FFT_log.h"
+#include "Scripts/FFT_log.c"
 
 
 int main(int argc, char **argv){
@@ -138,8 +143,8 @@ int main(int argc, char **argv){
     gsl_ran_r                 = gsl_rng_alloc(gsl_ran_T);
     
     // Non-linear RSD
-    beta                      =       0.493;                  // beta = 0.542
-    velDispersion             =       2.53;                   // units of h^-1 Mpc rather than 300 km s^-1
+    beta                      =       0.542;                  // beta = 0.542
+    velDispersion             =        5.00;                   // units of h^-1 Mpc rather than 300 km s^-1
     A11Sq                     =       0.567;
     
     // Priors on the model params.
@@ -158,7 +163,7 @@ int main(int argc, char **argv){
     dRes                      =      30.0;
     
     ChiSqEval_kmin            =      0.02;
-    ChiSqEval_kmax            =      0.40; 
+    ChiSqEval_kmax            =      0.80; 
     
     // Fit solely the monopole (1) or both mono and Quad (2).
     hiMultipoleOrder          =         2;
@@ -178,13 +183,13 @@ int main(int argc, char **argv){
     linearBias                =   1.495903;
     
     // Clipping variables. 
-    appliedClippingThreshold  =     1000.0;    
+    appliedClippingThreshold  =        1.5;    
     // linearBias             = sqrt(2.90);
     
     // zCubeCreate();
     
     // wedgeMockCreate(400., 150., 600., 150., 700., 850., 300., 850., 475., 525.);
-    
+    /*
     comovDistReshiftCalc();
 
     // JenkinsCoordinates();
@@ -219,15 +224,17 @@ int main(int argc, char **argv){
     assign2DPkMemory();                
     
     // Choice of real or redshift space, zcube or cube. 
-    // sprintf(filepath, "%s/Data/HODCube/zcube_zvel_gal_-20.0.dat", root_dir);       
-                                                                                     
-    // CoordinateCalcCube(filepath);  
-    
+    sprintf(filepath, "%s/Data/HODCube/zcube_zvel_gal_-20.0.dat", root_dir);       
+                                                                                 
+    CoordinateCalcCube(filepath);  
+    */
     inputHODPk();
     
     // inputLinearPk();
     
-    setLorentzianRSD();
+    // setKaiserRSD();
+    
+    // setLorentzianRSD();
     
     // setGaussianRSD();
 
@@ -241,48 +248,55 @@ int main(int argc, char **argv){
     assignAcceptanceCube();
     
     CleanNGP();
-    */
-    sprintf(surveyType, "zCube_xvel_BootStrap_clipThreshold_%.1e_fullCube", appliedClippingThreshold);
-    /*
+    
+    // sprintf(surveyType, "zCube_xvel_clipThreshold_%.1e_fullCube", appliedClippingThreshold);
+    
     NGPCalcCube();
-	    
-	clipDensity(appliedClippingThreshold);
+    
+    // Overwrites measured density field with a Gaussian random field, with given P(k).
+    Gaussianfield();
+    
+    clipDensity(appliedClippingThreshold);
        
     prepBootStrap(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
        
-    for(loopCount=0; loopCount<100; loopCount++){
-        sprintf(surveyType, "zCube_xvel_clipThreshold_%.1e_fullCube", appliedClippingThreshold);
+    // for(loopCount=0; loopCount<100; loopCount++){
     
-    	BootStrapGen(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
+    sprintf(surveyType, "GaussianCube_zvel_MonoQuadPk_powLawXi_KaiserRSD_clipThreshold_%.1e_fullCube", appliedClippingThreshold);
+              
+    // BootStrapGen(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
                 
-        CalcWfCorrections();
+    CalcWfCorrections();
             
-        cleanFFTbinning();
+    cleanFFTbinning();
     
-        PkCalc();
-    }
+    // ** Shot noise correction is switched off **
+    PkCalc();
+    // }
     */
     // wfPkCalc();
     
     // kaiser_nonlinearSuppression_Multipoles();
     
-    LikelihoodMemory();
+    // LikelihoodMemory();
     
-    CovarianceMatrix(100);
+    // CovarianceMatrix(100);
         
-    CovarianceEigenVecs();
+    // CovarianceEigenVecs();
     
-    // ClippingModelling();
+    // ClippingModelling();                                                            // Assigns memory for Clipping prediction. 
+    
+    // Mono_xi();
     
     // formPkCube();
 
     // clipCorrfn();
-
-    multipolesRealisation();
     
-    minimiseChiSq();
+    // multipolesRealisation();
     
-    Calc_betaPosterior();
+    // minimiseChiSq();
+    
+    // Calc_betaPosterior();
 
     // Calc_sigmaPosterior();
 
@@ -307,7 +321,179 @@ int main(int argc, char **argv){
     
     // growthfactor_derivative();
     
-    printf("\n\n");
+    // Eisenstein & Hu P(k)
+    // TFmdm_set_cosm(0.3, 0.047337, 0.0, 0, 0.7, 0.65, 0.0);
+    
+    FFTlogRes   = 4096;
+    
+    // Correlation fns. 
+    mono   = malloc(FFTlogRes*sizeof(double));
+    quad   = malloc(FFTlogRes*sizeof(double));
+     hex   = malloc(FFTlogRes*sizeof(double));
+    
+    // Power spectra
+    monop  = malloc(FFTlogRes*sizeof(double));
+    quadp  = malloc(FFTlogRes*sizeof(double));
+     hexp  = malloc(FFTlogRes*sizeof(double));
+    
+    double*     r   = malloc(FFTlogRes*sizeof(double));
+    double* kVals   = malloc(FFTlogRes*sizeof(double));
+    
+    cmono   = malloc(FFTlogRes*sizeof(double)); 
+    cmonop  = malloc(FFTlogRes*sizeof(double)); 
+    
+    double* power   = malloc(FFTlogRes*sizeof(double)); 
+    double*    Xi   = malloc(FFTlogRes*sizeof(double)); 
+    
+    /*
+    // Correlation functions given input P(k).
+    xi_mu(0, r, mono, beta, velDispersion, kVals, FFTlogRes);
+    
+    xi_mu(2, r, quad, beta, velDispersion, kVals, FFTlogRes);
+    
+    xi_mu(4, r,  hex, beta, velDispersion, kVals, FFTlogRes);
+    
+    sprintf(filepath, "%s/Data/SpectralDistortion/TestMonopole_PowerLaw_Multipoles.dat", root_dir);
 
+    output = fopen(filepath, "w");
+
+    for(i=0; i<FFTlogRes; i++) fprintf(output, "%e \t %e \t %e \t %e \n", r[i], mono[i]/Pk_powerlaw_xi(r[i], 5., 1.8), quad[i]/Pk_powerlaw_xi(r[i], 5., 1.8), hex[i]/Pk_powerlaw_xi(r[i], 5., 1.8));
+
+    fclose(output);
+    
+    // Power spectra given input correlation functions. 
+    pk_mu(0, r, mono, beta, velDispersion, kVals, FFTlogRes);
+    
+    pk_mu(2, r, quad, beta, velDispersion, kVals, FFTlogRes);
+    
+    pk_mu(4, r,  hex, beta, velDispersion, kVals, FFTlogRes);
+    
+    sprintf(filepath, "%s/Data/SpectralDistortion/TestMonopole_PowerLaw_pkMultipoles.dat", root_dir);
+
+    output = fopen(filepath, "w");
+
+    for(i=0; i<FFTlogRes; i++) fprintf(output, "%e \t %e \t %e \t %e \t %e \t %e \t %e \n", kVals[i], mono[i], quad[i], hex[i], Pk_powerlaw(kVals[i], 5., 1.8)*kaiser_multipole(kVals[i], beta, 0), Pk_powerlaw(kVals[i], 5., 1.8)*kaiser_multipole(kVals[i], beta, 2), Pk_powerlaw(kVals[i], 5., 1.8)*kaiser_multipole(kVals[i], beta, 4));
+
+    fclose(output);
+    */
+    /*
+    double u0        = 0.5175669;
+    
+    double variance  =  4.199712*pow(10., 9.);
+    
+    // Spectral distortion calculation. 
+    // Correlation functions given input P(k).
+    xi_mu(0, r, mono, beta, velDispersion, kVals, FFTlogRes, power, Xi);
+    
+    xi_mu(2, r, quad, beta, velDispersion, kVals, FFTlogRes, power, Xi);
+    
+    xi_mu(4, r,  hex, beta, velDispersion, kVals, FFTlogRes, power, Xi);
+    
+    // Clipped monopole calculation to 2nd order. 
+    
+    for(i=0; i<FFTlogRes; i++){
+        cmono[i]  = mono[i];
+    
+        // cmono[i] *= 0.25*pow(1. + gsl_sf_erf(u0), 2.);
+            
+        // cmono[i] += (C_n(u0, 1)/variance)*((1./64.)*pow(8.*mono[i] - 4.*quad[i] + 3.*hex[i], 2.) - pow(quad[i], 2.)/20. + mono[i]*(quad[i] - 3.*hex[i]/4.) + 3.*quad[i]*hex[i]/8. - (17./576.)*hex[i]*hex[i]);
+    }
+    
+    rVals    = malloc(FFTlogRes*sizeof(float));
+    fcmono   = malloc(FFTlogRes*sizeof(float));
+    fcmono2D = malloc(FFTlogRes*sizeof(float));
+    
+    for(i=0; i<FFTlogRes; i++){
+         rVals[i]   = (float)     r[i];
+        fcmono[i]   = (float)     Pk_powerlaw_xi(r[i], 5., 1.8); //cmono[i];
+    } 
+    
+    spline(rVals, fcmono, FFTlogRes-1, 1.0e31, 1.0e31, fcmono2D);
+        
+    sprintf(filepath, "%s/Data/SpectralDistortion/ClippedMonopole_Order2_xi.dat", root_dir);
+
+    output = fopen(filepath, "w");
+
+    for(i=0; i<FFTlogRes; i++) fprintf(output, "%e \t %e \t %e \t %e \t %e\n", r[i], mono[i]/Pk_powerlaw_xi(r[i], 5., 1.8), quad[i]/Pk_powerlaw_xi(r[i], 5., 1.8), hex[i]/Pk_powerlaw_xi(r[i], 5., 1.8), cmono[i]/Pk_powerlaw_xi(r[i], 5., 1.8));
+
+    fclose(output);
+    */
+    // Power spectra
+    monop           = malloc(FFTlogRes*sizeof(double));
+    quadp           = malloc(FFTlogRes*sizeof(double));
+     hexp           = malloc(FFTlogRes*sizeof(double));
+    
+    cmonop          = malloc(FFTlogRes*sizeof(double)); 
+    
+    pk_mu(0, r,  monop, beta, velDispersion, kVals, FFTlogRes);
+    
+    // sprintf(filepath, "%s/Data/SpectralDistortion/ClippedMonopole_Order2_pk.dat", root_dir);
+
+    // output = fopen(filepath, "w");
+
+    // for(i=0; i<FFTlogRes; i++) fprintf(output, "%e \t %e \t %e \n", kVals[i], monop[i], Pk_powerlaw(kVals[i], 5., 1.8));
+
+    // fclose(output);
+    
+    printf("\n\n");
+    
+    return 0;
+}
+
+
+int pk_mu(int mu, double* r, double* multi, double beta, double velDispersion, double* kVals, int FFTlogRes){
+    // Last argument of FFTLog_init is the order of the Hankel transform. 
+    fc = FFTLog_init(FFTlogRes, pow(10., -2.), pow(10., 6.), 0.0, mu + 0.5);
+        
+    FFTLog_setInput(fc, kVals, r, beta, velDispersion);
+    
+    // for(i=0; i<fc->N; i++)  fc->xi[i][0]  = pow(2.*pi*r[i], 3./2.)*Pk_powerlaw_xi(r[i], 5., 1.8);
+    
+    print_fcprop(fc);
+    
+    FFTLog(fc, fc->xi_forwardplan, fc->xi_backwardplan); 
+    
+    // reverse array
+    for(i=0; i<fc->N/2; i++) FFTLog_SWAP(fc->pk[i][0],fc->pk[fc->N-i-1][0]);
+  
+    for(i=0; i<fc->N;   i++) fc->pk[i][0] = (fc->pk[i][0]/(double)fc->N);
+
+    for(i=0; i<fc->N;   i++) multi[i] = pow(-1., mu/2)*fc->pk[i][0]*pow(kVals[i], -1.5);
+
+    // FFTLog_free(fc);    
+
+    return 0;
+}
+
+
+double splint_cmono(double r){
+        float Interim;
+    
+        splint(rVals, fcmono, fcmono2D, fc->N, (float) r, &Interim);
+    
+        return (double) Interim;
+    }
+
+
+int xi_mu(int mu, double* r, double* multi, double beta, double velDispersion, double* kVals, int FFTlogRes, double* Pk, double* Xi){
+    // Last argument of FFTLog_init is the order of the Hankel transform. 
+    
+    fc = FFTLog_init(FFTlogRes, pow(10., -8.), pow(10., 8.), 0.0, mu + 0.5);
+    
+    FFTLog_setInput(fc, kVals, r, beta, velDispersion);
+    
+    FFTLog(fc, fc->pk_forwardplan, fc->pk_backwardplan); 
+    
+    // reverse array
+    for(i=0; i<fc->N/2; i++) FFTLog_SWAP(fc->xi[i][0],fc->xi[fc->N-i-1][0]);
+  
+    for(i=0; i<fc->N;   i++) fc->xi[i][0] = (fc->xi[i][0]/(double)fc->N);
+
+    for(i=0; i<fc->N;   i++) multi[i] = pow(-1., mu/2)*fc->xi[i][0]*pow(r[i], -1.5);
+    
+    // for(i=0; i<fc->N;   i++)  printf("%e \t %e \t %e \t %e \t %e \t %e \n", kVals[i], (*pt2Pk)(kVals[i]), kaiserLorentz_multipole(kVals[i]*velDispersion, beta, 0), sqrt(pow(kVals[i], 3.)/(8.*pow(pi, 3.)))*(*pt2Pk)(kVals[i])*kaiserLorentz_multipole(kVals[i]*velDispersion, beta, 0), fc->pk[i][0], multi[i]);
+
+    // FFTLog_free(fc);    
+    
     return 0;
 }
