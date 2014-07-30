@@ -83,7 +83,7 @@ double kaiserLorentz_multipole(double ks, double beta, int monoQuad){
 
 
 int setLorentzianRSD(){
-    pt2RSD  = &kaiserLorentz_multipole;
+    pt2RSD_k  = &kaiserLorentz_multipole;
     
     sprintf(theoryRSD_flag, "LorentzianRSD");
 
@@ -93,7 +93,7 @@ int setLorentzianRSD(){
 
 // Print model to file. 
 
-int kaiser_nonlinearSuppression_Multipoles(){
+int DispersionModel_Multipoles(){
     double waveNumber    = 0.0;
     
     sprintf(filepath, "%s/Data/Multipoles/KaiserLorentzMultipoles_Pk_%s_beta_%.2f_velDispersion_%.2f.dat", root_dir, theoryPk_flag, beta, velDispersion);

@@ -8,46 +8,34 @@
 
 #define CC 299792.458
 
-// Pk model, power law with high k truncation.
-double Pk_powerlaw_truncated(double k, double k0, double kc, int n){
-    double dn = (double) n;
+int FFTlog_memory(int FFTlogRes, double beta, double velDispersion){
+    fftlogr         = malloc(FFTlogRes*sizeof(double)); 
+    fftlogk         = malloc(FFTlogRes*sizeof(double)); 
 
-    return 2.*pow(pi, 2.)*pow(k0, -3.)*pow(k/k0, dn)*exp(-1.*k/kc);
-}
- 
-double Pk_powerlaw_truncated_xi(double r, double k0, double kc, int n){
-    double dn = (double) n;
-    double y  = kc*r;
+    mono_config     = FFTLog_init(FFTlogRes, pow(10., -10.), pow(10., 14.), 0.0, 0 + 0.5);
+    quad_config     = FFTLog_init(FFTlogRes, pow(10., -10.), pow(10., 14.), 0.0, 2 + 0.5);
+     hex_config     = FFTLog_init(FFTlogRes, pow(10., -10.), pow(10., 14.), 0.0, 4 + 0.5);
+
+    // octupole_config = FFTLog_init(FFTlogRes, pow(10., -10.), pow(10., 14.), 0.0, 6 + 0.5);
+     
+    clipmono_config = FFTLog_init(FFTlogRes, pow(10., -10.), pow(10., 14.), 0.0, 0 + 0.5);  
+    clipquad_config = FFTLog_init(FFTlogRes, pow(10., -10.), pow(10., 14.), 0.0, 2 + 0.5);  
     
-    return pow(kc/k0, dn + 3.)*sin((2.+dn)*atan(y))*tgamma(2.+dn)*pow(y*pow(1.+y*y, 1.+dn/2.), -1.);
-} 
- 
-double Pk_powerlaw(double k, double r0, double gamma){
-    return 4.*pi*pow(k, -3.)*pow(k*r0, gamma)*tgamma(2.-gamma)*sin((pi/2.)*(2.-gamma)); 
-} 
-
-double Pk_powerlaw_xi(double r, double r0, double gamma){
-    return pow(r0/r, gamma);
+    FFTLog_setInput(hex_config,      fftlogk, fftlogr, beta, velDispersion);
+    
+    FFTLog_setInput(mono_config,     fftlogk, fftlogr, beta, velDispersion);
+    
+    FFTLog_setInput(quad_config,     fftlogk, fftlogr, beta, velDispersion);
+    
+    // FFTLog_setInput(octupole_config, fftlogk, fftlogr, beta, velDispersion);
+    
+    FFTLog_setInput(clipmono_config, fftlogk, fftlogr, beta, velDispersion);
+    
+    FFTLog_setInput(clipquad_config, fftlogk, fftlogr, beta, velDispersion);
+    
+    return 0;
 }
 
-double kaiser_multipole_xifactors(double gamma, int monoQuad){
-    switch(monoQuad){
-        case 0:
-            return 1.0;
-        case 2:
-            return -gamma*pow(3.-gamma, -1.);
-        case 4:
-            return gamma*(2.+gamma)*pow(-5.+gamma, -1.)*pow(-3.+gamma, -1.);
-    }
-}
-
-double pk_Setup(double k, double transformOrder){
-    return sqrt(pow(k, 3.)/(8.*pow(pi, 3.)))*(*pt2Pk)(k)*kaiserLorentz_multipole(k*velDispersion, beta, (int) transformOrder);
-}
-
-double xi_Setup(double r, double transformOrder){
-    return pow(2.*pi*r, 3./2.)*Pk_powerlaw_xi(r, 5., 1.8)*kaiser_multipole(r, beta, (int) transformOrder)*kaiser_multipole_xifactors(1.8, transformOrder);
-}
 
 int FFTLog_setInput(FFTLog_config *fc, double *k, double *r, double beta, double velDispersion){
   // Set k and r arrays. 
@@ -68,9 +56,7 @@ int FFTLog_setInput(FFTLog_config *fc, double *k, double *r, double beta, double
   
   transformOrder  =  fc->mu - 0.5;
   
-  printf("\n\nTransform order: %.2e\n", transformOrder);
-  
-  // write signal
+  // write initial signal
   for(i=0; i<fc->N; i++){
     k[i] = exp(logkc + ((double)i-nc)*dlogr);
     
@@ -79,16 +65,72 @@ int FFTLog_setInput(FFTLog_config *fc, double *k, double *r, double beta, double
     // purely real.  Set P(k) to obtain xi(r) by inverse Hankel transform. 
     //fc->pk[i][0]  = sqrt(pow(k[i], 3.)/(8.*pow(pi, 3.)))*Pk_powerlaw(k[i], 5., 1.8)*kaiser_multipole(k[i], beta, (int) transformOrder);
     
-    fc->pk[i][0]    = sqrt(pow(k[i], 3.)/(8.*pow(pi, 3.)))*Pk_powerlaw(k[i], 5., 1.8)*kaiser_multipole(k[i], beta, (int) transformOrder);
+    fc->pk[i][0]    = sqrt(pow(k[i], 3.)/(8.*pow(pi, 3.)))*(*pt2Pk)(k[i])*(*pt2RSD_k)(k[i]*velDispersion, beta, transformOrder);
     fc->pk[i][1]    = 0.0;
     
     // purely real.  Set xi(r) to obtain P(k) by Hankel transform.  
-    fc->xi[i][0]    = pow(2.*pi*r[i], 3./2.)*Pk_powerlaw_xi(r[i], 5., 1.8);
+    fc->xi[i][0]    = pow(2.*pi*r[i], 3./2.)*(*pt2Xi)(r[i]);
     fc->xi[i][1]    = 0.0;
   }
 
   return 0;
 }
+ 
+ 
+int xi_mu(FFTLog_config* fc, int mu, double* fftlogr){
+    // Last argument of FFTLog_init is the order of the Hankel transform. 
+    FFTLog(fc, fc->pk_forwardplan, fc->pk_backwardplan); 
+    
+    // reverse array
+    for(i=0; i<fc->N/2; i++) FFTLog_SWAP(fc->xi[i][0],fc->xi[fc->N-i-1][0]);
+  
+    for(i=0; i<fc->N;   i++) fc->xi[i][0] = (fc->xi[i][0]/(double)fc->N);
+
+    for(i=0; i<fc->N;   i++) fc->xi[i][0] = pow(-1., mu/2)*fc->xi[i][0]*pow(fftlogr[i], -1.5);
+
+    // FFTLog_free(fc);    
+    
+    return 0;
+}  
+
+
+int clipmono(FFTLog_config* clip, FFTLog_config* mono, FFTLog_config* quad, FFTLog_config* hex, double u0, double var){
+    // Clipped monopole calculation to 2nd order.   
+    for(i=0; i<clip->N; i++){
+      clip->xi[i][0]   = 0.25*pow(1. + gsl_sf_erf(u0), 2.)*mono->xi[i][0];
+             
+      clip->xi[i][0]  += (C_n(u0, 1)/var)*(pow(8.*mono->xi[i][0] - 4.*quad->xi[i][0] + 3.*hex->xi[i][0], 2.)/64. - pow(quad->xi[i][0], 2.)/20. + mono->xi[i][0]*(quad->xi[i][0] - 3.*hex->xi[i][0]/4.) + 3.*quad->xi[i][0]*hex->xi[i][0]/8. - (17./576.)*hex->xi[i][0]*hex->xi[i][0]);
+    }
+
+    return 0;
+}
+
+
+int clipquad(FFTLog_config* clip, FFTLog_config* mono, FFTLog_config* quad, FFTLog_config* hex, double u0, double var){
+    // Clipped monopole calculation to 2nd order.   
+    for(i=0; i<clip->N; i++){
+      clip->xi[i][0]   = 0.25*pow(1. + gsl_sf_erf(u0), 2.)*quad->xi[i][0];
+             
+      clip->xi[i][0]  += (C_n(u0, 1)/var)*(2./693.)*(693.*mono->xi[i][0]*quad->xi[i][0] + 99.*pow(quad->xi[i][0], 2.) + 198.*quad->xi[i][0]*hex->xi[i][0] + 50.*pow(hex->xi[i][0], 2.));
+    }
+
+    return 0;
+}
+
+int pk_mu(FFTLog_config* fc, int mu, double* fftlogk){
+    // Last argument of FFTLog_init is the order of the Hankel transform. 
+    FFTLog(fc, fc->xi_forwardplan, fc->xi_backwardplan); 
+    
+    // reverse array
+    for(i=0; i<fc->N/2; i++) FFTLog_SWAP(fc->pk[i][0],fc->pk[fc->N-i-1][0]);
+  
+    for(i=0; i<fc->N;   i++) fc->pk[i][0] = (fc->pk[i][0]/(double)fc->N);
+
+    for(i=0; i<fc->N;   i++) fc->pk[i][0] = pow(-1., mu/2)*fc->pk[i][0]*pow(fftlogk[i], -1.5);
+
+    return 0;
+}
+
  
 /*----------------------------------------------------------------*
  *FFTLog                                                          *
@@ -127,18 +169,6 @@ void FFTLog(FFTLog_config *fc, fftw_plan p_forward, fftw_plan p_backward){
   fftw_execute(p_backward);
   
   return;
-}
-
-
-int print_fcprop(FFTLog_config *fc){
-    printf("\n\nP(k) object properties:");
-    printf("\nminimum: %e", fc->min);
-    printf("\nmaximum: %e", fc->max);
-    printf("\nbias   : %d", fc->q);
-    printf("\norder:   %d",   fc->mu);
-    printf("\nlength: %d",  fc->N);
-    
-    return 0;
 }
 
 

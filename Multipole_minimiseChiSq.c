@@ -68,8 +68,8 @@ double ChiSqEval(int order){
     
     // Numerical recipes/Fortran array indexing. 
     for(j=1; j<chiSq_kmaxIndex + 1; j++){
-        xtheory[j]                   =  pow(sigmaNorm[j-1][j-1], -1.)*A11Sq*(*pt2Pk)(kMultipoles[j-1])*(*pt2RSD)(kMultipoles[j-1]*velDispersion, beta, 0); 
-        xtheory[chiSq_kmaxIndex + j] =  pow(sigmaNorm[chiSq_kmaxIndex + j -1][chiSq_kmaxIndex + j -1], -1.)*A11Sq*(*pt2Pk)(kMultipoles[j-1])*(*pt2RSD)(kMultipoles[j-1]*velDispersion, beta, 1); 
+        xtheory[j]                   =  pow(sigmaNorm[j-1][j-1], -1.)*A11Sq*(*pt2Pk)(kMultipoles[j-1])*(*pt2RSD_k)(kMultipoles[j-1]*velDispersion, beta, 0); 
+        xtheory[chiSq_kmaxIndex + j] =  pow(sigmaNorm[chiSq_kmaxIndex + j -1][chiSq_kmaxIndex + j -1], -1.)*A11Sq*(*pt2Pk)(kMultipoles[j-1])*(*pt2RSD_k)(kMultipoles[j-1]*velDispersion, beta, 1); 
     }
     
     for(j=1; j<order; j++){
@@ -94,9 +94,9 @@ double ChiSqEval(int order){
 
 int fprintfBestfit(int order){
     for(j=1; j<chiSq_kmaxIndex +1; j++){
-        xtheory[j]                   = minChiSq_A11Sq*(*pt2Pk)(kMultipoles[j-1])*(*pt2RSD)(kMultipoles[j-1]*minChiSq_sigma, minChiSq_beta, 0);
+        xtheory[j]                   = minChiSq_A11Sq*(*pt2Pk)(kMultipoles[j-1])*(*pt2RSD_k)(kMultipoles[j-1]*minChiSq_sigma, minChiSq_beta, 0);
         
-        xtheory[chiSq_kmaxIndex + j] = minChiSq_A11Sq*(*pt2Pk)(kMultipoles[j-1])*(*pt2RSD)(kMultipoles[j-1]*minChiSq_sigma, minChiSq_beta, 1);
+        xtheory[chiSq_kmaxIndex + j] = minChiSq_A11Sq*(*pt2Pk)(kMultipoles[j-1])*(*pt2RSD_k)(kMultipoles[j-1]*minChiSq_sigma, minChiSq_beta, 1);
     }
     
     for(j=1; j<order; j++){

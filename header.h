@@ -27,7 +27,10 @@ int          EvaluateConvolution(char type[]);
 double 		 (*pt2AnisoWf)(double, double, double)  = NULL;
 double       (*pt2Windowfn)(double)                 = NULL;
 double       (*pt2Pk)(double)       				= NULL;
-double       (*pt2RSD)(double, double, int)         = NULL;
+double       (*pt2Xi)(double)       				= NULL;
+
+double       (*pt2RSD_k)(double, double, int)       = NULL;
+double       (*pt2RSD_r)(double, double, int)       = NULL;
 
 double       (*pt2nz)(double)                       = NULL;
 double       (*pt2shot)(double)                     = NULL;
@@ -827,7 +830,6 @@ float   q0;
 
 double Pk_powerlaw(double k, double r0, double gamma);
 
-
 double* mono;
 double* quad;
 double*  hex;
@@ -845,4 +847,9 @@ float* fcmono2D;
 
 int    FFTlogRes;
 
-double splint_cmono(double r);
+double* fftlogr;
+double* fftlogk;
+
+double Pk_powerlaw_truncated_xi(double r);
+
+double HODPk_Gaussian(double k);

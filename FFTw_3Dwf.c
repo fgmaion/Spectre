@@ -85,7 +85,7 @@ int wfPkCalc(){
     
     printf("\nSum over states of W2k: %e", SumOverStates_W2k);
 
-    PkBinningCalc(n0*n1*n2, PkArray);
+    PkBinningCalc(n0*n1*n2, PkArray, kbinInterval);
     
     sprintf(filepath, "%s/Data/WindowfuncSpherical/midK_W2q_%s.dat", root_dir, surveyType);
     

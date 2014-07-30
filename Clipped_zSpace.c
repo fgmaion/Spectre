@@ -39,11 +39,18 @@ int inputHODPk(){
 
     spline(sdltk, sdltPk, 469, 1.0e31, 1.0e31, sdlt2d);
     
-    pt2Pk   = &splintHODpk;
+    pt2Pk   = &HODPk_Gaussian;
+    
+    // Approx. model to HOD P(k), inflationary power law with exponential truncation. 
+    pt2Xi   = &Pk_powerlaw_truncated_xi;
     
     sprintf(theoryPk_flag, "HOD_-20.0");
    
     return 0;
+}
+
+double HODPk_Gaussian(double k){
+    return splintHODpk(k)*exp(-0.5*pow(k*10., 2.));
 }
 
 
@@ -85,8 +92,6 @@ int formPkCube(){
 
     // beta               = f/linearBias;
 
-    // Take line of sight wavevector to be (1, 0, 0), i.e unit vector along kx. 
-
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
@@ -106,7 +111,7 @@ int formPkCube(){
                 
                 if(kmodulus == 0.0)          mu    = 0.0;  
 
-		        PkCube[Index]                      = Pk_powerlaw(kmodulus, 5., 1.8);         // Convert from CAMB units for P(k), [P_CAMB] = Volume, to [P(k)] dimensionless.
+		        PkCube[Index]                      = (*pt2Pk)(kmodulus); // Convert from CAMB units for P(k), [P_CAMB] = Volume, to [P(k)] dimensionless.
                 PkCube[Index]                     *= 1.0/TotalVolume;
                 
                 // Impose spherical filter to calculate sigma_8.
@@ -122,8 +127,9 @@ int formPkCube(){
                 PkCube[Index]                     *= pow(1. + beta*mu*mu, 2.);
                 
                 // Lorentzian factor for non-linear redshift space distortions. 
-                // PkCube[Index]                     /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
+                PkCube[Index]                     /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
                 
+                /*
                 WindowFunc                         = 1.;
 
                 if(k_x != 0.){
@@ -137,7 +143,7 @@ int formPkCube(){
 	        
 	            PkCube[Index]                     *= pow(WindowFunc, 2.);
 	        	PkCube[Index]                     *= pow(WindowFunc, 2.);
-                
+                */
                 // Gaussian factor for non-linear redshift space distortion.
                 // PkCube[Index]                  *= exp(-kmodulus*kmodulus*mu*mu*velDispersion*velDispersion);
              }
@@ -193,7 +199,7 @@ int clipCorrfn(){
     fftw_execute(p);
 
     for(j=0; j<n0*n1*n2; j++) Corrfn[j] = out[j][0];
-
+    
     double variance;
     double u0;
     
@@ -202,7 +208,7 @@ int clipCorrfn(){
     // inverse error fn. defined between -1 and 1. | A11Sq | < 1, i.e suppression factor. 
     u0       = appliedClippingThreshold/(sqrt(2.*variance));
     
-    printf("\n\nu0:  %e, variance: %e", u0, variance);
+    printf("\n\nu0:  %e, variance: %e, suppression factor: %e", u0, variance, 0.25*pow(1.0 + gsl_sf_erf(u0), 2.));
     
     for(j=0; j<n0*n1*n2; j++) suppressedCorrfn[j]      = 0.25*pow(1.0 + gsl_sf_erf(u0), 2.)*Corrfn[j]; 
     for(j=0; j<n0*n1*n2; j++)  distortedCorrfn[j]      = suppressedCorrfn[j]; 
@@ -222,11 +228,70 @@ int clipCorrfn(){
 
     for(j=0; j<n0*n1*n2; j++) clippedPk[j] = pow(n0*n1*n2, -1.)*out[j][0];
 
-    printf("\n\nClipped P(k).");
+    printf("\n\nClipped P(k), frgs method.");
     
-    ClippedMultipole();
-   
+    // ClippedMultipole();
+    
     return 0;    
+}
+
+
+int corrfn_multipoles(double Corrfn[], char filepath[]){
+    int    rbinNumb   = 100;
+    double rbinlength =  5.;
+    int    m0, m1, m2;
+
+    double rbinLimits[rbinNumb];
+    
+    double xCell, yCell, zCell, rmodulus;
+    
+    free2DBinning();
+
+    assign2DPkMemory(muBinNumb, rbinNumb);
+    
+    for(j=0; j<rbinNumb;  j++)    rbinLimits[j]    =    j*rbinlength;
+    for(j=0; j<muBinNumb; j++)  muBinLimits[j]     =   (1.0/(double) (muBinNumb - 1))*(j+1);
+    
+    polarPk_modeCount        = 0;
+
+    for(k=0; k<n0; k++){
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+               m0 = k;
+               m1 = j;
+               m2 = i;
+
+               if(m2>n2/2)  m2 -= n2;
+               if(m1>n1/2)  m1 -= n1;
+               if(m0>n0/2)  m0 -= n0;
+            
+	           xCell         =  CellSize*m2;
+	           yCell         =  CellSize*m1;
+	           zCell         =  CellSize*m0;
+
+               rmodulus      = sqrt(xCell*xCell + yCell*yCell + zCell*zCell);
+
+               Index         = k*n1*n2 + j*n2 + i;
+
+               mu            = zCell/rmodulus;
+               if(rmodulus < 0.000001)       mu   = 0.0;      
+
+		       polar2Dpk[polarPk_modeCount][0]    = rmodulus;
+               polar2Dpk[polarPk_modeCount][1]    = fabs(mu);
+		       polar2Dpk[polarPk_modeCount][2]    = Corrfn[Index]/TotalVolume;
+                    
+               // printf("\n%e \t %e \t %e", polar2Dpk[polarPk_modeCount][0], polar2Dpk[polarPk_modeCount][1], polar2Dpk[polarPk_modeCount][2]);  
+                    
+               polarPk_modeCount                 += 1;
+            }
+        }
+    }
+
+    DualBinning(polarPk_modeCount, muBinNumb, muBinLimits, rbinNumb, rbinLimits, polar2Dpk, polar2DBinnedPk, mean_mu, mean_modk, polar_modesPerBin);
+
+    MultipoleCalc(rbinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, polarPk_modeCount, filepath, rbinlength);
+
+    return 0;
 }
 
 
@@ -284,15 +349,13 @@ int ClippedMultipole(){
 
                 // Cloud in cell. NGP corresponds to WindowFunc rather than WindowFunc^2.
                 
-                clippedPk[Index]                  /= pow(WindowFunc, 2.)*pow(WindowFunc, 2.);
+                // clippedPk[Index]                  /= pow(WindowFunc, 2.)*pow(WindowFunc, 2.);
 
                 if(kmodulus > 0.000001){	            
 		            // Issue with mu for a zeroth length vector being ill defined. 
 		            polar2Dpk[polarPk_modeCount][0]    = kmodulus;
 		            polar2Dpk[polarPk_modeCount][1]    = fabs(mu);
 		            polar2Dpk[polarPk_modeCount][2]    = clippedPk[Index];
-
-                    // printf("\n%e \t %e \t %e", kmodulus, fabs(mu), clippedPk[Index]);
 
                     polarPk_modeCount                 += 1;
 	            }
@@ -302,21 +365,9 @@ int ClippedMultipole(){
     
     polar2DpkBinning(polarPk_modeCount);
     
-    sprintf(filepath, "%s/Data/Multipoles/Multipoles_clippedPrediction_%s_%s_beta_%.2f_sigma_%.2f_kbin_%.3f.dat", root_dir, surveyType, theoryPk_flag, beta, velDispersion, kbinInterval);
+    sprintf(filepath, "%s/Data/SpectralDistortion/frgs_clipped.dat", root_dir);
 
-    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, polarPk_modeCount, filepath);
-    /*
-    for(j=0; j<kBinNumb; j++){
-        f_meanKBin[j]    = (float)  meanKBin[j];
-    
-        f_kMonopole[j]   = (float)  kMonopole[j];
-        
-        f_kQuadrupole[j] = (float) kQuadrupole[j];
-    }  
-    
-    spline(f_meanKBin, f_kMonopole,   kBinNumb-2, 1.0e31, 1.0e31, f_kMonopole2d);
-    
-    spline(f_meanKBin, f_kQuadrupole, kBinNumb-2, 1.0e31, 1.0e31, f_kQuadrupole2d);
-    */
+    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, polarPk_modeCount, filepath, kbinInterval);
+
     return 0;
 }

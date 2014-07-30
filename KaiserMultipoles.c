@@ -28,8 +28,21 @@ double kaiser_multipole(double k, double beta, int monoQuad){
     }
 }
 
+
+double kaiser_multipole_xifactors(double r, double gamma, int monoQuad){
+    switch(monoQuad){
+        case 0:
+            return 1.0;
+        case 2:
+            return -gamma*pow(3.-gamma, -1.);
+        case 4:
+            return gamma*(2.+gamma)*pow(-5.+gamma, -1.)*pow(-3.+gamma, -1.);
+    }
+}
+
+
 int setKaiserRSD(){
-    pt2RSD  = &kaiser_multipole;
+    pt2RSD_k  = &kaiser_multipole;
     
     sprintf(theoryRSD_flag, "KaiserRSD");
 

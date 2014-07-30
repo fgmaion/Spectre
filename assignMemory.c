@@ -107,7 +107,8 @@ int prepFFTbinning(){
 }
 
 
-int assign2DPkMemory(){
+int assign2DPkMemory(int muBinNumb, int kBinNumb){
+    
     polar2Dpk             = (double **) malloc(n0*n1*n2*sizeof(double*));
     TwoDpkArray           = (double **) malloc(n0*n1*n2*sizeof(double*));                         
  
@@ -123,15 +124,14 @@ int assign2DPkMemory(){
         TwoDpkArray[j][1] = 0.0;
         TwoDpkArray[j][2] = 0.0;
     }
-
-
-    legendre2weights                                     = (double *)  malloc(n0*n1*n2*sizeof(*legendre2weights));
-
-    zSpaceBinnedPk                                       = (double **) malloc((loskBinNumb-1)*sizeof(double*));
-    for(j=0; j<loskBinNumb-1; j++) zSpaceBinnedPk[j]     = (double  *) malloc((perpkBinNumb-1)*sizeof(double));
     
-    zSpacemodesPerBin                                    = (int **)    malloc((loskBinNumb-1)*sizeof(int*));
-    for(j=0; j<loskBinNumb-1; j++) zSpacemodesPerBin[j]  = (int  *)    malloc((perpkBinNumb-1)*sizeof(int));
+    // legendre2weights                                     = (double *)  malloc(n0*n1*n2*sizeof(*legendre2weights));
+
+    //zSpaceBinnedPk                                       = (double **) malloc((loskBinNumb-1)*sizeof(double*));
+    //for(j=0; j<loskBinNumb-1; j++) zSpaceBinnedPk[j]     = (double  *) malloc((perpkBinNumb-1)*sizeof(double));
+    
+    //zSpacemodesPerBin                                    = (int **)    malloc((loskBinNumb-1)*sizeof(int*));
+    //for(j=0; j<loskBinNumb-1; j++) zSpacemodesPerBin[j]  = (int  *)    malloc((perpkBinNumb-1)*sizeof(int));
     
     mean_perpk                                           = (double **) malloc((loskBinNumb-1)*sizeof(double*));
     for(j=0; j<loskBinNumb-1; j++) mean_perpk[j]         = (double *)  malloc((perpkBinNumb-1)*sizeof(double));
@@ -139,8 +139,6 @@ int assign2DPkMemory(){
     mean_losk                                            = (double **) malloc((loskBinNumb-1)*sizeof(double*));
     for(j=0; j<loskBinNumb-1; j++) mean_losk[j]          = (double  *) malloc((perpkBinNumb-1)*sizeof(double));
 
-    clean2Dpk();
-    
     loskBinLimits                                        = (double *) malloc(loskBinNumb*sizeof(*loskBinLimits));
     perpkBinLimits                                       = (double *) malloc(perpkBinNumb*sizeof(*perpkBinLimits));
 
@@ -168,20 +166,7 @@ int assign2DPkMemory(){
 
     f_kMonopole2d                                        = (float  *) malloc((kBinNumb-1)*sizeof(*f_kMonopole2d));
     f_kQuadrupole2d                                      = (float  *) malloc((kBinNumb-1)*sizeof(*f_kQuadrupole2d));
-
-    return 0;
-}
-
-
-int clean2Dpk(){
-    for(j=0; j<loskBinNumb-1; j++){
-        for(i=0; i<perpkBinNumb-1; i++){
-            zSpaceBinnedPk[j][i]    = 0.0;
-            zSpacemodesPerBin[j][i] =   0;
-            mean_perpk[j][i]        = 0.0;
-            mean_losk[j][i]         = 0.0;
-        }
-    }
+    
     return 0;
 }
 

@@ -11,7 +11,7 @@ typedef struct FFTLog_complex{
 }  FFTLog_complex;
 
 
-typedef struct {
+typedef struct FFTLog_config{
   int N;
   
   double min;
@@ -41,4 +41,12 @@ void FFTLog_free(FFTLog_config *fc);
 FFTLog_complex FFTLog_U_mu(double mu, FFTLog_complex z);
 FFTLog_config *FFTLog_init(int N, double min, double max, double q, double mu);
 
-FFTLog_config *fc;
+// FFTLog_config *fc;
+
+FFTLog_config*  octupole_config;
+FFTLog_config*      mono_config;
+FFTLog_config*      quad_config;
+FFTLog_config*       hex_config;
+
+FFTLog_config*  clipmono_config;
+FFTLog_config*  clipquad_config;
