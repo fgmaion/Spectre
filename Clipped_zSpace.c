@@ -50,7 +50,7 @@ int inputHODPk(){
 }
 
 double HODPk_Gaussian(double k){
-    return splintHODpk(k)*exp(-0.5*pow(k*10., 2.));
+    return splintHODpk(k)*exp(-0.5*pow(k*3., 2.));
 }
 
 
@@ -124,10 +124,10 @@ int formPkCube(){
                 }
                 */    
                 
-                PkCube[Index]                     *= pow(1. + beta*mu*mu, 2.);
+                // PkCube[Index]                  *= pow(1. + beta*mu*mu, 2.);
                 
                 // Lorentzian factor for non-linear redshift space distortions. 
-                PkCube[Index]                     /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
+                // PkCube[Index]                  /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
                 
                 /*
                 WindowFunc                         = 1.;
@@ -185,6 +185,22 @@ double HermitePolynomial(double x, int n){
 }
 
 
+double LegendrePolynomials(double x, int n){
+    switch(n){
+        case 0:
+            return 1.;  
+        case 1:
+            return x;
+        case 2:
+            return 0.5*(3.*pow(x, 2.) -1.);
+        case 3:
+            return 0.5*(5.*pow(x, 3.) - 3.*x);
+        case 4:
+            return (1./8.)*(35.*pow(x, 4.) - 30.*pow(x, 2.) + 3.);
+    }
+}
+
+
 double C_n(double x, int n){                                                // (n+1)! = Gamma (n+2)
     return pow(HermitePolynomial(x, n-1), 2.)*exp(-2.*x*x)/(pi*pow(2., n)*gsl_sf_gamma(n + 2));
 }
@@ -219,14 +235,16 @@ int clipCorrfn(){
         }
     }
     
-    iplan   = fftw_plan_dft_3d(n0, n1, n2, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
+    // Unless clipping prediction has broken, remove this line. 
+    // iplan   = fftw_plan_dft_3d(n0, n1, n2, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
     
-    for(j=0; j<n0*n1*n2; j++) in[j][0] = distortedCorrfn[j];
-    for(j=0; j<n0*n1*n2; j++) in[j][1] = 0.0;
+    // switching out to in and vice versa. 
+    for(j=0; j<n0*n1*n2; j++) out[j][0] = distortedCorrfn[j];
+    for(j=0; j<n0*n1*n2; j++) out[j][1] = 0.0;
     
     fftw_execute(iplan);
 
-    for(j=0; j<n0*n1*n2; j++) clippedPk[j] = pow(n0*n1*n2, -1.)*out[j][0];
+    for(j=0; j<n0*n1*n2; j++) clippedPk[j] = pow(n0*n1*n2, -1.)*in[j][0];
 
     printf("\n\nClipped P(k), frgs method.");
     
@@ -237,8 +255,8 @@ int clipCorrfn(){
 
 
 int corrfn_multipoles(double Corrfn[], char filepath[]){
-    int    rbinNumb   = 100;
-    double rbinlength =  5.;
+    int    rbinNumb   =  100;
+    double rbinlength =  5.0;
     int    m0, m1, m2;
 
     double rbinLimits[rbinNumb];
@@ -253,7 +271,7 @@ int corrfn_multipoles(double Corrfn[], char filepath[]){
     for(j=0; j<muBinNumb; j++)  muBinLimits[j]     =   (1.0/(double) (muBinNumb - 1))*(j+1);
     
     polarPk_modeCount        = 0;
-
+    
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
@@ -269,9 +287,12 @@ int corrfn_multipoles(double Corrfn[], char filepath[]){
 	           yCell         =  CellSize*m1;
 	           zCell         =  CellSize*m0;
 
-               rmodulus      = sqrt(xCell*xCell + yCell*yCell + zCell*zCell);
+               rmodulus      = CellSize*sqrt(m2*m2 + m1*m1 + m0*m0);
 
                Index         = k*n1*n2 + j*n2 + i;
+               
+               rmodulus_vec[Index][0] =        rmodulus;
+               rmodulus_vec[Index][1] = (double)  Index;
 
                mu            = zCell/rmodulus;
                if(rmodulus < 0.000001)       mu   = 0.0;      
@@ -286,11 +307,14 @@ int corrfn_multipoles(double Corrfn[], char filepath[]){
             }
         }
     }
+    
+    rmodulus_vec[n0*n1*n2][0] =           9999.;
+    rmodulus_vec[n0*n1*n2][1] = (double)   9999;
 
     DualBinning(polarPk_modeCount, muBinNumb, muBinLimits, rbinNumb, rbinLimits, polar2Dpk, polar2DBinnedPk, mean_mu, mean_modk, polar_modesPerBin);
 
-    MultipoleCalc(rbinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, polarPk_modeCount, filepath, rbinlength);
-
+    MultipoleCalc(rbinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, polarPk_modeCount, filepath, rbinlength, 1);
+    
     return 0;
 }
 
@@ -367,7 +391,7 @@ int ClippedMultipole(){
     
     sprintf(filepath, "%s/Data/SpectralDistortion/frgs_clipped.dat", root_dir);
 
-    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, polarPk_modeCount, filepath, kbinInterval);
+    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, polarPk_modeCount, filepath, kbinInterval, 1);
 
     return 0;
 }

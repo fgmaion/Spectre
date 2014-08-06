@@ -18,9 +18,9 @@ int PkCalc(){
     if(loopCount<10)  sprintf(filepath, "%s/Data/Del2k/midK_Del2k_%s_kInterval_%.2f_00%d.dat", root_dir, surveyType, kbinInterval, loopCount);
     else              sprintf(filepath, "%s/Data/Del2k/midK_Del2k_%s_kInterval_%.2f_0%d.dat", root_dir, surveyType, kbinInterval, loopCount);
     
-    Monopole(filepath);
+    // Monopole(filepath);
 
-    // observedQuadrupole(polarPk_modeCount);
+    observedQuadrupole(polarPk_modeCount);
     
     // sprintf(filepath, "%s/Data/Multipoles/Cartesian2Dpk_%s_%.3f_%d.dat", root_dir, surveyType, kbinInterval, loopCount);
     
@@ -63,7 +63,7 @@ int observedQuadrupole(int modeCount){
     if(loopCount<10)  sprintf(filepath, "%s/Data/Multipoles/Multipoles_%s_kbin_%.3f_00%d.dat", root_dir,  surveyType, kbinInterval, loopCount);
     else              sprintf(filepath, "%s/Data/Multipoles/Multipoles_%s_kbin_%.3f_0%d.dat", root_dir, surveyType, kbinInterval, loopCount);
 
-    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, modeCount, filepath, kbinInterval);
+    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, modeCount, filepath, kbinInterval, 1);
   
     // HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, modesPerBin, polar2Dpk);
 
@@ -131,7 +131,7 @@ double legendrePolynomials(int Order, double mu){
 }
 
 
-int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQuadrupole[], int ModesPerBin[], double** Array, int modeCount, char filepath[], double Interval){
+int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQuadrupole[], int ModesPerBin[], double** Array, int modeCount, char filepath[], double Interval, int fileOutput){
     // monopole     factor:        1. + (2./3.)*beta + 0.2*beta*beta;
     // quadrupole   factor:    (4./3.)*beta + (4./7.)*beta**2 = 0.68;
     // hexadecapole factor:   (8./35.)*beta*beta); 
@@ -139,12 +139,12 @@ int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQ
     // P(k, mu_i) = P_0(k) + P_2(k)*(3.*mu_i*mu_i - 1.)
     // Least squares fit between theory prediction, P(k, mu_i) and measured.  (Linear regression).
 
-    printf("\n\nPerforming multipole calculation.");
+    // printf("\n\nPerforming multipole calculation.");
 
     for(j=0; j<kBinNumb; j++)  kBinLimits[j]  = (j+1)*Interval;
 
     // Order by mod k to ensure binning is the mean between LowerBinIndex and UpperBinIndex.
-    printf("\nSorting mod k array.");
+    // printf("\nSorting mod k array.");
     
     qsort(Array, modeCount, sizeof(Array[0]), FirstColumnCompare);
 
@@ -157,8 +157,6 @@ int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQ
         kQuadrupole[k] = 0.0;
         ModesPerBin[k] =   0;
     }
-    
-    output = fopen(filepath, "w");
     
     for(i=0; i<modeCount; i++){
         if(Array[i][0] >= kBinLimits[0]){
@@ -222,19 +220,26 @@ int MultipoleCalc(int kBinNumb, double meankBin[], double kMonopole[], double kQ
         double detA;
         // det = ad - bc.
      
-        detA = modesPerBin[j]*Sum_Li2 - Sum_Li*Sum_Li;
+        detA            = modesPerBin[j]*Sum_Li2 - Sum_Li*Sum_Li;
      
         // (P_0, P_2)^T = (A^-1)B = (1./detA)*(d*b1 - b*b2, -c*b1 + a*b2)^T.
      
           kMonopole[j]  = (1./detA)*(Sum_Li2*Sum_Pi - Sum_Li*Sum_PiLi);
         kQuadrupole[j]  = (1./detA)*(-1.*Sum_Li*Sum_Pi + modesPerBin[j]*Sum_PiLi);
-        
-        fprintf(output, "%e \t %e \t %e \t %d \t %e \t %e \n", meanKBin[j], TotalVolume*kMonopole[j], TotalVolume*kQuadrupole[j], modesPerBin[j], (*pt2Pk)(meanKBin[j])*kaiser_Monofactor(meanKBin[j], beta), (*pt2Pk)(meanKBin[j])*kaiser_Quadfactor(meanKBin[j], beta));   
     
-        LowerBinIndex = UpperBinIndex;
+        LowerBinIndex   = UpperBinIndex;
     } 
     
-    fclose(output);
+    if(fileOutput == 1){       
+        output = fopen(filepath, "w");
+    
+        for(j=0; j<kBinNumb-1; j++){
+            fprintf(output, "%e \t %e \t %e \t %d \t %e \t %e \n", meanKBin[j], TotalVolume*kMonopole[j], TotalVolume*kQuadrupole[j], modesPerBin[j], (*pt2Pk)(meanKBin[j])*kaiser_Monofactor(meanKBin[j], beta), (*pt2Pk)(meanKBin[j])*kaiser_Quadfactor(meanKBin[j], beta));   
+        }
+    
+        fclose(output);
+    }
+    
     
     return 0;
 }
@@ -510,11 +515,11 @@ int Gaussianfield(){
                 // Monopole and Quadrupole components, with z taken as the line of sight direction. 
                 // expectation                        = (kaiser_multipole(kmodulus, beta, 0) + kaiser_multipole(kmodulus, beta, 2)*0.5*(3.*mu*mu -1.))*Pk_powerlaw(kmodulus, 5., 1.8)/TotalVolume;
 
-                expectation                        = pow(1. + beta*pow(mu, 2.), 2.)*(*pt2Pk)(kmodulus)/TotalVolume;
+                expectation                        = (*pt2Pk)(kmodulus)/TotalVolume; // pow(1. + beta*pow(mu, 2.), 2.)
 
                 Power                              = -log(gsl_rng_uniform(gsl_ran_r))*expectation;
                 
-                /// amplitude                      = sqrt(Power);
+                // amplitude                       = sqrt(Power);
                 amplitude                          = sqrt(expectation);
                 
                 phase                              = 2.*pi*gsl_rng_uniform(gsl_ran_r);

@@ -117,13 +117,23 @@ int loadRand(){
 	        accepted_rand                    +=  1.;
 	    }
     }
-    
+    /*
     for(j=0; j<n0*n1*n2; j++){
         if(Cell_SurveyLimitsMask[j] <=4.){
             Cell_SurveyLimitsMask[j] = 0.0;
         }
     }
+    */
+    sprintf(filepath, "%s/Data/SpectralDistortion/VIPERS_mask.dat", root_dir);
     
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<n0*n1*n2; j++){ 
+            fprintf(output, "%e \n", Cell_SurveyLimitsMask[j]);
+    }
+    
+    fclose(output);
+
     /*
     for(j=0; j<rand_number; j++){ 
         if((LowerChiLimit < rand_chi[j]) && (rand_chi[j] < UpperChiLimit)){ 

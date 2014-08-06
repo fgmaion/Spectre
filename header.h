@@ -331,6 +331,10 @@ double*     suppressedCorrfn    = NULL;
 double*     distortedCorrfn     = NULL;
 double*     clippedPk           = NULL;
 
+double*     W2_veck             = NULL;
+double*     FFTW2_vecr_re       = NULL;
+double*     FFTW2_vecr_im       = NULL;
+
 // Binning a 2D, redshift space P(k).
 int**        zSpacemodesPerBin  = NULL;
 double**     mean_perpk         = NULL;
@@ -853,3 +857,14 @@ double* fftlogk;
 double Pk_powerlaw_truncated_xi(double r);
 
 double HODPk_Gaussian(double k);
+
+double*  theta;
+double** mixingmatrix;
+
+double**  rmodulus_vec;
+double*   kmodulus_vec;
+double*         mu_vec;
+
+double LegendrePolynomials(double x, int n);
+
+double unitTheory(double r, double k, double d, int order);

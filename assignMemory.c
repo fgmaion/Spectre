@@ -68,6 +68,11 @@ int prepFFTw(int n0, int n1, int n2){
     p                  = fftw_plan_dft_3d(n0, n1, n2, in, out, FFTW_FORWARD,  FFTW_ESTIMATE);
     iplan              = fftw_plan_dft_3d(n0, n1, n2, out, in, FFTW_BACKWARD, FFTW_ESTIMATE);
 
+    W2_veck            = malloc(n0*n1*n2*sizeof(double));  
+    
+    FFTW2_vecr_re      = malloc(n0*n1*n2*sizeof(double));
+    FFTW2_vecr_im      = malloc(n0*n1*n2*sizeof(double));
+
     return 0;
 }
 
@@ -102,6 +107,9 @@ int prepFFTbinning(){
     modesPerBin       = (int *)    malloc((kBinNumb-1)*sizeof(*modesPerBin));
     binnedPk          = (double *) malloc((kBinNumb-1)*sizeof(*binnedPk));
     linearErrors      = (double *) malloc((kBinNumb-1)*sizeof(*linearErrors));
+    
+    kmodulus_vec      = (double *) malloc(n0*n1*n2*sizeof(double));
+    mu_vec            = (double *) malloc(n0*n1*n2*sizeof(double));
     
     return 0;
 }
@@ -344,6 +352,34 @@ int ClippingModelling(){
     suppressedCorrfn  = (double *)  realloc(suppressedCorrfn,   n0*n1*n2*sizeof(*suppressedCorrfn));
     distortedCorrfn   = (double *)  realloc(distortedCorrfn,    n0*n1*n2*sizeof(*distortedCorrfn));
     clippedPk         = (double *)  realloc(clippedPk,          n0*n1*n2*sizeof(*clippedPk));
+    
+    rmodulus_vec      =             realloc(rmodulus_vec,       (1 + n0*n1*n2)*sizeof(*rmodulus_vec));
+    
+    for(j=0; j<=n0*n1*n2; j++){ 
+        rmodulus_vec[j] = malloc(2*sizeof(double));
+    }
 
+    return 0;
+}
+
+
+int assign_mixingmatrix(int kBinNumb, double kMonopole[], double kQuadrupole[]){
+    theta                     = malloc(2*(kBinNumb-1)*sizeof(double));
+        
+    for(j=0; j<kBinNumb-1; j++){  
+        theta[j]              =   kMonopole[j];   
+        theta[kBinNumb-1 + j] = kQuadrupole[j];
+    }
+    
+    mixingmatrix              = malloc(2*(kBinNumb-1)*sizeof(*mixingmatrix));
+    
+    for(j=0; j<2*(kBinNumb-1); j++){  
+        mixingmatrix[j]       = malloc(2*(kBinNumb-1)*sizeof(double));
+
+        for(k=0; k<2*(kBinNumb-1); k++){
+            mixingmatrix[j][k] = 0.0;
+        }
+    }
+    
     return 0;
 }

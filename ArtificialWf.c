@@ -81,7 +81,7 @@ int Gaussian(float sigma){
             
                 Index = k*n1*n2 + j*n2 + i;
             
-                Cell_SurveyLimitsMask[Index] = exp(-1.*r2/(2.*sigma*sigma));
+                Cell_SurveyLimitsMask[Index] = exp(-0.5*r2/pow(sigma, 2.));
             }
         }
     }
@@ -102,6 +102,19 @@ int PencilBeamSurvey(int xlow, int xhi, int ylow, int yhi){
             }
         }
     }
+
+    return 0;
+}
+
+
+int VIPERS_mask(){
+    sprintf(filepath, "%s/Data/SpectralDistortion/VIPERS_mask.dat", root_dir);
+    
+    inputfile     = fopen(filepath, "r");          
+
+    for(j=0; j<n0*n1*n2; j++)  fscanf(inputfile, "%le", &Cell_SurveyLimitsMask[j]);
+
+    fclose(inputfile);
 
     return 0;
 }

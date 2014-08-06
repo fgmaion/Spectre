@@ -65,7 +65,7 @@ int FFTLog_setInput(FFTLog_config *fc, double *k, double *r, double beta, double
     // purely real.  Set P(k) to obtain xi(r) by inverse Hankel transform. 
     //fc->pk[i][0]  = sqrt(pow(k[i], 3.)/(8.*pow(pi, 3.)))*Pk_powerlaw(k[i], 5., 1.8)*kaiser_multipole(k[i], beta, (int) transformOrder);
     
-    fc->pk[i][0]    = sqrt(pow(k[i], 3.)/(8.*pow(pi, 3.)))*(*pt2Pk)(k[i])*(*pt2RSD_k)(k[i]*velDispersion, beta, transformOrder);
+    fc->pk[i][0]    = sqrt(pow(k[i], 3.)/(8.*pow(pi, 3.)))*(*pt2Pk)(k[i]); //*(*pt2RSD_k)(k[i]*velDispersion, beta, transformOrder);
     fc->pk[i][1]    = 0.0;
     
     // purely real.  Set xi(r) to obtain P(k) by Hankel transform.  

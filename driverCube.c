@@ -7,6 +7,7 @@
 #include <gsl/gsl_sf_legendre.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_sf_bessel.h>
+#include <gsl/gsl_sf_expint.h> 
 
 // Stacpolly run. 
 // #define AUXfn_DIR "/home/mjw/Aux_functions/header.h"
@@ -51,6 +52,7 @@
 #include "Scripts/FFTw_3Dwf.c"
 // #include "Scripts/FFTw_3Dwf_pad.c"
 #include "Scripts/axesWfSlices.c"
+#include "Scripts/mixingMatrix.c"
 
 #include "Scripts/MeasureWfKernel.c"
 // #include "Scripts/sphericalConvolvePk.c"
@@ -95,7 +97,6 @@
 
 
 int main(int argc, char **argv){
-
     sprintf(root_dir,      "/disk1/mjw/HOD_MockRun");
     sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_HOD_Mocks");
 
@@ -110,17 +111,17 @@ int main(int argc, char **argv){
     
     // lower_xlimit & upper_xlimit
     AxisLimsArray[0][0]       =        0.0;                                 // h^-1 Mpc
-    AxisLimsArray[1][0]       =       1000.;                                 // h^-1 Mpc
+    AxisLimsArray[1][0]       =       800.;                                 // h^-1 Mpc
 
     // lower_ylimit & upper_ylimit
     AxisLimsArray[0][1]       =        0.0;                                 // h^-1 Mpc
-    AxisLimsArray[1][1]       =      1000.;                                 // h^-1 Mpc
+    AxisLimsArray[1][1]       =       800.;                                 // h^-1 Mpc
 
     // lower_zlimit & upper_zlimit
     AxisLimsArray[0][2]       =        0.0;                                 // h^-1 Mpc
-    AxisLimsArray[1][2]       =      1000.;                                 // h^-1 Mpc
+    AxisLimsArray[1][2]       =       800.;                                 // h^-1 Mpc
                 
-    CellSize                  =        5.0;                                 // Cell size, comoving distance, h^-1 Mpc
+    CellSize                  =        4.0;                                 // Cell size, comoving distance, h^-1 Mpc
 
     // Selection parameters. Mag 20.0 galaxies at redshift 0.8;
     redshiftLowLimit          =       0.795;
@@ -134,8 +135,8 @@ int main(int argc, char **argv){
     fkpPk                     =      5000.;                                               // [P(k)] = [h^-1 Mpc]^3, Peeble's convention.
 
     // Binning interval for P(k).
-    kbinInterval              =       0.01;
-    modkMax                   =        1.2;
+    kbinInterval              =      0.005;
+    modkMax                   =        0.5;
     muBinNumb                 =         50;
 
     gsl_rng_env_setup();
@@ -181,16 +182,16 @@ int main(int argc, char **argv){
     -20.15 1.527030
     */
     
-    linearBias                =   1.495903;
+    linearBias                   =   1.495903;
     
     // Clipping variables. 
-    appliedClippingThreshold  =        0.2;    
-    // linearBias             = sqrt(2.90);
+    // appliedClippingThreshold  =        0.2;    
+    appliedClippingThreshold     =      1000.;   
     
     // zCubeCreate();
     
     // wedgeMockCreate(400., 150., 600., 150., 700., 850., 300., 850., 475., 525.);
-    /*
+    
     comovDistReshiftCalc();
 
     // JenkinsCoordinates();
@@ -199,17 +200,18 @@ int main(int argc, char **argv){
    
     // assign binning interval in k, and calculate number of bins required. 
     assignbinninginterval(kbinInterval);
-
+    
     prepNGP();
     
     // No artificially applied window fn. 
     
-    FullCube();
+    // FullCube();
     // EmbeddedCube(50);
-    // Gaussian(250.);
-    // PencilBeamSurvey(25, 55, 25, 55);
+    // Gaussian(50.);
+    // PencilBeamSurvey(50, 100, 50, 100);
     // Spherical(250.);
     // AnisoGauss(20., 30., 40.);
+    VIPERS_mask();
     
     Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
     
@@ -222,8 +224,9 @@ int main(int argc, char **argv){
     
     prepFFTbinning();
     
-    assign2DPkMemory(muBinNumb, kBinNumb);                
-    
+    assign2DPkMemory(muBinNumb, kBinNumb);       
+         
+    /*
     // Choice of real or redshift space, zcube or cube. 
     sprintf(filepath, "%s/Data/HODCube/zcube_zvel_gal_-20.0.dat", root_dir);       
                                                                                  
@@ -237,10 +240,10 @@ int main(int argc, char **argv){
     
     // setKaiserRSD();
     
-    setLorentzianRSD();
-    /*
+    // setLorentzianRSD();
+    
     // setGaussianRSD();
-
+    
     pt2shot = &CubeShot;
     
     // Mean number density is the same when boot strapping. 
@@ -259,27 +262,25 @@ int main(int argc, char **argv){
     // Overwrites measured density field with a Gaussian random field, with given P(k).
     Gaussianfield();
     
-    // clipDensity(appliedClippingThreshold);
+    clipDensity(appliedClippingThreshold);
        
-    // prepBootStrap(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
+    prepBootStrap(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
        
     // for(loopCount=0; loopCount<100; loopCount++){
     
-    // sprintf(surveyType, "GaussianCube_powLawpk_trunc_NoRSD_clipThreshold_%.1e_fullCube", appliedClippingThreshold);
+    sprintf(surveyType, "VipersMaskCube_HOD_NoRSD_clipThreshold_%.1e_wfWork_fullCube", appliedClippingThreshold);
               
     // BootStrapGen(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
                 
-    // CalcWfCorrections();
+    CalcWfCorrections();
             
-    // cleanFFTbinning();
+    cleanFFTbinning();
     
     // ** Shot noise correction is switched off **
-    // PkCalc();
+    PkCalc();
     // }
     
-    // wfPkCalc();
-    
-    // DispersionModel_Multipoles()();
+    // DispersionModel_Multipoles();
     
     // LikelihoodMemory();
     
@@ -290,16 +291,25 @@ int main(int argc, char **argv){
     ClippingModelling();                                                            // Assigns memory for Clipping prediction. 
     
     // Mono_xi();
-    
-    formPkCube();
 
-    clipCorrfn();
+    // formPkCube();
+
+    // clipCorrfn();
     
-    sprintf(filepath, "%s/Data/SpectralDistortion/2D_corrfn_multipoles_%.2f.dat", root_dir, CellSize);
+    // sprintf(filepath, "%s/Data/SpectralDistortion/2D_corrfn_multipoles_%.2f_4Aug.dat", root_dir, CellSize);
     
-    corrfn_multipoles(Corrfn, filepath);
+    /* iplan currently prevents execution of corrfn_multipoles and wfPkCalc in the same run. Why? to be determined. No f** 'ing clue*/
+    // corrfn_multipoles(Corrfn, filepath);
     
+    wfPkCalc();
     
+    calc_mixingmatrix(kBinLimits, kBinNumb);
+    
+    // printf_unitTheoryxi();
+    
+    // printf_xi();
+    
+    /*
     sprintf(filepath, "%s/Data/SpectralDistortion/2D_corrfn_Suppressedmultipoles_%.2f.dat", root_dir, CellSize);
     
     corrfn_multipoles(suppressedCorrfn, filepath);
@@ -308,7 +318,7 @@ int main(int argc, char **argv){
     sprintf(filepath, "%s/Data/SpectralDistortion/2D_corrfn_Clippedmultipoles_%.2f.dat", root_dir, CellSize);
     
     corrfn_multipoles(distortedCorrfn, filepath);
-    
+    */
     // multipolesRealisation();
     
     // minimiseChiSq();
@@ -340,12 +350,13 @@ int main(int argc, char **argv){
     
     // Eisenstein & Hu P(k)
     // TFmdm_set_cosm(0.3, 0.047337, 0.0, 0, 0.7, 0.65, 0.0);
-    */
     
+    /*
     FFTlogRes        = 4096;
     
     FFTlog_memory(FFTlogRes, beta, velDispersion);
     
+    double u0;
     double variance  =   3.866168*pow(10., -1.);
     
     u0               =   appliedClippingThreshold/(sqrt(2.*variance));
@@ -359,9 +370,9 @@ int main(int argc, char **argv){
     xi_mu( hex_config, 4, fftlogr);
     
     // Currently evaluated at second order. 
-    clipmono(clipmono_config, mono_config, quad_config, hex_config, u0, variance);
+    // clipmono(clipmono_config, mono_config, quad_config, hex_config, u0, variance);
     
-    clipquad(clipquad_config, mono_config, quad_config, hex_config, u0, variance);
+    // clipquad(clipquad_config, mono_config, quad_config, hex_config, u0, variance);
     
     // Power spectra given input correlation functions. 
     // pk_mu(mono_config, 0, fftlogk);
@@ -370,14 +381,16 @@ int main(int argc, char **argv){
     
     // pk_mu( hex_config, 4, fftlogk);
                 
-    sprintf(filepath, "%s/Data/SpectralDistortion/fftlog_pk_truncpowerlaw_%d_%.2e_%.2e.dat", root_dir, FFTlogRes, mono_config->min, mono_config->max);
+    sprintf(filepath, "%s/Data/SpectralDistortion/fftlog_hodpk_NoRSD_%d_%.2e_%.2e_04Aug.dat", root_dir, FFTlogRes, mono_config->min, mono_config->max);
 
     output = fopen(filepath, "w");
 
-    for(i=0; i<FFTlogRes; i++) fprintf(output, "%e \t %e \t %e \t %e \t %e \t %e \n", fftlogr[i], fabs(mono_config->xi[i][0]), fabs(quad_config->xi[i][0]), fabs(hex_config->xi[i][0]), fabs(clipmono_config->xi[i][0]), fabs(clipquad_config->xi[i][0]));
+    for(i=0; i<FFTlogRes; i++) fprintf(output, "%e \t %e \n", fftlogr[i], mono_config->xi[i][0]);
+
+    // for(i=0; i<FFTlogRes; i++) fprintf(output, "%e \t %e \t %e \t %e \t %e \t %e \n", fftlogr[i], fabs(mono_config->xi[i][0]), fabs(quad_config->xi[i][0]), fabs(hex_config->xi[i][0]), fabs(clipmono_config->xi[i][0]), fabs(clipquad_config->xi[i][0]));
     
     fclose(output);
-    
+    */
     printf("\n\n");
     
     return 0;

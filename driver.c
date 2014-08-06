@@ -50,6 +50,7 @@
 #include "Scripts/FFTw_3D.c"
 #include "Scripts/FFTw_3Dwf.c"
 #include "Scripts/axesWfSlices.c"
+#include "Scripts/mixingMatrix.c"
 
 #include "Scripts/MeasureWfKernel.c"
 // #include "Scripts/sphericalConvolvePk.c"
@@ -70,6 +71,7 @@
 #include "Scripts/MatrixInverse.c"
 
 #include "Scripts/Clipped_zSpace.c"
+#include "Scripts/toymodel_pk_xi.c"
 
 #include "Scripts/PowellsRoutine.c"
 #include "Scripts/Powells_mnbrak.c"
@@ -79,9 +81,9 @@
 #include "Scripts/fitting_nz.c"
 #include "Scripts/randGen.c"
 
-
-#include "Scripts/slowDFT.c"
 /*
+#include "Scripts/slowDFT.c"
+
 // #include "Scripts/MockAvgMultipole.c"
 #include "Scripts/MultipoleCovariance.c"
 #include "Scripts/MultipoleCovariance_Inverse.c"
@@ -128,7 +130,6 @@ AxisLimsArray[1][1]   =     800.0;                                              
 
 AxisLimsArray[0][2]   =       0.0;                                                     // h^-1 Mpc
 AxisLimsArray[1][2]   =     800.0;                                                     // h^-1 Mpc
-
 
 // degree of translation for Stefano's co-ordinates, fit survey into surrounding volume. 
 stefano_trans_x       =    + 100.;
@@ -286,7 +287,7 @@ prepFFTw(n0, n1, n2);
 
 prepFFTbinning();
 
-assign2DPkMemory();
+assign2DPkMemory(muBinNumb, kBinNumb);       
 
 sprintf(theoryPk_flag, "HOD_-20.0");
 
@@ -321,7 +322,7 @@ for(loopCount=1; loopCount<2; loopCount++){
     
     // Applied window fn.
     Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
-
+    /*
     // Checked.
     CalcWfCorrections();
     
@@ -351,7 +352,7 @@ for(loopCount=1; loopCount<2; loopCount++){
     cleanFFTbinning();
   
     PkCalc();
-    
+    */
     // slowDFTcalc();
 }
 

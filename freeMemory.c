@@ -84,6 +84,7 @@ int freeBinning(){
 
 
 int free2DBinning(){
+
     for(j=0; j<n0*n1*n2; j++){
         free(polar2Dpk[j]);
         free(TwoDpkArray[j]);
@@ -105,7 +106,7 @@ int free2DBinning(){
     
     for(j=0; j<muBinNumb-1; j++)  free(polar2DBinnedPk[j]);
     free(polar2DBinnedPk);
-
+    
     return 0;
 }
 
