@@ -14,7 +14,7 @@ int          CalcCorrections();
 
 int          randNGP();
 
-float        zChi_Integrand(float x);
+// double        zChi_Integrand(double x);
 int          CoordinateCalc();
 int          NGPCalc();
 int          PkCalc();
@@ -169,13 +169,13 @@ int          loopCount;
 
 // z - Comoving distance data points for interpolation. 
 int          nPoints = 1000;
-float        z_Array[1001];
-float        ComovingDistance_z[1001];
-float        redshiftInterval  = 0.015;
+double       z_Array[1001];
+double       ComovingDistance_z[1001];
+double       redshiftInterval  = 0.015;
 
 // Spline and splint holders. 
-float        z_ComovingDistance_2derivatives[1001];
-float        ComovingDistance_z_2derivatives[1001];
+double       z_ComovingDistance_2derivatives[1001];
+double       ComovingDistance_z_2derivatives[1001];
 
 // Memory assignment for ZADE catalogue input. 
 
@@ -300,14 +300,14 @@ int          NuQuadrants  = 0;
 // Jenkins scaling trick. 
 double       JenkinsScalefactor;
 
-float*      sdltk               = NULL;
-float*      sdltPk              = NULL;
-float*      sdlt2d              = NULL;
+double*      sdltk               = NULL;
+double*      sdltPk              = NULL;
+double*      sdlt2d              = NULL;
 
 // Camb linear P(k)
-float*      lineark             = NULL;
-float*      linearPk            = NULL;
-float*      linear2d            = NULL;
+double*      lineark             = NULL;
+double*      linearPk            = NULL;
+double*      linear2d            = NULL;
 
 // Factors for theoretical prediction of redshift space P(k).
 double       kaiserFactor;
@@ -332,6 +332,7 @@ double*     distortedCorrfn     = NULL;
 double*     clippedPk           = NULL;
 
 double*     W2_veck             = NULL;
+double*     W2_vecr             = NULL;
 double*     FFTW2_vecr_re       = NULL;
 double*     FFTW2_vecr_im       = NULL;
 
@@ -615,12 +616,19 @@ double*  kHexadecapole;
 double*  kQuadrupole;
 double*  kMonopole;
 
-float*   f_kMonopole;
-float*   f_kQuadrupole;
-float*   f_meanKBin;
+double* kMonopole_expError;
+double* kQuadrupole_expError;
 
-float*   f_kMonopole2d;
-float*  f_kQuadrupole2d;
+double*  wfMonopole;
+double*  wfQuadrupole;
+
+float*  fkBinLimits;
+
+float*  convMono;
+float*  convQuad;
+
+float*  convMono2d;
+float*  convQuad2d;
 
 float   TotalW1W4area;                                                                          
 
@@ -851,8 +859,8 @@ float* fcmono2D;
 
 int    FFTlogRes;
 
-double* fftlogr;
-double* fftlogk;
+// double* fftlogr;
+// double* fftlogk;
 
 double Pk_powerlaw_truncated_xi(double r);
 
@@ -868,3 +876,21 @@ double*         mu_vec;
 double LegendrePolynomials(double x, int n);
 
 double unitTheory(double r, double k, double d, int order);
+
+double u0, variance;
+
+double splintConvQuad(double k);
+double splintConvMono(double k);
+
+double apparent_mean;
+
+double* windfn_rvals;
+double* windfn_rMonopole;
+double* windfn_rQuadrupole;
+double* windfn_rHexadecapole;
+
+double* windfn_rMonopole2d;
+double* windfn_rQuadrupole2d;
+double* windfn_rHexadecapole2d;
+
+int    rbinNumb;

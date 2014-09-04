@@ -9,6 +9,8 @@
 #include <gsl/gsl_sf_bessel.h>
 #include <gsl/gsl_sf_expint.h> 
 
+// #include <nag.h>
+
 // Stacpolly run. 
 // #define AUXfn_DIR "/home/mjw/Aux_functions/header.h"
 
@@ -95,11 +97,10 @@
 #include "Scripts/FFT_log.h"
 #include "Scripts/FFT_log.c"
 
-
 int main(int argc, char **argv){
     sprintf(root_dir,      "/disk1/mjw/HOD_MockRun");
     sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_HOD_Mocks");
-
+    
     // Stacpolly run. 
     // sprintf(root_dir, "/home/mjw/HOD_MockRun");
 
@@ -135,9 +136,11 @@ int main(int argc, char **argv){
     fkpPk                     =      5000.;                                               // [P(k)] = [h^-1 Mpc]^3, Peeble's convention.
 
     // Binning interval for P(k).
-    kbinInterval              =      0.005;
-    modkMax                   =        0.5;
-    muBinNumb                 =         50;
+    kbinInterval              =       0.01;
+    // kbinInterval           =      0.005;
+    
+    modkMax                   =        0.7;
+    muBinNumb                 =         40;
 
     gsl_rng_env_setup();
 
@@ -145,8 +148,12 @@ int main(int argc, char **argv){
     gsl_ran_r                 = gsl_rng_alloc(gsl_ran_T);
     
     // Non-linear RSD
-    beta                      =       0.542;                  // beta = 0.542
-    velDispersion             =        5.00;                   // units of h^-1 Mpc rather than 300 km s^-1
+    // beta                      =       0.542;                  // beta = 0.542
+    // velDispersion             =        4.00;                  // units of h^-1 Mpc rather than 300 km s^-1
+    
+    beta                      =         0.0;
+    velDispersion             =         0.0;
+    
     A11Sq                     =       0.567;
     
     // Priors on the model params.
@@ -193,11 +200,11 @@ int main(int argc, char **argv){
     // wedgeMockCreate(400., 150., 600., 150., 700., 850., 300., 850., 475., 525.);
     
     comovDistReshiftCalc();
-
+    
     // JenkinsCoordinates();
     
     EvaluateGridParameters();
-   
+    
     // assign binning interval in k, and calculate number of bins required. 
     assignbinninginterval(kbinInterval);
     
@@ -205,33 +212,37 @@ int main(int argc, char **argv){
     
     // No artificially applied window fn. 
     
-    // FullCube();
+    FullCube();
     // EmbeddedCube(50);
     // Gaussian(50.);
     // PencilBeamSurvey(50, 100, 50, 100);
     // Spherical(250.);
     // AnisoGauss(20., 30., 40.);
-    VIPERS_mask();
+    // VIPERS_mask();
+    // VIPERS_Binarymask();
+    
+    prepBootStrap(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
     
     Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
     
-    CalcCellraDec();
-
+    CalcWfCorrections();
+    
+    // CalcCellraDec();
+    
     // TotalSurveyedVolume initialised to zero in header.h
-    TotalSurveyedVolume   = SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2)*CellVolume;
+    // TotalSurveyedVolume   = SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2)*CellVolume;
     
     prepFFTw(n0, n1, n2);
     
-    prepFFTbinning();
+    prepFFTbinning(kbinInterval);
     
     assign2DPkMemory(muBinNumb, kBinNumb);       
          
-    /*
     // Choice of real or redshift space, zcube or cube. 
-    sprintf(filepath, "%s/Data/HODCube/zcube_zvel_gal_-20.0.dat", root_dir);       
+    // sprintf(filepath, "%s/Data/HODCube/zcube_zvel_gal_-20.0.dat", root_dir);       
                                                                                  
-    CoordinateCalcCube(filepath);  
-    */
+    // CoordinateCalcCube(filepath);  
+    
     inputHODPk();
     
     // inputLinearPk();
@@ -240,46 +251,43 @@ int main(int argc, char **argv){
     
     // setKaiserRSD();
     
-    // setLorentzianRSD();
+    setLorentzianRSD();
     
     // setGaussianRSD();
     
-    pt2shot = &CubeShot;
+    // pt2shot = &CubeShot;
     
     // Mean number density is the same when boot strapping. 
-    pt2nz   = &CubeMeanNumberDensity;
+    // pt2nz   = &CubeMeanNumberDensity;
     
     // Currently all galaxies accepted. 
     
-    assignAcceptanceCube();
+    // assignAcceptanceCube();
     
-    CleanNGP();
+    // CleanNGP();
     
-    // sprintf(surveyType, "zCube_xvel_clipThreshold_%.1e_fullCube", appliedClippingThreshold);
-    
-    NGPCalcCube();
+    // NGPCalcCube();
     
     // Overwrites measured density field with a Gaussian random field, with given P(k).
-    Gaussianfield();
     
-    clipDensity(appliedClippingThreshold);
-       
-    prepBootStrap(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
-       
-    // for(loopCount=0; loopCount<100; loopCount++){
-    
-    sprintf(surveyType, "VipersMaskCube_HOD_NoRSD_clipThreshold_%.1e_wfWork_fullCube", appliedClippingThreshold);
+    // clipDensity(appliedClippingThreshold);
+    /*
+    for(loopCount=0; loopCount<10; loopCount++){
+        sprintf(surveyType, "VIPERS_fullCube_HOD_QuadrupoleOnly_clipThreshold_%.1e_MaskedMultiples_fullMu", appliedClippingThreshold);
               
-    // BootStrapGen(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
-                
-    CalcWfCorrections();
+        // BootStrapGen(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
+        
+        printf("\nCreating Gaussian realisations: %d", loopCount);
+        
+        Gaussianfield();
             
-    cleanFFTbinning();
+        cleanFFTbinning();
     
-    // ** Shot noise correction is switched off **
-    PkCalc();
-    // }
+        // ** Shot noise correction is switched off **
     
+        PkCalc();
+    }
+    */
     // DispersionModel_Multipoles();
     
     // LikelihoodMemory();
@@ -296,14 +304,20 @@ int main(int argc, char **argv){
 
     // clipCorrfn();
     
-    // sprintf(filepath, "%s/Data/SpectralDistortion/2D_corrfn_multipoles_%.2f_4Aug.dat", root_dir, CellSize);
+    // sprintf(filepath, "%s/Data/SpectralDistortion/corrfn_multipoles_%.2f_11Aug.dat", root_dir, CellSize);
     
-    /* iplan currently prevents execution of corrfn_multipoles and wfPkCalc in the same run. Why? to be determined. No f** 'ing clue*/
+    // iplan currently prevents execution of corrfn_multipoles and wfPkCalc in the same run. Why? to be determined. No f** 'ing clue //
     // corrfn_multipoles(Corrfn, filepath);
     
-    wfPkCalc();
+    // wfPkCalc();
     
-    calc_mixingmatrix(kBinLimits, kBinNumb);
+    spline_wfMultipoles_deltaSpace();
+    
+    // calc_mixingmatrix(kBinLimits, kBinNumb);
+    
+    // prepConvolution(kBinLimits, kBinNumb);
+    
+    // convolvePk(kBinLimits, kBinNumb);
     
     // printf_unitTheoryxi();
     
@@ -313,7 +327,6 @@ int main(int argc, char **argv){
     sprintf(filepath, "%s/Data/SpectralDistortion/2D_corrfn_Suppressedmultipoles_%.2f.dat", root_dir, CellSize);
     
     corrfn_multipoles(suppressedCorrfn, filepath);
-    
     
     sprintf(filepath, "%s/Data/SpectralDistortion/2D_corrfn_Clippedmultipoles_%.2f.dat", root_dir, CellSize);
     
@@ -351,47 +364,40 @@ int main(int argc, char **argv){
     // Eisenstein & Hu P(k)
     // TFmdm_set_cosm(0.3, 0.047337, 0.0, 0, 0.7, 0.65, 0.0);
     
+    // clippedPkCalc();
+    
+    convolvedPkCalc();
+    
     /*
-    FFTlogRes        = 4096;
+    double xvals[10];
+    double yvals[10];
     
-    FFTlog_memory(FFTlogRes, beta, velDispersion);
+    double answer, error;
     
-    double u0;
-    double variance  =   3.866168*pow(10., -1.);
+    for(j=0; j<10; j++){
+        xvals[j] = j*1.0;
+        
+        yvals[j] = 10.*pow(xvals[j], 2.) + 2.;
+    }
     
-    u0               =   appliedClippingThreshold/(sqrt(2.*variance));
+    polint(xvals, yvals, 10, 6.5, &answer, &error);
     
-    // Spectral distortion calculation. 
-    // Correlation functions given input P(k).
-    xi_mu(mono_config, 0, fftlogr);
-    
-    xi_mu(quad_config, 2, fftlogr);
-    
-    xi_mu( hex_config, 4, fftlogr);
-    
-    // Currently evaluated at second order. 
-    // clipmono(clipmono_config, mono_config, quad_config, hex_config, u0, variance);
-    
-    // clipquad(clipquad_config, mono_config, quad_config, hex_config, u0, variance);
-    
-    // Power spectra given input correlation functions. 
-    // pk_mu(mono_config, 0, fftlogk);
-    
-    // pk_mu(quad_config, 2, fftlogk);
-    
-    // pk_mu( hex_config, 4, fftlogk);
-                
-    sprintf(filepath, "%s/Data/SpectralDistortion/fftlog_hodpk_NoRSD_%d_%.2e_%.2e_04Aug.dat", root_dir, FFTlogRes, mono_config->min, mono_config->max);
-
-    output = fopen(filepath, "w");
-
-    for(i=0; i<FFTlogRes; i++) fprintf(output, "%e \t %e \n", fftlogr[i], mono_config->xi[i][0]);
-
-    // for(i=0; i<FFTlogRes; i++) fprintf(output, "%e \t %e \t %e \t %e \t %e \t %e \n", fftlogr[i], fabs(mono_config->xi[i][0]), fabs(quad_config->xi[i][0]), fabs(hex_config->xi[i][0]), fabs(clipmono_config->xi[i][0]), fabs(clipquad_config->xi[i][0]));
-    
-    fclose(output);
+    printf("\n%e \t %e", 10.*pow(6.5, 2.) + 2., answer);
     */
+    
     printf("\n\n");
     
     return 0;
 }
+
+/*
+int printSphericalBesselfns(){
+    sprintf(filepath, "%s/Data/SpectralDistortion/sphericalBeselfns.dat", root_dir);
+    
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<100; j++)  fprintf(output, "%e \t %e \t %e \t %e \n", j*0.2, )
+
+    return 0;
+}
+*/

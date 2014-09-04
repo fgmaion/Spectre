@@ -41,9 +41,9 @@ int assignbinninginterval(double interval){
     
     kBinNumb          =  (int) ceil(modkMax/kbinInterval);   
     
-    loskBinNumb       =  (int) ceil(modkMax/kbinInterval); 
+    loskBinNumb       =  (int) ceil(modkMax/(10.*kbinInterval)); 
     
-    perpkBinNumb      =  loskBinNumb;
+    perpkBinNumb      =  (int) ceil(modkMax/(4.*kbinInterval));
 
     printf("\n\nkbinterval:  %f", kbinInterval);
     printf("\nNumber of k bins:  %d", kBinNumb);

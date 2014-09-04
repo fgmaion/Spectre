@@ -83,11 +83,11 @@ double splintHODpk(double k){
     else if(k<0.0004)  return 4.675*pow(10., 6.)*pow(k, 0.96)*pow(linearBias/1.495903, 2.); 
 
     else{
-        float Interim;
+        double Interim;
     
-        splint(sdltk, sdltPk, sdlt2d, 469, (float) k, &Interim);
+        splint(sdltk, sdltPk, sdlt2d, 469, k, &Interim);
     
-        return (double) Interim*pow(linearBias/1.495903, 2.);
+        return Interim*pow(linearBias/1.495903, 2.);
     }
 }
 

@@ -129,7 +129,7 @@ int loadRand(){
     output = fopen(filepath, "w");
     
     for(j=0; j<n0*n1*n2; j++){ 
-            fprintf(output, "%e \n", Cell_SurveyLimitsMask[j]);
+        fprintf(output, "%e \n", Cell_SurveyLimitsMask[j]);
     }
     
     fclose(output);

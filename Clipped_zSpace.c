@@ -23,21 +23,23 @@ int clipDensity(double threshold){
 
 int inputHODPk(){
     // Interpolated theoretical P(k) on a regular grid in k. 
-    sdltk  = (float *) realloc(sdltk,          470*sizeof(*sdltk));
-    sdltPk = (float *) realloc(sdltPk,         470*sizeof(*sdltPk));
+    sdltk  = realloc(sdltk,          470*sizeof(*sdltk));
+    sdltPk = realloc(sdltPk,         470*sizeof(*sdltPk));
               
     // Second derivates of HOD P(k) for cubic spline.           
-    sdlt2d = (float *) realloc(sdlt2d,         470*sizeof(*sdlt2d));
+    sdlt2d = realloc(sdlt2d,         470*sizeof(*sdlt2d));
 
     sprintf(filepath, "%s/Data/HODTheoryPk/cambExtendedPk_hod_20.00.dat", root_dir);
     
     inputfile = fopen(filepath, "r");
     
-    for(j=0; j<470; j++) fscanf(inputfile, "%f \t %f\n", &sdltk[j], &sdltPk[j]);
+    for(j=0; j<470; j++){
+        fscanf(inputfile, "%le \t %le \n", &sdltk[j], &sdltPk[j]);
+    }
     
     fclose(inputfile);
 
-    spline(sdltk, sdltPk, 469, 1.0e31, 1.0e31, sdlt2d);
+    spline(sdltk, sdltPk, 470, 1.0e31, 1.0e31, sdlt2d);
     
     pt2Pk   = &HODPk_Gaussian;
     
@@ -56,26 +58,28 @@ double HODPk_Gaussian(double k){
 
 int inputLinearPk(){
     // Interpolated theoretical P(k) on a regular grid in k. 
-    lineark  = (float *) realloc(lineark,          470*sizeof(*lineark));
-    linearPk = (float *) realloc(linearPk,         470*sizeof(*linearPk));
+    lineark  = realloc(lineark,          470*sizeof(*lineark));
+    linearPk = realloc(linearPk,         470*sizeof(*linearPk));
               
     // Second derivates of HOD P(k) for cubic spline.           
-    linear2d = (float *) realloc(linear2d,         470*sizeof(*linear2d));
+    linear2d = realloc(linear2d,         470*sizeof(*linear2d));
 
     sprintf(filepath, "%s/Data/HODTheoryPk/camb_matterPk.dat", root_dir);
     
     inputfile = fopen(filepath, "r");
     
-    for(j=0; j<470; j++) fscanf(inputfile, "%f \t %f \n", &lineark[j], &linearPk[j]);
+    for(j=0; j<470; j++) fscanf(inputfile, "%le \t %le \n", &lineark[j], &linearPk[j]);
     
     for(j=0; j<470; j++) linearPk[j] *= linearBias*linearBias;
     
     fclose(inputfile); 
     
-    spline(lineark, linearPk, 469, 1.0e31, 1.0e31, linear2d);
+    spline(lineark, linearPk, 470, 1.0e31, 1.0e31, linear2d);
     
-
     pt2Pk = &splintLinearPk;
+    
+    // Approx. model to HOD P(k), inflationary power law with exponential truncation. 
+    pt2Xi   = &Pk_powerlaw_truncated_xi;
     
     sprintf(theoryPk_flag, "linear_-20.0");
     
@@ -112,8 +116,9 @@ int formPkCube(){
                 if(kmodulus == 0.0)          mu    = 0.0;  
 
 		        PkCube[Index]                      = (*pt2Pk)(kmodulus); // Convert from CAMB units for P(k), [P_CAMB] = Volume, to [P(k)] dimensionless.
-                PkCube[Index]                     *= 1.0/TotalVolume;
                 
+                PkCube[Index]                     /= TotalVolume; 
+                 
                 // Impose spherical filter to calculate sigma_8.
                 /*
                 y                                  = kmodulus*8.;  
@@ -124,10 +129,10 @@ int formPkCube(){
                 }
                 */    
                 
-                // PkCube[Index]                  *= pow(1. + beta*mu*mu, 2.);
+                PkCube[Index]                     *= pow(1. + beta*mu*mu, 2.);
                 
                 // Lorentzian factor for non-linear redshift space distortions. 
-                // PkCube[Index]                  /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
+                PkCube[Index]                     /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
                 
                 /*
                 WindowFunc                         = 1.;
@@ -216,15 +221,12 @@ int clipCorrfn(){
 
     for(j=0; j<n0*n1*n2; j++) Corrfn[j] = out[j][0];
     
-    double variance;
-    double u0;
-    
     variance =  Corrfn[0];
     
     // inverse error fn. defined between -1 and 1. | A11Sq | < 1, i.e suppression factor. 
     u0       = appliedClippingThreshold/(sqrt(2.*variance));
     
-    printf("\n\nu0:  %e, variance: %e, suppression factor: %e", u0, variance, 0.25*pow(1.0 + gsl_sf_erf(u0), 2.));
+    printf("\n\nfrgs method: variance: %e, u0:  %e, suppression factor: %e", variance, u0, 0.25*pow(1.0 + gsl_sf_erf(u0), 2.));
     
     for(j=0; j<n0*n1*n2; j++) suppressedCorrfn[j]      = 0.25*pow(1.0 + gsl_sf_erf(u0), 2.)*Corrfn[j]; 
     for(j=0; j<n0*n1*n2; j++)  distortedCorrfn[j]      = suppressedCorrfn[j]; 
@@ -234,9 +236,6 @@ int clipCorrfn(){
             distortedCorrfn[j]   += variance*pow(Corrfn[j]/variance, i + 1)*C_n(u0, i);
         }
     }
-    
-    // Unless clipping prediction has broken, remove this line. 
-    // iplan   = fftw_plan_dft_3d(n0, n1, n2, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
     
     // switching out to in and vice versa. 
     for(j=0; j<n0*n1*n2; j++) out[j][0] = distortedCorrfn[j];
@@ -301,8 +300,6 @@ int corrfn_multipoles(double Corrfn[], char filepath[]){
                polar2Dpk[polarPk_modeCount][1]    = fabs(mu);
 		       polar2Dpk[polarPk_modeCount][2]    = Corrfn[Index]/TotalVolume;
                     
-               // printf("\n%e \t %e \t %e", polar2Dpk[polarPk_modeCount][0], polar2Dpk[polarPk_modeCount][1], polar2Dpk[polarPk_modeCount][2]);  
-                    
                polarPk_modeCount                 += 1;
             }
         }
@@ -313,27 +310,9 @@ int corrfn_multipoles(double Corrfn[], char filepath[]){
 
     DualBinning(polarPk_modeCount, muBinNumb, muBinLimits, rbinNumb, rbinLimits, polar2Dpk, polar2DBinnedPk, mean_mu, mean_modk, polar_modesPerBin);
 
-    MultipoleCalc(rbinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, polarPk_modeCount, filepath, rbinlength, 1);
+    MultipoleCalc(rbinNumb, meanKBin, kMonopole, kQuadrupole, polar2Dpk, polarPk_modeCount, filepath, 0.0, 1.0, rbinlength, 1);
     
     return 0;
-}
-
-
-double splint_kMonopole(double k){
-    float Interim;
-    
-    splint(f_meanKBin, f_kMonopole, f_kMonopole2d, kBinNumb-2, (float) k, &Interim);
-
-    return (double) Interim*TotalVolume;
-}
-
-
-double splint_kQuadrupole(double k){
-    float Interim;
-    
-    splint(f_meanKBin, f_kQuadrupole, f_kQuadrupole2d, kBinNumb-2, (float) k, &Interim);
-    
-    return (double) Interim*TotalVolume;
 }
 
 
@@ -391,7 +370,7 @@ int ClippedMultipole(){
     
     sprintf(filepath, "%s/Data/SpectralDistortion/frgs_clipped.dat", root_dir);
 
-    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, modesPerBin, polar2Dpk, polarPk_modeCount, filepath, kbinInterval, 1);
+    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, polar2Dpk, polarPk_modeCount, filepath, 0.0, 1.0, kbinInterval, 1);
 
     return 0;
 }

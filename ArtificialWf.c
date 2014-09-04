@@ -115,6 +115,41 @@ int VIPERS_mask(){
     for(j=0; j<n0*n1*n2; j++)  fscanf(inputfile, "%le", &Cell_SurveyLimitsMask[j]);
 
     fclose(inputfile);
+    
+    int nonEmptyCells = 0;
+    
+    for(j=0; j<n0*n1*n2; j++){
+        if(fabs(Cell_SurveyLimitsMask[j]) > 0.0){  
+            nonEmptyCells      +=   1;  
+            Cell_VIPERSbools[j] = 1.0;
+        }
+    }
+    
+    printf("\n\nNon-empty cells in window fn.: %d", nonEmptyCells);   
+    
+    return 0;
+}
 
+
+int VIPERS_Binarymask(){
+    sprintf(filepath, "%s/Data/SpectralDistortion/VIPERS_maskBinary.dat", root_dir);
+    
+    inputfile     = fopen(filepath, "r");          
+
+    for(j=0; j<n0*n1*n2; j++)  fscanf(inputfile, "%le", &Cell_SurveyLimitsMask[j]);
+
+    fclose(inputfile);
+    
+    int nonEmptyCells = 0;
+    
+    for(j=0; j<n0*n1*n2; j++){
+        if(fabs(Cell_SurveyLimitsMask[j]) > 0.0){  
+            nonEmptyCells      +=   1;  
+            Cell_VIPERSbools[j] = 1.0;
+        }
+    }
+    
+    printf("\n\nNon-empty cells in window fn.: %d", nonEmptyCells);   
+    
     return 0;
 }

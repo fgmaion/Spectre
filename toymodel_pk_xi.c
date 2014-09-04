@@ -37,3 +37,13 @@ double Pk_powerlaw_xi(double r, double r0, double gamma){
     return pow(r0/r, gamma);
 }
 
+double toyRSD_OnePlusOneHalfMuSq(int order){
+    switch(order){
+        case 0:
+            return (7./6.);
+        
+        case 2:
+            return (1./3.); 
+    }
+}
+

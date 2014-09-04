@@ -2,7 +2,7 @@ int prepBootStrap(int objectNumber, double* xVal, double* yVal, double* zVal, do
     BootStrap_flag = realloc(BootStrap_flag, objectNumber*sizeof(int));
     BootStrap_Wght = realloc(BootStrap_Wght, objectNumber*sizeof(double));
 
-    for(j=0; j<objectNumber; j++)  BootStrap_flag[j] = SubVolAssign(xVal[j], yVal[j], zVal[j], CubeSize);
+    // for(j=0; j<objectNumber; j++)  BootStrap_flag[j] = SubVolAssign(xVal[j], yVal[j], zVal[j], CubeSize);
     
     for(j=0; j<objectNumber; j++)  BootStrap_Wght[j] = 1.0;
 
