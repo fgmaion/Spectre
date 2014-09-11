@@ -66,7 +66,7 @@ int FFTLog_setInput(FFTLog_config *fc, double beta, double velDispersion){
     fc->krvals[i][1]    = exp(logrc + ((double)i-nc)*dlogr);
     
     // purely real.  Set P(k) to obtain xi(r) by inverse Hankel transform.     
-    fc->pk[i][0]        = (*pt2Pk)(fc->krvals[i][0])*toyRSD_OnePlusOneHalfMuSq(transformOrder); // (*pt2RSD_k)(fc->krvals[i][0]*velDispersion, beta, transformOrder);
+    fc->pk[i][0]        = (*pt2Pk)(fc->krvals[i][0]); // *toyRSD_OnePlusOneHalfMuSq(transformOrder); // (*pt2RSD_k)(fc->krvals[i][0]*velDispersion, beta, transformOrder);
     fc->pk[i][1]        = 0.0;
     
     // purely real.  Set xi(r) to obtain P(k) by Hankel transform.  
@@ -508,7 +508,7 @@ int cnvldquadCorr(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad
       
       cnvld->xi[i][0]   = mono->xi[i][0]*splint_windfn_rSpaceQuad(mono->krvals[i][1]);
       
-      cnvld->xi[i][0]  += quad->xi[i][0]*(0.2*splint_windfn_rSpaceMono(mono->krvals[i][1]) + (2./7.)*splint_windfn_rSpaceQuad(mono->krvals[i][1]));    
+      cnvld->xi[i][0]  += quad->xi[i][0]*(0.2*splint_windfn_rSpaceMono(mono->krvals[i][1]) + (2./7.)*splint_windfn_rSpaceQuad(mono->krvals[i][1]) + (18./35.)*splint_windfn_rSpaceHex(mono->krvals[i][1]));    
     }
 
     return 0;
@@ -522,12 +522,18 @@ int convolvedPkCalc(){
     
     // Spectral distortion calculation. 
     // Correlation functions given input P(k).
+    
     xi_mu(mono_config);
 
     xi_mu(quad_config);
     
     xi_mu( hex_config);
-
+    
+    // for(j=0; j<mono_config->N; j++)  printf("%e \t %e \t %e \n", mono_config->krvals[j][1], mono_config->xi[j][0], quad_config->xi[j][0]);
+    
+    // for(j=0; j<mono_config->N; j++)  printf("%e \t %e \t %e \n", mono_config->krvals[j][1], splint_windfn_rSpaceMono(mono_config->krvals[j][1]), splint_windfn_rSpaceQuad(mono_config->krvals[j][1]));
+    
+    
     // Currently evaluated at second order. 
     cnvldmonoCorr(convlmonoCorr, mono_config, quad_config, hex_config);
     
@@ -544,19 +550,162 @@ int convolvedPkCalc(){
     
     print_xi();
     
-    printCnvldPk();
+    // printCnvldPk();
+    
+    // printMonoPkContributions();
+    
+    // printQuadPkContributions();
+    
+    spline_monoCorr();
+    
+    // projectedCorrfn();
+    
+    generateGalsfromxi(pow(10., 0.), 100., 4);
+    
+    // loadGalaxyCatalogue();
+    
+    // calcSSPOCflag(0.0001);
+    
+    return 0;
+}
+
+
+int generateGalsfromxi(double numberDensity, double rmax, int N){
+    printf("\n\nGenerating galaxies");
+
+    sprintf(filepath, "%s/Data/SpectralDistortion/GalaxyCatalogue.dat", root_dir);
+
+    double r, vol, totalGals;
+        
+    double res = rmax/N;
+    
+    int    NumbergalsInCell; 
+    
+    int    galCount = 0;
+    
+    volAvgOfXi = volAverage_Corrfn(rmax);
+    
+    vol        = (4./3.)*pi*pow(rmax, 3.);
+    
+    totalGals  = numberDensity*vol; 
+    
+    output = fopen(filepath, "w");
+
+    for(k=0; k<N; k++){
+        for(j=0; j<N; j++){
+            for(i=0; i<N; i++){
+                r                     = res*pow(pow(k - N/2, 2.) + pow(j - N/2, 2.) + pow(i- N/2, 2.), 0.5);
+                
+                if((r<rmax) && (r>1.)){
+                    NumbergalsInCell  = round(totalGals*volNormedCorrfn(r)*pow(res, 3.));
+                }
+                
+                else{
+                    NumbergalsInCell = 0;
+                }
+                
+                for(jj=0; jj<NumbergalsInCell; jj++){
+                    fprintf(output, "%d \t %e \t %e \t %e \n", galCount, res*(k-N/2) + res*(-0.5 + gsl_rng_uniform(gsl_ran_r)), res*(j-N/2) + res*(-0.5 + gsl_rng_uniform(gsl_ran_r)), res*(i-N/2) + + res*(-0.5 + gsl_rng_uniform(gsl_ran_r)));    
+                    
+                    galCount         += 1;
+                }
+            }
+        }
+    }
+    
+    fclose(output);
+    
+    printf("\nRes: %e, Volume average of corr. fn.: %e, total Galaxies in vol: %e, Galaxies in catalogue: %d", res, volAvgOfXi, totalGals, galCount);
 
     return 0;
 }
 
 
+int loadGalaxyCatalogue(){
+    sprintf(filepath, "%s/Data/SpectralDistortion/GalaxyCatalogue.dat", root_dir);
+
+    inputfile = fopen(filepath, "r");
+    
+    ch         = 0;
+    Vipers_Num = 0;
+    
+    do{
+        ch = fgetc(inputfile);        
+        if(ch == '\n')
+       	  Vipers_Num += 1;
+    } while (ch != EOF);
+
+    rewind(inputfile);
+    
+    id             =  (int   *)   realloc(id,             Vipers_Num*sizeof(*id));
+    flag_SSPOC     =  (int   *)   realloc(flag_SSPOC,     Vipers_Num*sizeof(*flag_SSPOC));
+
+    xCoor          =  (double *)  realloc(xCoor,          Vipers_Num*sizeof(*xCoor));
+    yCoor          =  (double *)  realloc(yCoor,          Vipers_Num*sizeof(*yCoor));
+    zCoor          =  (double *)  realloc(zCoor,          Vipers_Num*sizeof(*zCoor));
+    rDist          =  (double *)  realloc(rDist,          Vipers_Num*sizeof(*rDist));
+    
+    for(j=0; j<Vipers_Num; j++){ 
+        fscanf(inputfile, "%d \t %le \t %le \t %le", &id[j], &xCoor[j], &yCoor[j], &zCoor[j]);
+        
+        flag_SSPOC[j] = 1;
+        
+        // printf("\n%d \t %e \t %e \t %e \t %d", id[j], xCoor[j], yCoor[j], zCoor[j], flag_SSPOC[j]);
+    }
+
+    return 0;
+}
+
+
+int calcSSPOCflag(double l){
+    double w = l/9.;
+
+    int rand, spocGals = 0;
+
+    for(j=0; j<Vipers_Num; j++){
+        for(k=0; k<Vipers_Num; k++){
+            if((flag_SSPOC[j] == 1) && (flag_SSPOC[k] == 1)){
+                if((fabs(xCoor[j] - xCoor[k]) < w) && (fabs(yCoor[j] - yCoor[k]) < l)){     
+                    rand = gsl_rng_uniform_int(gsl_ran_r, 2);
+                
+                    if(rand == 0) flag_SSPOC[k] = 0;
+                    
+                    // printf("\n%d \t %d \t %d", j, k, flag_SSPOC[k]);
+                    
+                    // else{
+                    //     flag_SSPOC[j] = 0;    
+                    // }
+                }
+            }   
+        }
+    }
+
+    sprintf(filepath, "%s/Data/SpectralDistortion/GalaxyCatalogue_spec.dat", root_dir);
+    
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<Vipers_Num; j++){
+        if(flag_SSPOC[j] == 1){  
+            fprintf(output, "%d \t %e \t %e \t %e \n", id[j], xCoor[j], yCoor[j], zCoor[j]);         
+    
+            spocGals += 1;
+        }
+    }
+    
+    fclose(output);
+
+    printf("\nGalaxies selected by SSPOC: %d", spocGals);
+
+    return 0;
+}
+
 
 int print_xi(){
-    sprintf(filepath, "%s/Data/SpectralDistortion/fftlog_hodpk_NoRSD_%d_%.2e_%.2e_02Sep_xi.dat", root_dir, FFTlogRes, mono_config->min, mono_config->max);
+    sprintf(filepath, "%s/Data/SpectralDistortion/fftlog_hodpk_NoRSD_%d_%.2e_%.2e_05Sep_xi.dat", root_dir, FFTlogRes, mono_config->min, mono_config->max);
 
     output = fopen(filepath, "w");
 
-    for(i=0; i<mono_config->N; i++) fprintf(output, "%e \t %e \t %e \t %e \n", mono_config->krvals[i][1], mono_config->xi[i][0], quad_config->xi[i][0], mono_config->xi[i][0]*splint_windfn_rSpaceMono(mono_config->krvals[i][1]));
+    for(i=0; i<mono_config->N; i++) fprintf(output, "%e \t %e \t %e \n", mono_config->krvals[i][1], mono_config->xi[i][0], quad_config->xi[i][0]);
     
     fclose(output);
 
@@ -584,6 +733,134 @@ int printCnvldPk(){
 
     for(i=0; i<mono_config->N; i++){ 
         fprintf(output, "%e \t %e \t %e \t %e \n", mono_config->krvals[i][0], mono_config->pk[i][0], convlmonoCorr->pk[i][0], convlquadCorr->pk[i][0]);
+    }
+    
+    fclose(output);
+
+    return 0;
+}
+
+
+int printMonoPkContributions(){
+    sprintf(filepath, "%s/Data/SpectralDistortion/fftlog_hodpk_NoRSD_%d_%.2e_%.2e_04Sep_monoPkContributions_firstOrder_pk.dat", root_dir, FFTlogRes, mono_config->min, mono_config->max);
+
+    output = fopen(filepath, "w");
+    
+    for(i=0; i<mono_config->N; i++)  fprintf(output, "%e \t %e \t %e \n", mono_config->krvals[i][1], mono_config->xi[i][0]*splint_windfn_rSpaceMono(mono_config->krvals[i][1]), quad_config->xi[i][0]*splint_windfn_rSpaceQuad(mono_config->krvals[i][1]));
+    
+    fclose(output);    
+
+    return 0;
+}
+
+
+int printQuadPkContributions(){
+    sprintf(filepath, "%s/Data/SpectralDistortion/fftlog_hodpk_NoRSD_%d_%.2e_%.2e_04Sep_quadPkContributions_firstOrder_pk.dat", root_dir, FFTlogRes, mono_config->min, mono_config->max);
+
+    output = fopen(filepath, "w");
+    
+    for(i=0; i<mono_config->N; i++)  fprintf(output, "%e \t %e \t %e \t %e \t %e \n", mono_config->krvals[i][1], mono_config->xi[i][0]*splint_windfn_rSpaceQuad(mono_config->krvals[i][1]), quad_config->xi[i][0]*0.2*splint_windfn_rSpaceMono(mono_config->krvals[i][1]), quad_config->xi[i][0]*(2./7.)*splint_windfn_rSpaceQuad(mono_config->krvals[i][1]), quad_config->xi[i][0]*(18./35.)*splint_windfn_rSpaceHex(mono_config->krvals[i][1]));
+    
+    fclose(output);    
+
+    return 0;
+}
+
+
+double splint_monoCorr(double r){
+    double Interim;
+    
+    splint(rmonoCorr, monoCorr, monoCorr2d, 4096, r, &Interim);
+    
+    // if(r>rmonoCorr[4095])  Interim = 0.0;
+    
+    return Interim;
+}
+
+double AbelIntegrand(double r){
+    return (*pt2funcforAbel)(r)*r*pow(r*r - Abel_rp*Abel_rp, -0.5);
+}
+
+
+int spline_monoCorr(){
+    sprintf(filepath, "%s/Data/SpectralDistortion/fftlog_hodpk_NoRSD_4096_1.00e-10_1.00e+14_05Sep_xi.dat", root_dir);
+
+    inputfile = fopen(filepath, "r");
+    
+    for(j=0; j<4096; j++){  
+        fscanf(inputfile, "%le \t %le \t %*le\n", &rmonoCorr[j], &monoCorr[j]);
+    
+        // printf("\n%e \t %e", rmonoCorr[j], monoCorr[j]);
+    }
+    
+    fclose(inputfile);
+    
+    spline(rmonoCorr, monoCorr, 4096, 1.0e31, 1.0e31, monoCorr2d);
+    
+    return 0;
+}
+
+double projectedCorrIntegrand(double r){
+    double error;
+
+    return sqrt(r*r - Abel_rp*Abel_rp)*dfridr(pt2funcforAbel, r, 0.1, &error);
+}
+
+
+double GaussTest(double r){
+    return  exp(-pow(r/10., 2.));
+}
+
+
+double r2Corr(double r){
+    return r*r*(*splint_monoCorr)(r);
+}
+
+
+double volAverage_Corrfn(double rmax){
+    return 4.*pi*qromb(&r2Corr, 0.0, rmax);
+}
+
+
+double volNormedCorrfn(double r){
+    return splint_monoCorr(r)/volAvgOfXi;
+}
+
+int projectedCorrfn(){
+    double lolim =   0.0;
+    double hilim =  100.0;
+
+    sprintf(filepath, "%s/Data/SpectralDistortion/projected_xi_%.2f_%.2f.dat", root_dir, lolim, hilim);
+
+    output = fopen(filepath, "w");
+    
+    double  r, error;
+    
+    pt2funcforAbel = &splint_monoCorr;
+    
+    /*
+    // Integrand as a fn. of rp (columns)
+    for(j=1; j<10000; j++){
+        r = 0.01*j; 
+        
+        fprintf(output, "%e \t", r);// 2.*qromb(&AbelIntegrand, Abel_rp + 0.01, 400.));
+        
+        // fprintf(output, "%e \t", splint_monoCorr(r)*r);
+    
+        for(k=0; k<10; k++){  
+            Abel_rp = pow(10., -1. + 0.3*k);
+        
+            fprintf(output, "%e \t", splint_monoCorr(r)*r*pow(r*r - Abel_rp*Abel_rp, -0.5));
+        }
+        
+        fprintf(output, "\n");
+    }
+    */
+    
+    for(j=0; j<1000; j++){
+        Abel_rp = 0.1 + j*0.1; 
+
+        fprintf(output, "%e \t %e \t %e\n", Abel_rp, -2.*qromb(&projectedCorrIntegrand, Abel_rp + lolim, Abel_rp + hilim), 10.*sqrt(pi)*exp(-pow(Abel_rp/10., 2.)));
     }
     
     fclose(output);

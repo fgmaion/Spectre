@@ -366,6 +366,10 @@ int ClippingModelling(){
     for(j=0; j<=n0*n1*n2; j++){ 
         rmodulus_vec[j] = malloc(2*sizeof(double));
     }
+    
+    monoCorr          = (double *)  realloc(monoCorr,           4096*sizeof(*monoCorr));
+    rmonoCorr         = (double *)  realloc(rmonoCorr,          4096*sizeof(*rmonoCorr));
+    monoCorr2d        = (double *)  realloc(monoCorr2d,         4096*sizeof(*monoCorr2d));
 
     return 0;
 }

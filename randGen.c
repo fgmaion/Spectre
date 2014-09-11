@@ -48,6 +48,70 @@ int assign_randmemory(double alpha, int Vipers_Num){
 }
 
 
+int loadNagoya_rands(){
+  sprintf(filepath, "/disk1/mjw/VIPERS_ValueAddedHOD/mocks_W1_Nagoya_v1.2/mock_W1_rand_Nagoya_ra_dec_z.cat");
+
+  inputfile = fopen(filepath, "r");
+
+  ch          = 0;
+  rand_number = 0;
+
+  do{
+    ch = fgetc(inputfile);
+    if(ch == '\n')
+      rand_number += 1;
+  } while (ch != EOF);
+
+  printf("\n\n%d randoms. up to date", rand_number);
+
+  rewind(inputfile);
+
+  assign_randmemory(0.1, rand_number);
+  
+  for(j=0; j<rand_number; j++){  
+    fscanf(inputfile, "%le \t %le \t %le", &rand_ra[j], &rand_dec[j], &rand_chi[j]);
+
+    rand_chi[j] = interp_comovingDistance(rand_chi[j]);
+  }
+
+  fclose(inputfile);
+  
+  for(j=0; j<rand_number; j++){
+    rand_ra[j]                *= (pi/180.0);                                 // Converted to radians.                      
+    rand_dec[j]               *= (pi/180.0);                                 // Converted to radians.                    
+
+    rand_x[j]              =     rand_chi[j]*cos(rand_dec[j])*cos(rand_ra[j]);
+    rand_y[j]              =     rand_chi[j]*cos(rand_dec[j])*sin(rand_ra[j]);
+    rand_z[j]              = -1.*rand_chi[j]*sin(rand_dec[j]);
+
+    rand_ra[j]                /= (pi/180.0);                                 // Converted to degrees.                      
+    rand_dec[j]               /= (pi/180.0);                                 // Converted to degrees.                    
+  }
+
+  printf("\n\nRandoms on input");
+
+  printf("\nx max:  %f \t x min:  %f", arrayMax(rand_x, rand_number), arrayMin(rand_x, rand_number));
+  printf("\ny max:  %f \t y min:  %f", arrayMax(rand_y, rand_number), arrayMin(rand_y, rand_number));
+  printf("\nz max:  %f \t z min:  %f", arrayMax(rand_z, rand_number), arrayMin(rand_z, rand_number));
+  printf("\nr max:  %f \t r min %f",   arrayMax(rand_chi, rand_number), arrayMin(rand_chi, rand_number));
+  /*
+  for(j=0; j<rand_number; j++){
+    if((rand_ra[j] == 0.) || (rand_dec[j] == 0.) || (rand_chi[j]==0.))  printf("\nrand: %d", j);
+  }  
+  */
+  StefanoRotated(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);
+  
+  printf("\n\nRandoms successfully loaded. + translated");
+
+  printf("\nx max:  %f \t x min:  %f", arrayMax(rand_x, rand_number), arrayMin(rand_x, rand_number));
+  printf("\ny max:  %f \t y min:  %f", arrayMax(rand_y, rand_number), arrayMin(rand_y, rand_number));
+  printf("\nz max:  %f \t z min:  %f", arrayMax(rand_z, rand_number), arrayMin(rand_z, rand_number));
+  printf("\nr max:  %f \t r min %f",   arrayMax(rand_chi, rand_number), arrayMin(rand_chi, rand_number));
+  
+  return 0;
+}
+
+
 int loadRand(){
     sprintf(filepath, "%s/Stefano/xyzRan.dat", root_dir);
     

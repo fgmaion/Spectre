@@ -893,4 +893,35 @@ double* windfn_rMonopole2d;
 double* windfn_rQuadrupole2d;
 double* windfn_rHexadecapole2d;
 
-int    rbinNumb;
+int     rbinNumb;
+
+double* monoCorr;
+double* monoCorr2d;
+double* rmonoCorr;
+
+double  AbelIntegrand(double);
+
+double (*pt2funcforAbel)(double) = NULL;
+
+double Abel_rp;
+
+double volAvgOfXi;
+
+double volAverage_Corrfn(double rmax);
+double volNormedCorrfn(double r);
+
+double  dra;
+double  ddec;
+
+int rabin;
+int decbin;
+
+int radecbinNumb = 300;
+
+double rabinInterval;
+double decbinInterval;
+
+double*  ra_bins;
+double* dec_bins;
+
+double** binned_pairs;

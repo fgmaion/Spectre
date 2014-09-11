@@ -546,8 +546,8 @@ int Gaussianfield(){
 
                 Power                              = -log(gsl_rng_uniform(gsl_ran_r))*expectation;
                 
-                amplitude                          = sqrt(Power);
-                // amplitude                          = sqrt(expectation);
+                // amplitude                          = sqrt(Power);
+                amplitude                          = sqrt(expectation);
                 
                 phase                              = 2.*pi*gsl_rng_uniform(gsl_ran_r);
                 

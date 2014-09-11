@@ -66,9 +66,9 @@
 
 #include "Scripts/ComovingNumberDensityCalc.c"
 
-#include "Scripts/AgeOftheUniverse.c"
-#include "Scripts/linearGrowthRate.c"
-#include "Scripts/growthfactor_derivative.c"
+// #include "Scripts/AgeOftheUniverse.c"
+// #include "Scripts/linearGrowthRate.c"
+// #include "Scripts/growthfactor_derivative.c"
 
 #include "Scripts/InvErrorfn.c"
 #include "Scripts/MatrixInverse.c"
@@ -212,14 +212,14 @@ int main(int argc, char **argv){
     
     // No artificially applied window fn. 
     
-    FullCube();
+    // FullCube();
     // EmbeddedCube(50);
     // Gaussian(50.);
     // PencilBeamSurvey(50, 100, 50, 100);
     // Spherical(250.);
     // AnisoGauss(20., 30., 40.);
     // VIPERS_mask();
-    // VIPERS_Binarymask();
+    VIPERS_Binarymask();
     
     prepBootStrap(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
     
@@ -272,8 +272,8 @@ int main(int argc, char **argv){
     
     // clipDensity(appliedClippingThreshold);
     /*
-    for(loopCount=0; loopCount<10; loopCount++){
-        sprintf(surveyType, "VIPERS_fullCube_HOD_QuadrupoleOnly_clipThreshold_%.1e_MaskedMultiples_fullMu", appliedClippingThreshold);
+    for(loopCount=0; loopCount<1; loopCount++){
+        sprintf(surveyType, "VIPERS_Binarymask_HOD_QuadrupoleOnly_clipThreshold_%.1e_MaskedMultiples_fullMu", appliedClippingThreshold);
               
         // BootStrapGen(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
         

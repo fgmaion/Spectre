@@ -197,7 +197,7 @@ double LegendrePolynomials(double x, int n){
         case 1:
             return x;
         case 2:
-            return 0.5*(3.*pow(x, 2.) -1.);
+            return 0.5*(3.*pow(x, 2.) - 1.);
         case 3:
             return 0.5*(5.*pow(x, 3.) - 3.*x);
         case 4:

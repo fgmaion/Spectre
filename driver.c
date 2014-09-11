@@ -81,6 +81,10 @@
 #include "Scripts/fitting_nz.c"
 #include "Scripts/randGen.c"
 
+#include "Scripts/correlation_fns.c"
+
+#include "Scripts/redshiftDistribution_NagoyaRandoms.c"
+
 /*
 #include "Scripts/slowDFT.c"
 
@@ -94,6 +98,8 @@
 */
 #include "Scripts/freeMemory.c"
 
+#include "Scripts/MonteCarlo_SSPOC.c"
+#include "Scripts/AngularSelectionCats.c"
 
 int main(int argc, char **argv){
 
@@ -274,7 +280,7 @@ prepNGP();
 
 // Checked.
 // CalcCellraDec();
-CalcCellChi();
+// CalcCellChi();
 
 // apodiseWindowfn();
 
@@ -285,7 +291,7 @@ assignbinninginterval(kbinInterval);
 
 prepFFTw(n0, n1, n2);
 
-prepFFTbinning();
+prepFFTbinning(kbinInterval);
 
 assign2DPkMemory(muBinNumb, kBinNumb);       
 
@@ -300,9 +306,18 @@ inputHODPk();
 
 pt2shot = &lightconeShot;
 
+// loadNagoya_rands();
+
+// initialise_angularCorrelation();
+
+// randoms_angular_correlationfn();
+// sprintf(filepath, "%s/Data/SpectralDistortion/redshiftDistribution_NagoyaRandoms.dat", root_dir);
+
+// output = fopen(filepath, "w");
+
 for(loopCount=1; loopCount<2; loopCount++){
-    if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
-    else              sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
+    if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_Nagoya_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
+    else              sprintf(filepath, "%s/mocks_W1_Nagoya_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
       
     // Choice of redshift from zcos, zpec, zphot, zobs.
     
@@ -310,26 +325,34 @@ for(loopCount=1; loopCount<2; loopCount++){
     
     zUtilized = &zcos[0];
 
+    // for(jj=0; jj<Vipers_Num; jj++)  fprintf(output, "%e \n", zUtilized[jj]);
+
     // My basis, otherwise use Stefano basis. Never use both in conjuction. 
     // CoordinateCalc();
     
     // Convert from ra, dec, z to x, y, z in Stefano's basis. 
     StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);
+
+    fiberCollision_cat();
     
+    // correlationfn();
+
+    // angular_correlationfn();
+
     // randomGeneration();
     
-    loadRand();
+    // loadRand();
     
     // Applied window fn.
-    Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
-    /*
+    // Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
+    
     // Checked.
-    CalcWfCorrections();
+    // CalcWfCorrections();
     
     // projectVIPERSsystem();
 
     // VIPERSbasis(CentreRA, CentreDec, xCoor, yCoor, zCoor, Vipers_Num);
-    
+    /*
     assignAcceptance();
 
     // Must be run for all 27 mocks in preparation for P(k) calc.
@@ -355,6 +378,14 @@ for(loopCount=1; loopCount<2; loopCount++){
     */
     // slowDFTcalc();
 }
+
+// sprintf(filepath, "%s/Data/SpectralDistortion/measuredCorrelationfn_mono_randoms.dat", root_dir);
+
+// correlationfn(filepath, rand_x, rand_y, rand_z, rand_number);
+
+// fclose(output);
+
+// randoms_redshiftDistribution();
 
 // MockAvg2Dpk(14);
 

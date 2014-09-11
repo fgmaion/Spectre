@@ -144,6 +144,8 @@ int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoo
     printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
     printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
+
+    printf("\nr max:  %f \t r min:  %f", arrayMax(rDist, Vipers_Num), arrayMin(rDist, Vipers_Num));
     
     printf("\n\nRedshift max:  %f \t Redshift min:  %f", arrayMax(zUtilized, Vipers_Num), arrayMin(zUtilized, Vipers_Num));
 
@@ -161,7 +163,13 @@ int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoo
     
     // Rotate the input co-ordinates such that the ra direction is aligned more or less with the y asix, dec direction with x, and redshift along z. 
     StefanoRotated(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
-    
+
+                                                                                                                     
+    printf("\n\nVIPERS Galaxies. Rotated + translated");                                                                  
+    printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));                       
+    printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));                       
+    printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));                                                                                                                                              
+    printf("\nr max:  %f \t r min %f", arrayMax(rDist, Vipers_Num), arrayMin(rDist, Vipers_Num));                         
     return 0;
 }
 
@@ -183,9 +191,9 @@ int StefanoRotated(int Number, double centreRA, double centreDec, double xCoors[
         y2  = y1;
         z2  = sin(c_dec + pi/2.)*x1  + cos(c_dec + pi/2.)*z1;
     
-        xCoor[j] = x2 + stefano_trans_x;
-        yCoor[j] = y2 + stefano_trans_y;
-        zCoor[j] = z2 + stefano_trans_z;   
+        xCoors[j] = x2 + stefano_trans_x;
+        yCoors[j] = y2 + stefano_trans_y;
+        zCoors[j] = z2 + stefano_trans_z;   
     }
 
     /*
@@ -197,13 +205,6 @@ int StefanoRotated(int Number, double centreRA, double centreDec, double xCoors[
     
     fclose(output);
     */
-
-    printf("\n\nVIPERS Galaxies. Rotated + translated");
-    printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
-    printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
-    printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
-    
-    printf("\nr max:  %f \t r min %f", arrayMax(rDist, Vipers_Num), arrayMin(rDist, Vipers_Num));
 
     return 0;
 }

@@ -264,16 +264,20 @@ int wfPkCalc(){
 
 
 int newApproach_W2rMultipoles(){
-    int    rbinNumb   =   80;
+    int    rbinNumb   =  200;
     
-    double rbinlength =  6.0;
+    double rbinlength =  3.0;
     
     windowfn_rspaceMultipoles(rbinNumb);
     
     for(j=0; j<rbinNumb;  j++){  
-        windfn_rvals[j]     =         j*rbinlength;
+        windfn_rvals[j]         =         j*rbinlength;
     
-        windfn_rMonopole[j] =                  0.0;
+        windfn_rMonopole[j]     =                  0.0;
+        
+        windfn_rQuadrupole[j]   =                  0.0;
+                
+        windfn_rHexadecapole[j] =                  0.0;
     }
     
     for(k=0; k<n0; k++){
@@ -313,7 +317,7 @@ int newApproach_W2rMultipoles(){
             
             windfn_rQuadrupole[j]                 +=  W2_veck[k]*gsl_sf_bessel_j2(kmodulus_vec[k]*windfn_rvals[j])*LegendrePolynomials(mu_vec[k], 2);
             
-            // windfn_rHexadecapole[j]               +=  W2_veck[k]*gsl_sf_bessel_j4(kmodulus_vec[k]*windfn_rvals[j])*LegendrePolynomials(mu_vec[k], 4);
+            windfn_rHexadecapole[j]               +=  W2_veck[k]*gsl_sf_bessel_jl(4, kmodulus_vec[k]*windfn_rvals[j])*LegendrePolynomials(mu_vec[k], 4);
         }
     }
     
@@ -661,7 +665,7 @@ double splint_windfn_rSpaceHex(double r){
 
 
 int spline_wfMultipoles_deltaSpace(){
-    rbinNumb   =  80;
+    rbinNumb   =  200;
 
     windowfn_rspaceMultipoles(rbinNumb);
     
@@ -674,9 +678,9 @@ int spline_wfMultipoles_deltaSpace(){
     // for(j=0; j<rbinNumb; j++)  fscanf(inputfile, "%le \t %le \t %le \t \t %le %*d \n", &windfn_rvals[j], &windfn_rMonopole[j], &windfn_rQuadrupole[j], &windfn_rHexadecapole[j]);
     
     for(j=0; j<rbinNumb; j++){  
-        fscanf(inputfile, "%le \t %le \t %le \t %*le \n", &windfn_rvals[j], &windfn_rMonopole[j], &windfn_rQuadrupole[j]);
+        fscanf(inputfile, "%le \t %le \t %le \t %le \n", &windfn_rvals[j], &windfn_rMonopole[j], &windfn_rQuadrupole[j], &windfn_rHexadecapole[j]);
     
-        printf("\n%e \t %e \t %e", windfn_rvals[j], windfn_rMonopole[j], windfn_rQuadrupole[j]);
+        printf("\n%e \t %e \t %e \t %e", windfn_rvals[j], windfn_rMonopole[j], windfn_rQuadrupole[j], windfn_rHexadecapole[j]);
     }
     
     fclose(inputfile);
@@ -685,7 +689,7 @@ int spline_wfMultipoles_deltaSpace(){
         
     spline(windfn_rvals, windfn_rQuadrupole,   rbinNumb, 1.0e31, 1.0e31, windfn_rQuadrupole2d);
     
-    // spline(windfn_rvals, windfn_rHexadecapole, rbinNumb, 1.0e31, 1.0e31, windfn_rHexadecapole2d);
+    spline(windfn_rvals, windfn_rHexadecapole, rbinNumb, 1.0e31, 1.0e31, windfn_rHexadecapole2d);
     
     printf("\n\nlimit on splint taken to be: %e", windfn_rvals[rbinNumb-1]);
     
