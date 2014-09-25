@@ -100,6 +100,14 @@
 
 #include "Scripts/MonteCarlo_SSPOC.c"
 #include "Scripts/AngularSelectionCats.c"
+#include "Scripts/SaundersDeproject.c"
+
+#include "Scripts/libkdtree.h"
+#include "Scripts/kdtree_xi_mom.c"
+#include "Scripts/buildTree.c"
+#include "Scripts/libkdtree.c"
+
+#include "Scripts/mockGalaxyCats.c"
 
 int main(int argc, char **argv){
 
@@ -129,13 +137,16 @@ sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_ValueAddedHOD");
 
 // Stefano basis. 
 AxisLimsArray[0][0]   =       0.0;                                                     // h^-1 Mpc
-AxisLimsArray[1][0]   =     800.0;                                                     // h^-1 Mpc
+AxisLimsArray[1][0]   =     200.0;                                                     // h^-1 Mpc
+// AxisLimsArray[1][0]   =     800.0;
 
 AxisLimsArray[0][1]   =       0.0;                                                     // h^-1 Mpc
-AxisLimsArray[1][1]   =     800.0;                                                     // h^-1 Mpc
+AxisLimsArray[1][1]   =     200.0;                                                     // h^-1 Mpc
+// AxisLimsArray[1][1]   =     800.0;
 
 AxisLimsArray[0][2]   =       0.0;                                                     // h^-1 Mpc
-AxisLimsArray[1][2]   =     800.0;                                                     // h^-1 Mpc
+AxisLimsArray[1][2]   =     200.0;                                                     // h^-1 Mpc
+// AxisLimsArray[1][2]   =     800.0;
 
 // degree of translation for Stefano's co-ordinates, fit survey into surrounding volume. 
 stefano_trans_x       =    + 100.;
@@ -253,7 +264,6 @@ gsl_rng_env_setup();
 gsl_ran_T = gsl_rng_default;
 gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
     
-    
 // Clipping variables. 
 appliedClippingThreshold  =        5.0;    
 // linearBias             = sqrt(2.90);
@@ -266,7 +276,7 @@ padVolume(0.0, 0.0, 0.0);
 comovDistReshiftCalc();
 
 // Checked.
-VIPERS_SolidAngle     = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
+VIPERS_SolidAngle         = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
 
 sprintf(surveyType, "HODmocks_RedshiftSpace_Mesh_%.2f_CicWf", CellSize);
 
@@ -311,30 +321,38 @@ pt2shot = &lightconeShot;
 // initialise_angularCorrelation();
 
 // randoms_angular_correlationfn();
-// sprintf(filepath, "%s/Data/SpectralDistortion/redshiftDistribution_NagoyaRandoms.dat", root_dir);
+// sprintf(filepath, "%s/redshiftDistribution_NagoyaRandoms.dat", root_dir);
 
 // output = fopen(filepath, "w");
 
 for(loopCount=1; loopCount<2; loopCount++){
-    if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_Nagoya_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
-    else              sprintf(filepath, "%s/mocks_W1_Nagoya_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
+    if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
+    else              sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
       
     // Choice of redshift from zcos, zpec, zphot, zobs.
     
-    CatalogueInput(filepath);
+    // CatalogueInput(filepath);
     
-    zUtilized = &zcos[0];
-
-    // for(jj=0; jj<Vipers_Num; jj++)  fprintf(output, "%e \n", zUtilized[jj]);
-
+    // zUtilized = &zcos[0];
+    /*
+    for(jj=0; jj<Vipers_Num; jj++){  
+        if((zUtilized[jj] > 0.65) && (zUtilized[jj]<0.75)){
+	        fprintf(output, "%e \n", zUtilized[jj]);
+        }
+    }
+    */
     // My basis, otherwise use Stefano basis. Never use both in conjuction. 
     // CoordinateCalc();
     
     // Convert from ra, dec, z to x, y, z in Stefano's basis. 
-    StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);
-
-    fiberCollision_cat();
+    // StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);
+   
+    // fiberCollision_cat(rand_number, rand_redshift, rand_x, rand_y, rand_z);
     
+    // fiberCollision_cat(Vipers_Num, zUtilized, xCoor, yCoor, zCoor);
+    
+    // randoms_redshiftDistribution();
+
     // correlationfn();
 
     // angular_correlationfn();
@@ -379,13 +397,25 @@ for(loopCount=1; loopCount<2; loopCount++){
     // slowDFTcalc();
 }
 
+// gridlike();
+
+load_gridRands();
+
+load_displacedRands();
+
+computeCorrelation_fns();
+
+// spline_realSpaceCorrfn(55);
+
+// fprintf_fiberCollision();
+
+// SaundersDeproject(40, 0.1);
+
 // sprintf(filepath, "%s/Data/SpectralDistortion/measuredCorrelationfn_mono_randoms.dat", root_dir);
 
 // correlationfn(filepath, rand_x, rand_y, rand_z, rand_number);
 
 // fclose(output);
-
-// randoms_redshiftDistribution();
 
 // MockAvg2Dpk(14);
 
@@ -409,16 +439,6 @@ for(loopCount=1; loopCount<2; loopCount++){
 // free(rand_chi);
 
 // AnisoConvolution();
-
-/*
-#pragma omp parallel{
-    int ID = omp_get_thread_num();
-    
-    printf(’Hello(%d) ’, ID);
-    printf(’World(%d) \n’, ID);
-}
-*/
-
 
 // Window func. convolution assuming spherical symmetry/averaging.                                                  
 // ConvolveSphericalSymm();

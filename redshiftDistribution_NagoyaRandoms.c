@@ -3,7 +3,7 @@ int randoms_redshiftDistribution(){
     
     double* redshifts;
 
-    sprintf(filepath, "%s/Data/SpectralDistortion/redshiftDistribution_NagoyaRandoms.dat", root_dir);
+    sprintf(filepath, "%s/redshiftDistribution_NagoyaRandoms.dat", root_dir);
 
     inputfile = fopen(filepath, "r");
 
@@ -29,7 +29,7 @@ int randoms_redshiftDistribution(){
 
     // load randoms to be assigned redshifts. 
 
-    sprintf(filepath, "/disk1/mjw/VIPERS_ValueAddedHOD/mocks_W1_Nagoya_v1.2/mock_W1_rand_Nagoya.cat");
+    sprintf(filepath, "/disk1/mjw/VIPERS_ValueAddedHOD/mock_W1_rand_Nagoya_join.cat");
 
     inputfile = fopen(filepath, "r");
     
@@ -74,11 +74,16 @@ int randoms_redshiftDistribution(){
       // printf("\n%d \t %e", Index, rand_z[j]);
     }
    
-    sprintf(filepath, "/disk1/mjw/VIPERS_ValueAddedHOD/mocks_W1_Nagoya_v1.2/mock_W1_rand_Nagoya_ra_dec_z.cat");
+    // if(loopCount<10)  sprintf(filepath, "/disk1/mjw/VIPERS_ValueAddedHOD/randoms_W1_Nagoya_0.65_0.75_v1.2/randoms_W1_Nagoya_ra_dec_z_00%d.cat", loopCount);
+    // else sprintf(filepath, "/disk1/mjw/VIPERS_ValueAddedHOD/randoms_W1_Nagoya_0.65_0.75_v1.2/randoms_W1_Nagoya_ra_dec_z_0%d.cat", loopCount);
+
+    sprintf(filepath, "/disk1/mjw/VIPERS_ValueAddedHOD/randoms_W1_Nagoya_0.65_0.75_v1.2/randoms20_W1_Nagoya_ra_dec_z_.cat");
 
     output = fopen(filepath, "w");
 
-    for(j=0; j<howmanyRandoms; j++)  fprintf(output, "%e \t %e \t %e \n", rand_ra[j], rand_dec[j], rand_z[j]);
+    for(j=0; j<howmanyRandoms; j++){  
+      fprintf(output, "%e \t %e \t %e \n", rand_ra[j], rand_dec[j], rand_z[j]);
+    }
 
     fclose(output);
     

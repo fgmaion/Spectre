@@ -1,6 +1,8 @@
 // Available functions. 
 int          comovDistReshiftCalc();
 
+int          DisplacementCalc();
+
 int          JenkinsCoordinates();
 int          JenkinsFold(double original[], int lenArray, int axis);
 int          ApplyJenkins();
@@ -925,3 +927,19 @@ double*  ra_bins;
 double* dec_bins;
 
 double** binned_pairs;
+
+double* fiber_flag;
+double remaining;
+
+double* rvals;
+double*    xi;
+double*  xi2D;
+
+int splinexi_N =0;
+
+int*    shuffle_rows;
+double* rand_redshift;
+
+double* xDisplacement;
+double* yDisplacement;
+double* zDisplacement;

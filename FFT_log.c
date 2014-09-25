@@ -21,7 +21,6 @@ int FFTlog_memory(int FFTlogRes, double beta, double velDispersion){
     convlmonoCorr   = FFTLog_init(FFTlogRes, pow(10., -10.), pow(10., 14.), 0.0, 0 + 0.5);  
     convlquadCorr   = FFTLog_init(FFTlogRes, pow(10., -10.), pow(10., 14.), 0.0, 2 + 0.5);  
     
-    
     FFTLog_setInput(mono_config,      beta, velDispersion);
     
     FFTLog_setInput(quad_config,      beta, velDispersion);
@@ -66,7 +65,7 @@ int FFTLog_setInput(FFTLog_config *fc, double beta, double velDispersion){
     fc->krvals[i][1]    = exp(logrc + ((double)i-nc)*dlogr);
     
     // purely real.  Set P(k) to obtain xi(r) by inverse Hankel transform.     
-    fc->pk[i][0]        = (*pt2Pk)(fc->krvals[i][0]); // *toyRSD_OnePlusOneHalfMuSq(transformOrder); // (*pt2RSD_k)(fc->krvals[i][0]*velDispersion, beta, transformOrder);
+    fc->pk[i][0]        = (*pt2Pk)(fc->krvals[i][0])*toyRSD_OnePlusOneHalfMuSq(transformOrder); // (*pt2RSD_k)(fc->krvals[i][0]*velDispersion, beta, transformOrder);
     fc->pk[i][1]        = 0.0;
     
     // purely real.  Set xi(r) to obtain P(k) by Hankel transform.  
@@ -494,7 +493,7 @@ int cnvldmonoCorr(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad
       
       cnvld->xi[i][0]   = mono->xi[i][0]*splint_windfn_rSpaceMono(mono->krvals[i][1]);
       
-      cnvld->xi[i][0]  += quad->xi[i][0]*splint_windfn_rSpaceQuad(mono->krvals[i][1]);    
+      cnvld->xi[i][0]  += 0.2*quad->xi[i][0]*splint_windfn_rSpaceQuad(mono->krvals[i][1]);    
     }
 
     return 0;
@@ -508,7 +507,7 @@ int cnvldquadCorr(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad
       
       cnvld->xi[i][0]   = mono->xi[i][0]*splint_windfn_rSpaceQuad(mono->krvals[i][1]);
       
-      cnvld->xi[i][0]  += quad->xi[i][0]*(0.2*splint_windfn_rSpaceMono(mono->krvals[i][1]) + (2./7.)*splint_windfn_rSpaceQuad(mono->krvals[i][1]) + (18./35.)*splint_windfn_rSpaceHex(mono->krvals[i][1]));    
+      cnvld->xi[i][0]  += quad->xi[i][0]*(splint_windfn_rSpaceMono(mono->krvals[i][1]) + (2./7.)*splint_windfn_rSpaceQuad(mono->krvals[i][1]) + (2./7.)*splint_windfn_rSpaceHex(mono->krvals[i][1]));    
     }
 
     return 0;
@@ -533,7 +532,6 @@ int convolvedPkCalc(){
     
     // for(j=0; j<mono_config->N; j++)  printf("%e \t %e \t %e \n", mono_config->krvals[j][1], splint_windfn_rSpaceMono(mono_config->krvals[j][1]), splint_windfn_rSpaceQuad(mono_config->krvals[j][1]));
     
-    
     // Currently evaluated at second order. 
     cnvldmonoCorr(convlmonoCorr, mono_config, quad_config, hex_config);
     
@@ -548,19 +546,19 @@ int convolvedPkCalc(){
         
     printf("\nConvolved mono + quad evaluated.");
     
-    print_xi();
+    // print_xi();
     
-    // printCnvldPk();
+    printCnvldPk();
     
     // printMonoPkContributions();
     
     // printQuadPkContributions();
     
-    spline_monoCorr();
+    // spline_monoCorr();
     
     // projectedCorrfn();
     
-    generateGalsfromxi(pow(10., 0.), 100., 4);
+    // generateGalsfromxi(pow(10., 0.), 100., 4);
     
     // loadGalaxyCatalogue();
     
@@ -569,7 +567,7 @@ int convolvedPkCalc(){
     return 0;
 }
 
-
+/*
 int generateGalsfromxi(double numberDensity, double rmax, int N){
     printf("\n\nGenerating galaxies");
 
@@ -619,8 +617,8 @@ int generateGalsfromxi(double numberDensity, double rmax, int N){
 
     return 0;
 }
-
-
+*/
+/*
 int loadGalaxyCatalogue(){
     sprintf(filepath, "%s/Data/SpectralDistortion/GalaxyCatalogue.dat", root_dir);
 
@@ -699,7 +697,7 @@ int calcSSPOCflag(double l){
     return 0;
 }
 
-
+*/
 int print_xi(){
     sprintf(filepath, "%s/Data/SpectralDistortion/fftlog_hodpk_NoRSD_%d_%.2e_%.2e_05Sep_xi.dat", root_dir, FFTlogRes, mono_config->min, mono_config->max);
 
@@ -727,7 +725,7 @@ int printClippedPk(){
 
 
 int printCnvldPk(){
-    sprintf(filepath, "%s/Data/SpectralDistortion/fftlog_hodpk_NoRSD_%d_%.2e_%.2e_04Sep_cnvld_firstOrder_pk.dat", root_dir, FFTlogRes, mono_config->min, mono_config->max);
+    sprintf(filepath, "%s/Data/SpectralDistortion/fftlog_hodpk_NoRSD_%d_%.2e_%.2e_18Sep_cnvld_firstOrder_pk.dat", root_dir, FFTlogRes, mono_config->min, mono_config->max);
 
     output = fopen(filepath, "w");
 

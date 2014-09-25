@@ -212,14 +212,16 @@ int main(int argc, char **argv){
     
     // No artificially applied window fn. 
     
-    // FullCube();
+    FullCube();
     // EmbeddedCube(50);
     // Gaussian(50.);
     // PencilBeamSurvey(50, 100, 50, 100);
     // Spherical(250.);
     // AnisoGauss(20., 30., 40.);
     // VIPERS_mask();
-    VIPERS_Binarymask();
+    // VIPERS_Binarymask();
+    // knownGRF_mask();
+    // knownGRF_mask_smallCell();
     
     prepBootStrap(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
     
@@ -268,26 +270,29 @@ int main(int argc, char **argv){
     
     // NGPCalcCube();
     
-    // Overwrites measured density field with a Gaussian random field, with given P(k).
-    
     // clipDensity(appliedClippingThreshold);
-    /*
-    for(loopCount=0; loopCount<1; loopCount++){
-        sprintf(surveyType, "VIPERS_Binarymask_HOD_QuadrupoleOnly_clipThreshold_%.1e_MaskedMultiples_fullMu", appliedClippingThreshold);
+    
+    ClippingModelling();                                                            // Assigns memory for Clipping prediction. 
+    
+    // wfPkCalc();
+    
+    for(loopCount=0; loopCount<500; loopCount++){
+        sprintf(surveyType, "VIPERS_fullCube_HOD_QuadrupoleOnly_clipThreshold_%.1e_MaskedMultiples_fullMu_CellSize_%.2f", appliedClippingThreshold, CellSize);
               
         // BootStrapGen(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
         
         printf("\nCreating Gaussian realisations: %d", loopCount);
         
         Gaussianfield();
+        
+        // printGaussianfield();
             
         cleanFFTbinning();
     
         // ** Shot noise correction is switched off **
-    
         PkCalc();
     }
-    */
+    
     // DispersionModel_Multipoles();
     
     // LikelihoodMemory();
@@ -295,8 +300,6 @@ int main(int argc, char **argv){
     // CovarianceMatrix(100);
         
     // CovarianceEigenVecs();
-    
-    ClippingModelling();                                                            // Assigns memory for Clipping prediction. 
     
     // Mono_xi();
 
@@ -309,9 +312,7 @@ int main(int argc, char **argv){
     // iplan currently prevents execution of corrfn_multipoles and wfPkCalc in the same run. Why? to be determined. No f** 'ing clue //
     // corrfn_multipoles(Corrfn, filepath);
     
-    // wfPkCalc();
-    
-    spline_wfMultipoles_deltaSpace();
+    // spline_wfMultipoles_deltaSpace();
     
     // calc_mixingmatrix(kBinLimits, kBinNumb);
     
@@ -351,8 +352,7 @@ int main(int argc, char **argv){
     // Theory2Dpk();
     
     // Observed2Dpk();
-
-    // Stacpolly run. 
+    
     // MPI_Finalize();
     
     // sprintf(surveyType, "zPencilBeamCube_Jenkins%.1f_xtrans_%.2f_ytrans_%.2f", JenkinsScalefactor, ii*xtranslateDist, jj*ytranslateDist);
@@ -366,38 +366,9 @@ int main(int argc, char **argv){
     
     // clippedPkCalc();
     
-    convolvedPkCalc();
-    
-    /*
-    double xvals[10];
-    double yvals[10];
-    
-    double answer, error;
-    
-    for(j=0; j<10; j++){
-        xvals[j] = j*1.0;
-        
-        yvals[j] = 10.*pow(xvals[j], 2.) + 2.;
-    }
-    
-    polint(xvals, yvals, 10, 6.5, &answer, &error);
-    
-    printf("\n%e \t %e", 10.*pow(6.5, 2.) + 2., answer);
-    */
+    // convolvedPkCalc();
     
     printf("\n\n");
     
     return 0;
 }
-
-/*
-int printSphericalBesselfns(){
-    sprintf(filepath, "%s/Data/SpectralDistortion/sphericalBeselfns.dat", root_dir);
-    
-    output = fopen(filepath, "w");
-    
-    for(j=0; j<100; j++)  fprintf(output, "%e \t %e \t %e \t %e \n", j*0.2, )
-
-    return 0;
-}
-*/

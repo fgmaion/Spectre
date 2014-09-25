@@ -43,13 +43,15 @@ int assign_randmemory(double alpha, int Vipers_Num){
     rand_x     = (double *) malloc(rand_number*sizeof(*rand_x));
     rand_y     = (double *) malloc(rand_number*sizeof(*rand_y));
     rand_z     = (double *) malloc(rand_number*sizeof(*rand_z));
+
+    rand_redshift = (double *) malloc(rand_number*sizeof(*rand_redshift));
     
     return 0;
 }
 
 
 int loadNagoya_rands(){
-  sprintf(filepath, "/disk1/mjw/VIPERS_ValueAddedHOD/mocks_W1_Nagoya_v1.2/mock_W1_rand_Nagoya_ra_dec_z.cat");
+  sprintf(filepath, "/disk1/mjw/VIPERS_ValueAddedHOD/randoms20_W1_Nagoya_ra_dec_z.cat");
 
   inputfile = fopen(filepath, "r");
 
@@ -69,9 +71,9 @@ int loadNagoya_rands(){
   assign_randmemory(0.1, rand_number);
   
   for(j=0; j<rand_number; j++){  
-    fscanf(inputfile, "%le \t %le \t %le", &rand_ra[j], &rand_dec[j], &rand_chi[j]);
+    fscanf(inputfile, "%le \t %le \t %le", &rand_ra[j], &rand_dec[j], &rand_redshift[j]);
 
-    rand_chi[j] = interp_comovingDistance(rand_chi[j]);
+    rand_chi[j] = interp_comovingDistance(rand_redshift[j]);
   }
 
   fclose(inputfile);
@@ -106,7 +108,7 @@ int loadNagoya_rands(){
   printf("\nx max:  %f \t x min:  %f", arrayMax(rand_x, rand_number), arrayMin(rand_x, rand_number));
   printf("\ny max:  %f \t y min:  %f", arrayMax(rand_y, rand_number), arrayMin(rand_y, rand_number));
   printf("\nz max:  %f \t z min:  %f", arrayMax(rand_z, rand_number), arrayMin(rand_z, rand_number));
-  printf("\nr max:  %f \t r min %f",   arrayMax(rand_chi, rand_number), arrayMin(rand_chi, rand_number));
+  // printf("\nr max:  %f \t r min %f",   arrayMax(rand_chi, rand_number), arrayMin(rand_chi, rand_number));
   
   return 0;
 }

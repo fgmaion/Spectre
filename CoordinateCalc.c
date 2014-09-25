@@ -78,9 +78,16 @@
     */
     
     for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%d \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %d \t %lf \t %lf \t %lf \t %*s \t %*s \t %d \t %d \t %d \t %lf \n", &id[j], &ra[j], &dec[j], &zcos[j], &zpec[j], &zobs[j], &zphot[j], &M_B[j], &type[j], &csr[j], &sampling[j], &sampling35[j], &flag_Nagoya[j], &flag_SSPOC[j], &flag_SSPOC35[j], &rand_sel[j]);
-
-    //  pointing[j], quadrant[j]
-
+    /*
+    for(j=0; j<Vipers_Num; j++){  
+      fscanf(inputfile, "%d \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %d \t %lf \t \
+%lf \t %lf \t %d \t %d \t %d \t %lf \n", &id[j], &ra[j], &dec[j], &zcos[j], &zpec[j], &zobs[j], &zphot[j], &M_B[j], &type[j], &csr[j], &sampling[j], &sampling35[j], &flag_Nagoya[j], &flag_SSPOC[j], &flag_SSPOC35[j], &rand_sel[j]);
+    
+      if(flag_Nagoya[j] == 1){
+        printf("\n %e \t %e \t %e \t %d", ra[j], dec[j], zcos[j], flag_Nagoya[j]);
+      }
+    }
+    */
     // Note: &pointing[j] must be passed to any printf statement. 
     
     fclose(inputfile);
@@ -136,8 +143,8 @@ int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoo
         yCoor[j]              =     rDist[j]*cos(dec[j])*sin(ra[j]);
         zCoor[j]              = -1.*rDist[j]*sin(dec[j]);
         
-        ra[j]                *= (pi/180.0);                                 // Converted to degrees.
-        dec[j]               *= (pi/180.0);                                 // Converted to degrees.
+        ra[j]                /= (pi/180.0);                                 // Converted to degrees.
+        dec[j]               /= (pi/180.0);                                 // Converted to degrees.
     }
     
     printf("\n\nOn input...");
@@ -163,7 +170,6 @@ int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoo
     
     // Rotate the input co-ordinates such that the ra direction is aligned more or less with the y asix, dec direction with x, and redshift along z. 
     StefanoRotated(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
-
                                                                                                                      
     printf("\n\nVIPERS Galaxies. Rotated + translated");                                                                  
     printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));                       

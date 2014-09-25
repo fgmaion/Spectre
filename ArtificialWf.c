@@ -153,3 +153,29 @@ int VIPERS_Binarymask(){
     
     return 0;
 }
+
+
+int knownGRF_mask(){
+    sprintf(filepath, "%s/Data/SpectralDistortion/GRF_mask_MonoAndQuad.dat", root_dir);
+    
+    inputfile     = fopen(filepath, "r");          
+
+    for(j=0; j<n0*n1*n2; j++)  fscanf(inputfile, "%le", &Cell_SurveyLimitsMask[j]);
+
+    fclose(inputfile);
+
+    return 0;
+}
+
+
+int knownGRF_mask_smallCell(){
+    sprintf(filepath, "%s/Data/SpectralDistortion/GRF_mask_MonoAndQuad_CellSize_2.00.dat", root_dir);
+    
+    inputfile     = fopen(filepath, "r");          
+
+    for(j=0; j<n0*n1*n2; j++)  fscanf(inputfile, "%le", &Cell_SurveyLimitsMask[j]);
+
+    fclose(inputfile);
+
+    return 0;
+}

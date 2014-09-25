@@ -123,7 +123,7 @@ int randoms_angular_correlationfn(){
     if(i%10000 == 0){
 
       printf("\nprinting to file");
-  printMockAvg_correlation();
+      printMockAvg_correlation();
     }
   }
 
@@ -166,7 +166,7 @@ int angular_correlationfn(){
 }
 
 int printMockAvg_correlation(){	
-        sprintf(filepath, "%s/Data/SpectralDistortion/NagoyaRandoms_angularcorrelation.dat", root_dir);
+        sprintf(filepath, "%s/randoms20_W1_Nagoya_angularCorrelation.dat", root_dir);
 
 	output = fopen(filepath, "w");
 

@@ -546,7 +546,7 @@ int Gaussianfield(){
 
                 Power                              = -log(gsl_rng_uniform(gsl_ran_r))*expectation;
                 
-                // amplitude                          = sqrt(Power);
+                // amplitude                       = sqrt(Power);
                 amplitude                          = sqrt(expectation);
                 
                 phase                              = 2.*pi*gsl_rng_uniform(gsl_ran_r);
@@ -631,6 +631,144 @@ int Gaussianfield(){
     
     printf("\n\nApparent (weighted) mean of the Gaussian realisation: %e", apparent_mean);
     
+    return 0;
+}
+
+
+int DisplacementCalc(){
+  int m0, m1, m2;
+
+  int negkIndex;
+
+  double Power, amplitude, phase, expectation;
+
+  fftw_complex *outx, *outy, *outz;
+
+  xDisplacement       = malloc(n0*n1*n2*sizeof(double));
+  yDisplacement       = malloc(n0*n1*n2*sizeof(double));
+  zDisplacement       = malloc(n0*n1*n2*sizeof(double));
+
+  outx                = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);  
+  outy                = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);
+  outz                = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);
+
+  for(k=0; k<n0; k++){
+    for(j=0; j<n1; j++){
+      for(i=0; i<n2; i++){
+	m0 = k;
+	m1 = j;
+	m2 = i;
+
+	if(m2>n2/2)  m2                   -= n2;
+	if(m1>n1/2)  m1                   -= n1;
+	if(m0>n0/2)  m0                   -= n0;
+
+	k_x                                = kIntervalx*m2;
+	k_y                                = kIntervaly*m1;
+	k_z                                = kIntervalz*m0;
+
+	Index                              = k*n1*n2 + j*n2 + i;
+
+	kSq                                = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
+
+	kmodulus                           = pow(kSq, 0.5);
+
+	mu                                 = k_z/kmodulus;
+	if(kmodulus < 0.000001)       mu   = 0.0;
+
+	expectation                        = (*pt2Pk)(kmodulus)/TotalVolume;
+
+	expectation                       *= 1. + 0.5*pow(mu, 2.);
+
+	// expectation                    *= pow(1. + beta*pow(mu, 2.), 2.);                                                                         
+
+	// expectation                    /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);                                                            
+
+	Power                              = -log(gsl_rng_uniform(gsl_ran_r))*expectation;
+
+	// amplitude                       = sqrt(Power);                                                                                            
+	amplitude                          = sqrt(expectation);
+
+	phase                              = 2.*pi*gsl_rng_uniform(gsl_ran_r);
+
+	// purely real.                                                                                                                              
+	if(k_x == NyquistWaveNumber) phase = 0.0;
+	if(k_y == NyquistWaveNumber) phase = 0.0;
+	if(k_z == NyquistWaveNumber) phase = 0.0;
+
+	outx[Index][0]                     =  (k_x/kSq)*amplitude*sin(phase);
+	outx[Index][1]                     = -(k_x/kSq)*amplitude*cos(phase);
+      
+	outy[Index][0]                     =  (k_y/kSq)*amplitude*sin(phase);
+        outy[Index][1]                     = -(k_y/kSq)*amplitude*cos(phase);
+
+	outz[Index][0]                     =  (k_z/kSq)*amplitude*sin(phase);
+        outz[Index][1]                     = -(k_z/kSq)*amplitude*cos(phase);
+      }
+    }
+  }
+
+  outx[0][0] = 0.0;
+  outx[0][1] = 0.0;
+
+  outy[0][0] = 0.0;
+  outy[0][1] = 0.0;
+
+  outz[0][0] = 0.0;
+  outz[0][1] = 0.0;
+
+  // Hermitian condition.                                                                                                                                  
+  for(k=0; k<n0/2 +1; k++){
+    for(j=0; j<n1; j++){
+      for(i=0; i<n2; i++){
+	Index     = k*n1*n2 + j*n2 + i;
+
+	negkIndex = 0;
+
+	if(i != 0) negkIndex += (n2-i);
+	if(j != 0) negkIndex += (n1-j)*n2;
+	if(k != 0) negkIndex += (n0-k)*n1*n2;
+
+	outx[negkIndex][0] =     outx[Index][0];
+	outx[negkIndex][1] = -1.*outx[Index][1];
+      
+	outy[negkIndex][0] =     outy[Index][0];
+        outy[negkIndex][1] = -1.*outy[Index][1];
+
+	outz[negkIndex][0] =     outz[Index][0];
+        outz[negkIndex][1] = -1.*outz[Index][1];
+      }
+    }
+  }
+
+  fftw_plan    iplan_x, iplan_y, iplan_z;
+
+  iplan_x = fftw_plan_dft_3d(n0, n1, n2, outx, in, FFTW_BACKWARD, FFTW_ESTIMATE);
+  iplan_y = fftw_plan_dft_3d(n0, n1, n2, outy, in, FFTW_BACKWARD, FFTW_ESTIMATE);
+  iplan_z = fftw_plan_dft_3d(n0, n1, n2, outz, in, FFTW_BACKWARD, FFTW_ESTIMATE);
+
+  fftw_execute(iplan_x);
+  for(j=0; j<n0*n2*n1; j++)  xDisplacement[j] = in[j][0];
+  
+  fftw_execute(iplan_y);
+  for(j=0; j<n0*n2*n1; j++)  yDisplacement[j] = in[j][0];
+  
+  fftw_execute(iplan_z);
+  for(j=0; j<n0*n2*n1; j++)  zDisplacement[j] = in[j][0];
+
+  return 0;
+}
+
+
+int printGaussianfield(){
+    sprintf(filepath, "%s/Data/SpectralDistortion/GRF_mask_MonoAndQuad_CellSize_%.2f.dat", root_dir, CellSize);
+
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<n0*n1*n2; j++)  fprintf(output, "%e \n", densityArray[j]);
+    
+    fclose(output);
+
     return 0;
 }
 

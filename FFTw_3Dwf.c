@@ -321,7 +321,10 @@ int newApproach_W2rMultipoles(){
         }
     }
     
-    sprintf(filepath, "%s/Data/SpectralDistortion/VipersMaskWf_rSpaceMonopole_newApproach.dat", root_dir);
+    windfn_rQuadrupole[j]                         *= -5.;
+    windfn_rHexadecapole[j]                       *=  9.;
+    
+    sprintf(filepath, "%s/Data/SpectralDistortion/knownGRFmask_rSpaceMonopole_newApproach.dat", root_dir);
     
     output = fopen(filepath, "w");
     
@@ -671,7 +674,7 @@ int spline_wfMultipoles_deltaSpace(){
     
     //  sprintf(filepath, "%s/Data/SpectralDistortion/VipersBinaryMask_rSpaceMultipoles_Hex.dat", root_dir);
 
-    sprintf(filepath, "%s/Data/SpectralDistortion/VipersMaskWf_rSpaceMonopole_newApproach.dat", root_dir);
+    sprintf(filepath, "%s/Data/SpectralDistortion/knownGRFmask_rSpaceMonopole_newApproach.dat", root_dir);
 
     inputfile = fopen(filepath, "r");
     
@@ -692,7 +695,7 @@ int spline_wfMultipoles_deltaSpace(){
     spline(windfn_rvals, windfn_rHexadecapole, rbinNumb, 1.0e31, 1.0e31, windfn_rHexadecapole2d);
     
     printf("\n\nlimit on splint taken to be: %e", windfn_rvals[rbinNumb-1]);
-    
+    /*
     sprintf(filepath, "%s/Data/SpectralDistortion/VipersBinaryMask_rSpaceMultipoles_MonoSplint.dat", root_dir);
     
     output = fopen(filepath, "w");
@@ -706,6 +709,6 @@ int spline_wfMultipoles_deltaSpace(){
     }
     
     fclose(output);
-    
+    */
     return 0;
 }
