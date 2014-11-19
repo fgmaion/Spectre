@@ -109,18 +109,18 @@ int  printHODMatterPk(){
 
     return 0;
 }
-
 */
+
 double splintLinearPk(double k){
     // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec). 
+    
+    // if(k<0.0004)  return 4.675*pow(10., 6.)*pow(k, 1.00)*pow(linearBias/1.495903, 2.); 
     if(k<0.0004)  return 4.675*pow(10., 6.)*pow(k, 0.96)*pow(linearBias/1.495903, 2.); 
 
     else{
-        float Interim;
+        splint(lineark, linearPk, linear2d, 469, k, &Interim);
     
-        splint(lineark, linearPk, linear2d, 469, (float) k, &Interim);
-    
-        return (double) Interim*pow(linearBias/1.495903, 2.);
+        return Interim*pow(linearBias/1.495903, 2.);
     }
 }
 
@@ -144,7 +144,6 @@ double ConvolutionNorm(double array[]){
 
 	return Interim;
 }
-
 */
 
 double minAmp_ConvolutionNorm(double array[]){

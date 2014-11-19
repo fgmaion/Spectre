@@ -2,7 +2,7 @@ int prepNGP(){
     densityArray               =  (double *)  realloc(densityArray,     n0*n1*n2*sizeof(*densityArray));
     // meanCellRedshift        =  (double *)  realloc(meanCellRedshift, n0*n1*n2*sizeof(*meanCellRedshift));  
 
-    // FKPweights              =  (double *)  realloc(FKPweights,       n0*n1*n2*sizeof(*FKPweights));
+    FKPweights                 =  (double *)  realloc(FKPweights,       n0*n1*n2*sizeof(*FKPweights));
 
     // Cell_rotatedXvals       =  (double *)  realloc(Cell_rotatedXvals,       n0*n1*n2*sizeof(*Cell_rotatedXvals));
     // Cell_rotatedYvals       =  (double *)  realloc(Cell_rotatedYvals,       n0*n1*n2*sizeof(*Cell_rotatedYvals));
@@ -36,7 +36,7 @@ int prepNGP(){
 int CleanNGP(){
     for(j=0; j<n0*n1*n2; j++)             FKPweights[j] = 1.0;
     for(j=0; j<n0*n1*n2; j++)           densityArray[j] = 0.0;
-    for(j=0; j<n0*n1*n2; j++)       meanCellRedshift[j] = 0.0;
+    // for(j=0; j<n0*n1*n2; j++)       meanCellRedshift[j] = 0.0;
 
     return 0;
 }

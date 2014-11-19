@@ -310,7 +310,7 @@ int newApproach_W2rMultipoles(){
     printf("\n\nCalculating window autocorrelation monopole");
     
     for(j=0; j<rbinNumb; j++){
-        printf("\n %d", j);
+        printf("\n%d", j);
     
         for(k=0; k<n0*n1*n2; k++){
             windfn_rMonopole[j]                   +=  W2_veck[k]*gsl_sf_bessel_j0(kmodulus_vec[k]*windfn_rvals[j]);
@@ -324,7 +324,8 @@ int newApproach_W2rMultipoles(){
     windfn_rQuadrupole[j]                         *= -5.;
     windfn_rHexadecapole[j]                       *=  9.;
     
-    sprintf(filepath, "%s/Data/SpectralDistortion/knownGRFmask_rSpaceMonopole_newApproach.dat", root_dir);
+    
+    sprintf(filepath, "%s/Data/window_fft/VipersMask_rSpaceMonopole_newApproach.dat", root_dir);
     
     output = fopen(filepath, "w");
     

@@ -35,7 +35,7 @@ int randomGeneration(){
 }
 
 
-int assign_randmemory(double alpha, int Vipers_Num){
+int assign_randmemory(){
     rand_ra    = (double *) malloc(rand_number*sizeof(*rand_ra));
     rand_dec   = (double *) malloc(rand_number*sizeof(*rand_dec));
     rand_chi   = (double *) malloc(rand_number*sizeof(*rand_chi));
@@ -68,7 +68,7 @@ int loadNagoya_rands(){
 
   rewind(inputfile);
 
-  assign_randmemory(0.1, rand_number);
+  assign_randmemory();
   
   for(j=0; j<rand_number; j++){  
     fscanf(inputfile, "%le \t %le \t %le", &rand_ra[j], &rand_dec[j], &rand_redshift[j]);

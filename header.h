@@ -943,3 +943,59 @@ double* rand_redshift;
 double* xDisplacement;
 double* yDisplacement;
 double* zDisplacement;
+
+int startint = -99;
+int endint =-99;
+
+double* sigma2rvals;
+
+double* sigma2perp;
+double* sigma2para;
+
+double* sigma2perp_2d;
+double* sigma2para_2d;
+
+double zel_vecr[3];
+double zel_vecx[3];
+
+double zel_qmin[3];
+double zel_qmax[3];
+
+double dummy;
+
+double** invA;
+
+double zel_r;
+double zel_xi;
+double zel_err;
+double zel_scale;
+
+double splint_sigma2perp(double r);
+double splint_sigma2para(double r);
+
+double NFW_densityprofile_NormedFourier(double k);
+
+double haloModel_pk(double k, double beta, int Order);
+double ukm2(double k);
+double linearPk_Gaussian(double k);
+
+double NFW_rvir;
+double NFW_conc;
+int    haloNumber;
+
+double* r_Nfwinversion;
+double* q_Nfwinversion;
+double* rq2D_Nfwinversion;
+
+double rhobox, Mbox, Mhalo, Mpart;
+double Delta_crit = 200.;
+double Dplus = 0.5;
+double fGR   = 0.7;
+
+double* hod_disp;
+
+fftw_complex *outx, *outy, *outz;
+
+fftw_plan    iplan_x, iplan_y, iplan_z;
+
+int*     shuffle_rows;

@@ -3,14 +3,17 @@
 
 #include <stdbool.h>
 
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
+#include <gsl/gsl_linalg.h>
+// #include "omp.h"
+
 #include <gsl/gsl_sf_bessel.h>
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_sf_gamma.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
+#include <gsl/gsl_sf_dawson.h>
 #include <gsl/gsl_sf_legendre.h>
-#include <gsl/gsl_linalg.h>
-// #include "omp.h"
+#include <gsl/gsl_sf_expint.h>
 
 #define   AUXfn_header "/disk1/mjw/Aux_functions/header.h"
 #include  AUXfn_header
@@ -43,8 +46,8 @@
 #include "Scripts/Windowfn_PkCorrections.c"
 
 #include "Scripts/KaiserMultipoles.c"
-// #include "Scripts/KaiserGaussMultipoles.c"
-#include "Scripts/KaiserLorentzMultipoles.c"
+#include "Scripts/KaiserGaussMultipoles.c"
+// #include "Scripts/KaiserLorentzMultipoles.c"
 
 #include "Scripts/qSortCompare.c"
 #include "Scripts/FFTw_3D.c"
@@ -81,9 +84,19 @@
 #include "Scripts/fitting_nz.c"
 #include "Scripts/randGen.c"
 
+#include "Scripts/ArtificialWf.c"
+#include "Scripts/BootStrap.c"
+
 #include "Scripts/correlation_fns.c"
 
 #include "Scripts/redshiftDistribution_NagoyaRandoms.c"
+
+#include "Scripts/FFT_log.h"
+#include "Scripts/FFT_log.c"
+
+#include "Scripts/cubature/cubature.h"
+#include "Scripts/FFT_log_zeldovich.h"
+#include "Scripts/FFT_log_zeldovich.c"
 
 /*
 #include "Scripts/slowDFT.c"
@@ -96,6 +109,7 @@
 #include "Scripts/2DPosteriors.c"
 #include "Scripts/LikelihoodEval.c"
 */
+
 #include "Scripts/freeMemory.c"
 
 #include "Scripts/MonteCarlo_SSPOC.c"
@@ -108,6 +122,9 @@
 #include "Scripts/libkdtree.c"
 
 #include "Scripts/mockGalaxyCats.c"
+
+#include "Scripts/NFW_profile.c"
+
 
 int main(int argc, char **argv){
 
@@ -137,21 +154,18 @@ sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_ValueAddedHOD");
 
 // Stefano basis. 
 AxisLimsArray[0][0]   =       0.0;                                                     // h^-1 Mpc
-AxisLimsArray[1][0]   =     200.0;                                                     // h^-1 Mpc
-// AxisLimsArray[1][0]   =     800.0;
+AxisLimsArray[1][0]   =     500.0;
 
 AxisLimsArray[0][1]   =       0.0;                                                     // h^-1 Mpc
-AxisLimsArray[1][1]   =     200.0;                                                     // h^-1 Mpc
-// AxisLimsArray[1][1]   =     800.0;
+AxisLimsArray[1][1]   =     500.0;
 
 AxisLimsArray[0][2]   =       0.0;                                                     // h^-1 Mpc
-AxisLimsArray[1][2]   =     200.0;                                                     // h^-1 Mpc
-// AxisLimsArray[1][2]   =     800.0;
+AxisLimsArray[1][2]   =     500.0;
 
 // degree of translation for Stefano's co-ordinates, fit survey into surrounding volume. 
 stefano_trans_x       =    + 100.;
 stefano_trans_y       =    + 300.;
-stefano_trans_z       =   - 1500.;
+stefano_trans_z       =    -1500.;
 
 // limits in right asecension.
 // W1 catalogue.
@@ -186,7 +200,7 @@ W4area                =       8.8;
 TotalW1W4area         =    19.675; 
 
 // Cell size, comoving distance, h^-1 Mpc.
-CellSize              =       4.0;     
+CellSize              =       2.0;     
 // CellSize           =    7.8125;     
 // CellSize           =     5.208;
 
@@ -196,9 +210,8 @@ redshiftLowLimit      =      0.60;
 redshiftHiLimit       =      0.90;
 
 // Non-linear RSD
-velDispersion         =      3.00;                  // units of h^-1 Mpc rather than 300 km s^-1
-beta                  =      0.542;                 // 2dF measurement, beta = 0.43
-A11Sq                 =      2.58;                  // beta = 0.542 for the cube. 
+velDispersion         =      12.00;                  // units of h^-1 Mpc rather than 300 km s^-1
+beta                  =      0.542;                  // 2dF measurement, beta = 0.43, beta = 0.542 for the cube. 
 
 // Priors on the model params.
 min_beta              =      0.30;
@@ -242,8 +255,8 @@ fkpPk                 =    1000.0;                                              
 meanSampling          =       0.4;
 
 // Binning interval for P(k).
-kbinInterval          =      0.01;
-modkMax               =      0.80;
+kbinInterval          =     0.005;
+modkMax               =      1.00;
 muBinNumb             =       100;
 
 // Interval in k^2 for perp k binning of 2D P(k).
@@ -264,40 +277,68 @@ gsl_rng_env_setup();
 gsl_ran_T = gsl_rng_default;
 gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
     
-// Clipping variables. 
-appliedClippingThreshold  =        5.0;    
-// linearBias             = sqrt(2.90);
+// Clipping variables. Currently underclip. 
+appliedClippingThreshold  =       -1.0;    
+
 A11Sq                     =        1.0;
 
 
-padVolume(0.0, 0.0, 0.0);
+// NFW halo generation
+haloNumber = 10000;
+NFW_conc   =   1.0; 
 
-// Checked.
+// Correlation fn.s
+// logarithmic binning in r. 
+zerolog  =             log10(0.001);
+maxlog   =             log10(300.0);
+logbinsz =             log10(  1.4);
+  
+nlogbins =  (int) ceil((maxlog - zerolog)/logbinsz);
+
+// linear binning in mu. 
+zerolin  =                   0.00;
+maxlin   =                   1.00;
+linbinsz =                   0.05;
+
+nlinbins =  (int) ceil((maxlin - zerolin)/linbinsz);
+
+
+// padVolume(0.0, 0.0, 0.0);
+
 comovDistReshiftCalc();
 
-// Checked.
-VIPERS_SolidAngle         = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
-
-sprintf(surveyType, "HODmocks_RedshiftSpace_Mesh_%.2f_CicWf", CellSize);
+// VIPERS_SolidAngle         = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
 
 // JenkinsCoordinates();
 
 // Checked.
 EvaluateGridParameters();
 
+// assign binning interval in k, and calcualate number of bins required. Checked. 
+assignbinninginterval(kbinInterval);
+
 // Checked.
 prepNGP();
 
-// Checked.
+// VIPERS_Binarymask();
+// knownGRF_mask();
+FullCube();
+
 // CalcCellraDec();
+
 // CalcCellChi();
 
 // apodiseWindowfn();
 
 // apodisedVolume        = CellVolume*SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2);
 
-// assign binning interval in k, and calcualate number of bins required. Checked. 
-assignbinninginterval(kbinInterval);
+prepBootStrap(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
+
+// Applied window fn.
+Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
+
+// Checked.
+CalcWfCorrections();
 
 prepFFTw(n0, n1, n2);
 
@@ -305,16 +346,17 @@ prepFFTbinning(kbinInterval);
 
 assign2DPkMemory(muBinNumb, kBinNumb);       
 
-sprintf(theoryPk_flag, "HOD_-20.0");
+// wfPkCalc();
 
-pt2Pk = &splintHODpk;
+// inputHODPk();
 
-inputHODPk();
+inputLinearPk();
 
-// pt2Pk = &splintLinearPk;
-// inputLinearPk();
+// pt2shot = &lightconeShot;
 
-pt2shot = &lightconeShot;
+// Number of randoms, load positions, load RR.
+// 3600000., 13122980.
+prep_randpairs(20.*30000., 1, 0);
 
 // loadNagoya_rands();
 
@@ -325,22 +367,48 @@ pt2shot = &lightconeShot;
 
 // output = fopen(filepath, "w");
 
+// NFW DD: 147637 D, 8.xD rands for RR. 
+// prep_randpairs(8.*147637., 0, 1);
+
+// NFWprofile_oneHalo();
+
+// NFWprofile_oneHalo_pairCount(); 
+
+// NFWprofile_oneHalo_xiCalc();
+
+// NFW_profileOneHalo_xi();
+
+// computeCorrelation_fns(2);
+
+// randoms_Sphere(30000., 200.);
+
+load_homogeneous_rands_sphere(30000., 1);
+
+randSphere_pairCount();
+
+// prep_NFWhaloCat(3000000);
+
+// prep_pairwisepdf();
+
 for(loopCount=1; loopCount<2; loopCount++){
-    if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
-    else              sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
+    printf("\n\n%d", loopCount);
+    
+    // sprintf(surveyType, "250_fullCube_Gaussian_fogRSD_CellSize_%.2f", CellSize);
+
+    // if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
+    // else              sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
       
     // Choice of redshift from zcos, zpec, zphot, zobs.
     
     // CatalogueInput(filepath);
     
     // zUtilized = &zcos[0];
-    /*
-    for(jj=0; jj<Vipers_Num; jj++){  
-        if((zUtilized[jj] > 0.65) && (zUtilized[jj]<0.75)){
-	        fprintf(output, "%e \n", zUtilized[jj]);
-        }
-    }
-    */
+    
+    //for(jj=0; jj<Vipers_Num; jj++){      //    if((zUtilized[jj] > 0.65) && (zUtilized[jj]<0.75)){
+	//        fprintf(output, "%e \n", zUtilized[jj]);
+    //    }
+    //}
+    
     // My basis, otherwise use Stefano basis. Never use both in conjuction. 
     // CoordinateCalc();
     
@@ -361,17 +429,11 @@ for(loopCount=1; loopCount<2; loopCount++){
     
     // loadRand();
     
-    // Applied window fn.
-    // Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
-    
-    // Checked.
-    // CalcWfCorrections();
-    
     // projectVIPERSsystem();
 
     // VIPERSbasis(CentreRA, CentreDec, xCoor, yCoor, zCoor, Vipers_Num);
-    /*
-    assignAcceptance();
+    
+    // assignAcceptance();
 
     // Must be run for all 27 mocks in preparation for P(k) calc.
     // ComovingNumberDensityCalc();
@@ -379,31 +441,55 @@ for(loopCount=1; loopCount<2; loopCount++){
 
     // splineGaussfilteredW1_W4_nz();
     
-    splineMockAvg_nz();
+    // splineMockAvg_nz();
     
-    pt2nz = &MockAvg_nz;
+    // pt2nz = &MockAvg_nz;
+    
+    // Gaussianfield();
+    
+    // deplete_homogeneous();
+    
+    // underclipDensity(appliedClippingThreshold);
+    
+    // poissonSample_lnNorm();
+    
+    // Do not forget call to prep Cat. 
+    // HaloCatalogue_NFWprofile(3000000);
+    
+    //** Note: Dangerous non-commutation of sampling and randomise in load_clustered. may generate biased population if not careful. **//
+    // load_clustered(1, 0.01);
 
-    CleanNGP();
+    // NFW_profile_pairCount();
 
+    // Calculation of multipole moments for the halo model catalogue.
+    // ukm_calc();
+    
+    // CleanNGP();
+    
     // Checked.
-    NGPCalc();
+    // NGPCalcCube(xCoor, yCoor, zCoor, Vipers_Num);
+    // NGPCalcCube(rand_x, rand_y, rand_z, rand_number);
     
     // ApplyFKPweights(meanSampling);
 
-    cleanFFTbinning();
+    // cleanFFTbinning();
   
-    PkCalc();
-    */
+    // PkCalc();
+    
     // slowDFTcalc();
 }
 
-// gridlike();
+// print_pairwisepdf();
 
-load_gridRands();
+// hodmodel_xi();
 
-load_displacedRands();
+// calc_zeldovichxi();
 
-computeCorrelation_fns();
+// fog_xiCalc();
+
+// clippedPkCalc();
+
+// lnnormPkCalc();
 
 // spline_realSpaceCorrfn(55);
 

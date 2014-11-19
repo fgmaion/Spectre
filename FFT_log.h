@@ -50,12 +50,16 @@ FFTLog_config *FFTLog_init(int N, double min, double max, double q, double mu);
 FFTLog_config*  octupole_config;
 FFTLog_config*      mono_config;
 FFTLog_config*      quad_config;
+FFTLog_config*      zero_config;
 FFTLog_config*       hex_config;
 
 FFTLog_config*   limmono_config;
 
 FFTLog_config*  clipmono_config;
 FFTLog_config*  clipquad_config;
+
+FFTLog_config*    lnnorm_mono_config;
+FFTLog_config*    lnnorm_quad_config;
 
 FFTLog_config*    convlmonoCorr;
 FFTLog_config*    convlquadCorr;

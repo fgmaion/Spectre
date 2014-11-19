@@ -8,6 +8,7 @@ double ra_criterion(double x, double y, double max){
 	}
 }
 
+
 double dec_criterion(double x, double y){
 	double dec360x;
 	double dec360y;

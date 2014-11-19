@@ -14,13 +14,10 @@ int PkCalc(){
     
     PkCorrections();
     
-    if(loopCount<10)  sprintf(filepath, "%s/Data/Del2k/midK_Del2k_%s_kInterval_%.2f_00%d.dat", root_dir, surveyType, kbinInterval, loopCount);
-    else              sprintf(filepath, "%s/Data/Del2k/midK_Del2k_%s_kInterval_%.2f_0%d.dat", root_dir, surveyType, kbinInterval, loopCount);
-    
     // Monopole(filepath);
 
     observedQuadrupole(polarPk_modeCount);
-        
+  
     // Cartesian2Dpk();
     
     // sprintf(filepath, "%s/Data/muSlicedPk/%s_muSlicedPk_0.0mu0.2.dat", root_dir, surveyType);
@@ -39,14 +36,7 @@ int PkCalc(){
 int Monopole(char filepath[]){
     // Peacock 2dF:                 beta = 0.43 +- 0.07
     
-    MonopoleCalc(kBinNumb, meanKBin, kMonopole, polar2Dpk, polarPk_modeCount, filepath, kbinInterval, 0.0, 1.0, 1);;
-
-    output = fopen(filepath, "w");
-    
-    // Only half the modes are independent. 
-    for(j=0; j<kBinNumb-1; j++) fprintf(output, "%e \t %e \t %e \n", meanKBin[j], binnedPk[j], (*pt2Pk)(meanKBin[j]));
-
-    fclose(output);
+    MonopoleCalc(kBinNumb, meanKBin, kMonopole, polar2Dpk, polarPk_modeCount, filepath, kbinInterval, 0.0, 1.0, 1);
 
     return 0;
 }
@@ -57,8 +47,10 @@ int observedQuadrupole(int modeCount){
 
     // polar2DpkBinning(modeCount);
     
-    if(loopCount<10)  sprintf(filepath, "%s/Data/Multipoles/Multipoles_%s_kbin_%.3f_00%d.dat", root_dir,  surveyType, kbinInterval, loopCount);
-    else              sprintf(filepath, "%s/Data/Multipoles/Multipoles_%s_kbin_%.3f_0%d.dat", root_dir, surveyType, kbinInterval, loopCount);
+    // if(loopCount<10)  sprintf(filepath, "%s/Data/window_fft/Multipoles_%s_kbin_%.3f_00%d.dat", root_dir,  surveyType, kbinInterval, loopCount);
+    // else              sprintf(filepath, "%s/Data/window_fft/Multipoles_%s_kbin_%.3f_0%d.dat",  root_dir, surveyType, kbinInterval, loopCount);
+
+    sprintf(filepath,"%s/Data/stacpolly/NFW_profile_500_ukm_%d.dat", root_dir, loopCount);
 
     MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, polar2Dpk, modeCount, filepath, kbinInterval, 0.0, 1.0, 1);
   
@@ -243,17 +235,15 @@ int MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], doubl
          
          LowerBinIndex   = UpperBinIndex;
      } 
-    
+     
      if(fileOutput == 1){       
          output = fopen(filepath, "w");
     
-         for(j=0; j<modBinNumb-1; j++){
-             fprintf(output, "%e \t %e \t %e \t %d \n", midBin[j], Monopole[j], Quadrupole[j], modesperbin[j]);   
-         }
+         for(j=0; j<modBinNumb-1; j++)  fprintf(output, "%e \t %e \t %e \t %d \t %e \n", mean_modBin[j], Monopole[j], Quadrupole[j], modesperbin[j], NFW_densityprofile_NormedFourier(mean_modBin[j]));
     
          fclose(output);
      }
-    
+     
      return 0;
 }
 
@@ -454,8 +444,8 @@ int PkCorrections(){
                 H_kImag                            = pow(n0*n1*n2, -1.0)*out[Index][1];
                 
                 // Cloud in cell. NGP corresponds to WindowFunc rather than WindowFunc^2. 
-                // H_kReal                        /= pow(WindowFunc, 2.);
-                // H_kImag                        /= pow(WindowFunc, 2.);
+                // H_kReal                        /= pow(WindowFunc, 1.);
+                // H_kImag                        /= pow(WindowFunc, 1.);
                 
                 PkArray[Index][0]                  = kmodulus;
         
@@ -464,33 +454,58 @@ int PkCorrections(){
                 // Rescale measured P(k) in the cube to the V=1 camb convention.
                 PkArray[Index][1]                 *= TotalVolume; 
                     
-                // Account for the affect of the window on the measured P(k).
+                // Account for the affect of the window on the amplitude of the measured P(k).
                 PkArray[Index][1]                 /= fkpSqWeightsVolume*pow(TotalVolume, -1.);
+                    
+                // PkArray[Index][1]                 -= TotalVolume/Vipers_Num;
                     
                 // Clipping corrected shot noise estimate. 
                 // PkArray[Index][1]              -= (1./TotalVolume)*(*pt2shot)(1.)*(1. - clippedVolume/TotalVolume);
                  
                 // PkCorrections called to correct NGP for survey window function.
 
-	            if((kmodulus > 0.000001) && (k_z >= 0.)){
-	                // Only half the modes are independent.
-	            	            
-		            // Issue with mu for a zeroth length vector being ill defined. 
-		            polar2Dpk[polarPk_modeCount][0]    = kmodulus;
-		            polar2Dpk[polarPk_modeCount][1]    = fabs(mu);
-		            polar2Dpk[polarPk_modeCount][2]    = PkArray[Index][1];
+                // Issue with mu for a zeroth length vector being ill defined. 
+	            if(kmodulus > 0.000001){
+	                // Only half the modes are independent. 
+	            	if(k_z>0.){
+	            	    // One hemi-sphere is independent, e.g. k_z >= 0.
+		                polar2Dpk[polarPk_modeCount][0]    = kmodulus;
+		                polar2Dpk[polarPk_modeCount][1]    = fabs(mu);
+		                polar2Dpk[polarPk_modeCount][2]    = PkArray[Index][1];
 		            
-		            // printf("\n%e \t %e \t %e", kmodulus, fabs(mu), PkArray[Index][1]);
+		                polarPk_modeCount                 += 1;
+		            }
 		            
+		            else if((k_z == 0.0) && (k_y > 0.0)){
+                        // in the k_z=0 plane one semi-circle is independent, k_y>0.
+		                polar2Dpk[polarPk_modeCount][0]    = kmodulus;
+		                polar2Dpk[polarPk_modeCount][1]    = fabs(mu);
+		                polar2Dpk[polarPk_modeCount][2]    = PkArray[Index][1];
+		            
+		                polarPk_modeCount                 += 1;
+		            }
+		            
+		            else if((k_z == 0.0) && (k_y == 0.0) && (k_x > 0.0)){
+		                // on the line k_z=k_y=0, one half is independent, k_x>=0.
+		                                        // in the k_z=0 plane one semi-circle is independent, k_y>0.
+		                polar2Dpk[polarPk_modeCount][0]    = kmodulus;
+		                polar2Dpk[polarPk_modeCount][1]    = fabs(mu);
+		                polar2Dpk[polarPk_modeCount][2]    = PkArray[Index][1];
+		            
+		                polarPk_modeCount                 += 1;
+		            }
+		            		            
+		            // else no dice.    
+		            		            
 		            // TwoDpkArray[Index][0]              = fabs(k_z);                      // Line of sight wavevector. 
 	                // TwoDpkArray[Index][1]              = pow(k_y*k_y + k_x*k_x, 0.5);    // perpendicular wavevector.
                     // TwoDpkArray[Index][2]              = PkArray[Index][1];
-                    
-                    polarPk_modeCount                 += 1;
 	            }
 	        }
         }
     }
+    
+    // printf("\n\nVipers number: %d, TotalVolume: %e, Shot noise contribution: %e", Vipers_Num, TotalVolume, TotalVolume/Vipers_Num);
     
     // sprintf(filepath, "%s/Data/SpectralDistortion/fullCube_muBinsPk_0.0.dat", root_dir);
     
@@ -504,8 +519,6 @@ int Gaussianfield(){
     int m0, m1, m2;
     
     double Power, amplitude, phase, expectation; 
-    
-    printf("\nTotal vol.: %e", TotalVolume);
     
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
@@ -538,30 +551,25 @@ int Gaussianfield(){
 
                 expectation                        = (*pt2Pk)(kmodulus)/TotalVolume;
                 
-                expectation                       *= 1. + 0.5*pow(mu, 2.);
+                // expectation                    *= 1. + 0.5*pow(mu, 2.);
             
                 // expectation                    *= pow(1. + beta*pow(mu, 2.), 2.);
                 
-                // expectation                    /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
+                // fingers of God RSD.
+                expectation                       /= 1. + 0.5*pow(k_z*velDispersion, 2.);
 
-                Power                              = -log(gsl_rng_uniform(gsl_ran_r))*expectation;
+                // Power                           = -log(gsl_rng_uniform(gsl_ran_r))*expectation;
                 
                 // amplitude                       = sqrt(Power);
                 amplitude                          = sqrt(expectation);
-                
+                                
                 phase                              = 2.*pi*gsl_rng_uniform(gsl_ran_r);
-                
-                // purely real.
-                if(k_x == NyquistWaveNumber) phase = 0.0;
-                if(k_y == NyquistWaveNumber) phase = 0.0;
-                if(k_z == NyquistWaveNumber) phase = 0.0;
-                
-                // printf("\n%le %le \t %le \t %le \t %le", kmodulus, (*pt2Pk)(kmodulus), Power, amplitude, phase);
                 
                 // Assuming Cic assignment scheme
                 out[Index][0]                      = amplitude*cos(phase);
                 out[Index][1]                      = amplitude*sin(phase);
                 
+                /*
                 WindowFunc                         = 1.;
 
                 if(k_x != 0.){
@@ -572,191 +580,121 @@ int Gaussianfield(){
                 
                 if(k_z != 0.){
 		            WindowFunc                    *= sin(pi*k_z*0.5/NyquistWaveNumber)/(pi*k_z*0.5/NyquistWaveNumber);}		      
-	        
+	            */
+	            
 	            // out[Index][0]                  *= pow(WindowFunc, 2.);
 	        	// out[Index][1]                  *= pow(WindowFunc, 2.);
 	        }
         }
     }
     
-    // Zero mean. 
+    // Zero mean. Mean is always real for a real input fn.
     out[0][0] = 0.0;
     out[0][1] = 0.0;
     
     int negkIndex;
-            
-    // Hermitian condition. 
-    for(k=0; k<n0/2 +1; k++){
+    
+    // Hermitian condition. One hemi-sphere is independent, e.g. k_z >= 0.
+    for(k=n0-1; k>=n0/2; k--){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
-                Index     = k*n1*n2 + j*n2 + i;
+                negkIndex          = k*n1*n2 + j*n2 + i;
                        
-                negkIndex = 0;
-                     
-                if(i != 0) negkIndex += (n2-i); 
-                if(j != 0) negkIndex += (n1-j)*n2; 
-                if(k != 0) negkIndex += (n0-k)*n1*n2; 
+                Index              = 0;
+                
+                // zero maps to zero on reflection through the origin.
+                if(i!=0)  Index   += (n2 - i);
+                if(j!=0)  Index   += (n1 - j)*n2;
+                          Index   += (n0 - k)*n1*n2;
 
-                out[negkIndex][0] =     out[Index][0];
-                out[negkIndex][1] = -1.*out[Index][1];
+                out[negkIndex][0]  =     out[Index][0];
+                out[negkIndex][1]  = -1.*out[Index][1];
+                
+                if(negkIndex == Index)   out[Index][1] = 0.0; // purely real
             }
+        }
+    } 
+    
+    // in the k_z=0 plane one semi-circle is independent, k_y>0.         
+    for(j=n1-1; j>=n1/2; j--){
+        for(i=0; i<n2; i++){
+            negkIndex          = j*n2 + i;
+                       
+            Index              = 0;
+                
+            // zero maps to zero on reflection through the origin.
+            if(i!=0)  Index   += (n2 - i);
+                      Index   += (n1 - j)*n2;
+
+            out[negkIndex][0]  =     out[Index][0];
+            out[negkIndex][1]  = -1.*out[Index][1];
+            
+            if(negkIndex == Index)   out[Index][1] = 0.0;
         }
     }
     
+    // on the line k_z=k_y=0, one half is independent, k_x>=0.
+    for(i=n2-1; i>=n2/2; i--){
+        negkIndex          = i;
+                       
+        Index              = 0;
+                
+        // zero maps to zero on reflection through the origin.
+        Index             += (n2 - i);
+
+        out[negkIndex][0]  =      out[Index][0];
+        out[negkIndex][1]  =  -1.*out[Index][1];
+            
+        if(negkIndex == Index)    out[Index][1] = 0.0;
+    }
+
     fftw_execute(iplan);
 
     for(j=0; j<n0*n2*n1; j++)  densityArray[j] = in[j][0];
     
-    double GRF_var = 0.0, GRF_mean = 0.0;
+    // double GRF_var = 0.0, GRF_mean = 0.0;
     
-    apparent_mean = 0.0;
+    // apparent_mean = 0.0;
     
-    for(j=0; j<n0*n1*n2; j++){ 
-        GRF_var        += pow(densityArray[j], 2.);
-        GRF_mean       +=     densityArray[j];
-    }
+    // for(j=0; j<n0*n1*n2; j++){ 
+    //   GRF_var        += pow(densityArray[j], 2.);
+    //    GRF_mean       +=     densityArray[j];
+    //}
     
-    GRF_var     /= n0*n1*n2;
-    GRF_mean    /= n0*n1*n2;                           
+    ///GRF_var            /= n0*n1*n2;
+    // GRF_mean           /= n0*n1*n2;                           
     
-    printf("\n\nMean of the Gaussian realisation: %e", GRF_mean);
-    printf("\n\nVariance of Gaussian realisation: %e", GRF_var);
+    // printf("\n\nMean of the Gaussian realisation: %e", GRF_mean);
+    // printf("\n\nVariance of Gaussian realisation: %e", GRF_var);
     
-    for(j=0; j<n0*n2*n1; j++)  apparent_mean       += densityArray[j]*Cell_AppliedWindowFn[j];
+    // for(j=0; j<n0*n2*n1; j++)  apparent_mean       += densityArray[j]*Cell_AppliedWindowFn[j];
     
     // Number of non-empty cells in mask. 
-    apparent_mean    /= 123004.;
+    // apparent_mean    /= 123004.;
     
     // for(j=0; j<n0*n1*n2; j++)  densityArray[j]     -= apparent_mean;
     
-    printf("\n\nApparent (weighted) mean of the Gaussian realisation: %e", apparent_mean);
+    // printf("\n\nApparent (weighted) mean of the Gaussian realisation: %e", apparent_mean);
+    
+    printf("\n\nminimum delta of Gaussian realisation: %e", arrayMin(densityArray, n0*n1*n2));
     
     return 0;
 }
 
 
-int DisplacementCalc(){
-  int m0, m1, m2;
+int lnNormfield(){
+    Gaussianfield();
+            
+    double GRF_var = 0.0;
+            
+    // Already a zero mean field. 
+    for(j=0; j<n0*n1*n2; j++) GRF_var         += pow(densityArray[j], 2.);
 
-  int negkIndex;
+    GRF_var                                   /= n0*n1*n2;
 
-  double Power, amplitude, phase, expectation;
+    for(j=0; j<n0*n2*n1; j++)  densityArray[j] = exp(densityArray[j] - 0.5*GRF_var) - 1.;
 
-  fftw_complex *outx, *outy, *outz;
-
-  xDisplacement       = malloc(n0*n1*n2*sizeof(double));
-  yDisplacement       = malloc(n0*n1*n2*sizeof(double));
-  zDisplacement       = malloc(n0*n1*n2*sizeof(double));
-
-  outx                = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);  
-  outy                = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);
-  outz                = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);
-
-  for(k=0; k<n0; k++){
-    for(j=0; j<n1; j++){
-      for(i=0; i<n2; i++){
-	m0 = k;
-	m1 = j;
-	m2 = i;
-
-	if(m2>n2/2)  m2                   -= n2;
-	if(m1>n1/2)  m1                   -= n1;
-	if(m0>n0/2)  m0                   -= n0;
-
-	k_x                                = kIntervalx*m2;
-	k_y                                = kIntervaly*m1;
-	k_z                                = kIntervalz*m0;
-
-	Index                              = k*n1*n2 + j*n2 + i;
-
-	kSq                                = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
-
-	kmodulus                           = pow(kSq, 0.5);
-
-	mu                                 = k_z/kmodulus;
-	if(kmodulus < 0.000001)       mu   = 0.0;
-
-	expectation                        = (*pt2Pk)(kmodulus)/TotalVolume;
-
-	expectation                       *= 1. + 0.5*pow(mu, 2.);
-
-	// expectation                    *= pow(1. + beta*pow(mu, 2.), 2.);                                                                         
-
-	// expectation                    /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);                                                            
-
-	Power                              = -log(gsl_rng_uniform(gsl_ran_r))*expectation;
-
-	// amplitude                       = sqrt(Power);                                                                                            
-	amplitude                          = sqrt(expectation);
-
-	phase                              = 2.*pi*gsl_rng_uniform(gsl_ran_r);
-
-	// purely real.                                                                                                                              
-	if(k_x == NyquistWaveNumber) phase = 0.0;
-	if(k_y == NyquistWaveNumber) phase = 0.0;
-	if(k_z == NyquistWaveNumber) phase = 0.0;
-
-	outx[Index][0]                     =  (k_x/kSq)*amplitude*sin(phase);
-	outx[Index][1]                     = -(k_x/kSq)*amplitude*cos(phase);
-      
-	outy[Index][0]                     =  (k_y/kSq)*amplitude*sin(phase);
-        outy[Index][1]                     = -(k_y/kSq)*amplitude*cos(phase);
-
-	outz[Index][0]                     =  (k_z/kSq)*amplitude*sin(phase);
-        outz[Index][1]                     = -(k_z/kSq)*amplitude*cos(phase);
-      }
-    }
-  }
-
-  outx[0][0] = 0.0;
-  outx[0][1] = 0.0;
-
-  outy[0][0] = 0.0;
-  outy[0][1] = 0.0;
-
-  outz[0][0] = 0.0;
-  outz[0][1] = 0.0;
-
-  // Hermitian condition.                                                                                                                                  
-  for(k=0; k<n0/2 +1; k++){
-    for(j=0; j<n1; j++){
-      for(i=0; i<n2; i++){
-	Index     = k*n1*n2 + j*n2 + i;
-
-	negkIndex = 0;
-
-	if(i != 0) negkIndex += (n2-i);
-	if(j != 0) negkIndex += (n1-j)*n2;
-	if(k != 0) negkIndex += (n0-k)*n1*n2;
-
-	outx[negkIndex][0] =     outx[Index][0];
-	outx[negkIndex][1] = -1.*outx[Index][1];
-      
-	outy[negkIndex][0] =     outy[Index][0];
-        outy[negkIndex][1] = -1.*outy[Index][1];
-
-	outz[negkIndex][0] =     outz[Index][0];
-        outz[negkIndex][1] = -1.*outz[Index][1];
-      }
-    }
-  }
-
-  fftw_plan    iplan_x, iplan_y, iplan_z;
-
-  iplan_x = fftw_plan_dft_3d(n0, n1, n2, outx, in, FFTW_BACKWARD, FFTW_ESTIMATE);
-  iplan_y = fftw_plan_dft_3d(n0, n1, n2, outy, in, FFTW_BACKWARD, FFTW_ESTIMATE);
-  iplan_z = fftw_plan_dft_3d(n0, n1, n2, outz, in, FFTW_BACKWARD, FFTW_ESTIMATE);
-
-  fftw_execute(iplan_x);
-  for(j=0; j<n0*n2*n1; j++)  xDisplacement[j] = in[j][0];
-  
-  fftw_execute(iplan_y);
-  for(j=0; j<n0*n2*n1; j++)  yDisplacement[j] = in[j][0];
-  
-  fftw_execute(iplan_z);
-  for(j=0; j<n0*n2*n1; j++)  zDisplacement[j] = in[j][0];
-
-  return 0;
+    return 0; 
 }
 
 
@@ -857,25 +795,21 @@ int MonopoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], double
         // Peacock and Nicholson 1991, pg 313. above eqn (20).
         // Result of summing over a shell in k space containing m modes, should be a Gaussian random variable with variance 2.m/N^2  
               
-        // linearErrors[j]     = sqrt(2.*modesPerBin[j]/(TotalZADEWeight*TotalZADEWeight));
+        // linearErrors[j]  = sqrt(2.*modesPerBin[j]/(TotalZADEWeight*TotalZADEWeight));
 
-        // del2[j]             = pow(mean_modBin[j], 3.)*TotalVolume*binnedPk[j]*(4.*pi)/pow(2.*pi, 3.);
+        // del2[j]          = pow(mean_modBin[j], 3.)*TotalVolume*binnedPk[j]*(4.*pi)/pow(2.*pi, 3.);
         
         LowerBinIndex       = UpperBinIndex;
     }
-
+    
     if(fileOutput == 1){
         output = fopen(filepath, "w");
-        
-        fprintf(output, "%e \t %e \t %d \n", Array[0][0], Array[0][2], 1);
     
-        for(j=0; j<modBinNumb-1; j++){    
-            fprintf(output, "%e \t %e \t %d \n", mean_modBin[j], Monopole[j], modesperbin[j]);   
-        }
+        for(j=3; j<modBinNumb-1; j++)  fprintf(output, "%e \t %e \t %d \t %e \t %e \t %e \t %e \n", mean_modBin[j], Monopole[j], modesperbin[j], haloModel_pk(mean_modBin[j], 0.0, 0), haloModel_pk(mean_modBin[j], 0.0, 2), haloModel_pk(mean_modBin[j], 0.7, 0), haloModel_pk(mean_modBin[j], 0.7, 2));   
     
         fclose(output);
     }
-
+    
     return 0;
 }
 

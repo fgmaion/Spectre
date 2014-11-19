@@ -21,6 +21,29 @@ int clipDensity(double threshold){
 }
 
 
+int underclipDensity(double threshold){
+    int    CellsClipped =  0;
+
+    printf("\n\nClipping threshold: %e",    appliedClippingThreshold);
+
+    printf("\nMin overdensity: %f", arrayMin(densityArray, n0*n1*n2));
+
+    for(j=0; j<n0*n1*n2; j++){
+        if(densityArray[j]  < threshold){ 
+	        densityArray[j] = threshold;
+	        
+		    CellsClipped   += 1; 
+        }
+    }
+
+    clippedVolume = CellVolume*CellsClipped;
+
+    printf("\nUnclipped volume: %e", 1. - clippedVolume/TotalVolume);
+    
+    return 0;
+}
+
+
 int inputHODPk(){
     // Interpolated theoretical P(k) on a regular grid in k. 
     sdltk  = realloc(sdltk,          470*sizeof(*sdltk));
@@ -33,9 +56,7 @@ int inputHODPk(){
     
     inputfile = fopen(filepath, "r");
     
-    for(j=0; j<470; j++){
-        fscanf(inputfile, "%le \t %le \n", &sdltk[j], &sdltPk[j]);
-    }
+    for(j=0; j<470; j++)  fscanf(inputfile, "%le \t %le \n", &sdltk[j], &sdltPk[j]);
     
     fclose(inputfile);
 
@@ -52,9 +73,13 @@ int inputHODPk(){
 }
 
 double HODPk_Gaussian(double k){
-    return splintHODpk(k)*exp(-0.5*pow(k*3., 2.));
+    return  0.02*splintHODpk(k)*exp(-0.5*pow(3.*k, 2.));
 }
 
+
+double linearPk_Gaussian(double k){
+    return splintLinearPk(k)*exp(-0.5*pow(3.*k, 2.));
+}
 
 int inputLinearPk(){
     // Interpolated theoretical P(k) on a regular grid in k. 
@@ -74,12 +99,13 @@ int inputLinearPk(){
     
     fclose(inputfile); 
     
+    
     spline(lineark, linearPk, 470, 1.0e31, 1.0e31, linear2d);
     
-    pt2Pk = &splintLinearPk;
+    pt2Pk = &linearPk_Gaussian;
     
     // Approx. model to HOD P(k), inflationary power law with exponential truncation. 
-    pt2Xi   = &Pk_powerlaw_truncated_xi;
+    pt2Xi = &Pk_powerlaw_truncated_xi;
     
     sprintf(theoryPk_flag, "linear_-20.0");
     

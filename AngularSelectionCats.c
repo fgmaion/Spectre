@@ -13,52 +13,6 @@ int initialisefiberCatGen(int objectNumber){
 }
 
 
-int drawrows(int shuffle_rows[], int N){
-    for(j=0; j<N; j++)  shuffle_rows[j] = j + (int) gsl_rng_uniform_int(gsl_ran_r, N - j);
-
-    return 0;
-}
-
-/*
-int shuffle(double array[], int shuffle_rows[], int N){
-    double temp;
-    
-    for(k=0; k<N; k++){    
-        temp                  = array[shuffle_rows[k]];
-        
-       array[shuffle_rows[k]] = array[k];
-
-       array[k]               = temp;
-    }
-    
-    for(k=0; k<N; k++)  printf("\n%e", array[k]);
-    
-    return 0;
-}
-
-
-int shuffletest(){
-   double* array;
-   int*     shuffle_rows;
-   
-   array = malloc(10*sizeof(double*));
-   
-   shuffle_rows = malloc(10*sizeof(int));
-   
-   for(j=0; j<10; j++){  
-      array[j] = 1.*j;
-   }
-  
-    drawrows(shuffle_rows, 10);
-  
-    // for(j=0; j<10; j++)  printf("\n%d", shuffle_rows[j]);
-  
-    shuffle(array, shuffle_rows, 10);
-    
-    return 0;
-}
-*/
-
 int fiberCollision_cat(int objectNumber, double redshifts[], double xCoors[], double yCoors[], double zCoors[]){
   double dx, dy, dz, r;
   

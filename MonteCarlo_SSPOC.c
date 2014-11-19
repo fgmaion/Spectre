@@ -85,6 +85,7 @@ int MonteCarlo_SSPOC(double midr, double dr, double* mono, double* monoerror, do
 
       phi               = 0.5*pi*gsl_rng_uniform(gsl_ran_r);
 
+      // NO - uniform in cos(theta)
       theta             = 0.5*pi*gsl_rng_uniform(gsl_ran_r);
 
       mu                = cos(theta);

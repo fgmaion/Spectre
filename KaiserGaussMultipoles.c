@@ -4,6 +4,7 @@
 
     where n is the "order".
 
+    Here sigma, is 'sigma_v' i.e pairwise dispersion/sqrt(2).
 */
 
 double muOrderZero(double ks){
@@ -72,21 +73,19 @@ double kaiserGauss_Hexfactor(double ks, double beta){
 
 
 double kaiserGauss_multipole(double ks, double beta, int monoQuad){
-    // Mono, L_0 corresponds to 0. Quad, L_2 corresponds to 1.
-    
     switch(monoQuad){
         case 0:
             return kaiserGauss_Monofactor(ks, beta);
-        case 1:
-            return kaiserGauss_Quadfactor(ks, beta);
         case 2:
+            return kaiserGauss_Quadfactor(ks, beta);
+        case 4:
             return kaiserGauss_Hexfactor(ks, beta);
     }
 }
 
 
 int setGaussianRSD(){
-    pt2RSD  = &kaiserGauss_multipole;
+    // pt2RSD  = &kaiserGauss_multipole;
     
     sprintf(theoryRSD_flag, "GaussianRSD");
 
