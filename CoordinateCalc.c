@@ -168,7 +168,7 @@ int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoo
     fclose(output);
     */
     
-    // Rotate the input co-ordinates such that the ra direction is aligned more or less with the y asix, dec direction with x, and redshift along z. 
+    // Rotate the input co-ordinates such that the ra direction is aligned more or less with the y axis, dec direction with x, and redshift along z. 
     StefanoRotated(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
                                                                                                                      
     printf("\n\nVIPERS Galaxies. Rotated + translated");                                                                  

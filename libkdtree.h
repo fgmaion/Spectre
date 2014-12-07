@@ -31,7 +31,7 @@ int   pairwisepdf_pairCount=0;
   
 double SplitValue;
 
-double **gg, **rr, **gr, **landy_xi, *xi0, *xi2, *xi4, *logrbins, ngg, ngr, nrr;
+double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, *xi0, *xi2, *xi4, *logrbins, ngg, ngr, nrr;
 
 double **gg_meanr, **gg_meanmu;
 double **gr_meanr, **gr_meanmu;
@@ -102,7 +102,7 @@ int    print_dr();
 
 int    print_xiMultipoles();
 
-int    CountPairs_rMu(double **C, double **r, double **mu, Node* firstTree, Node* secndTree, int sameTree);
+int    CountPairs_rMu(double **C0, double **C2, double **C4, double **r, double **mu, Node* firstTree, Node* secndTree, int sameTree);
 
 int    assignLeafValues(Particle cat[], double xCoors[], double yCoors[], double zCoors[], double disp[], int N);
 
@@ -116,15 +116,15 @@ double min_mu = +99.0;
 
 Node*  buildTree(Particle cat[],  int N);
 
-Node* Create_toyChildNode();
+Node*  Create_toyChildNode();
 
 Node   *createNode(Particle cat[], int N, int SplitDim, double xmin[NDIM], double xmax[NDIM]);
 
 int    sortby_position_alongDim_splitDim(const void *a, const void *b);
 
-int    findSuitableNodePairs_bruteforcePairCount(double **C, double **r, double **mu, Node *node1, Node *node2, int sameTree);
+int    findSuitableNodePairs_bruteforcePairCount(double **C0, double **C2,  double **C4, double **r, double **mu, Node *node1, Node *node2, int sameTree);
 
-int    bruteforceCountpairs_betweenChildren(double **C, double **r, double **mu, Node *node1, Node *node2, int sameTree);
+int    bruteforceCountpairs_betweenChildren(double **C0, double **C2, double **C4, double **r, double **mu, Node *node1, Node *node2, int sameTree);
 
 double pair_zmu(Particle a, Particle b);
 

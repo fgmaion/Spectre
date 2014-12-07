@@ -8,13 +8,13 @@ int xiMonopole(double** xi, double** mu, double* Monopole){
     
         for(j=0; j<nlinbins; j++){
             // second equality tests for NaNs in mu[i][j] (due to zero DD[i][j] pairs). NaN is the only number not equal to itself, not respected by all compilers. 
-            if((gr[i][j] <10) || (mu[i][j] != mu[i][j])){
-               quality_flag = 0;
-            }
+            // if((gr[i][j] <10) || (mu[i][j] != mu[i][j])){
+            //    quality_flag = 0;
+            // }
     
-            mu[i][j]        = zerolin + (j+0.5)*linbinsz;
+            // mu[i][j]        = zerolin + (j+0.5)*linbinsz;
     
-            Monopole[i]    += xi[i][j]*LegendrePolynomials(mu[i][j], 0)*linbinsz;
+            Monopole[i]    += xi[i][j]; //*LegendrePolynomials(mu[i][j], 0)*linbinsz;
         }
      
         logrbins[i] = pow(10., zerolog + (i+0.5)*logbinsz);
@@ -70,13 +70,15 @@ int xiQuadrupole(double** xi, double** mu, double* Quadrupole){
     
         for(j=0; j<nlinbins; j++){
             // second equality tests for NaNs in mu[i][j] (due to zero pairs). NaN is the only number not equal to itself, not respected by all compilers. 
-            if((rr[i][j] <10) || (mu[i][j] != mu[i][j])){
-              quality_flag  = 0;
-            }
+            // if((rr[i][j] <10) || (mu[i][j] != mu[i][j])){
+            //  quality_flag  = 0;
+            //}
             
             mu[i][j]        = zerolin + (j+0.5)*linbinsz;
         
-            Quadrupole[i]  += 5.*xi[i][j]*LegendrePolynomials(mu[i][j], 2)*linbinsz;
+            // Quadrupole[i]  += 5.*xi[i][j]*LegendrePolynomials(mu[i][j], 2)*linbinsz;
+        
+            Quadrupole[i] += 5.*xi[i][j]*LegendrePolynomials(mu[i][j], 2);
         }
      
         logrbins[i] = pow(10., zerolog + (i+0.5)*logbinsz);
@@ -84,7 +86,11 @@ int xiQuadrupole(double** xi, double** mu, double* Quadrupole){
         if(quality_flag ==1){        
             meanQuad[i]   += Quadrupole[i];
             Quad_suitable_mockCount[i] += 1.;
-        } 
+        }
+        
+        printf("\n\nQuadrupole.");
+        
+        printf("\n%e \t %e", logrbins[i], Quadrupole[i]); 
     }    
     
     return 0;
@@ -197,7 +203,9 @@ int landy_szalay(){
 	        // landy_xi[i][j] = gg[i][j]/(rr[i][j]*norm_gg/norm_rr) - 1.;
 	        
 	        // Basic DD/DR -1 estimator 
-	        landy_xi[i][j] = gg[i][j]/(gr[i][j]*norm_gg/norm_gr) - 1.;
+	        // landy_xi[i][j] = gg[i][j]/(gr[i][j]*norm_gg/norm_gr) - 1.;
+        
+            landy_xi[i][j] = gg[i][j];
         
             // printf("%e \t", landy_xi[i][j]);
         }
@@ -259,7 +267,15 @@ int assignMemory_xi(){
     gg          = malloc(nlogbins*sizeof(double*));
     gr          = malloc(nlogbins*sizeof(double*));
     rr          = malloc(nlogbins*sizeof(double*));
+    
     landy_xi    = malloc(nlogbins*sizeof(double*));
+    
+    // window
+    rr_0        = malloc(nlogbins*sizeof(double*));
+    rr_2        = malloc(nlogbins*sizeof(double*));
+    rr_4        = malloc(nlogbins*sizeof(double*));
+    
+    dummy_gg    = malloc(nlogbins*sizeof(double*));
     
     gg_meanr    = malloc(nlogbins*sizeof(double*));
     gg_meanmu   = malloc(nlogbins*sizeof(double*));
@@ -290,6 +306,12 @@ int assignMemory_xi(){
         
         landy_xi[j]  = malloc(nlinbins*sizeof(double));
         
+        rr_0[j]      = malloc(nlinbins*sizeof(double));
+        rr_2[j]      = malloc(nlinbins*sizeof(double));
+        rr_4[j]      = malloc(nlinbins*sizeof(double));
+        
+        dummy_gg[j]  = malloc(nlinbins*sizeof(double));
+        
         mean_xi[j]   = malloc(nlinbins*sizeof(double)); 
 
         for(i=0; i<nlinbins; i++){        
@@ -307,6 +329,10 @@ int assignMemory_xi(){
             rr_meanmu[j][i] = 0.0;
         
             landy_xi[j][i]  = 0.0;
+            
+            rr_0[j][i]      = 0.0;
+            rr_2[j][i]      = 0.0;
+            rr_4[j][i]      = 0.0;
             
             mean_xi[j][i]   = 0.0; 
         }
@@ -411,8 +437,8 @@ int NFW_profile_pairCount(){
     
     grow_galTree();
 
-    printf("\n\nCounting DD pairs.");
-    CountPairs_rMu(gg, gg_meanr, gg_meanmu, galTree,  galTree,  1);
+    printf("\n\nCounting DD pairs.");  //
+    CountPairs_rMu(rr_0, rr_2, rr_4, gg_meanr, gg_meanmu, galTree,  galTree,  1);
 
     // print_dd();
 
@@ -433,33 +459,64 @@ int NFW_profile_pairCount(){
 }
 
 
-int randSphere_pairCount(){
-    sprintf(surveyType, "randSphere_xi");
+int print_W2_2D(){
+  double mu;
+  double  r;
 
-    assignGal_xiMemory();
+  sprintf(filepath, "%s/Data/VIPERS_window/W2_2D.dat", root_dir);
+
+  output = fopen(filepath, "w");
+
+  for(j=0; j<nlogbins; j++){  
+    for(i=0; i<nlinbins; i++){  
+        mu = zerolin + (i + 0.5)*linbinsz;
     
-    grow_galTree();
-
-    printf("\n\nCounting DD pairs.");
-    CountPairs_rMu(gg, gg_meanr, gg_meanmu, galTree,  galTree,  1);
+         r = pow(10., zerolog + (j + 0.5)*logbinsz);
     
-    printf("\n\nCounting DR pairs.");
-    CountPairs_rMu(gr, gr_meanr, gr_meanmu, galTree, randTree,  0);
+        fprintf(output, "%e \t %e \t %e \n", r, mu, rr_0[j][i]);
+    }
+  }
 
-    // print_dd();
+  fclose(output);
 
+  return 0;
+}
+
+
+int randWindow_pairCount(){
+    sprintf(surveyType, "rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_hihiRes_hex");
+
+    assignMemory_xi();
+    
+    grow_randTree();
+    
+    printf("\n\nCounting RR pairs.");
+    CountPairs_rMu(rr_0, rr_2, rr_4, rr_meanr, rr_meanmu, randTree,  randTree,  1);
+    
+    // printf("\n\nCounting DR pairs.");
+    // CountPairs_rMu(gr, gr_meanr, gr_meanmu, galTree, randTree,  0);
+
+    // print_W2_2D();
+    
+    // print_dr();
+    
     // sprintf(filename, "DD_%s.dat", surveyType);
-    // load2d(filename, gg);
+    // load2d(filename, rr);
     
-    landy_szalay();
+    // sprintf(filename, "DR_tree_%s.dat", surveyType);
+    // load2d(filename, gr);
+    
+    // landy_szalay();
 
-    xiMonopole(landy_xi,   gg_meanmu, xi0);
+    xiMonopole(rr_0,   gg_meanmu, xi0);
+
+    xiMonopole(rr_2,   gg_meanmu, xi2);
     
-    // xiQuadrupole(landy_xi, gg_meanmu, xi2);
+    xiMonopole(rr_4,   gg_meanmu, xi4);
+    
+    // xiQuadrupole(rr_2, gg_meanmu, xi2);
     
     print_xiMultipoles();
-    
-    // printf("\n%d \t %d", Vipers_Num, rand_number);
 
     return 0;
 }
@@ -602,12 +659,14 @@ int load2d(char filename[], double** array){
 
 int print_xiMultipoles(){
   // sprintf(filepath, "%s/Data/stacpolly/poissonSampled_clustered_fog_500_ximultipoles/xiMultipoles_poissonSampled_clustered_fog_500_%d.dat", root_dir, loopCount);
-  sprintf(filepath, "%s/Data/stacpolly/%s_multipoles.dat", root_dir, surveyType);
+  sprintf(filepath, "%s/Data/VIPERS_window2/%s_multipoles.dat", root_dir, surveyType);
 
   output = fopen(filepath, "w");
 
   for(j=0; j<nlogbins; j++){  
-    fprintf(output, "%e \t %e \t %e \n", logrbins[j], xi0[j], xi2[j]);
+      if(logrbins[j] > 0.1){
+        fprintf(output, "%e \t %e \t %e \t %e \n", logrbins[j], xi0[j], xi2[j], xi4[j]);
+      }
   }
   
   fclose(output);
@@ -674,7 +733,7 @@ int print_rr_meanmu(){
 
 
 int print_dr(){
-  sprintf(filepath, "%s/Data/stacpolly/DR_nodes.dat", root_dir, surveyType);
+  sprintf(filepath, "%s/Data/stacpolly/DR_tree_%s.dat", root_dir, surveyType);
 
   output = fopen(filepath, "w");
 

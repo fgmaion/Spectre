@@ -332,7 +332,7 @@ int NFWprofile_oneHalo_pairCount(){
 
     grow_randTree();
 
-    CountPairs_rMu(rr, rr_meanr, rr_meanmu, randTree, randTree, 1);
+    CountPairs_rMu(rr_0, rr_2, rr_4, rr_meanr, rr_meanmu, randTree, randTree, 1);
 
     sprintf(filepath, "%s/Data/stacpolly/NFW_profile_onehalo_DD.dat", root_dir);
 

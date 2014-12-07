@@ -63,3 +63,6 @@ FFTLog_config*    lnnorm_quad_config;
 
 FFTLog_config*    convlmonoCorr;
 FFTLog_config*    convlquadCorr;
+FFTLog_config*    convlhexCorr;
+
+FFTLog_config*    W2_config;

@@ -228,6 +228,8 @@ double LegendrePolynomials(double x, int n){
             return 0.5*(5.*pow(x, 3.) - 3.*x);
         case 4:
             return (1./8.)*(35.*pow(x, 4.) - 30.*pow(x, 2.) + 3.);
+        case 6:
+            return (1./16.)*(231.*pow(x, 6.) - 315.*pow(x, 4.) + 105.*pow(x, 2.) -5.);
     }
 }
 

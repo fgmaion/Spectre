@@ -13,7 +13,7 @@ int prepNGP(){
     // Cell_chiVIPERSsystem    =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_chiVIPERSsystem));
 
     // Cell_VIPERSweights      =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_VIPERSweights));
-    Cell_VIPERSbools           =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_VIPERSbools));
+    // Cell_VIPERSbools        =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_VIPERSbools));
     Cell_SurveyLimitsMask      =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_SurveyLimitsMask));
     // Cell_SurveyEdge         =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_SurveyEdge));
     // Cell_ApodiseWeights     =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_ApodiseWeights));
@@ -23,7 +23,7 @@ int prepNGP(){
     // for(j=0; j<n0*n1*n2; j++)             FKPweights[j] =                  1.0;
     for(j=0; j<n0*n1*n2; j++)              densityArray[j] =                  0.0;
     // for(j=0; j<n0*n1*n2; j++)        Cell_SurveyEdge[j] =                  0.0;
-    for(j=0; j<n0*n1*n2; j++)          Cell_VIPERSbools[j] =                  0.0;
+    // for(j=0; j<n0*n1*n2; j++)          Cell_VIPERSbools[j] =                  0.0;
     // for(j=0; j<n0*n1*n2; j++)       meanCellRedshift[j] =                  0.0;
     // for(j=0; j<n0*n1*n2; j++)    Cell_ShortDist2edge[j] =  10.0*GibbsSkinDepth;
     // for(j=0; j<n0*n1*n2; j++)    Cell_ApodiseWeights[j] =                  1.0;

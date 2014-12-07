@@ -999,3 +999,40 @@ fftw_complex *outx, *outy, *outz;
 fftw_plan    iplan_x, iplan_y, iplan_z;
 
 int*     shuffle_rows;
+
+double anisoGauss_delta;
+double anisoGauss_asigma;
+double anisoGauss_bsigma;
+
+
+int     VIPERS_mask_lineNo_lo;
+
+double* VIPERS_maskr_lo;
+
+double* VIPERS_maskMono_lo;
+double* VIPERS_maskQuad_lo;
+double* VIPERS_maskHex_lo;
+
+double* VIPERS_maskMono2D_lo;
+double* VIPERS_maskQuad2D_lo;
+double* VIPERS_maskHex2D_lo;
+
+double mask_monopolenorm_lo;
+
+int     VIPERS_mask_lineNo_hi;
+double* VIPERS_maskr_hi;
+double* VIPERS_maskMono_hi;
+double* VIPERS_maskQuad_hi;
+double* VIPERS_maskHex_hi;
+
+double* VIPERS_maskMono2D_hi;
+double* VIPERS_maskQuad2D_hi;
+double* VIPERS_maskHex2D_hi;
+
+double mask_monopolenorm_hi;
+
+double loRes_highRes_join;
+
+double splint_VIPERS_maskMono(double r);
+double splint_VIPERS_maskQuad(double r);
+double splint_VIPERS_maskHex(double r);

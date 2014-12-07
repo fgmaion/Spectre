@@ -2,7 +2,7 @@ int PkCalc(){
     printf("\n\nAssigning FFT in array.");
     
     // The true density field multiplied by a mask, W(x). 
-    for(j=0; j<n0*n1*n2; j++) in[j][0] = densityArray[j]*Cell_AppliedWindowFn[j]*BootStrap_Wght[j];
+    for(j=0; j<n0*n1*n2; j++) in[j][0] = densityArray[j]*Cell_AppliedWindowFn[j]; //*BootStrap_Wght[j];
     
     for(j=0; j<n0*n1*n2; j++) in[j][1] = 0.0;
     
@@ -50,13 +50,13 @@ int observedQuadrupole(int modeCount){
     // if(loopCount<10)  sprintf(filepath, "%s/Data/window_fft/Multipoles_%s_kbin_%.3f_00%d.dat", root_dir,  surveyType, kbinInterval, loopCount);
     // else              sprintf(filepath, "%s/Data/window_fft/Multipoles_%s_kbin_%.3f_0%d.dat",  root_dir, surveyType, kbinInterval, loopCount);
 
-    sprintf(filepath,"%s/Data/stacpolly/NFW_profile_500_ukm_%d.dat", root_dir, loopCount);
+    sprintf(filepath,"%s/Data/VIPERS_window2/VIPERS_mask_500_norm_hex_intcor/VIPERS_mask_500_norm_hex_intcor_%d.dat", root_dir, loopCount);
 
-    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, polar2Dpk, modeCount, filepath, kbinInterval, 0.0, 1.0, 1);
-  
-    // HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, modesPerBin, polar2Dpk);
+    // MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, polar2Dpk, modeCount, filepath, kbinInterval, 0.0, 1.0, 1);
+    
+    HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, polar2Dpk, modeCount, filepath, kbinInterval, 0.0, 1.0, 1);
 
-  return 0;
+    return 0;
 }
 
 
@@ -106,22 +106,8 @@ int polar2DpkBinning(int modeCount){
 }
 
 
-double legendrePolynomials(int Order, double mu){
-    switch(Order){
-        case 0: 
-            return 1.;
-
-        case 2:
-            return 0.5*(3.*mu*mu -1.);
-	       
-        case 4:
-            return (35.*pow(mu, 4.) - 30.*mu*mu + 3.)/8.;
-    } 
-}
-
-
 int MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], double Quadrupole[], double** Array, int modeCount, char filepath[], double Interval, double mu_lolimit, double mu_hilimit, int fileOutput){
-    // P(k, mu_i) = P_0(k) + P_2(k)*(3.*mu_i*mu_i - 1.)
+    // P(k, mu_i) = P_0(k) + P_2(k)*(3.*mu_i*mu_i - 1.)/2
     // Least squares fit between theory prediction, P(k, mu_i) and measured.  (Linear regression).
 
     printf("\n\nPerforming multipole calculation. (to Quadrupole order)");
@@ -239,7 +225,7 @@ int MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], doubl
      if(fileOutput == 1){       
          output = fopen(filepath, "w");
     
-         for(j=0; j<modBinNumb-1; j++)  fprintf(output, "%e \t %e \t %e \t %d \t %e \n", mean_modBin[j], Monopole[j], Quadrupole[j], modesperbin[j], NFW_densityprofile_NormedFourier(mean_modBin[j]));
+         for(j=0; j<modBinNumb-1; j++)  fprintf(output, "%e \t %e \t %e \t %d \n", mean_modBin[j], Monopole[j], Quadrupole[j], modesperbin[j]);
     
          fclose(output);
      }
@@ -249,7 +235,7 @@ int MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], doubl
 
 
 int HexadecapoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], double Quadrupole[], double Hexadecapole[], double** Array, int modeCount, char filepath[], double Interval, double mu_lolimit, double mu_hilimit, int fileOutput){
-    // P(k, mu_i) = P_0(k) + P_2(k)*(3.*mu_i*mu_i - 1.) + P_4(k)*(35x^4 -30x^2 +3)/8.
+    // P(k, mu_i) = P_0(k) + P_2(k)*(3.*mu_i*mu_i - 1.)/2 + P_4(k)*(35x^4 -30x^2 +3)/8.
     // Least squares fit between theory prediction, P(k, mu_i) and measured.  (Linear regression).
 
     printf("\n\nPerforming Monopole calculation (to Hexadecapole order).");
@@ -360,7 +346,7 @@ int HexadecapoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], do
         output = fopen(filepath, "w");
     
         for(j=0; j<modBinNumb-1; j++){    
-            fprintf(output, "%e \t %e \t %e \t %e \t %d \n", midBin[j], Monopole[j], Quadrupole[j], Hexadecapole[j], modesperbin[j]);   
+            fprintf(output, "%e \t %e \t %e \t %e \t %d \t %e \n", mean_modBin[j], Monopole[j], Quadrupole[j], Hexadecapole[j], modesperbin[j], (*pt2Pk)(mean_modBin[j]));   
         }
     
         fclose(output);
@@ -444,8 +430,8 @@ int PkCorrections(){
                 H_kImag                            = pow(n0*n1*n2, -1.0)*out[Index][1];
                 
                 // Cloud in cell. NGP corresponds to WindowFunc rather than WindowFunc^2. 
-                // H_kReal                        /= pow(WindowFunc, 1.);
-                // H_kImag                        /= pow(WindowFunc, 1.);
+                // H_kReal                           /= pow(WindowFunc, 1.);
+                // H_kImag                           /= pow(WindowFunc, 1.);
                 
                 PkArray[Index][0]                  = kmodulus;
         
@@ -457,7 +443,7 @@ int PkCorrections(){
                 // Account for the affect of the window on the amplitude of the measured P(k).
                 PkArray[Index][1]                 /= fkpSqWeightsVolume*pow(TotalVolume, -1.);
                     
-                // PkArray[Index][1]                 -= TotalVolume/Vipers_Num;
+                // PkArray[Index][1]              -= TotalVolume/Vipers_Num;
                     
                 // Clipping corrected shot noise estimate. 
                 // PkArray[Index][1]              -= (1./TotalVolume)*(*pt2shot)(1.)*(1. - clippedVolume/TotalVolume);
@@ -520,6 +506,8 @@ int Gaussianfield(){
     
     double Power, amplitude, phase, expectation; 
     
+    // printf("\n\nKaiser factors: %e \t %e \t %e", kaiser_Monofactor(0., beta), kaiser_Quadfactor(0., beta), kaiser_Hexfactor(0., beta));
+    
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
@@ -556,7 +544,7 @@ int Gaussianfield(){
                 // expectation                    *= pow(1. + beta*pow(mu, 2.), 2.);
                 
                 // fingers of God RSD.
-                expectation                       /= 1. + 0.5*pow(k_z*velDispersion, 2.);
+                // expectation                    /= 1. + 0.5*pow(k_z*velDispersion, 2.);
 
                 // Power                           = -log(gsl_rng_uniform(gsl_ran_r))*expectation;
                 
@@ -654,12 +642,12 @@ int Gaussianfield(){
     
     // double GRF_var = 0.0, GRF_mean = 0.0;
     
-    // apparent_mean = 0.0;
+    apparent_mean = 0.0;
     
     // for(j=0; j<n0*n1*n2; j++){ 
-    //   GRF_var        += pow(densityArray[j], 2.);
-    //    GRF_mean       +=     densityArray[j];
-    //}
+    //  GRF_var        += pow(densityArray[j], 2.);
+    //  GRF_mean       +=     densityArray[j];
+    // }
     
     ///GRF_var            /= n0*n1*n2;
     // GRF_mean           /= n0*n1*n2;                           
@@ -667,7 +655,7 @@ int Gaussianfield(){
     // printf("\n\nMean of the Gaussian realisation: %e", GRF_mean);
     // printf("\n\nVariance of Gaussian realisation: %e", GRF_var);
     
-    // for(j=0; j<n0*n2*n1; j++)  apparent_mean       += densityArray[j]*Cell_AppliedWindowFn[j];
+    for(j=0; j<n0*n2*n1; j++)  apparent_mean       += densityArray[j]*Cell_AppliedWindowFn[j];
     
     // Number of non-empty cells in mask. 
     // apparent_mean    /= 123004.;

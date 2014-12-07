@@ -80,11 +80,11 @@ int randoms_Sphere(double maxGals, double radius){
     output = fopen(filepath, "w");    	
     
     while(GalNumber<maxGals){
-        x = (AxisLimsArray[1][2] - AxisLimsArray[0][2])*gsl_rng_uniform(gsl_ran_r) + AxisLimsArray[0][2];
-        y = (AxisLimsArray[1][1] - AxisLimsArray[0][1])*gsl_rng_uniform(gsl_ran_r) + AxisLimsArray[0][1];
-        z = (AxisLimsArray[1][0] - AxisLimsArray[0][0])*gsl_rng_uniform(gsl_ran_r) + AxisLimsArray[0][0];
+        x  = 500.*(gsl_rng_uniform(gsl_ran_r) -0.5) + 250.;
+        y  = 500.*(gsl_rng_uniform(gsl_ran_r) -0.5) + 250.;
+        z  = 500.*(gsl_rng_uniform(gsl_ran_r) -0.5) + 250.;
 
-        r2 = pow(x, 2.) + pow(y, 2.) + pow(z, 2.);
+        r2 = pow(x - 250., 2.) + pow(y - 250., 2.) + pow(z - 250., 2.);
 
         if(r2 <= radius*radius){
            fprintf(output, "%e \t %e \t %e \n", x, y, z);
@@ -96,6 +96,34 @@ int randoms_Sphere(double maxGals, double radius){
    fclose(output);
     
    return 0;
+}
+
+
+int randoms_anisoGauss(double maxGals, double a, double b, double c){
+    printf("\nCreating anisotropic Gaussian distribution of randoms.");
+
+    double x, y, z;
+    double GalNumber = 0.;
+
+    sprintf(filepath, "%s/Data/stacpolly/poissonSampled_randoms_500_anisoGauss_%.2e.dat", root_dir, maxGals); 
+
+    output = fopen(filepath, "w");    	
+    
+    while(GalNumber<maxGals){
+        x  = 250. + rand_gaussian(gsl_ran_r, a);
+        y  = 250. + rand_gaussian(gsl_ran_r, b);
+        z  = 250. + rand_gaussian(gsl_ran_r, c);
+        
+        if((x >= 0.) && (x <= 500.) && (y >= 0.) && (y <= 500.) && (z >= 0.) && (z <= 500.)){
+            fprintf(output, "%e \t %e \t %e \n", x, y, z);
+            
+            GalNumber += 1.0;
+        }
+    }
+   
+    fclose(output);
+    
+    return 0;
 }
 
 

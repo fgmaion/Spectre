@@ -98,6 +98,8 @@
 #include "Scripts/FFT_log_zeldovich.h"
 #include "Scripts/FFT_log_zeldovich.c"
 
+#include "Scripts/anisotropicGaussian_multipoles.c"
+
 /*
 #include "Scripts/slowDFT.c"
 
@@ -124,6 +126,7 @@
 #include "Scripts/mockGalaxyCats.c"
 
 #include "Scripts/NFW_profile.c"
+#include "Scripts/VIPERS_window.c"
 
 
 int main(int argc, char **argv){
@@ -163,9 +166,13 @@ AxisLimsArray[0][2]   =       0.0;                                              
 AxisLimsArray[1][2]   =     500.0;
 
 // degree of translation for Stefano's co-ordinates, fit survey into surrounding volume. 
-stefano_trans_x       =    + 100.;
-stefano_trans_y       =    + 300.;
-stefano_trans_z       =    -1500.;
+stefano_trans_x       =     +250.;
+stefano_trans_y       =     +250.;
+stefano_trans_z       =    -1650.;
+
+// stefano_trans_x       =     +100.;
+// stefano_trans_y       =     +300.;
+// stefano_trans_z       =    -1500.;
 
 // limits in right asecension.
 // W1 catalogue.
@@ -201,8 +208,6 @@ TotalW1W4area         =    19.675;
 
 // Cell size, comoving distance, h^-1 Mpc.
 CellSize              =       2.0;     
-// CellSize           =    7.8125;     
-// CellSize           =     5.208;
 
 // Selection parameters.
 absMagCut             =     22.00;
@@ -255,7 +260,7 @@ fkpPk                 =    1000.0;                                              
 meanSampling          =       0.4;
 
 // Binning interval for P(k).
-kbinInterval          =     0.005;
+kbinInterval          =      0.01;
 modkMax               =      1.00;
 muBinNumb             =       100;
 
@@ -287,11 +292,10 @@ A11Sq                     =        1.0;
 haloNumber = 10000;
 NFW_conc   =   1.0; 
 
-// Correlation fn.s
-// logarithmic binning in r. 
+// Correlation fn's, logarithmic binning in r. 
 zerolog  =             log10(0.001);
-maxlog   =             log10(300.0);
-logbinsz =             log10(  1.4);
+maxlog   =             log10(10.0); // hiRes: 10., lowRes: 2000.
+logbinsz =             log10( 1.01); // previously 1.4, must be >1.0 otherwise log gives 0. or -ve.
   
 nlogbins =  (int) ceil((maxlog - zerolog)/logbinsz);
 
@@ -302,12 +306,14 @@ linbinsz =                   0.05;
 
 nlinbins =  (int) ceil((maxlin - zerolin)/linbinsz);
 
+// printf("\n\n%d \t %d", nlogbins, nlinbins);
+
 
 // padVolume(0.0, 0.0, 0.0);
 
 comovDistReshiftCalc();
 
-// VIPERS_SolidAngle         = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
+// VIPERS_SolidAngle = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
 
 // JenkinsCoordinates();
 
@@ -322,7 +328,14 @@ prepNGP();
 
 // VIPERS_Binarymask();
 // knownGRF_mask();
-FullCube();
+// randoms_redshiftDistribution();
+
+// sampling: 0.032 for w^2 hi res measurement, 0.008 for lo res, 1.00 for creating mask for P(k)
+// homogeneous_rands_window_volCalc(0.95);
+load_homogeneous_rands_window(50000000., 1, 0.4);
+// write_homogeneous_rands_window_gridded(50000000., 1, 1.0);
+
+// FullCube();
 
 // CalcCellraDec();
 
@@ -355,8 +368,7 @@ inputLinearPk();
 // pt2shot = &lightconeShot;
 
 // Number of randoms, load positions, load RR.
-// 3600000., 13122980.
-prep_randpairs(20.*30000., 1, 0);
+// prep_randpairs(20.*30000., 1, 0);
 
 // loadNagoya_rands();
 
@@ -366,9 +378,6 @@ prep_randpairs(20.*30000., 1, 0);
 // sprintf(filepath, "%s/redshiftDistribution_NagoyaRandoms.dat", root_dir);
 
 // output = fopen(filepath, "w");
-
-// NFW DD: 147637 D, 8.xD rands for RR. 
-// prep_randpairs(8.*147637., 0, 1);
 
 // NFWprofile_oneHalo();
 
@@ -380,17 +389,21 @@ prep_randpairs(20.*30000., 1, 0);
 
 // computeCorrelation_fns(2);
 
+// Change seed before calling. 
 // randoms_Sphere(30000., 200.);
+// randoms_anisoGauss(50000000., 40., 40., 60.);
 
-load_homogeneous_rands_sphere(30000., 1);
-
-randSphere_pairCount();
+randWindow_pairCount();
 
 // prep_NFWhaloCat(3000000);
 
 // prep_pairwisepdf();
 
-for(loopCount=1; loopCount<2; loopCount++){
+// && anisotropicGaussian_multipoles();
+
+// prep_VIPERS_maskMonopole();
+
+for(loopCount=1; loopCount<1; loopCount++){
     printf("\n\n%d", loopCount);
     
     // sprintf(surveyType, "250_fullCube_Gaussian_fogRSD_CellSize_%.2f", CellSize);
@@ -404,10 +417,10 @@ for(loopCount=1; loopCount<2; loopCount++){
     
     // zUtilized = &zcos[0];
     
-    //for(jj=0; jj<Vipers_Num; jj++){      //    if((zUtilized[jj] > 0.65) && (zUtilized[jj]<0.75)){
+    // for(jj=0; jj<Vipers_Num; jj++){      //    if((zUtilized[jj] > 0.65) && (zUtilized[jj]<0.75)){
 	//        fprintf(output, "%e \n", zUtilized[jj]);
-    //    }
-    //}
+    // 
+    // }
     
     // My basis, otherwise use Stefano basis. Never use both in conjuction. 
     // CoordinateCalc();
@@ -418,8 +431,6 @@ for(loopCount=1; loopCount<2; loopCount++){
     // fiberCollision_cat(rand_number, rand_redshift, rand_x, rand_y, rand_z);
     
     // fiberCollision_cat(Vipers_Num, zUtilized, xCoor, yCoor, zCoor);
-    
-    // randoms_redshiftDistribution();
 
     // correlationfn();
 
@@ -445,7 +456,7 @@ for(loopCount=1; loopCount<2; loopCount++){
     
     // pt2nz = &MockAvg_nz;
     
-    // Gaussianfield();
+    Gaussianfield();
     
     // deplete_homogeneous();
     
@@ -456,7 +467,7 @@ for(loopCount=1; loopCount<2; loopCount++){
     // Do not forget call to prep Cat. 
     // HaloCatalogue_NFWprofile(3000000);
     
-    //** Note: Dangerous non-commutation of sampling and randomise in load_clustered. may generate biased population if not careful. **//
+    // Note: Dangerous non-commutation of sampling and randomise in load_clustered. may generate biased population if not careful. //
     // load_clustered(1, 0.01);
 
     // NFW_profile_pairCount();
@@ -472,12 +483,26 @@ for(loopCount=1; loopCount<2; loopCount++){
     
     // ApplyFKPweights(meanSampling);
 
-    // cleanFFTbinning();
+    cleanFFTbinning();
   
-    // PkCalc();
+    PkCalc();
     
     // slowDFTcalc();
 }
+
+// VIPERS_mask_cnvldpk();
+
+/*
+sprintf(filepath, "%s/Data/stacpolly/spherical_tophat.dat", root_dir);
+
+output = fopen(filepath, "w");
+
+for(j=1; j<1000000; j++) fprintf(output, "%e \t %e \n", 0.0001*j, spherical_tophat_pk(0.0001*j));
+ 
+fclose(output);
+ 
+spherical_randDistribution();
+*/
 
 // print_pairwisepdf();
 

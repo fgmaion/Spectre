@@ -45,5 +45,24 @@ double toyRSD_OnePlusOneHalfMuSq(int order){
         case 2:
             return (1./3.); 
     }
+} 
+
+
+double spherical_tophat(double k){
+    double y;
+    double R;
+
+    R = 200.;
+    y =  k*R;
+    
+    // if(y<0.1)  return (1. - pow(y, 2.)/10. + pow(y, 4.)/280.);
+    
+    // else{
+        return  3.*pow(y, -3.)*(sin(y) - y*cos(y));
+    // }
 }
 
+
+double spherical_tophat_pk(double k){
+        return  pow(spherical_tophat(k), 2.);
+}

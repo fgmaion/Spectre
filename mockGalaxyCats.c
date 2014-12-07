@@ -293,37 +293,118 @@ int load_homogeneous_rands(double maxGals, int load){
 }
 
 
-int load_homogeneous_rands_sphere(double maxGals, int load){
-    sprintf(filepath, "%s/Data/stacpolly/poissonSampled_randoms_500_sphere_%.2e.dat", root_dir, maxGals); 
+int load_homogeneous_rands_window(double maxGals, int load, double sampling){
+    // sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/VIPERS_window2/randoms_W1_Nagoya_xyz_0.7_0.8.cat");
+    sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/VIPERS_window2/randoms_W1_Nagoya_xyz_0.7_0.8_gridded.cat");
 
     inputfile   = fopen(filepath, "r");
 
     ch          = 0;
-    Vipers_Num  = 0;
+    rand_number = 0;
 
     do{
         ch = fgetc(inputfile);
         
         if(ch == '\n')
-            Vipers_Num += 1;
+            rand_number += 1;
     } while(ch != EOF);
     
-    // lowerSampling_randomisedCatalogue(sampling);
+    lowerSampling_randomisedCatalogue(sampling);
 
-    printf("\n\n%d Vipers number", Vipers_Num);
+    printf("\n\n%d randoms number", rand_number);
 
-    
     if(load ==1){
         rewind(inputfile);
 
-        xCoor          =  (double *)  realloc(xCoor,          Vipers_Num*sizeof(*xCoor));
-        yCoor          =  (double *)  realloc(yCoor,          Vipers_Num*sizeof(*yCoor));
-        zCoor          =  (double *)  realloc(zCoor,          Vipers_Num*sizeof(*zCoor));
+        rand_x          =  (double *)  realloc(rand_x,          rand_number*sizeof(*rand_x));
+        rand_y          =  (double *)  realloc(rand_y,          rand_number*sizeof(*rand_y));
+        rand_z          =  (double *)  realloc(rand_z,          rand_number*sizeof(*rand_z));
 
-        for(j=0; j<Vipers_Num; j++)   fscanf(inputfile, "%le \t %le \t %le", &xCoor[j], &yCoor[j], &zCoor[j]);
+        for(j=0; j<rand_number; j++)   fscanf(inputfile, "%le \t %le \t %le", &rand_x[j], &rand_y[j], &rand_z[j]);
     }
 
     fclose(inputfile);
+    
+    for(j=0; j<rand_number; j++){
+        boxlabel = boxCoordinates(rand_x, rand_y, rand_z, j);
+    
+        Cell_SurveyLimitsMask[boxlabel] = 1.0;
+    }
+    
+    // free(rand_x);
+    // free(rand_y);
+    // free(rand_z);
+    
+    return 0;
+}
+
+
+int write_homogeneous_rands_window_gridded(double maxGals, int load, double sampling){
+    // never load already smoothed randoms. 
+    load_homogeneous_rands_window(maxGals, load, sampling);
+    
+    int  loopCount      = 0;
+    int  rand_count     = 0;
+    int  nonempty_cells = 0;
+    
+    int* nonempty_indices;
+    int* nonempty_cellx;
+    int* nonempty_celly;
+    int* nonempty_cellz;
+    
+    double x,y,z;
+    
+    for(j=0; j<n0*n1*n2; j++){
+        if(Cell_SurveyLimitsMask[j] > 0.0){
+            nonempty_cells += 1;
+        }
+    }
+    
+    printf("\nNumber of non-empty cells: %d", nonempty_cells);
+    
+    
+    nonempty_indices = malloc(nonempty_cells*sizeof(int));
+    
+    nonempty_cellx   = malloc(nonempty_cells*sizeof(double));
+    nonempty_celly   = malloc(nonempty_cells*sizeof(double));
+    nonempty_cellz   = malloc(nonempty_cells*sizeof(double));
+    
+    for(k=0; k<n0; k++){
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+                Index = i + n2*j + n2*n1*k;
+            
+                if(Cell_SurveyLimitsMask[Index] > 0.0){
+                    nonempty_indices[loopCount] = Index;
+                    
+                    nonempty_cellx[loopCount]   = (i+0.5)*CellSize;
+                    nonempty_celly[loopCount]   = (j+0.5)*CellSize;
+                    nonempty_cellz[loopCount]   = (k+0.5)*CellSize;
+                    
+                    loopCount += 1;
+                }
+            }
+        }
+    }
+    
+
+    sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/VIPERS_window2/randoms_W1_Nagoya_xyz_0.7_0.8_gridded.cat");
+
+    output = fopen(filepath, "w");
+
+    while(rand_count<rand_number){
+        Index       = (int) gsl_rng_uniform_int(gsl_ran_r, nonempty_cells);        
+    
+        x           = nonempty_cellx[Index] + CellSize*(gsl_rng_uniform(gsl_ran_r) - 0.5);
+        y           = nonempty_celly[Index] + CellSize*(gsl_rng_uniform(gsl_ran_r) - 0.5);
+        z           = nonempty_cellz[Index] + CellSize*(gsl_rng_uniform(gsl_ran_r) - 0.5);
+        
+        rand_count += 1;
+    
+        fprintf(output, "%e \t %e \t %e \n", x, y, z);
+    }
+
+    fclose(output);
     
     return 0;
 }
@@ -522,7 +603,7 @@ int shuffletest(){
 
 
 int lowerSampling_randomisedCatalogue(double sampling){
-    Vipers_Num = (int) ceil(Vipers_Num*sampling);
+    rand_number = (int) ceil(rand_number*sampling);
 
     return 0;
 }
