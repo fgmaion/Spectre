@@ -24,7 +24,7 @@ double splint_VIPERS_maskMono(double r){
 
 
 double splint_VIPERS_maskQuad(double r){
-    if(r<1.0)   return 0.;
+    if(r<0.7)   return 0.;
     
     if(r>400.0) return 0.;
     
@@ -47,7 +47,7 @@ double splint_VIPERS_maskQuad(double r){
 
 
 double splint_VIPERS_maskHex(double r){
-    if(r<1.0)   return 0.;
+    if(r<0.7)   return 0.;
     
     if(r>400.0) return 0.;
     
@@ -69,9 +69,21 @@ double splint_VIPERS_maskHex(double r){
 }
 
 
+double splint_VIPERS_maskMultipoles(double r, int transformOrder){
+    switch(transformOrder){
+        case 0:
+            return  splint_VIPERS_maskMono(r);  
+        case 2:
+            return  splint_VIPERS_maskQuad(r);
+        case 4:
+            return  splint_VIPERS_maskHex(r);
+    }
+}
+
+
 int prep_VIPERS_maskMonopole(){
     // high resolution
-    sprintf(filepath, "%s/Data/VIPERS_window2/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_hiRes_hex_multipoles.dat", root_dir);
+    sprintf(filepath, "%s/Data/VIPERS_window2/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_hihiRes_hex_multipoles.dat", root_dir);
 
     inputfile = fopen(filepath, "r");
     
@@ -98,7 +110,7 @@ int prep_VIPERS_maskMonopole(){
     for(j=0; j<VIPERS_mask_lineNo_hi; j++)  fscanf(inputfile, "%le \t %le \t %le \t %le \n", &VIPERS_maskr_hi[j], &VIPERS_maskMono_hi[j], &VIPERS_maskQuad_hi[j], &VIPERS_maskHex_hi[j]);
     
     // calc. hi res amplitude factor. 
-    powerlaw_regression(VIPERS_mask_lineNo_hi, 1.0, 2.0, 1.0, VIPERS_maskr_hi, VIPERS_maskMono_hi, &mask_monopolenorm_hi);
+    powerlaw_regression(VIPERS_mask_lineNo_hi, 0.9, 1.0, 1.0, VIPERS_maskr_hi, VIPERS_maskMono_hi, &mask_monopolenorm_hi);
     
     for(j=0; j<VIPERS_mask_lineNo_hi; j++){
         VIPERS_maskMono_hi[j] /= mask_monopolenorm_hi*pow(VIPERS_maskr_hi[j], 3.);
@@ -168,6 +180,72 @@ int prep_VIPERS_maskMonopole(){
     spline(VIPERS_maskr_lo, VIPERS_maskMono_lo, VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskMono2D_lo);
     spline(VIPERS_maskr_lo, VIPERS_maskQuad_lo, VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskQuad2D_lo);
     spline(VIPERS_maskr_lo, VIPERS_maskHex_lo,  VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskHex2D_lo);
+    
+    prepVIPERS_kSpaceMultipole();
+    
+    return 0;
+}
+
+
+double splint_VIPERS_kSpaceMono(double k){
+    if(k<0.001)   return 1.;
+    
+    if(k>1.000)   return 0.;
+    
+    else{
+        double Interim;
+    
+        splint(VIPERS_k, VIPERS_kMono, VIPERS_kMono2D,  VIPERS_kSpace_multipoles_lineNo, k, &Interim);
+    
+        return Interim;
+    }
+}
+
+
+double splint_VIPERS_kSpaceQuad(double k){
+    if(k<0.001)   return 1.;
+    
+    if(r>1.000)   return 0.;
+    
+    else{
+        double Interim;
+    
+        splint(VIPERS_k, VIPERS_kQuad, VIPERS_kQuad2D,  VIPERS_kSpace_multipoles_lineNo, k, &Interim);
+    
+        return Interim;
+    }
+}
+
+
+int prepVIPERS_kSpaceMultipole(){
+    sprintf(filepath, "%s/Data/VIPERS_window2/VIPERS_window_kMultipoles_fftLog.dat", root_dir);
+
+    inputfile = fopen(filepath, "r");
+    
+    VIPERS_kSpace_multipoles_lineNo = 0;
+    ch                              = 0;
+
+    do{
+        ch = fgetc(inputfile);
+        if(ch == '\n')  VIPERS_kSpace_multipoles_lineNo += 1;
+    } while(ch != EOF);
+
+    rewind(inputfile);
+
+    VIPERS_k               = malloc(VIPERS_kSpace_multipoles_lineNo*sizeof(double));
+    
+    VIPERS_kMono           = malloc(VIPERS_kSpace_multipoles_lineNo*sizeof(double));
+    VIPERS_kMono2D         = malloc(VIPERS_kSpace_multipoles_lineNo*sizeof(double));
+    
+    VIPERS_kQuad           = malloc(VIPERS_kSpace_multipoles_lineNo*sizeof(double));
+    VIPERS_kQuad2D         = malloc(VIPERS_kSpace_multipoles_lineNo*sizeof(double));
+    
+    for(j=0; j<VIPERS_kSpace_multipoles_lineNo; j++)  fscanf(inputfile, "%le \t %le \t %le \n", &VIPERS_k[j], &VIPERS_kMono[j], &VIPERS_kQuad[j]);
+    
+    fclose(inputfile);
+
+    spline(VIPERS_k, VIPERS_kMono, VIPERS_kSpace_multipoles_lineNo, 1.0e31, 1.0e31, VIPERS_kMono2D);
+    spline(VIPERS_k, VIPERS_kQuad, VIPERS_kSpace_multipoles_lineNo, 1.0e31, 1.0e31, VIPERS_kQuad2D);
     
     return 0;
 }

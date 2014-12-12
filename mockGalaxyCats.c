@@ -294,8 +294,8 @@ int load_homogeneous_rands(double maxGals, int load){
 
 
 int load_homogeneous_rands_window(double maxGals, int load, double sampling){
-    // sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/VIPERS_window2/randoms_W1_Nagoya_xyz_0.7_0.8.cat");
-    sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/VIPERS_window2/randoms_W1_Nagoya_xyz_0.7_0.8_gridded.cat");
+    sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/VIPERS_window2/randoms_W1_Nagoya_xyz_0.7_0.8.cat");
+    // sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/VIPERS_window2/randoms_W1_Nagoya_xyz_0.7_0.8_gridded.cat"); // To be used for pair counting. 
 
     inputfile   = fopen(filepath, "r");
 
@@ -331,9 +331,13 @@ int load_homogeneous_rands_window(double maxGals, int load, double sampling){
         Cell_SurveyLimitsMask[boxlabel] = 1.0;
     }
     
-    // free(rand_x);
-    // free(rand_y);
-    // free(rand_z);
+    // double masktotal = 0.0;
+    // for(j=0; j<n0*n1*n2; j++) masktotal += Cell_SurveyLimitsMask[j];
+    // printf("\n\nsummed mask: %e", masktotal);
+    
+    free(rand_x);
+    free(rand_y);
+    free(rand_z);
     
     return 0;
 }

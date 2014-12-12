@@ -1036,3 +1036,16 @@ double loRes_highRes_join;
 double splint_VIPERS_maskMono(double r);
 double splint_VIPERS_maskQuad(double r);
 double splint_VIPERS_maskHex(double r);
+
+double splint_VIPERS_maskMultipoles(double r, int transformOrder);
+
+int VIPERS_kSpace_multipoles_lineNo;
+
+double* VIPERS_k;
+double* VIPERS_kMono;
+double* VIPERS_kMono2D;
+double* VIPERS_kQuad;
+double* VIPERS_kQuad2D;
+
+double splint_VIPERS_kSpaceMono(double k);
+double splint_VIPERS_kSpaceQuad(double k);

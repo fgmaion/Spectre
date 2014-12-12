@@ -460,20 +460,26 @@ int NFW_profile_pairCount(){
 
 
 int print_W2_2D(){
-  double mu;
-  double  r;
+  double     mu;
+  double      r;
+  double theory;
 
-  sprintf(filepath, "%s/Data/VIPERS_window/W2_2D.dat", root_dir);
+  sprintf(filepath, "%s/Data/VIPERS_window2/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_theoryExpectation_hex_2D.dat", root_dir);
 
   output = fopen(filepath, "w");
 
-  for(j=0; j<nlogbins; j++){  
+  for(j=0; j<nlogbins; j=j+100){  
     for(i=0; i<nlinbins; i++){  
-        mu = zerolin + (i + 0.5)*linbinsz;
+        mu = zerolin + i*linbinsz;
     
-         r = pow(10., zerolog + (j + 0.5)*logbinsz);
+         r = pow(10., zerolog + j*logbinsz);
     
-        fprintf(output, "%e \t %e \t %e \n", r, mu, rr_0[j][i]);
+         if((r>=1.) && (r<400.)){
+            theory = splint_VIPERS_maskMono(r); // + splint_VIPERS_maskQuad(r)*LegendrePolynomials(mu, 2);
+         
+            fprintf(output, "%e \t %e \t %e \n", log10(r), mu, theory);
+            // fprintf(output, "%e \t %e \t %e \n", r, mu, rr_0[j][i]);
+         }
     }
   }
 
@@ -496,7 +502,7 @@ int randWindow_pairCount(){
     // printf("\n\nCounting DR pairs.");
     // CountPairs_rMu(gr, gr_meanr, gr_meanmu, galTree, randTree,  0);
 
-    // print_W2_2D();
+    print_W2_2D();
     
     // print_dr();
     
@@ -508,15 +514,15 @@ int randWindow_pairCount(){
     
     // landy_szalay();
 
-    xiMonopole(rr_0,   gg_meanmu, xi0);
+    // xiMonopole(rr_0,   gg_meanmu, xi0);
 
-    xiMonopole(rr_2,   gg_meanmu, xi2);
+    // xiMonopole(rr_2,   gg_meanmu, xi2);
     
-    xiMonopole(rr_4,   gg_meanmu, xi4);
+    // xiMonopole(rr_4,   gg_meanmu, xi4);
     
     // xiQuadrupole(rr_2, gg_meanmu, xi2);
     
-    print_xiMultipoles();
+    // print_xiMultipoles();
 
     return 0;
 }

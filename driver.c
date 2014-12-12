@@ -2,6 +2,7 @@
 // #define AUXfn_DIR "/home/mjw/Aux_functions/header.h"
 
 #include <stdbool.h>
+#include <time.h>
 
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
@@ -130,7 +131,6 @@
 
 
 int main(int argc, char **argv){
-
 sprintf(root_dir,      "/disk1/mjw/HOD_MockRun");
 sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_ValueAddedHOD");
 
@@ -265,7 +265,7 @@ modkMax               =      1.00;
 muBinNumb             =       100;
 
 // Interval in k^2 for perp k binning of 2D P(k).
-perpkInterval         =      0.02;
+perpkInterval         =      0.01;
 
 wfKernel_minAmp       = pow(10., -2.);
 convolution_modkmax   =           0.6;
@@ -294,7 +294,7 @@ NFW_conc   =   1.0;
 
 // Correlation fn's, logarithmic binning in r. 
 zerolog  =             log10(0.001);
-maxlog   =             log10(10.0); // hiRes: 10., lowRes: 2000.
+maxlog   =             log10(2000.0); // hiRes: 10., lowRes: 2000.
 logbinsz =             log10( 1.01); // previously 1.4, must be >1.0 otherwise log gives 0. or -ve.
   
 nlogbins =  (int) ceil((maxlog - zerolog)/logbinsz);
@@ -306,8 +306,7 @@ linbinsz =                   0.05;
 
 nlinbins =  (int) ceil((maxlin - zerolin)/linbinsz);
 
-// printf("\n\n%d \t %d", nlogbins, nlinbins);
-
+printf("\n\nPair counting binning: %d \t %d", nlogbins, nlinbins);
 
 // padVolume(0.0, 0.0, 0.0);
 
@@ -332,7 +331,7 @@ prepNGP();
 
 // sampling: 0.032 for w^2 hi res measurement, 0.008 for lo res, 1.00 for creating mask for P(k)
 // homogeneous_rands_window_volCalc(0.95);
-load_homogeneous_rands_window(50000000., 1, 0.4);
+load_homogeneous_rands_window(50000000., 1, 0.0001);
 // write_homogeneous_rands_window_gridded(50000000., 1, 1.0);
 
 // FullCube();
@@ -358,8 +357,6 @@ prepFFTw(n0, n1, n2);
 prepFFTbinning(kbinInterval);
 
 assign2DPkMemory(muBinNumb, kBinNumb);       
-
-// wfPkCalc();
 
 // inputHODPk();
 
@@ -393,7 +390,9 @@ inputLinearPk();
 // randoms_Sphere(30000., 200.);
 // randoms_anisoGauss(50000000., 40., 40., 60.);
 
-randWindow_pairCount();
+// wfPkCalc();
+
+// randWindow_pairCount();
 
 // prep_NFWhaloCat(3000000);
 
@@ -401,7 +400,9 @@ randWindow_pairCount();
 
 // && anisotropicGaussian_multipoles();
 
-// prep_VIPERS_maskMonopole();
+prep_VIPERS_maskMonopole();
+
+print_W2_2D();
 
 for(loopCount=1; loopCount<1; loopCount++){
     printf("\n\n%d", loopCount);
@@ -489,6 +490,8 @@ for(loopCount=1; loopCount<1; loopCount++){
     
     // slowDFTcalc();
 }
+
+// VIPERS_mask_intCnsrt();
 
 // VIPERS_mask_cnvldpk();
 

@@ -50,11 +50,11 @@ int observedQuadrupole(int modeCount){
     // if(loopCount<10)  sprintf(filepath, "%s/Data/window_fft/Multipoles_%s_kbin_%.3f_00%d.dat", root_dir,  surveyType, kbinInterval, loopCount);
     // else              sprintf(filepath, "%s/Data/window_fft/Multipoles_%s_kbin_%.3f_0%d.dat",  root_dir, surveyType, kbinInterval, loopCount);
 
-    sprintf(filepath,"%s/Data/VIPERS_window2/VIPERS_mask_500_norm_hex_intcor/VIPERS_mask_500_norm_hex_intcor_%d.dat", root_dir, loopCount);
+    sprintf(filepath,"%s/Data/VIPERS_window2/VIPERS_mask_500_norm_hex_aniso_intcor/VIPERS_mask_500_norm_hex_aniso_intcor_%d.dat", root_dir, loopCount);
 
-    // MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, polar2Dpk, modeCount, filepath, kbinInterval, 0.0, 1.0, 1);
+    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, polar2Dpk, modeCount, filepath, kbinInterval, 0.0, 1.0, 1);
     
-    HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, polar2Dpk, modeCount, filepath, kbinInterval, 0.0, 1.0, 1);
+    // HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, polar2Dpk, modeCount, filepath, kbinInterval, 0.0, 1.0, 1);
 
     return 0;
 }
@@ -506,8 +506,6 @@ int Gaussianfield(){
     
     double Power, amplitude, phase, expectation; 
     
-    // printf("\n\nKaiser factors: %e \t %e \t %e", kaiser_Monofactor(0., beta), kaiser_Quadfactor(0., beta), kaiser_Hexfactor(0., beta));
-    
     for(k=0; k<n0; k++){
         for(j=0; j<n1; j++){
             for(i=0; i<n2; i++){
@@ -539,7 +537,7 @@ int Gaussianfield(){
 
                 expectation                        = (*pt2Pk)(kmodulus)/TotalVolume;
                 
-                // expectation                    *= 1. + 0.5*pow(mu, 2.);
+                expectation                       *= 1. + 0.5*pow(mu, 2.);
             
                 // expectation                    *= pow(1. + beta*pow(mu, 2.), 2.);
                 
@@ -658,13 +656,13 @@ int Gaussianfield(){
     for(j=0; j<n0*n2*n1; j++)  apparent_mean       += densityArray[j]*Cell_AppliedWindowFn[j];
     
     // Number of non-empty cells in mask. 
-    // apparent_mean    /= 123004.;
+    apparent_mean    /= 222124.0;
     
-    // for(j=0; j<n0*n1*n2; j++)  densityArray[j]     -= apparent_mean;
+    for(j=0; j<n0*n1*n2; j++)  densityArray[j]     -= apparent_mean;
     
-    // printf("\n\nApparent (weighted) mean of the Gaussian realisation: %e", apparent_mean);
+    printf("\n\nApparent (weighted) mean of the Gaussian realisation: %e", apparent_mean);
     
-    printf("\n\nminimum delta of Gaussian realisation: %e", arrayMin(densityArray, n0*n1*n2));
+    // printf("\n\nminimum delta of Gaussian realisation: %e", arrayMin(densityArray, n0*n1*n2));
     
     return 0;
 }

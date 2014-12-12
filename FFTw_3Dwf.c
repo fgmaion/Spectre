@@ -72,6 +72,50 @@ int polar2dWf(){
 }
 
 
+int W2k_Multipoles(){
+    polarPk_modeCount = 0;
+    
+    for(k=0; k<n0; k++){
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+                k_x = kIntervalx*i;
+                k_y = kIntervaly*j;
+                k_z = kIntervalz*k;
+
+                if(k_x>NyquistWaveNumber)  k_x    -= n2*kIntervalx;
+                if(k_y>NyquistWaveNumber)  k_y    -= n1*kIntervaly;
+                if(k_z>NyquistWaveNumber)  k_z    -= n0*kIntervalz;
+
+                kSq                                = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
+                
+                kmodulus                           = pow(kSq, 0.5);
+                
+                mu                                 = k_z/kmodulus;
+                if(kmodulus < 0.000001)       mu   = 0.0; 
+                
+                Index                              = k*n1*n2 + j*n2 + i;
+
+                // Binning calculation following inverse transform. 
+                polar2Dpk[polarPk_modeCount][0]    = kmodulus;
+		        polar2Dpk[polarPk_modeCount][1]    = fabs(mu);
+		        polar2Dpk[polarPk_modeCount][2]    = W2_veck[Index]/W2_veck[0];
+		      
+                // printf("\n%e \t %e \t %e \t %d", kmodulus, fabs(mu), W2_veck[Index], polarPk_modeCount);                
+                
+		        polarPk_modeCount                 += 1;
+            }
+        }
+    }
+            
+            
+    sprintf(filepath, "%s/Data/VIPERS_window2/VIPERS_W1_Mask_kMultipoles_kbin_%.5f.dat", root_dir, kbinInterval);
+    
+    MultipoleCalc(kBinNumb, meanKBin, wfMonopole, wfQuadrupole, polar2Dpk, polarPk_modeCount, filepath,  kbinInterval, 0.0, 1.0, 1);
+    
+    return 0;
+}
+
+
 int wfPkCalc(){    
     printf("\n\nBeginning window function calculation.");
     
@@ -90,7 +134,7 @@ int wfPkCalc(){
     
     // polar2dWf();
     
-    // W2k_Multipoles();
+    // W2k_Multipoles(); 
     
     // 3D FFT of W^2(vec k).
     for(j=0; j<n0*n1*n2; j++)  out[j][0]  = W2_veck[j];
@@ -102,6 +146,8 @@ int wfPkCalc(){
     for(j=0; j<n0*n1*n2; j++) FFTW2_vecr_im[j] =  in[j][1];
     
     for(j=0; j<n0*n1*n2; j++) W2_vecr[j] = pow(FFTW2_vecr_re[j], 2.) + pow(FFTW2_vecr_im[j], 2.);
+    
+    ClippingModelling();
     
     /*
     int    m0, m1, m2;
@@ -185,6 +231,24 @@ int wfPkCalc(){
             }
         }
     }
+    */
+    
+    // START CLOCK
+    clock_t start = clock(), diff;
+    
+    int iii;
+    for(iii=0; iii<1; iii++){
+    
+    formPkCube();
+    
+    for(j=0; j<n0*n1*n2; j++) in[j][0] = (double) PkCube[j];
+    for(j=0; j<n0*n1*n2; j++) in[j][1] = (double) 0.0;
+   
+    printf("\nPerforming FFT.");
+    
+    fftw_execute(p);
+
+    for(j=0; j<n0*n1*n2; j++) Corrfn[j] = out[j][0];
     
     // Carry out the convolution by inverse FFT of the correlation fn. x FFT of W^2(k).
     for(j=0; j<n0*n1*n2; j++){ 
@@ -197,10 +261,8 @@ int wfPkCalc(){
         
     printf("\nWindow fn. convolution complete.");
 
-    free2DBinning();
-
-    assign2DPkMemory(muBinNumb, kBinNumb);
-    
+    // free2DBinning();
+    // assign2DPkMemory(muBinNumb, kBinNumb);
     // W2k_Multipoles();
     
     polarPk_modeCount = 0;
@@ -234,30 +296,29 @@ int wfPkCalc(){
 		        
 		        // Convolved P(k), amplitude corrected for the effects of the convolution. 
 		        polar2Dpk[polarPk_modeCount][2]    = pow(n0*n1*n2, -1.)*out[Index][0];
-		        
 		        polarPk_modeCount                 += 1;
             }
         }
     }
     
-    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, polar2Dpk, polarPk_modeCount, filepath, kbinInterval, 0);
+    sprintf(filepath, "%s/Data/VIPERS_window2/ConvolvedPk_Multipoles_kbin_%.5f_kmax_%.2f_CellSize_%.2f_timeTest.dat", root_dir, kbinInterval, modkMax, CellSize);
     
-    sprintf(filepath, "%s/Data/Multipoles/ConvolvedPk_Multipoles_kbin_%.5f_kmax_%.2f_CellSize_%.2f_MonoInput.dat", root_dir,  surveyType, kbinInterval, modkMax, CellSize);
-    
-    output = fopen(filepath, "w");
-    
-    for(j=0; j<(kBinNumb-1); j++) fprintf(output, "%e \t %e \t %e \n", meanKBin[j], kMonopole[j], kQuadrupole[j]);
-    
-    fclose(output);
-    
+    MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, polar2Dpk, polarPk_modeCount, filepath, kbinInterval, 0.0, 1.0, 1);
+    }
+        
     // sprintf(filepath, "%s/Data/Multipoles/GaussianWf_rMultipoles_%s_kbin_%.5f_00%d.dat", root_dir,  surveyType, kbinInterval, loopCount);
     
     // corrfn_multipoles(FFTW2_vecr_re, filepath);
-    */
     
     // W2r_Multipoles();
     
-    newApproach_W2rMultipoles();
+    // newApproach_W2rMultipoles();
+    
+    diff = clock() - start;
+
+    int msec = diff*1000/CLOCKS_PER_SEC;
+
+    printf("\n\n3D FFT approach to convolution, for 10 models: %d seconds %d milliseconds", msec/1000, msec%1000);
     
     return 0;
 }
@@ -508,52 +569,6 @@ int wfPkCalc(){
     return 0;
 }
 */
-
-int W2k_Multipoles(){
-    polarPk_modeCount = 0;
-    
-    for(k=0; k<n0; k++){
-        for(j=0; j<n1; j++){
-            for(i=0; i<n2; i++){
-                k_x = kIntervalx*i;
-                k_y = kIntervaly*j;
-                k_z = kIntervalz*k;
-
-                if(k_x>NyquistWaveNumber)  k_x    -= n2*kIntervalx;
-                if(k_y>NyquistWaveNumber)  k_y    -= n1*kIntervaly;
-                if(k_z>NyquistWaveNumber)  k_z    -= n0*kIntervalz;
-
-                kSq                                = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
-                
-                kmodulus                           = pow(kSq, 0.5);
-                
-                mu                                 = k_z/kmodulus;
-                if(kmodulus < 0.000001)       mu   = 0.0; 
-                
-                Index                              = k*n1*n2 + j*n2 + i;
-
-                // Binning calculation following inverse transform. 
-                polar2Dpk[polarPk_modeCount][0]    = kmodulus;
-		        polar2Dpk[polarPk_modeCount][1]    = fabs(mu);
-		        polar2Dpk[polarPk_modeCount][2]    = W2_veck[Index];
-		      
-		        polarPk_modeCount                 += 1;
-            }
-        }
-    }
-            
-    sprintf(filepath, "%s/Data/Multipoles/VipersMaskWf_Multipoles_%s_kbin_%.5f.dat", root_dir,  surveyType, kbinInterval);
-    
-    MultipoleCalc(kBinNumb, meanKBin, wfMonopole, wfQuadrupole, polar2Dpk, polarPk_modeCount, filepath, 0.0, 1.0, kbinInterval, 0);
-    
-    output = fopen(filepath, "w");
-    
-    for(j=0; j<(kBinNumb-1); j++) fprintf(output, "%e \t %e \t %e \n", meanKBin[j], wfMonopole[j], wfQuadrupole[j]);
-    
-    fclose(output);
-    
-    return 0;
-}
 
 
 int W2r_Multipoles(){

@@ -138,7 +138,6 @@ int formPkCube(){
                 kmodulus                           = pow(pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.), 0.5);
                 
                 mu                                 = k_z/(double) kmodulus;
-                
                 if(kmodulus == 0.0)          mu    = 0.0;  
 
 		        PkCube[Index]                      = (*pt2Pk)(kmodulus); // Convert from CAMB units for P(k), [P_CAMB] = Volume, to [P(k)] dimensionless.
@@ -155,10 +154,12 @@ int formPkCube(){
                 }
                 */    
                 
-                PkCube[Index]                     *= pow(1. + beta*mu*mu, 2.);
+                PkCube[Index]                     *= 1. + 0.5*pow(mu, 2.);
+                
+                // PkCube[Index]                  *= pow(1. + beta*mu*mu, 2.);
                 
                 // Lorentzian factor for non-linear redshift space distortions. 
-                PkCube[Index]                     /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
+                // PkCube[Index]                  /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
                 
                 /*
                 WindowFunc                         = 1.;
