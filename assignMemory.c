@@ -1,6 +1,6 @@
 int prepNGP(){
     densityArray               =  (double *)  realloc(densityArray,     n0*n1*n2*sizeof(*densityArray));
-    // meanCellRedshift        =  (double *)  realloc(meanCellRedshift, n0*n1*n2*sizeof(*meanCellRedshift));  
+    meanCellRedshift           =  (double *)  realloc(meanCellRedshift, n0*n1*n2*sizeof(*meanCellRedshift));  
 
     FKPweights                 =  (double *)  realloc(FKPweights,       n0*n1*n2*sizeof(*FKPweights));
 
@@ -276,7 +276,6 @@ int LikelihoodMemory(){
     
     for(j=0; j<Res; j++)  betaSigmaPosterior[j] = malloc(Res*sizeof(**betaSigmaPosterior));
     
-    
     for(i=0; i<Res; i++){
         for(j=0; j<Res; j++){
             betaSigmaPosterior[i][j] = 0.0;
@@ -287,68 +286,68 @@ int LikelihoodMemory(){
 }
 
 
-int assignCovMat(int mockNumber, int kBinNumb, int hiMultipoleOrder){
+int assignCovMat(int mocks){
     // Multipoles is a [CatalogNumber][hiMultipoleOrder][kBinNumb] object, where [x][][] corresponds to mock number, [][x][] corresponds to x e [Mono, Quad, Hex], [][][x] mid or mean k bin. 
-    Multipoles                                             = (double ***) malloc(mockNumber*sizeof(*Multipoles));
+    Multipoles                                             = (double **) malloc(mocks*sizeof(*Multipoles));
+    
+    // Decorrelated multipole moments measurements
+    dMultipoles                                            = (double **) malloc(mocks*sizeof(*dMultipoles));
         
-    for(j=0; j<mockNumber; j++) Multipoles[j]              = (double  **) malloc(hiMultipoleOrder*sizeof(**Multipoles));
-    
-    for(j=0; j<mockNumber; j++){
-        for(k=0; k<hiMultipoleOrder; k++){      
-            Multipoles[j][k]                               = (double   *) malloc(kBinNumb*sizeof(***Multipoles));
-        }
+    for(j=0; j<mocks; j++){ 
+         Multipoles[j]                                     = (double  *) malloc(order*sizeof( *Multipoles));
+        dMultipoles[j]                                     = (double  *) malloc(order*sizeof(*dMultipoles));
     }
-
-    for(i=0; i<mockNumber; i++){
-        for(j=0; j<hiMultipoleOrder; j++){
-            for(k=0; k<kBinNumb; k++){
-                Multipoles[i][j][k] = 0.0;
-            }
+    
+    for(i=0; i<mocks; i++){
+        for(j=0; j<order; j++){
+             Multipoles[i][j]  = 0.0;
+            dMultipoles[i][j]  = 0.0;
         }
     }
     
-    kMultipoles                                            = (double  *) malloc(kBinNumb*sizeof(*kMultipoles));
+    kVals                                                  = (double  *) malloc(chiSq_kmaxIndex*sizeof(*kVals));
 
-    ModeNumber                                             = (int     *) malloc(kBinNumb*sizeof(*ModeNumber));
-
-    MeanMultipoles                                         = (double **) malloc(hiMultipoleOrder*sizeof(*MeanMultipoles));    
+    MeanMultipoles                                         = (double  *) malloc(order*sizeof(*MeanMultipoles));    
     
-    for(j=0; j<hiMultipoleOrder; j++)  MeanMultipoles[j]   = (double  *) malloc(kBinNumb*sizeof(**MeanMultipoles));
-    
-    for(j=0; j<hiMultipoleOrder; j++){
-        for(k=0; k<kBinNumb; k++){
-            MeanMultipoles[j][k] = 0.0;
-        }
+    for(j=0; j<order; j++){
+        MeanMultipoles[j]   = 0.0;
     }
     
+    Covariance = gsl_matrix_alloc(order, order);
+    sigma_norm = gsl_matrix_alloc(order, order);
     
-    // Covariance is an N x N matrix, where N corresponds to hiMultipoleOrder*(kBinNumb-1), here hiMultipoleOrder is due to Mono-Mono, Mono-Quad, Quad-Quad, etc... elements. Here hex-blah elements are 
+    eval       = gsl_vector_alloc(order);
+    evec       = gsl_matrix_alloc(order, order);
+    
+    w          = gsl_eigen_symmv_alloc(order); 
+    
+    // Assign gsl_vector for eigenvector. 
+    col        = gsl_vector_alloc(order);
+    
+    
+    // Covariance is an N x N matrix, where N corresponds to hiMultipoleOrder*chiSq_kmaxIndex, here hiMultipoleOrder is due to Mono-Mono, Mono-Quad, Quad-Quad, etc... elements. Here hex-blah elements are 
     // ignored. 
-         
-    Covariance                                                      = (double **) malloc(2*kBinNumb*sizeof(*Covariance));
+        /*
+    Covariance                                                      = (double **) malloc(order*sizeof(*Covariance));
     
-    // Covariance_CofactorMatrix                                    = (double **) malloc(2*(kBinNumb-1)*sizeof(*Covariance_CofactorMatrix));
-    
-    for(j=0; j<2*kBinNumb; j++) Covariance[j]                       = (double  *) malloc(2*kBinNumb*sizeof(**Covariance));
-    // for(j=0; j<2*(kBinNumb-1); j++) Covariance_CofactorMatrix[j] = (double  *) malloc(2*(kBinNumb-1)*sizeof(**Covariance_CofactorMatrix));
-    
-    // flatCov     = malloc(2*(kBinNumb-1)*2*(kBinNumb-1)*sizeof(*flatCov));
-    
-    for(k=0; k<2*kBinNumb; k++){
-        for(j=0; j<2*kBinNumb; j++){
+    for(j=0; j<order; j++) Covariance[j]                            = (double  *) malloc(order*sizeof(**Covariance));
+        
+    for(k=0; k<order; k++){
+        for(j=0; j<order; j++){
             Covariance[j][k]                = 0.0;
-            // Covariance_CofactorMatrix[j][k] = 0.0;
         }
     }
     
-    /*
-    invCov      = (double **) malloc(2*(kBinNumb-1)*sizeof(*invCov));
+    sigmaNorm = (double *)  malloc(order*sizeof(*sigmaNorm));
     
-    for(j=0; j<2*(kBinNumb-1); j++){
-        invCov[j] = malloc(2*(kBinNumb-1)*sizeof(**invCov));
-    }
+    smallestEigenvalue = pow(10., 12.);
+    
+    // order has been assigned in MultipoleCovariance.
+    eigenVals = malloc(order*sizeof(*eigenVals));
+    eigenVecs = malloc(order*sizeof(*eigenVecs)); 
+    
+    for(j=0; j<order; j++)  eigenVecs[j] = malloc(order*sizeof(**eigenVecs));
     */
-    
     return 0;
 }
 

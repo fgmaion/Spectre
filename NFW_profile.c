@@ -1,3 +1,18 @@
+int nfw_profile(){
+  // NFWprofile_oneHalo();
+
+  // NFWprofile_oneHalo_pairCount(); 
+
+  // NFWprofile_oneHalo_xiCalc();
+
+  // NFW_profileOneHalo_xi();
+
+  // prep_NFWhaloCat(3000000);
+
+  return 0;
+}
+
+
 double splint_NFWinversion_rq(double q){
     double Interim;
 
@@ -38,7 +53,7 @@ double haloModel_pk(double k, double beta, int Order){
     
     Interim = TotalVolume/haloNumber; 
                                                                   
-    return Interim*pow(NFW_densityprofile_NormedFourier(k), 2.)*kaiserGauss_multipole(k*2., 0.0, Order) + pow(Dplus, 2.)*(*pt2Pk)(k)*kaiserGauss_multipole(k*2., beta, Order);
+    return Interim*pow(NFW_densityprofile_NormedFourier(k), 2.)*(*pt2RSD_k)(k*2., 0.0, Order) + pow(Dplus, 2.)*(*pt2Pk)(k)*(*pt2RSD_k)(k*2., beta, Order);
 }
 
 

@@ -1,13 +1,11 @@
 int NGPCalc(){
     // ApplyJenkins();
     
-    // CountGalaxies();
+    // cic_Assignment(); 
     
-    cic_Assignment(); 
+    // overdensity_varyingSelection();
     
-    overdensity_varyingSelection();
-    
-    printSurveyDetails();
+    // printSurveyDetails();
     
     return 0;
 }
@@ -65,47 +63,12 @@ int GaussCube(){
 }
 
 
-int boxCoordinates(double xCoor[], double yCoor[], double zCoor[], int rowNumber){
-    xlabel                  = (int) floor((xCoor[rowNumber] - AxisLimsArray[0][0])/CellSize);    
-    ylabel                  = (int) floor((yCoor[rowNumber] - AxisLimsArray[0][1])/CellSize);
-    zlabel                  = (int) floor((zCoor[rowNumber] - AxisLimsArray[0][2])/CellSize);
-    
-    boxlabel                = (int)                        xlabel + n2*ylabel + n2*n1*zlabel;
-
-    return boxlabel;
-}
-
-
 int cic_Assignment(double xCoor[], double yCoor[], double zCoor[], int objectNumber){
     for(j=0; j<objectNumber; j++){
         // if(Acceptanceflag[j] == true){
             cic_assign(xCoor[j], yCoor[j], zCoor[j], CellSize, densityArray, 1.0);
         // }
     }
-    
-    return 0;
-}
-
-
-int CountGalaxies(){
-    for(j=0; j<Vipers_Num; j++){
-        boxlabel = boxCoordinates(xCoor, yCoor, zCoor, j);
-		            
-        if(Acceptanceflag[j] == true){    
-            densityArray[boxlabel]     += 1;
-		    meanCellRedshift[boxlabel] += zUtilized[j];
-        }
-    }
-    
-    
-    for(j=0; j<n0*n1*n2; j++){
-        if(densityArray[j] > 0.0){
-	        // Currently densityArray contains solely galaxy counts per cell.
-            meanCellRedshift[j] /= densityArray[j];
-        }
-    }
-    
-    // TotalZADEWeight = SumDoubleArray(densityArray, n0*n1*n2);
     
     return 0;
 }
@@ -122,13 +85,6 @@ int CountGalaxiesCube(double xCoor[], double yCoor[], double zCoor[], int object
     // TotalZADEWeight = SumDoubleArray(densityArray, n0*n1*n2);                                                                 
  
  return 0;
-}
-
-
-double CubeMeanNumberDensity(double chi){
-    // Galaxies in cube/comoving volume. 
-    
-    return Vipers_Num/TotalVolume; 
 }
 
 

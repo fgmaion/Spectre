@@ -1,10 +1,9 @@
-int CovarianceMatrix(int mockNumber){
-    // Multipoles is a [CatalogNumber][hiMultipoleOrder][chiSq_kmaxIndex] object, where [x][][] corresponds to mock number, [][x][] corresponds to x e [Mono, Quad, Hex], [][][x] mid or mean k bin. 
-
+int CovarianceMatrix(int mocks){
     // Retrieve the number of rows necessary before k value is greater than kmax for chi sq. evaluation. 
-    sprintf(filepath, "%s/Data/Multipoles/zCube_xVel/Multipoles_zCube_xvel_clipThreshold_1.0e+03_fullCube_kbin_0.010_001.dat", root_dir);
-
-    inputfile       = fopen(filepath, "r");
+    // sprintf(filepath,"%s/Data/likelihood/ClippedGaussian_fields_noCosVar/clipped_fullCube_500_noCosVar_kaiserLorentz_%d.dat", root_dir, 0);
+    sprintf(filepath,"%s/Data/likelihood/ClippedGaussian_fields_noCosVar_window500s_zeromean/clipped_fullCube_500_noCosVar_window500s_zeromean_kaiserLorentz_%d.dat", root_dir, 0); // 500s mask
+    
+    inputfile  = fopen(filepath, "r");
     
     // Retrieve the number of lines in the input file. 
     ch         = 0;
@@ -19,10 +18,10 @@ int CovarianceMatrix(int mockNumber){
     rewind(inputfile);
 
     for(i=0; i<lineNo; i++){
-        fscanf(inputfile, "%lf \t %*lf \t %*lf \t %*d \t %*lf \t %*lf \n", &Interim);
+        fscanf(inputfile, "%le \t %*le \t %*le \t %*d \n", &Interim);
     
-        if(Interim > ChiSqEval_kmax){
-            chiSq_kmaxIndex = i -1;
+        if(Interim>ChiSq_kmax){
+            chiSq_kmaxIndex = (i -1);
         
             break;
         }
@@ -30,80 +29,107 @@ int CovarianceMatrix(int mockNumber){
     
     fclose(inputfile);
     
-    printf("\n\nkmax limit for ChiSq: %d", chiSq_kmaxIndex);
-
-    assignCovMat(mockNumber, chiSq_kmaxIndex, 2);
+    printf("\n\nkmax limit for ChiSq: %e (%d) \n\n", ChiSq_kmax, chiSq_kmaxIndex);
     
-    // Be careful with 0 or 1 for the starting value !!
-    for(k=0; k<mockNumber; k++){
-            if(k<10)  sprintf(filepath, "%s/Data/Multipoles/zCube_xVel/Multipoles_zCube_xvel_clipThreshold_1.0e+03_fullCube_kbin_0.010_00%d.dat", root_dir, k);
-            else      sprintf(filepath, "%s/Data/Multipoles/zCube_xVel/Multipoles_zCube_xvel_clipThreshold_1.0e+03_fullCube_kbin_0.010_0%d.dat",  root_dir, k);
+    // total number of data points.
+    order = chiSq_kmaxIndex*hiMultipoleOrder;
+    
+    // Number of mocks, number of bins to kmax, number of multipoles to be fit. 
+    assignCovMat(mocks);
+    
+    // Be careful with 0 or 1 for the mock numbering. 
+    for(k=0; k<mocks; k++){
+        // sprintf(filepath,"%s/Data/likelihood/ClippedGaussian_fields_noCosVar/clipped_fullCube_500_noCosVar_kaiserLorentz_%d.dat", root_dir, k);
+        sprintf(filepath,"%s/Data/likelihood/ClippedGaussian_fields_noCosVar_window500s_zeromean/clipped_fullCube_500_noCosVar_window500s_zeromean_kaiserLorentz_%d.dat", root_dir, k); // 500s mask
             
-            // if(k<10)  sprintf(filepath, "%s/Data/Del2k/GaussCube/midK_Del2k_GaussCube_Realisation_clipThreshold_1.0e+03_fullCube_kInterval_0.01_00%d.dat", root_dir, k);
-            // else      sprintf(filepath, "%s/Data/Del2k/GaussCube/midK_Del2k_GaussCube_Realisation_clipThreshold_1.0e+03_fullCube_kInterval_0.01_0%d.dat",  root_dir, k);
-            
-            // if(k<10)  sprintf(filepath, "%s/Data/Del2k/GaussCube_BootStrap/midK_Del2k_GaussCube_BootStrap_clipThreshold_1.0e+03_fullCube_kInterval_0.01_00%d.dat", root_dir, k);
-            // else      sprintf(filepath, "%s/Data/Del2k/GaussCube_BootStrap/midK_Del2k_GaussCube_BootStrap_clipThreshold_1.0e+03_fullCube_kInterval_0.01_0%d.dat",  root_dir, k);
-            
-            inputfile = fopen(filepath, "r");
-            
-            // printf("\n\nInput of mock number: %d", mockNumber);
+        inputfile = fopen(filepath, "r");
 
-            for(i=0; i<chiSq_kmaxIndex; i++){
-	            fscanf(inputfile, "%lf \t %lf \t %lf \t %d \t %*lf \t %*lf \n", &kMultipoles[i], &Multipoles[k][0][i], &Multipoles[k][1][i], &ModeNumber[i]);
-	       
-                // printf("\n%e \t %e \t %e \t %d", kMultipoles[i], Multipoles[k][0][i], Multipoles[k][1][i], ModeNumber[i]);
-            }
-
-            // printf("\n\n");            
-
-            fclose(inputfile);    
+        for(i=0; i<chiSq_kmaxIndex; i++)  fscanf(inputfile, "%le \t %le \t %le \t %*d \n", &kVals[i], &Multipoles[k][i], &Multipoles[k][i+chiSq_kmaxIndex]);
+    
+        fclose(inputfile);    
     }  
     
-    for(k=0; k<chiSq_kmaxIndex; k++){
-        for(j=0; j<hiMultipoleOrder; j++){
-            // Be careful with 0 or 1 for the starting value !!
-            for(i=0; i<mockNumber; i++){
-                MeanMultipoles[j][k] += (1./mockNumber)*Multipoles[i][j][k];
-            }
+    for(k=0; k<order; k++){
+        for(i=0; i<mocks; i++){
+            MeanMultipoles[k] += Multipoles[i][k]/mocks;
         }
     }
     
-    printf("\n\nMean multipoles: \n");
+    // printf("\n\nMean multipoles:");
     
-    for(k=0; k<chiSq_kmaxIndex; k++)  printf("\n%e \t %e \t %e", kMultipoles[k], MeanMultipoles[0][k], MeanMultipoles[1][k]);
+    // for(k=0; k<chiSq_kmaxIndex; k++)  printf("\n%e \t %e \t %e", kVals[k], MeanMultipoles[k], MeanMultipoles[k+chiSq_kmaxIndex]);
     
-    for(k=0; k<chiSq_kmaxIndex; k++){
-        // Be careful with 0 or 1 for the starting value !!
-        for(i=0; i<mockNumber; i++){
-            // Multipoles is a [CatalogNumber][hiMultipoleOrder][chiSq_kmaxIndex] object, where [x][][] corresponds to mock number, [][x][] corresponds to x e [Mono, Quad, Hex], [][][x] mid or mean k bin. 
-            Multipoles[i][0][k] -= MeanMultipoles[0][k];
-            Multipoles[i][1][k] -= MeanMultipoles[1][k];
+    for(k=0; k<order; k++){
+        // New variables have zero mean. 
+        for(i=0; i<mocks; i++)  dMultipoles[i][k] = Multipoles[i][k] - MeanMultipoles[k];
+    }
+    
+    // Covariance is an N x N matrix, where N corresponds to order, here hiMultipoleOrder is due to Mono-Mono, Mono-Quad, Quad-Quad, etc... elements. Here hex-blah elements are 
+    // ignored. 
+    
+    initialiseCovariance(mocks);
+    
+    // Pre-whiten data and covariance. 
+    prewhitenCov(mocks);
+    
+    fprintf_Cov();
+    
+    Covariance_eigenVecs(mocks);
+    
+    return 0;
+}
+
+
+int initialiseCovariance(int mocks){    
+    // assumes dMultipoles have zero mean. 
+    for(j=0; j<order; j++){
+        for(k=0; k<order; k++){
+          Interim = 0.0;
+        
+          for(i=0; i<mocks; i++)  Interim += dMultipoles[i][j]*dMultipoles[i][k]/mocks;  
+        
+          gsl_matrix_set(Covariance, j, k, Interim);
         }
     }
 
-    // Covariance is an N x N matrix, where N corresponds to hiMultipoleOrder*chiSq_kmaxIndex, here hiMultipoleOrder is due to Mono-Mono, Mono-Quad, Quad-Quad, etc... elements. Here hex-blah elements are 
-    // ignored. 
+    return 0;
+}
+
+
+int prewhitenCov(int mocks){
+    for(j=0; j<order; j++){
+        for(k=0; k<order; k++){
+          gsl_matrix_set(sigma_norm, j, k, 0.0);
+        }
+        
+        gsl_matrix_set(sigma_norm, j, j, pow(gsl_matrix_get(Covariance, j, j), -0.5));
+    }
     
-    for(j=0; j<chiSq_kmaxIndex; j++){    
-        for(k=0; k<chiSq_kmaxIndex; k++){
-            for(i=0; i<mockNumber; i++){
-              // Multipoles is a [CatalogNumber][hiMultipoleOrder][chiSq_kmaxIndex] object, where [x][][] corresponds to mock number, [][x][] corresponds to x e [Mono, Quad, Hex], [][][x] mid or mean k bin. 
-              
-              // Mono-Mono elements.
-              Covariance[j][k]                                                 +=  (1./mockNumber)*Multipoles[i][0][j]*Multipoles[i][0][k];   
-              
-              // Quad-Quad elements.
-              Covariance[chiSq_kmaxIndex + j][chiSq_kmaxIndex + k]             +=  (1./mockNumber)*Multipoles[i][1][j]*Multipoles[i][1][k];   
-                     
-              // Mono-Quad.              
-              Covariance[j][chiSq_kmaxIndex + k]                               +=  (1./mockNumber)*Multipoles[i][0][j]*Multipoles[i][1][k];   
-                           
-              // Quad-Mono.               
-              Covariance[chiSq_kmaxIndex + j][k]                               +=  (1./mockNumber)*Multipoles[i][1][j]*Multipoles[i][0][k];   
-            }
+    // Pre-whitening of covariance. 
+    for(j=0; j<order; j++){
+        for(k=0; k<order; k++){
+            gsl_matrix_set(Covariance, j, k, gsl_matrix_get(Covariance, j, k)*gsl_matrix_get(sigma_norm, j, j)*gsl_matrix_get(sigma_norm, k, k));
         }
     }
     
+    return 0;
+}
+
+
+int fprintf_Cov(){
+    sprintf(filepath, "%s/Data/likelihood/Clipped_mask500s_Covariance.dat", root_dir);
+
+    output = fopen(filepath, "w"); 
+
+    for(j=0; j<order; j++){
+        for(k=0; k<order; k++){        
+            fprintf(output, "%e \t", gsl_matrix_get(Covariance, j, k));                  
+        }
+    
+        fprintf(output, "\n");
+    }
+
+    fclose(output);
+
     return 0;
 }

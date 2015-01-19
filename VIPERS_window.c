@@ -81,9 +81,27 @@ double splint_VIPERS_maskMultipoles(double r, int transformOrder){
 }
 
 
-int prep_VIPERS_maskMonopole(){
+int print_windowCorrfn(){
+    sprintf(filepath, "%s/Data/likelihood/rand__W1_500s_mask_0.7_0.8_hex_normed_mixedRes.dat", root_dir);
+    
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<mono_config->N; j++){  
+        if((mono_config->krvals[j][1] > 0.01) && (mono_config->krvals[j][1] < 400.)){
+            fprintf(output, "%e \t %e \t %e \t %e \n", mono_config->krvals[j][1],  splint_VIPERS_maskMono(mono_config->krvals[j][1]), splint_VIPERS_maskQuad(mono_config->krvals[j][1]), splint_VIPERS_maskHex(mono_config->krvals[j][1]));
+        }
+    }
+
+    fclose(output);
+
+    return 0;
+}
+
+
+int prep_VIPERS_maskMultipoles(){
     // high resolution
-    sprintf(filepath, "%s/Data/VIPERS_window2/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_hihiRes_hex_multipoles.dat", root_dir);
+    sprintf(filepath, "%s/Data/likelihood/rand_W1_500s_xi_mask_0.7_0.8_hiRes_hex_multipoles.dat", root_dir);    // 500s mask.
+    // sprintf(filepath, "%s/Data/VIPERS_window2/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_hihiRes_hex_multipoles.dat", root_dir); // masked RSD draft,  W1mask. 
 
     inputfile = fopen(filepath, "r");
     
@@ -132,7 +150,8 @@ int prep_VIPERS_maskMonopole(){
 
 
     // lower resolution on larger scales.
-    sprintf(filepath, "%s/Data/VIPERS_window2/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_loRes_hex_multipoles.dat", root_dir);
+    sprintf(filepath, "%s/Data/likelihood/rand_W1_500s_xi_mask_0.7_0.8_loRes_hex_multipoles.dat", root_dir);    // 500s mask.
+    // sprintf(filepath, "%s/Data/VIPERS_window2/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_loRes_hex_multipoles.dat", root_dir);
 
     inputfile = fopen(filepath, "r");
     
@@ -181,7 +200,8 @@ int prep_VIPERS_maskMonopole(){
     spline(VIPERS_maskr_lo, VIPERS_maskQuad_lo, VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskQuad2D_lo);
     spline(VIPERS_maskr_lo, VIPERS_maskHex_lo,  VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskHex2D_lo);
     
-    prepVIPERS_kSpaceMultipole();
+    // for integral constraint, I think.
+    // prepVIPERS_kSpaceMultipole();
     
     return 0;
 }

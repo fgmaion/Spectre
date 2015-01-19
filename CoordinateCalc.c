@@ -1,4 +1,4 @@
- int CatalogueInput(char filepath[]){
+int CatalogueInput(char filepath[]){
     printf("\n\nOpening catalogue: %s", filepath);
     
     inputfile     = fopen(filepath, "r");  
@@ -99,6 +99,68 @@
 }
 
 
+int CatalogueInput_500s(char filepath[]){
+    printf("\n\nOpening catalogue: %s", filepath);
+    
+    inputfile     = fopen(filepath, "r");  
+    
+    if(inputfile == NULL){  
+        printf("\nError opening %s\n", filepath); 
+        return 1;
+    }
+
+    // Column  0: id                                                                                                         
+    // Column  1: ra                                                                                           
+    // Column  2: dec                                                                                                                                                                
+    // Column  3: zobs presumably.                                                                           
+    // Column  4: MB, abs mag from the parent HOD. 
+    // Column  5: weight? 
+    
+    ch         = 0;
+    Vipers_Num = 0;
+    
+    do{
+        ch = fgetc(inputfile);        
+        if(ch == '\n')
+       	  Vipers_Num += 1;
+    } while (ch != EOF);
+
+    rewind(inputfile);
+    
+    id             =  (int   *)   realloc(id,             Vipers_Num*sizeof(*id));
+    ra             =  (double *)  realloc(ra,             Vipers_Num*sizeof(*ra));
+    dec            =  (double *)  realloc(dec,            Vipers_Num*sizeof(*dec));
+    zobs           =  (double *)  realloc(zobs,           Vipers_Num*sizeof(*zobs)); 
+    M_B            =  (double *)  realloc(M_B,            Vipers_Num*sizeof(*M_B));
+
+    // derived parameters. 
+    Acceptanceflag =  (bool  *)   realloc(Acceptanceflag, Vipers_Num*sizeof(*Acceptanceflag));
+    polarAngle     =  (double *)  realloc(polarAngle,     Vipers_Num*sizeof(*polarAngle));
+    rDist          =  (double *)  realloc(rDist,          Vipers_Num*sizeof(*rDist));
+    xCoor          =  (double *)  realloc(xCoor,          Vipers_Num*sizeof(*xCoor));
+    yCoor          =  (double *)  realloc(yCoor,          Vipers_Num*sizeof(*yCoor));
+    zCoor          =  (double *)  realloc(zCoor,          Vipers_Num*sizeof(*zCoor));
+    
+    for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j]  = false;
+    
+    // redshift range 0.7<z<0.8, as traced by randoms. magnitude cut for known linear bias. volume limited to z=0.85
+    for(j=0; j<Vipers_Num; j++){  
+        fscanf(inputfile, "%d \t %le \t %le \t %le \t %le \t %*le \n", &id[j], &ra[j], &dec[j], &zobs[j], &M_B[j]);
+    
+        if((-20.2<M_B[j]) && (M_B[j] < -19.8) && (0.7<zobs[j]) && (zobs[j]<0.8))  Acceptanceflag[j] = true;
+    }
+    
+    // for(j=0; j<10; j++)  printf("\n%d \t %e \t %e \t %e \t %e", id[j], ra[j], dec[j], zobs[j], M_B[j]);
+    
+    fclose(inputfile);
+    
+    printf("\nHOD 500s catalogue input successful.");
+    printf("\nNumber of galaxies in catalogue:  %d", Vipers_Num);
+
+    return 0;
+}
+
+
 int CoordinateCalc(){
     // Not to be used in conjunction with Stefano Basis. 
 
@@ -116,7 +178,6 @@ int CoordinateCalc(){
             ra[j]                /= (pi/180.0);                                 // Converted to degrees  
     }
 
-    
     printf("\n\nOn input...");
     printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
@@ -151,7 +212,6 @@ int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoo
     printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
     printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
     printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
-
     printf("\nr max:  %f \t r min:  %f", arrayMax(rDist, Vipers_Num), arrayMin(rDist, Vipers_Num));
     
     printf("\n\nRedshift max:  %f \t Redshift min:  %f", arrayMax(zUtilized, Vipers_Num), arrayMin(zUtilized, Vipers_Num));
@@ -170,12 +230,19 @@ int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoo
     
     // Rotate the input co-ordinates such that the ra direction is aligned more or less with the y axis, dec direction with x, and redshift along z. 
     StefanoRotated(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
-                                                                                                                     
-    printf("\n\nVIPERS Galaxies. Rotated + translated");                                                                  
-    printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));                       
-    printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));                       
-    printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));                                                                                                                                              
-    printf("\nr max:  %f \t r min %f", arrayMax(rDist, Vipers_Num), arrayMin(rDist, Vipers_Num));                         
+             
+    printf("\n\nrotated & translated");                                                                                                                                   
+    printf("\nx max:  %e \t x min:  %e", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
+    printf("\ny max:  %e \t y min:  %e", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
+    printf("\nz max:  %e \t z min:  %e", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
+    printf("\nr max:  %e \t r min:  %e", arrayMax(rDist, Vipers_Num), arrayMin(rDist, Vipers_Num));
+                                                                                                                                                                                 
+    printf("\n\naccepted. rotated & translated");                                                                  
+    printf("\nx max:  %e \t x min:  %e", AcceptedMax(xCoor, Acceptanceflag, Vipers_Num), AcceptedMin(xCoor, Acceptanceflag, Vipers_Num));                       
+    printf("\ny max:  %e \t y min:  %e", AcceptedMax(yCoor, Acceptanceflag, Vipers_Num), AcceptedMin(yCoor, Acceptanceflag, Vipers_Num));         
+    printf("\nz max:  %e \t z min:  %e", AcceptedMax(zCoor, Acceptanceflag, Vipers_Num), AcceptedMin(zCoor, Acceptanceflag, Vipers_Num));                                     
+    printf("\nr max:  %e \t r min   %e", AcceptedMax(rDist, Acceptanceflag, Vipers_Num), AcceptedMin(rDist, Acceptanceflag, Vipers_Num));                         
+    
     return 0;
 }
 

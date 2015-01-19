@@ -1,7 +1,7 @@
 int clipDensity(double threshold){
     int    CellsClipped =  0;
 
-    printf("\n\nClipping threshold: %e",    appliedClippingThreshold);
+    printf("\n\nClipping threshold: %e", appliedClippingThreshold);
 
     printf("\nMax overdensity: %f", arrayMax(densityArray, n0*n1*n2));
 
@@ -16,6 +16,18 @@ int clipDensity(double threshold){
     clippedVolume = CellVolume*CellsClipped;
 
     printf("\nUnclipped volume: %e", 1. - clippedVolume/TotalVolume);
+    
+    
+    // May introduce integral constraint like term if the field is not re-zeroed. 
+    double mean = 0.0;
+    
+    for(j=0; j<n0*n1*n2; j++)  mean += densityArray[j];
+    
+    mean /= (double) n0*n1*n2;
+    
+    printf("\nmean of clipped field: %e", mean);
+    
+    for(j=0; j<n0*n1*n2; j++)  densityArray[j] -= mean;
     
     return 0;
 }

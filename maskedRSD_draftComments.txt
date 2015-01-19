@@ -1,0 +1,44 @@
+// Chris Blake
+Hi Mike,
+
+Thanks for your message, I definitely remember our chat last year!  You have clearly done some very nice work in your PhD.  I will be visiting Edinburgh in the last week of January, so I look forward to talking with you some more.
+
+Your letter is definitely publishable in my opinion.  My main comment is you should compare with the work of Florian Beutler and Shun Saito ( http://arxiv.org/pdf/1312.4611.pdf ) who have done a lot of theoretical development along similar lines to you, although not exactly the same I believe.
+
+My current approach to the problem is to use the "Yamamoto et al." estimator that Florian and I have worked on to estimate the multipoles, and FFT approaches for convolution.  My method has been fine for my investigations, but is not as efficient as yours.  For some reason I have never got around to implementing the FFTlog approach for the Hankel transforms.
+
+Some other minor comments:
+
+Sec 1 : Taruya et al. ( http://arxiv.org/pdf/1006.0699.pdf ) have a big focus on modelling multipoles.
+
+Sec 2.1 : Comment on the convergence of Equation 19 ?
+
+Sec 2.2 : Give more details of form of window function considered and box size?  Does Fig.1 plot the error in the mean or the standard deviation?
+
+Hope those comments are useful,
+
+Chris
+
+
+// Ben
+Hi Mike,
+I read through the draft.  I think it is very nice.  
+
+In sec 4.1 about covariances, I remembered this paper which might be relevant:
+Harnois-Déraps
+http://adsabs.harvard.edu/abs/2012MNRAS.423.2288H
+
+Also I think the Pope&Szapudi reference is misplaced, that paper is about shrinkage estimators.  In that same paragraph, it is not clear why in Euclid or BigBOSS, the measurements would be limited to pair separations of a few degrees.
+
+The method to compute W(k) using pair counting and changing the density of pairs with scale is neat.
+
+I will discuss more with Gigi about the VIPERS details.  One thing to mention is that the survey coverage shown in Fig2 is not the final data release.
+
+cheers,
+Ben
+
+
+// Florian
+
+// Gigi
+

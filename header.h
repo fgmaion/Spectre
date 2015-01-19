@@ -344,24 +344,27 @@ double**     mean_perpk         = NULL;
 double**     mean_losk          = NULL;
 double**     zSpaceBinnedPk     = NULL;
 
-// Comoving number density calculation
-int          zBinNumber;
-
-double       zBinWidth;
+// Comoving number density calculation.
+// double       zBinWidth;
 double       VIPERS_SolidAngle;
 
-double*       redshiftSlices                = NULL;
-float*        ChiSlices                     = NULL;
-float*        NumberAtRedshift              = NULL;
-double*       ComovingVolumeAtZ             = NULL;
-float*        ComovingNumberDensity         = NULL;
-float*        filteredComovingNumberDensity = NULL;
-double*       MeanSliceRedshift             = NULL;
-double*       LuminosityDistance            = NULL;
-double*       Schechter_fn                  = NULL;
+double*      zbins   = NULL;
+double*      chibins = NULL;
+double*      Nchi      = NULL;
+double*      nbar    = NULL;
+double*       nbar_2d = NULL;
+
+double*      comovVol = NULL;
+
+double chi_interval;
+int    chibin_no;
+
+// double*        filteredComovingNumberDensity = NULL;
+// double*       MeanSliceRedshift             = NULL;
+// double*       LuminosityDistance            = NULL;
+// double*       Schechter_fn                  = NULL;
 
 // spline and splint comoving number density, n(z).
-float*       ComovingNumberDensity2d        = NULL;
 
 // FKP weights. 
 double        fkpPk;
@@ -371,7 +374,7 @@ double        Interim;
 
 // Window fn. convolution, spherical symmetry.
 int          InterpK_binNumber;
-float*       kVals;
+double*       kVals;                            // changed from float to double. 
 float*       interpolatedPk;
 
 int*         midKmodesperbin;
@@ -564,18 +567,12 @@ int dof;
 
 int mc_loopCount;
 
-float chiBinWidth;
-
-int chiBinNumber;
-float* NewArray;
-
 double sqdegs2steradians(double inSqdegs);
 
+// float* filteredNumberAtRedshift;
+// float* filtered_divfuncln_Atz;
 
-float* filteredNumberAtRedshift;
-float* filtered_divfuncln_Atz;
-
-float nzSigma;
+// float nzSigma;
 
 //  Apodise the window fn. to supress the Gibb's phenomenon. 
 double  GibbsSkinDepth;
@@ -754,13 +751,16 @@ double approx_growthfactor_today;
 float* HubbleConstant2derivatives;
 
 // Likelihood calculation.
-double***     Multipoles;
+double**     Multipoles;
+double**    dMultipoles;
+
+double*       sigmaNorm;
 
 // flattened covariance matrix. 
 double* flatCov;
 
-double  ChiSqEval_kmax;
-double  ChiSqEval_kmin;
+double  ChiSq_kmax;
+double  ChiSq_kmin;
 
 double* betaPosterior;
 double* sigmaPosterior;
@@ -771,15 +771,24 @@ double  PosteriorNorm = 0.0;
 
 double    detCovariance;
 
-int*      ModeNumber;
-double**  Covariance;
-double**  Covariance_CofactorMatrix;
+// int*      ModeNumber;
+gsl_matrix* Covariance;
+gsl_matrix* sigma_norm;
 
-double**  MeanMultipoles;
+gsl_vector* eval;
+gsl_matrix* evec;
+
+gsl_eigen_symmv_workspace* w;
+
+gsl_vector* col;
+
+// double**  Covariance;
+// double**  Covariance_CofactorMatrix;
+
+double*   MeanMultipoles;
 
 double*   mvGauss;
-double**  invCov;
-double*   kMultipoles;
+// double**  invCov;
 
 double    A11Sq;
 double    linearBias;
@@ -796,6 +805,8 @@ double    minChiSq_beta;
 double    minChiSq_A11Sq;
 double    minChiSq_sigma;
 
+double    paramNumber;
+
 double    min_beta;
 double    max_beta;
 
@@ -804,6 +815,9 @@ double    max_velDisperse;
 
 double    min_A11Sq;
 double    max_A11Sq;
+
+double    min_linearbias;
+double    max_linearbias;
 
 double    clippedVolume;
 
@@ -816,14 +830,11 @@ double*   yBoot;
 double*   zBoot;
 double*   deltaBoot;
 
-
-float** U;
-float*  eigenVals;
-float** eigenVecs;
+double*  eigenVals;
+double** eigenVecs;
     
-double** sigmaNorm;
-int order, order2, nrotations, l;
-
+// double** sigmaNorm;
+int order, nrotations;
 
 double* xdata;
 double* xtheory;
@@ -831,7 +842,7 @@ double* xtheory;
 double* ydata;
 double* ytheory;
 
-double  lowestKeptEigenvalue      = pow(10., 12.);
+double  smallestEigenvalue;
 int     chiSq_kmaxIndex;
 
 int     hiMultipoleOrder;
@@ -1049,3 +1060,5 @@ double* VIPERS_kQuad2D;
 
 double splint_VIPERS_kSpaceMono(double k);
 double splint_VIPERS_kSpaceQuad(double k);
+
+int*   fftlog_indices;

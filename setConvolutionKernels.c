@@ -77,8 +77,7 @@ int SetWfKernel_minAmp(){
 
 double splintHODpk(double k){
     // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec). 
-    
-    if(k>70.)          return 2.51*pow((k/70.), -1.8);
+    if(k>70.)          return 2.51*pow((k/70.), -1.8)*pow(linearBias/1.495903, 2.);
     
     else if(k<0.0004)  return 4.675*pow(10., 6.)*pow(k, 0.96)*pow(linearBias/1.495903, 2.); 
 

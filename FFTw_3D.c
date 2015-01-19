@@ -50,7 +50,7 @@ int observedQuadrupole(int modeCount){
     // if(loopCount<10)  sprintf(filepath, "%s/Data/window_fft/Multipoles_%s_kbin_%.3f_00%d.dat", root_dir,  surveyType, kbinInterval, loopCount);
     // else              sprintf(filepath, "%s/Data/window_fft/Multipoles_%s_kbin_%.3f_0%d.dat",  root_dir, surveyType, kbinInterval, loopCount);
 
-    sprintf(filepath,"%s/Data/VIPERS_window2/VIPERS_mask_500_norm_hex_aniso_intcor/VIPERS_mask_500_norm_hex_aniso_intcor_%d.dat", root_dir, loopCount);
+    sprintf(filepath,"%s/Data/likelihood/HOD_mocks/HOD_mock_%d.dat", root_dir, loopCount);
 
     MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, polar2Dpk, modeCount, filepath, kbinInterval, 0.0, 1.0, 1);
     
@@ -225,7 +225,7 @@ int MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], doubl
      if(fileOutput == 1){       
          output = fopen(filepath, "w");
     
-         for(j=0; j<modBinNumb-1; j++)  fprintf(output, "%e \t %e \t %e \t %d \n", mean_modBin[j], Monopole[j], Quadrupole[j], modesperbin[j]);
+         for(j=1; j<modBinNumb-1; j++)  fprintf(output, "%e \t %e \t %e \t %d \n", mean_modBin[j], Monopole[j], Quadrupole[j], modesperbin[j]);
     
          fclose(output);
      }
@@ -430,8 +430,8 @@ int PkCorrections(){
                 H_kImag                            = pow(n0*n1*n2, -1.0)*out[Index][1];
                 
                 // Cloud in cell. NGP corresponds to WindowFunc rather than WindowFunc^2. 
-                // H_kReal                           /= pow(WindowFunc, 1.);
-                // H_kImag                           /= pow(WindowFunc, 1.);
+                H_kReal                           /= pow(WindowFunc, 1.);
+                H_kImag                           /= pow(WindowFunc, 1.);
                 
                 PkArray[Index][0]                  = kmodulus;
         
@@ -444,6 +444,9 @@ int PkCorrections(){
                 PkArray[Index][1]                 /= fkpSqWeightsVolume*pow(TotalVolume, -1.);
                     
                 // PkArray[Index][1]              -= TotalVolume/Vipers_Num;
+                
+                // shot noise correction. -20.00 mags galaxy. 
+                PkArray[Index][1]                 -= 1./0.0035;
                     
                 // Clipping corrected shot noise estimate. 
                 // PkArray[Index][1]              -= (1./TotalVolume)*(*pt2shot)(1.)*(1. - clippedVolume/TotalVolume);
@@ -537,16 +540,17 @@ int Gaussianfield(){
 
                 expectation                        = (*pt2Pk)(kmodulus)/TotalVolume;
                 
-                expectation                       *= 1. + 0.5*pow(mu, 2.);
+                // expectation                    *= 1. + 0.5*pow(mu, 2.);
             
-                // expectation                    *= pow(1. + beta*pow(mu, 2.), 2.);
+                expectation                       *= pow(1. + beta*pow(mu, 2.), 2.);
                 
                 // fingers of God RSD.
-                // expectation                    /= 1. + 0.5*pow(k_z*velDispersion, 2.);
+                expectation                       /= 1. + 0.5*pow(k_z*velDispersion, 2.);
 
-                // Power                           = -log(gsl_rng_uniform(gsl_ran_r))*expectation;
+                Power                              = -log(gsl_rng_uniform(gsl_ran_r))*expectation;
                 
-                // amplitude                       = sqrt(Power);
+                // Note AMPLITUDE IS NOT the expectation. 
+                // amplitude                          = sqrt(Power);
                 amplitude                          = sqrt(expectation);
                                 
                 phase                              = 2.*pi*gsl_rng_uniform(gsl_ran_r);
@@ -639,7 +643,7 @@ int Gaussianfield(){
     for(j=0; j<n0*n2*n1; j++)  densityArray[j] = in[j][0];
     
     // double GRF_var = 0.0, GRF_mean = 0.0;
-    
+    /*
     apparent_mean = 0.0;
     
     // for(j=0; j<n0*n1*n2; j++){ 
@@ -661,7 +665,7 @@ int Gaussianfield(){
     for(j=0; j<n0*n1*n2; j++)  densityArray[j]     -= apparent_mean;
     
     printf("\n\nApparent (weighted) mean of the Gaussian realisation: %e", apparent_mean);
-    
+    */
     // printf("\n\nminimum delta of Gaussian realisation: %e", arrayMin(densityArray, n0*n1*n2));
     
     return 0;

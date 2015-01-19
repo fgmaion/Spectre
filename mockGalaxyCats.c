@@ -293,8 +293,9 @@ int load_homogeneous_rands(double maxGals, int load){
 }
 
 
-int load_homogeneous_rands_window(double maxGals, int load, double sampling){
-    sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/VIPERS_window2/randoms_W1_Nagoya_xyz_0.7_0.8.cat");
+int load_homogeneous_rands_window(int load, double sampling){
+    sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/likelihood/randoms_W1_500s_xyz_0.7_0.8.cat");
+    // sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/VIPERS_window2/randoms_W1_Nagoya_xyz_0.7_0.8.cat");
     // sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/VIPERS_window2/randoms_W1_Nagoya_xyz_0.7_0.8_gridded.cat"); // To be used for pair counting. 
 
     inputfile   = fopen(filepath, "r");
@@ -309,6 +310,7 @@ int load_homogeneous_rands_window(double maxGals, int load, double sampling){
             rand_number += 1;
     } while(ch != EOF);
     
+    // assumes catalogue is in a random order.
     lowerSampling_randomisedCatalogue(sampling);
 
     printf("\n\n%d randoms number", rand_number);
@@ -320,7 +322,8 @@ int load_homogeneous_rands_window(double maxGals, int load, double sampling){
         rand_y          =  (double *)  realloc(rand_y,          rand_number*sizeof(*rand_y));
         rand_z          =  (double *)  realloc(rand_z,          rand_number*sizeof(*rand_z));
 
-        for(j=0; j<rand_number; j++)   fscanf(inputfile, "%le \t %le \t %le", &rand_x[j], &rand_y[j], &rand_z[j]);
+        // for(j=0; j<rand_number; j++)   fscanf(inputfile, "%le \t %le \t %le", &rand_x[j], &rand_y[j], &rand_z[j]);
+        for(j=0; j<rand_number; j++)   fscanf(inputfile, "%*le \t %*le \t %le \t %le \t %le", &rand_x[j], &rand_y[j], &rand_z[j]);
     }
 
     fclose(inputfile);
@@ -335,6 +338,7 @@ int load_homogeneous_rands_window(double maxGals, int load, double sampling){
     // for(j=0; j<n0*n1*n2; j++) masktotal += Cell_SurveyLimitsMask[j];
     // printf("\n\nsummed mask: %e", masktotal);
     
+    // free if not pair counting window. 
     free(rand_x);
     free(rand_y);
     free(rand_z);
@@ -343,9 +347,9 @@ int load_homogeneous_rands_window(double maxGals, int load, double sampling){
 }
 
 
-int write_homogeneous_rands_window_gridded(double maxGals, int load, double sampling){
+int write_homogeneous_rands_window_gridded(int load, double sampling){
     // never load already smoothed randoms. 
-    load_homogeneous_rands_window(maxGals, load, sampling);
+    load_homogeneous_rands_window(load, sampling);
     
     int  loopCount      = 0;
     int  rand_count     = 0;

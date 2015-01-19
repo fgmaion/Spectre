@@ -85,9 +85,10 @@ int FFTLog_setInput(FFTLog_config *fc, double beta, double velDispersion){
     fc->pk[i][0]        = 
                           // spherical_tophat_pk(fc->krvals[i][0]);
                           // haloModel_pk(fc->krvals[i][0], 0.7, transformOrder);
-                          (*pt2Pk)(fc->krvals[i][0])*toyRSD_OnePlusOneHalfMuSq(transformOrder);
-                          // kaiserLorentz_multipole(fc->krvals[i][0]*velDispersion, beta, (int) transformOrder); 
-                          // (*pt2RSD_k)(fc->krvals[i][0]*velDispersion, beta, transformOrder);
+                          (*pt2Pk)(fc->krvals[i][0])*
+                          // toyRSD_OnePlusOneHalfMuSq(transformOrder);
+                          // kaiserGauss_multipole(fc->krvals[i][0]*velDispersion, beta, (int) transformOrder); 
+                          (*pt2RSD_k)(fc->krvals[i][0]*velDispersion, beta, transformOrder);
     fc->pk[i][1]        = 0.0;
     
     // purely real.  Set xi(r) to obtain P(k) by Hankel transform.  
@@ -191,9 +192,7 @@ int varCalc(FFTLog_config* fc, double* sigmaSq, double* u0){
         if((fc->krvals[i][1]) >= pow(10., -2.)){
             *sigmaSq = fc->xi[i][0];
             
-            *u0      = appliedClippingThreshold/sqrt(2.**sigmaSq);
-            
-            printf("\n\nfft log method: variance: %e, u0:  %e, suppression factor: %e", *sigmaSq, *u0, 0.25*pow(1.0 + gsl_sf_erf(*u0), 2.));
+            // printf("\n\nfft log method: variance: %e, u0:  %e, suppression factor: %e", *sigmaSq, *u0, 0.25*pow(1.0 + gsl_sf_erf(*u0), 2.));
             
             break;
         }   
