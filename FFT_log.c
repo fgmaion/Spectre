@@ -85,10 +85,11 @@ int FFTLog_setInput(FFTLog_config *fc, double beta, double velDispersion){
     fc->pk[i][0]        = 
                           // spherical_tophat_pk(fc->krvals[i][0]);
                           // haloModel_pk(fc->krvals[i][0], 0.7, transformOrder);
-                          (*pt2Pk)(fc->krvals[i][0])*
+                          (*pt2Pk)(fc->krvals[i][0])* 
                           // toyRSD_OnePlusOneHalfMuSq(transformOrder);
+                          noRSD(fc->krvals[i][0]*velDispersion, beta, (int) transformOrder);
                           // kaiserGauss_multipole(fc->krvals[i][0]*velDispersion, beta, (int) transformOrder); 
-                          (*pt2RSD_k)(fc->krvals[i][0]*velDispersion, beta, transformOrder);
+                          //*(*pt2RSD_k)(fc->krvals[i][0]*velDispersion, beta, transformOrder);
     fc->pk[i][1]        = 0.0;
     
     // purely real.  Set xi(r) to obtain P(k) by Hankel transform.  
@@ -199,6 +200,11 @@ int varCalc(FFTLog_config* fc, double* sigmaSq, double* u0){
     }
 
     return 0;
+}
+
+
+double C_n(double x, int n){                                                // (n+1)! = Gamma (n+2)
+    return pow(HermitePolynomial(x, n-1), 2.)*exp(-2.*x*x)/(pi*pow(2., n)*gsl_sf_gamma(n + 2));
 }
 
 
@@ -500,7 +506,7 @@ int spherical_randDistribution(){
 
 int VIPERS_mask_cnvldpk(){
     int cnvldpknorm;
-
+    
     FFTlogRes = 4096;
     
     // Currently beta is set by hand in the input P(k) function. 
@@ -531,7 +537,7 @@ int VIPERS_mask_cnvldpk(){
 
     // convolved pk zero point. 
     for(i=0; i<convlmonoCorr->N;   i++){ 
-        if((convlmonoCorr->krvals[i][0]) >= pow(10., -2.)){
+        if((convlmonoCorr->krvals[i][0]) >= pow(10., -3.)){
             cnvldpk_zero = convlmonoCorr->pk[i][0];
             
             printf("\n\nConvolved P(k) zero point: %e", cnvldpk_zero);
@@ -539,40 +545,25 @@ int VIPERS_mask_cnvldpk(){
             break;
         }   
     }
-
-    // for(j=0; j<mono_config->N; j++)   convlmonoCorr->pk[j][0] = convlmonoCorr->pk[j][0] - cnvldpk_zero*splint_VIPERS_kSpaceMono(convlmonoCorr->krvals[j][0]);
-    // for(j=0; j<mono_config->N; j++)   convlquadCorr->pk[j][0] = convlquadCorr->pk[j][0] - cnvldpk_zero*splint_VIPERS_kSpaceQuad(convlmonoCorr->krvals[j][0]);
-
-    for(j=0; j<mono_config->N; j++)   convlmonoCorr->pk[j][0] = mono_config->pk[j][0] - cnvldpk_zero*splint_VIPERS_kSpaceMono(convlmonoCorr->krvals[j][0]);
-    for(j=0; j<mono_config->N; j++)   convlquadCorr->pk[j][0] = quad_config->pk[j][0] - cnvldpk_zero*splint_VIPERS_kSpaceQuad(convlmonoCorr->krvals[j][0]);
-
-    /*
-    sprintf(filepath, "%s/Data/VIPERS_window2/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_hex_normed_jointmultipoles_hihiRes.dat", root_dir);
     
-    output = fopen(filepath, "w");
-    
-    for(j=0; j<mono_config->N; j++){  
-        if((mono_config->krvals[j][1] > 0.01) && (mono_config->krvals[j][1] < 400.)){
-            fprintf(output, "%e \t %e \t %e \t %e \t %e \n", mono_config->krvals[j][1], mono_config->xi[j][0],  splint_VIPERS_maskMono(mono_config->krvals[j][1]), splint_VIPERS_maskQuad(mono_config->krvals[j][1]), splint_VIPERS_maskHex(mono_config->krvals[j][1]));
-        }
-    }
+    for(j=0; j<mono_config->N; j++)   convlmonoCorr->pk[j][0] = convlmonoCorr->pk[j][0]; // - cnvldpk_zero*splint_VIPERS_kSpaceMono(convlmonoCorr->krvals[j][0]);
+    for(j=0; j<mono_config->N; j++)   convlquadCorr->pk[j][0] = convlquadCorr->pk[j][0]; // - cnvldpk_zero*splint_VIPERS_kSpaceQuad(convlmonoCorr->krvals[j][0]);
 
-    fclose(output);
-    */
-    // }
+    // VIPERS window systematics plot. 
+    // for(j=0; j<mono_config->N; j++)   convlmonoCorr->pk[j][0] = mono_config->pk[j][0] - cnvldpk_zero*splint_VIPERS_kSpaceMono(convlmonoCorr->krvals[j][0]);
+    // for(j=0; j<mono_config->N; j++)   convlquadCorr->pk[j][0] = quad_config->pk[j][0] - cnvldpk_zero*splint_VIPERS_kSpaceQuad(convlmonoCorr->krvals[j][0]);
     
     // diff = clock() - start;
     // int msec = diff*1000/CLOCKS_PER_SEC;
     // printf("\n\nFFT log approach to convolution, for 1000 models: %d seconds %d milliseconds", msec/1000, msec%1000);
     
-    
-    sprintf(filepath, "%s/Data/VIPERS_window2/VIPERS_window_500_cnvldpk_hex_aniso_intcor_truth_intcor.dat", root_dir);
+    sprintf(filepath, "%s/Data/500s/500s_cnvldpk.dat", root_dir);
     
     output = fopen(filepath, "w");
     
     for(j=0; j<mono_config->N; j++){  
         if((mono_config->krvals[j][0] > 0.0001) && (mono_config->krvals[j][0] < 100.)){
-            fprintf(output, "%e \t %e \t %e \t %e \n", mono_config->krvals[j][0], convlmonoCorr->pk[j][0], convlquadCorr->pk[j][0], (*pt2Pk)(mono_config->krvals[j][0]));
+            fprintf(output, "%e \t %e \t %e \n", mono_config->krvals[j][0], convlmonoCorr->pk[j][0], convlquadCorr->pk[j][0]);
         }
     }
     
@@ -584,7 +575,6 @@ int VIPERS_mask_cnvldpk(){
 
 int VIPERS_mask_intCnsrt(){
     //  Hankel transform pair counts of the window. 
-
     int cnvldpknorm;
 
     FFTlogRes = 4096;
@@ -592,18 +582,19 @@ int VIPERS_mask_intCnsrt(){
     // Currently beta is set by hand in the input P(k) function. 
     FFTlog_memory(FFTlogRes, beta, velDispersion);
     
+    // correlation_fns already assigned to the window in FFTlog_memory. 
     pk_mu(mono_config);
     
     pk_mu(quad_config);
         
         
-    sprintf(filepath, "%s/Data/VIPERS_window2/VIPERS_window_kMultipoles_fftLog.dat", root_dir);
+    sprintf(filepath, "%s/Data/500s/500s_kmaskMultipoles.dat", root_dir);
     
     output = fopen(filepath, "w");
     
     for(j=0; j<mono_config->N; j++){  
         if((mono_config->krvals[j][0] > 0.0001) && (mono_config->krvals[j][0] < 100.)){
-            fprintf(output, "%e \t %e \t %e \n", mono_config->krvals[j][0], mono_config->pk[j][0]/(1.823239*pow(10., 6.)), quad_config->pk[j][0]/(1.823239*pow(10., 6.)));
+            fprintf(output, "%e \t %e \t %e \n", mono_config->krvals[j][0], mono_config->pk[j][0]/(4.700981*1.823239*pow(10., 6.)), quad_config->pk[j][0]/(4.700981*1.823239*pow(10., 6.)));
         }
     }
     

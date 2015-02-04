@@ -7,6 +7,8 @@ int          JenkinsCoordinates();
 int          JenkinsFold(double original[], int lenArray, int axis);
 int          ApplyJenkins();
 
+double       invert_StefanoBasis(double centreRA, double centreDec, double* xval, double* yval, double* zval);
+
 int          EvaluateGridParameters();
 double       SolidAngleCalc(double decLowerBound, double decUpperBound, double raInterval);
 
@@ -22,31 +24,28 @@ int          NGPCalc();
 int          PkCalc();
 
 double       splintMatterPk(double EvalPoint);
-double       splintWindowfunc(double EvalPoint);
-double       AnalyticSpherical(double k);
-int          EvaluateConvolution(char type[]);
 
-double 		 (*pt2AnisoWf)(double, double, double)  = NULL;
-double       (*pt2Windowfn)(double)                 = NULL;
-double       (*pt2Pk)(double)       				= NULL;
+double       (*pt2Pk)(double k)                 	= NULL;
+double       (*pt2Pk_z)(double a, double k)       	= NULL;
 double       (*pt2Xi)(double)       				= NULL;
 
 double       (*pt2RSD_k)(double, double, int)       = NULL;
 double       (*pt2RSD_r)(double, double, int)       = NULL;
 
 double       (*pt2nz)(double)                       = NULL;
-double       (*pt2shot)(double)                     = NULL;
 
-double       CubeShot();
+double       volavg_invnbar;
+
+int          VIPERSbasis(double centerRA, double centerDec, double xCoors[], double yCoors[], double zCoors[], int len);
+
+int          Celestialbasis(double centerRA, double centerDec, double xCoors[], double yCoors[], double zCoors[], int len);
+
+int          projectVIPERSsystem();
+
 
 // Artificial window fn's for cubic run
 int          FullCube();
 int          PencilBeamSurvey(int xlow, int xhi, int ylow, int yhi);
-
-int          printWindowfuncSlices();
-int          WindowfuncSlice(double kintervali, int ni, int x0, int y0, int z0, char filepath[]);
-
-int          inputWindowfnBinNumb;
 
 double       interp_nz(double x);
 
@@ -65,8 +64,6 @@ int          assignbinninginterval(double interval);
 int          zCubeCreate();
 
 // padded window fn. calculation.
-int          padwfPkCalc(int sidepad);
-int          assignPaddedWindowfn(int padfactor);
 
 int          assignNGPMemory();
 int          assignFFTMemory();
@@ -84,21 +81,10 @@ int          free_sdltInterp();
 int          free_linear();
 int          freeClipped();
 int          free2dPk();
-int          freeConvolutionMemory();
 
 
-// Convolution with anisotropic window fn.
-int          AnisoGauss(double x, double y, double z);
-int          AnisoConvolution();
 int          setInputPk();
-int          SetWfKernel();
-double       ConvolveCell(int x, int y, int z);
-int 		 convolve3DInputPk();
 
-double       anisokGauss(double x, double y, double z);
-
-int          MeasureAnisoWfKernel();
-int          setMeasuredWfKernel();
 
 double       interp_comovingDistance(double z);
 double       interp_inverseComovingDistance(double r);
@@ -110,36 +96,39 @@ double       (*pt2interp_inverseComovingDistance)(double)  = &interp_inverseComo
 
 char         vipersHOD_dir[200];
 
-// directories
-char         WindowfuncSlices_dir[200];
 
+// VIPERS HOD mock parameters.              
+// 500s mocks. Big multidark, http://www.multidark.org/MultiDark/Help?page=simulations corresponding to planck 1: http:arxiv.org/abs/1303.5076
+double  Om_v      =    0.69;          // 0.73; value added mocks. obsolete. 
+double  Om_r      =    0.00;          // 0.0;
 
-// filepaths
-char         Windowfunc_xSlice[200];
-char         Windowfunc_ySlice[200];
-char         Windowfunc_zSlice[200];
+// total matter, cdm+baryons. 
+double  Om_m      =    0.31;          // 0.27;
+double  Om_b      =   0.048;          // 0.0469;
+double  Om_tot    =   1.000;          // 1.0;
+double  h         =   0.673;          // 0.7;
+double  sigma_8   =    0.82;          // 0.82;
+double  ns        =    0.96;          // 0.95;
 
+double  p_index   =     1.0;
+double  pk_gamma  =     0.0;          // Bond Efstathiou shape parameter.
+double  hz        =     0.0;
 
-// VIPERS HOD mock parameters
-const double  Om_v      =   0.73;
-const double  Om_r      =   0.0;
-const double  Om_m      =   0.27;
-const double  Om_b      =   0.0469;
-const double  Om_tot    =   1.0;
-const double  h         =   0.7;
-const double  sigma_8   =   0.82;
-const double  ns        =   0.95;
-
-double        hz        =    0.0;
+fftw_complex *overdensity, *H_k;
 
 double        H_0;
 double        H_0inPerSec;
 double        HubbleTime;
 
+double        HubbleCnst(double z);
+
 // Selection parameters. Volume limited sample between redshift 0.7 and 0.9
-double        redshiftHiLimit;
-double        redshiftLowLimit;
-double        absMagCut;
+double        lo_zlim;
+double        hi_zlim;
+double          z_eff; 
+
+double        lo_MBlim;
+double        hi_MBlim;  
 
 // Array to hold the coordinate limits of the VIPERS survey. 
 double        AxisLimsArray[2][3];
@@ -150,11 +139,20 @@ double        MinChi3;                                                      // h
 double        MaxChi3;                                                      // Redshift limited sample, 0.7 < z < 0.9
 double        IntervalChi3;
 
+double        hiChi;
+double        loChi;
+
+double        UpperRAlimit;
+double        LowerRAlimit;
+
+double        UpperDecLimit;
+double        LowerDecLimit;
+
 double        CellVolume;
 
-double*      densityArray        = NULL;
-double*      FKPweights          = NULL;
-double*      booldensity         = NULL;
+// double*      densityArray        = NULL;
+// double*      FKPweights          = NULL;
+// double*      booldensity         = NULL;
 double*      meanCellRedshift    = NULL;
 
 double       TotalVolume         = 0.0;
@@ -162,7 +160,6 @@ double       TotalSurveyedVolume = 0.0;
 
 double       fkpWeightedVolume   = 0.0;
 double       fkpSqWeightsVolume  = 0.0;
-double       SumOverStates_W2k   = 0.0;
 double       fkpShotNoiseCorr    = 0.0;
 
 // Dimensions of the padded volume (TotalVolume) in units of CellSize. 
@@ -197,7 +194,7 @@ int*             type  = NULL;
 double*           zpec  = NULL;
 double*          zphot  = NULL;
 
-double*	    zUtilized  = NULL;
+double*	         gal_z  = NULL;
 double*            csr  = NULL;
 double*       sampling  = NULL;  
 double*     sampling35  = NULL;
@@ -253,8 +250,6 @@ double        kIntervalx;
 double        kIntervaly;
 double        kIntervalz;
 
-float         fkmodulus;
-
 double        kmodulus;
 double        mu;
 
@@ -262,16 +257,13 @@ double        kbinInterval;
 
 double        k_x, k_y, k_z;
 
-double        WindowFunc;     
-double        GaussianFilter;    
-
 double        H_kReal;          
 double        H_kImag;           
 
 double        NyquistWaveNumber;
 
 // First column is mod k, second Pk.
-double**     PkArray            = NULL;
+// double**     PkArray            = NULL;
 double**     TwoDpkArray        = NULL;
 
 double**     muIntervalPk       = NULL;
@@ -279,20 +271,22 @@ double**     muIntervalPk       = NULL;
 double*      legendre2weights   = NULL;
 // Binned Pk parameters.
 
-int          kBinNumb;
-int          LowerBinIndex;
-int          UpperBinIndex;
+// int          kBinNumb;
+int          kbin_no;
 int          Num_ModesInMuInterval = 0;
-int*         modesPerBin        = NULL;
+int*         modes_perbin        = NULL;
 
 double       modkMax;
 
 double*      del2               = NULL;
-double*      midKBin            = NULL;
-double*      meanKBin           = NULL;        
+// double*      midKBin            = NULL;
+// double*      meanKBin           = NULL;        
+double*      mean_modk          = NULL;
+
 double*      binnedPk           = NULL;
-double*      kBinLimits         = NULL;
-double*      linearErrors       = NULL;
+// double*      kBinLimits         = NULL;
+double*      logk_limits        = NULL;
+// double*      linearErrors       = NULL;
 
 // Randoms generation
 int          lineNum      = 0;
@@ -328,15 +322,15 @@ double       Om_mz;
 // Clipping
 double*     PkCube              = NULL;
 
-double*     Corrfn              = NULL;
-double*     suppressedCorrfn    = NULL;
-double*     distortedCorrfn     = NULL;
-double*     clippedPk           = NULL;
+// double*     Corrfn              = NULL;
+// double*     suppressedCorrfn    = NULL;
+// double*     distortedCorrfn     = NULL;
+// double*     clippedPk           = NULL;
 
-double*     W2_veck             = NULL;
-double*     W2_vecr             = NULL;
-double*     FFTW2_vecr_re       = NULL;
-double*     FFTW2_vecr_im       = NULL;
+// double*     W2_veck             = NULL;
+// double*     W2_vecr             = NULL;
+// double*     FFTW2_vecr_re       = NULL;
+// double*     FFTW2_vecr_im       = NULL;
 
 // Binning a 2D, redshift space P(k).
 int**        zSpacemodesPerBin  = NULL;
@@ -348,11 +342,11 @@ double**     zSpaceBinnedPk     = NULL;
 // double       zBinWidth;
 double       VIPERS_SolidAngle;
 
-double*      zbins   = NULL;
-double*      chibins = NULL;
-double*      Nchi      = NULL;
-double*      nbar    = NULL;
-double*       nbar_2d = NULL;
+double*      zbins    = NULL;
+double*      chibins  = NULL;
+double*      Nchi     = NULL;
+double*      nbar     = NULL;
+double*      nbar_2d  = NULL;
 
 double*      comovVol = NULL;
 
@@ -367,48 +361,11 @@ int    chibin_no;
 // spline and splint comoving number density, n(z).
 
 // FKP weights. 
-double        fkpPk;
-double        TotalFKPweight;
-double        Chi;                       //  Comoving distance at redshift z for weight calculation.
-double        Interim;
+double       fkpPk;
+double       TotalFKPweight;
+double       Interim;
 
-// Window fn. convolution, spherical symmetry.
-int          InterpK_binNumber;
-double*       kVals;                            // changed from float to double. 
-float*       interpolatedPk;
-
-int*         midKmodesperbin;
-float*       midKBinNR;
-float*       WindowFuncNR;
-float*       WindowFunc2d;
-
-double*      ConvolvedPk;
-double*      ConvolvedPk2d;
-
-float        inputPkEval         = 0.0;
-float        WindowFuncEval      = 0.0;
-float        PkEvalPoint         = 0.0;
-float        muVal;
-float        muInterval;
-
-int          MuIntegralPrecision;
-
-/*              */
-
-double       Analytic2powerlaw(double k);
-double       AnalyticGaussian(double k);
-
-// Integral constraint correction.
-float        WindowfnZeroPointEval;
-
-// Nomenclature for applied survey window.
 char         surveyType[200];
-
-// padded window fn. calculation
-int          sidepad;
-int          padfactor;
-int          padcellsNumber;
-int          padIndex;
 
 // clipping threshold
 double       appliedClippingThreshold;
@@ -422,73 +379,14 @@ double       xroll;
 double       yroll;
 double       zroll;
 
-// Anisotropic convolution
-// int 		 xwfKernelsize;
-// int          ywfKernelsize;
-// int          zwfKernelsize;
-
-float        fPkCubeEntry;
-
-double 		 PkCubeEntry;
-double 		 ConvNorm;
-
 double*      inputPk;
-double*		 windowFunc3D; 
-double*		 convolvedPk3d;
-
-double**     flattenedConvolvedPk3D;
-
-double*      AnisoWfKernel;
-int*         AnisoWfKernel_ModeNumb;
-
 
 // VIPERS ra and dec of cell co-ordinates.
-double*   Cell_rotatedXvals;
-double*   Cell_rotatedYvals;
-double*   Cell_rotatedZvals;
 
-double*   Cell_raVIPERSsystem;
-double*   Cell_decVIPERSsystem;
-double*   Cell_chiVIPERSsystem;
+double*   surveyMask;
 
-double*   Cell_VIPERSweights;
-double*   Cell_VIPERSbools;
-double*   Cell_SurveyLimitsMask;
-double*   Cell_AppliedWindowFn;
-
-int VIPERSbasis(double centerRA, double centerDec, double xCoors[], double yCoors[], double zCoors[], int len);
-
-int Celestialbasis(double centerRA, double centerDec, double xCoors[], double yCoors[], double zCoors[], int len);
-
-int projectVIPERSsystem();
-
-double UpperChiLimit;
-double LowerChiLimit;
-
-double UpperRAlimit;
-double LowerRAlimit;
-
-double UpperDecLimit;
-double LowerDecLimit;
 
 int CatalogueInput(char filepath[]);
-
-int xminKernelshift;
-int xmaxKernelshift;
-
-int yminKernelshift;
-int ymaxKernelshift;
-
-int zminKernelshift;
-int zmaxKernelshift;
-
-int   iishift, kkshift, jjshift;
-
-double KernelMaxk;
-
-int   filterIndex;
-int   convIndex;
-int   PkIndex;
 
 int   CalcCellraDec();
 
@@ -498,42 +396,8 @@ int   CatalogNumber;
 
 double steradians2sqdegs(double inSteradians);
 
-double ZeroPointNorm();
-
-
-// Convolution calc. spherical symmetry. 
-
-int          splineInputWindowfn(char filepath[]);
-
-float        kConvScope;
-float       muConvScope;
-float        qConvScope;
-
-double  NormKernel(double q);
-float  fNormKernel(float);
-
-double SphericalW2NormEval();
-
-int EvaluateSphericalConv(char Convtype[]);
-
-double SphConvPk(double kval);
-float fqConvKernel(float q);
-double qConvKernel(double q);
-float fmuConvKernel(float q);
-double muConvKernel(double mu);
-double SphConvZeroPoint();
-double ZeroPoint;
-double ConvPkZeroPoint;
-
-int    IntegralConstraintCorrection();
-
-double ConvolutionNorm(double array[]);
-
-
-// fitting n(z) using Powell's method.
 int    len;
- 
-double (*pt2Theoryfn)(float array[], double z);
+
 
 double*    xdata = NULL;
 double*    ydata = NULL;
@@ -545,27 +409,14 @@ int*      Nzdata = NULL;
 
 int   maxiter    = 20000000;
 
-float returnval;
-
-
-float **unitMatrix;
-
-double HubbleCnst(double z);
 
 int lineNo;
 
-float* stepArray;
-float* nz_startParams;
-float* NewParams;
-
-int mc_jump(float paramsArray[], float* minChi2, int paramNumber, float fracPrecision);
-
-const gsl_rng_type* gsl_rng_T;
-gsl_rng*            gsl_rng_r;
+// gsl random number generation. 
+const gsl_rng_type* gsl_ran_T;
+gsl_rng*            gsl_ran_r;
 
 int dof;
-
-int mc_loopCount;
 
 double sqdegs2steradians(double inSqdegs);
 
@@ -584,8 +435,6 @@ double* Cell_ShortDist2edge;
 
 double  apodisedVolume;
 
-float   nbarChi2(float Chi);
-float   Chi2(float Chi);
 double  lightconeShot();
 double  CubeShot();
 
@@ -597,39 +446,32 @@ int     perpkBinNumb;
 
 double  perpkInterval;
 
-int     forCount;
-
 int     muBinNumb;
 int     modkBinNumb;
 
 double* muBinLimits;
 
-int**    polar_modesPerBin;
+int     fft_size;
+int     polar_pkcount;
+// int**    polar_modesPerBin;
 
-double** mean_mu;
-double** mean_modk;
-double** polar2Dpk;
-double** polar2DBinnedPk;
+// double** mean_mu;
+// double** mean_modk;
+double** polar_pk;
+// double** polar2DBinnedPk;
+
 
 double*  kHexadecapole; 
 double*  kQuadrupole;
 double*  kMonopole;
 
-double* kMonopole_expError;
-double* kQuadrupole_expError;
+double*  kMonopole_expError;
+double*  kQuadrupole_expError;
 
 double*  wfMonopole;
 double*  wfQuadrupole;
 
-float*  fkBinLimits;
-
-float*  convMono;
-float*  convQuad;
-
-float*  convMono2d;
-float*  convQuad2d;
-
-float   TotalW1W4area;                                                                          
+double   TotalW1W4area;                                                                          
 
 double  CentreRA;
 double  CentreDec;
@@ -637,10 +479,6 @@ double  CentreDec;
 double  W1area;
 double  W4area;
 
-const gsl_rng_type* gsl_ran_T;
-gsl_rng*            gsl_ran_r;
-
-float* tophat;
 
 double  TotalObservedGalaxies    =    0.0;
 double  dimmestAcceptedMagnitude =  -99.0;
@@ -653,10 +491,6 @@ double kaiserGauss_Quadfactor(double ks, double beta);
 double kaiserGauss_Hexfactor(double ks, double beta);
 
 double splintLinearPk(double k);
-
-int**  wfKernel_minAmpIndices;
-int    largeAmpIndices = 0;
-double minAmp_ConvolutionNorm(double array[]);
 
 char      theoryPk_flag[200];
 char      theoryRSD_flag[200];
@@ -675,16 +509,10 @@ int min_zShift = 99, max_zShift = 0;
 int min_yShift = 99, max_yShift = 0;
 int min_xShift = 99, max_xShift = 0;
 
-double wfKernel_minAmp;
-
-double Wfzeropoint;
-double convolution_modkmax;
-int    subVol1, subVol2, subVol3, subVolCount;
-
 int polarPk_modeCount = 0;
 
 
-// Calculation fof the age of the universe, leading to linear growth rate. 
+// Calculation fof the age of the universe, leading to linear growth rate.  Change to double precision.
 float*  AgeOftheUniverse;  // Units of H_0
 float*  HubbleCnstWithTime;
 
@@ -757,7 +585,6 @@ double**    dMultipoles;
 double*       sigmaNorm;
 
 // flattened covariance matrix. 
-double* flatCov;
 
 double  ChiSq_kmax;
 double  ChiSq_kmin;
@@ -767,7 +594,6 @@ double* sigmaPosterior;
 double** betaSigmaPosterior;
 
 double  PosteriorNorm = 0.0;
-
 
 double    detCovariance;
 
@@ -782,13 +608,7 @@ gsl_eigen_symmv_workspace* w;
 
 gsl_vector* col;
 
-// double**  Covariance;
-// double**  Covariance_CofactorMatrix;
-
 double*   MeanMultipoles;
-
-double*   mvGauss;
-// double**  invCov;
 
 double    A11Sq;
 double    linearBias;
@@ -872,30 +692,27 @@ float* fcmono2D;
 
 int    FFTlogRes;
 
-// double* fftlogr;
-// double* fftlogk;
-
 double Pk_powerlaw_truncated_xi(double r);
 
 double HODPk_Gaussian(double k);
 
-double*  theta;
-double** mixingmatrix;
+// double*  theta;
+// double** mixingmatrix;
 
-double**  rmodulus_vec;
-double*   kmodulus_vec;
-double*         mu_vec;
+// double**  rmodulus_vec;
+// double*   kmodulus_vec;
+// double*         mu_vec;
 
 double LegendrePolynomials(double x, int n);
 
-double unitTheory(double r, double k, double d, int order);
+// double unitTheory(double r, double k, double d, int order);
 
 double u0, variance;
 
 double splintConvQuad(double k);
 double splintConvMono(double k);
 
-double apparent_mean;
+double app_mean;
 
 double* windfn_rvals;
 double* windfn_rMonopole;
@@ -973,6 +790,7 @@ double zel_qmin[3];
 double zel_qmax[3];
 
 double dummy;
+double* kVals;
 
 double** invA;
 
@@ -984,24 +802,23 @@ double zel_scale;
 double splint_sigma2perp(double r);
 double splint_sigma2para(double r);
 
-double NFW_densityprofile_NormedFourier(double k);
+double ukm_nfw_profile(double k);
 
-double haloModel_pk(double k, double beta, int Order);
+double haloModel_pk(double k, double nbar, double beta, int Order);
 double ukm2(double k);
 double linearPk_Gaussian(double k);
 
-double NFW_rvir;
-double NFW_conc;
-int    haloNumber;
+double nfw_rvir;
+double nfw_conc;
 
-double* r_Nfwinversion;
-double* q_Nfwinversion;
-double* rq2D_Nfwinversion;
+double* r_nfwinversion;
+double* q_nfwinversion;
+double* r2D_nfwinversion;
 
 double rhobox, Mbox, Mhalo, Mpart;
 double Delta_crit = 200.;
-double Dplus = 0.5;
-double fGR   = 0.7;
+double Dplus      = 0.5;
+double fGR        = 0.7;
 
 double* hod_disp;
 
@@ -1062,3 +879,27 @@ double splint_VIPERS_kSpaceMono(double k);
 double splint_VIPERS_kSpaceQuad(double k);
 
 int*   fftlog_indices;
+
+
+// mass functions etc.
+double sig2_R;
+
+int   sigres;
+
+// for splint of sigma^2 of R.
+double*     sig2;
+double*    radii;
+double*  sig2_2D;
+
+double*  lnm_jenkins;
+double*  ln_invSig_jenkins;
+double*  ln_invSig_jenkins_2D;
+
+int      pk_lineNo;
+
+double dummy;
+
+double pk_hin;
+double pk_lon;
+double pk_hiA;
+double pk_loA;

@@ -382,7 +382,7 @@ int assignMemory_xi(){
 int prep_randpairs(double Nrands, int loadrands, int loadRR){
     // poissonSample_homogeneous(Nrands);
 
-    load_homogeneous_rands(Nrands, loadrands);
+    // load_homogeneous_rands(Nrands, loadrands);
     
     assignMemory_xi();
     
@@ -458,7 +458,7 @@ int NFW_profile_pairCount(){
     return 0;
 }
 
-
+/*
 int print_W2_2D(){
   double     mu;
   double      r;
@@ -486,12 +486,11 @@ int print_W2_2D(){
   fclose(output);
 
   return 0;
-}
+}*/
 
 
 int randWindow_pairCount(){
-    sprintf(surveyType, "rand_W1_500s_xi_mask_0.7_0.8_hiRes_hex");
-    // sprintf(surveyType, "rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_hihiRes_hex");
+    sprintf(surveyType, "maskmultipoles_W1_500s_xi_%.1f_%.1f_hiRes_hex", lo_zlim, hi_zlim);
 
     assignMemory_xi();
     
@@ -666,9 +665,7 @@ int load2d(char filename[], double** array){
 
 
 int print_xiMultipoles(){
-  // sprintf(filepath, "%s/Data/stacpolly/poissonSampled_clustered_fog_500_ximultipoles/xiMultipoles_poissonSampled_clustered_fog_500_%d.dat", root_dir, loopCount);
-  // sprintf(filepath, "%s/Data/VIPERS_window2/%s_multipoles.dat", root_dir, surveyType);
-    sprintf(filepath, "%s/Data/likelihood/%s_multipoles.dat", root_dir, surveyType);
+    sprintf(filepath, "%s/Data/500s/%s.dat", root_dir, surveyType);
 
   output = fopen(filepath, "w");
 

@@ -17,6 +17,8 @@ float f_Om_545(float x){
 
 
 int UniverseAge(){
+    // change to double precision.
+
     H_0             = 100.0*h;                                                            // km s^-1 Mpc^-1 
     
     H_0inPerSec     = H_0*pow(3.08567758, -1.)*pow(10.0, -19.0);                          // s^{-1}                    

@@ -10,47 +10,55 @@ int boxCoordinates(double xCoor[], double yCoor[], double zCoor[], int rowNumber
 
 
 int calc_overdensity(){
-    double chi;
+    double  chi;    
+    double* meanCellRedshift;
+    double  app_mean;
+    
+    meanCellRedshift = (double *) malloc(n0*n1*n2*sizeof(*meanCellRedshift));
 
-    for(j=0; j<n0*n1*n2; j++)  densityArray[j]     = 0.0;
-    for(j=0; j<n0*n1*n2; j++)  meanCellRedshift[j] = 0.0;
+    // assign memory for overdensity.
+    prep_grid();
+
+    for(j=0; j<n0*n1*n2; j++)           overdensity[j][0] = 0.0;
+    for(j=0; j<n0*n1*n2; j++)           overdensity[j][1] = 0.0;
+    
+    for(j=0; j<n0*n1*n2; j++)      meanCellRedshift[j]    = 0.0;
 
     for(j=0; j<Vipers_Num; j++){
         // magnitude and redshift selection. 
         if(Acceptanceflag[j] == true){ 
             boxlabel                    = boxCoordinates(xCoor, yCoor, zCoor, j);
-           
-            densityArray[boxlabel]     += 1;
-		    
-		    meanCellRedshift[boxlabel] += zUtilized[j];
+            
+            overdensity[boxlabel][0]   += 1;
+            
+            meanCellRedshift[boxlabel] += gal_z[j];
+            
+            // cic_assign(xCoor[j], yCoor[j], zCoor[j], gal_z[j], 1.0);
         }
     }
     
     for(j=0; j<n0*n1*n2; j++){
-        if(densityArray[j] > 0.0){
+        if(overdensity[j][0] > 0.0){
 	        // Currently densityArray contains solely galaxy counts per cell.
-            meanCellRedshift[j] /= densityArray[j];
+            meanCellRedshift[j] /= overdensity[j][0];
         
             chi                  = interp_comovingDistance(meanCellRedshift[j]);
         
-            densityArray[j]     /= CellVolume*interp_nz(chi);
+            overdensity[j][0]   /= CellVolume*interp_nz(chi);
             
-            densityArray[j]     -= 1.;  
-        
-            // printf("\n%e \t %e", meanCellRedshift[j], densityArray[j]);
+            overdensity[j][0]   -= 1.;  
         }
         
         // no galaxies. delta = -1. zeros handled by mask. 
-        else densityArray[j]     = -1.;
-    
-        densityArray[j]         *= Cell_AppliedWindowFn[j];
+        else overdensity[j][0]   = -1.;
     }
     
-    printf("\n\noverdensity, min: %e, max: %e", arrayMin(densityArray, n0*n1*n2), arrayMax(densityArray, n0*n1*n2));
+    free(meanCellRedshift);
+    
+    free_HOD();
     
     return 0;
 }
-
 
 // outdated.
 double CubeMeanNumberDensity(double chi){

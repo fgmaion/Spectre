@@ -82,6 +82,20 @@ double kaiserLorentz_multipole(double ks, double beta, int monoQuad){
 }
 
 
+double noRSD(double ks, double beta, int monoQuad){
+    // Mono, L_0 corresponds to 0. Quad, L_2 corresponds to 2.  Hex, L_4 corresponds to 4.
+    
+    switch(monoQuad){
+        case 0:
+            return 1.0;
+        case 2:
+            return 0.0;
+        case 4:
+            return 0.0;
+    }
+}
+
+
 int setLorentzianRSD(){
     pt2RSD_k  = &kaiserLorentz_multipole;
     

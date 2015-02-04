@@ -1,56 +1,28 @@
-int prepNGP(){
-    densityArray               =  (double *)  realloc(densityArray,     n0*n1*n2*sizeof(*densityArray));
-    meanCellRedshift           =  (double *)  realloc(meanCellRedshift, n0*n1*n2*sizeof(*meanCellRedshift));  
+int prep_mask(){
+    surveyMask      =  (double *)  malloc(n0*n1*n2*sizeof(*surveyMask));
+    
+    for(j=0; j<n0*n1*n2; j++)      surveyMask[j] = 0.0;
 
-    FKPweights                 =  (double *)  realloc(FKPweights,       n0*n1*n2*sizeof(*FKPweights));
+    return 0;
+}
 
-    // Cell_rotatedXvals       =  (double *)  realloc(Cell_rotatedXvals,       n0*n1*n2*sizeof(*Cell_rotatedXvals));
-    // Cell_rotatedYvals       =  (double *)  realloc(Cell_rotatedYvals,       n0*n1*n2*sizeof(*Cell_rotatedYvals));
-    // Cell_rotatedZvals       =  (double *)  realloc(Cell_rotatedZvals,       n0*n1*n2*sizeof(*Cell_rotatedZvals));
 
-    // Cell_raVIPERSsystem     =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_raVIPERSsystem));
-    // Cell_decVIPERSsystem    =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_decVIPERSsystem));
-    // Cell_chiVIPERSsystem    =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_chiVIPERSsystem));
-
-    // Cell_VIPERSweights      =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_VIPERSweights));
-    // Cell_VIPERSbools        =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_VIPERSbools));
-    Cell_SurveyLimitsMask      =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_SurveyLimitsMask));
-    // Cell_SurveyEdge         =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_SurveyEdge));
-    // Cell_ApodiseWeights     =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_ApodiseWeights));
-    // Cell_ShortDist2edge     =  (double *)  malloc(n0*n1*n2*sizeof(*Cell_ShortDist2edge));
-
-    // Allocate memory for NGP density arrays.
-    // for(j=0; j<n0*n1*n2; j++)             FKPweights[j] =                  1.0;
-    for(j=0; j<n0*n1*n2; j++)              densityArray[j] =                  0.0;
-    // for(j=0; j<n0*n1*n2; j++)        Cell_SurveyEdge[j] =                  0.0;
-    // for(j=0; j<n0*n1*n2; j++)          Cell_VIPERSbools[j] =                  0.0;
-    // for(j=0; j<n0*n1*n2; j++)       meanCellRedshift[j] =                  0.0;
-    // for(j=0; j<n0*n1*n2; j++)    Cell_ShortDist2edge[j] =  10.0*GibbsSkinDepth;
-    // for(j=0; j<n0*n1*n2; j++)    Cell_ApodiseWeights[j] =                  1.0;
-    for(j=0; j<n0*n1*n2; j++)     Cell_SurveyLimitsMask[j] =                  0.0;
+int prep_grid(){    
+    overdensity                = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);
     
     return 0;
 }
 
 
-int CleanNGP(){
-    for(j=0; j<n0*n1*n2; j++)             FKPweights[j] = 1.0;
-    for(j=0; j<n0*n1*n2; j++)           densityArray[j] = 0.0;
-    // for(j=0; j<n0*n1*n2; j++)       meanCellRedshift[j] = 0.0;
-
-    return 0;
-}
-
-
-int prepFFTw(int n0, int n1, int n2){    
-    in                 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);
-    out                = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2); 
-
-    // PkArray[row][column]. row < n0*n1*n2. column < 2 {Real, Imaginary}.
-    printf("\n\nAssigning Pk array.");
+int prep_fftw(){    
+    H_k                = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(fftw_complex)); 
+    
+    p                  = fftw_plan_dft_3d(n0, n1, n2, overdensity, H_k, FFTW_FORWARD,  FFTW_ESTIMATE);
+    
+    /*
     PkArray            = (double **)     malloc(n0*n1*n2*sizeof(double*));             // rows
     
-    muIntervalPk       = (double **)     malloc(n0*n1*n2*sizeof(*muIntervalPk));
+    // muIntervalPk    = (double **)     malloc(n0*n1*n2*sizeof(*muIntervalPk));
     
     for(j=0; j<n0*n1*n2; j++){  
         PkArray[j]     = (double *)      malloc(2*sizeof(double));                     // columns 
@@ -58,68 +30,56 @@ int prepFFTw(int n0, int n1, int n2){
         PkArray[j][0]  = 0.0;
         PkArray[j][1]  = 0.0;
     
-        muIntervalPk[j]    = (double *)     malloc(2*sizeof(double));
+        // muIntervalPk[j]    = (double *)     malloc(2*sizeof(double));
         
-        muIntervalPk[j][0] = 0.0;
-        muIntervalPk[j][1] = 0.0; 
+        // muIntervalPk[j][0] = 0.0;
+        // muIntervalPk[j][1] = 0.0; 
     }
+    */
+    // iplan              = fftw_plan_dft_3d(n0, n1, n2, H_k, overdensity, FFTW_BACKWARD, FFTW_ESTIMATE);
 
-    printf("\nCreating FFTw plan.");
-    p                  = fftw_plan_dft_3d(n0, n1, n2, in, out, FFTW_FORWARD,  FFTW_ESTIMATE);
-    iplan              = fftw_plan_dft_3d(n0, n1, n2, out, in, FFTW_BACKWARD, FFTW_ESTIMATE);
-
-    W2_veck            = malloc(n0*n1*n2*sizeof(double));  
-    W2_vecr            = malloc(n0*n1*n2*sizeof(double));
+    // W2_veck            = malloc(n0*n1*n2*sizeof(double));  
+    // W2_vecr            = malloc(n0*n1*n2*sizeof(double));
     
-    FFTW2_vecr_re      = malloc(n0*n1*n2*sizeof(double));
-    FFTW2_vecr_im      = malloc(n0*n1*n2*sizeof(double));
+    // FFTW2_vecr_re      = malloc(n0*n1*n2*sizeof(double));
+    // FFTW2_vecr_im      = malloc(n0*n1*n2*sizeof(double));
 
     return 0;
 }
 
 
-int prepFFTw1D(int n0){
-    in1D               = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0);
-    out1D              = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0);
+int prep_pkRegression(double logk_min, double logk_max, double bin_no){    
+    double logk_interval;
+
+    polar_pk             = (double **) malloc(n0*n1*n2*sizeof(double*));
     
-    p1D                = fftw_plan_dft_1d(n0, in1D, out1D, FFTW_FORWARD, FFTW_ESTIMATE);
+    // cols of mod k, mu, pk.
+    for(j=0; j<n0*n1*n2; j++)  polar_pk[j]    = (double *)  malloc(3*sizeof(double)); 
 
-    return 0;
-}
-
-
-int cleanFFTbinning(){
-    for(j=0; j<n0*n1*n2; j++){
-        PkArray[j][0] = 0.0;
-        PkArray[j][1] = 0.0;
-    }
-    
-  return 0;
-}
  
-
-int prepFFTbinning(double Interval){    
-    // Memory assigned for Pk binning.  
-    kBinLimits        = (double *) malloc(kBinNumb*sizeof(*kBinLimits));
+    logk_interval        = (logk_max - logk_min)/bin_no;
+ 
+    logk_limits          = (double *) malloc(bin_no*sizeof(*logk_limits));
     
-    for(j=0; j<kBinNumb; j++)      kBinLimits[j]  =     (j+1)*Interval;
+    for(j=0; j<bin_no; j++)  logk_limits[j] = pow(10., logk_min + j*logk_interval);
 
-    del2              = (double *) malloc((kBinNumb-1)*sizeof(*del2));
-    midKBin           = (double *) malloc((kBinNumb-1)*sizeof(*midKBin));
-    meanKBin          = (double *) malloc((kBinNumb-1)*sizeof(*meanKBin));
-    modesPerBin       = (int *)    malloc((kBinNumb-1)*sizeof(*modesPerBin));
-    binnedPk          = (double *) malloc((kBinNumb-1)*sizeof(*binnedPk));
-    linearErrors      = (double *) malloc((kBinNumb-1)*sizeof(*linearErrors));
+    mean_modk            = (double *) malloc((bin_no-1)*sizeof(*mean_modk));
     
-    kmodulus_vec      = (double *) malloc(n0*n1*n2*sizeof(double));
-    mu_vec            = (double *) malloc(n0*n1*n2*sizeof(double));
+    modes_perbin         = (int *)    malloc((bin_no-1)*sizeof(*modes_perbin));
+    
+    binnedPk             = (double *) malloc((bin_no-1)*sizeof(*binnedPk));
+    
+    // linearErrors      = (double *) malloc((kBinNumb-1)*sizeof(*linearErrors));
+    
+    kMonopole            = (double  *) malloc((bin_no-1)*sizeof(*kMonopole));
+    kQuadrupole          = (double  *) malloc((bin_no-1)*sizeof(*kQuadrupole));
+    kHexadecapole        = (double  *) malloc((bin_no-1)*sizeof(*kHexadecapole));
     
     return 0;
 }
 
-
+/*
 int assign2DPkMemory(int muBinNumb, int kBinNumb){
-    
     polar2Dpk             = (double **) malloc(n0*n1*n2*sizeof(double*));
     TwoDpkArray           = (double **) malloc(n0*n1*n2*sizeof(double*));                         
  
@@ -136,18 +96,18 @@ int assign2DPkMemory(int muBinNumb, int kBinNumb){
         TwoDpkArray[j][2] = 0.0;
     }
     
-    zSpaceBinnedPk                                       = (double **) malloc((loskBinNumb-1)*sizeof(double*));
-    for(j=0; j<loskBinNumb-1; j++) zSpaceBinnedPk[j]     = (double  *) malloc((perpkBinNumb-1)*sizeof(double));
+    // zSpaceBinnedPk                                       = (double **) malloc((loskBinNumb-1)*sizeof(double*));
+    // for(j=0; j<loskBinNumb-1; j++) zSpaceBinnedPk[j]     = (double  *) malloc((perpkBinNumb-1)*sizeof(double));
     
-    zSpacemodesPerBin                                    = (int **)    malloc((loskBinNumb-1)*sizeof(int*));
-    for(j=0; j<loskBinNumb-1; j++) zSpacemodesPerBin[j]  = (int  *)    malloc((perpkBinNumb-1)*sizeof(int));
+    // zSpacemodesPerBin                                    = (int **)    malloc((loskBinNumb-1)*sizeof(int*));
+    // for(j=0; j<loskBinNumb-1; j++) zSpacemodesPerBin[j]  = (int  *)    malloc((perpkBinNumb-1)*sizeof(int));
     
-    mean_perpk                                           = (double **) malloc((loskBinNumb-1)*sizeof(double*));
-    for(j=0; j<loskBinNumb-1; j++) mean_perpk[j]         = (double *)  malloc((perpkBinNumb-1)*sizeof(double));
+    // mean_perpk                                           = (double **) malloc((loskBinNumb-1)*sizeof(double*));
+    // for(j=0; j<loskBinNumb-1; j++) mean_perpk[j]         = (double *)  malloc((perpkBinNumb-1)*sizeof(double));
     
-    mean_losk                                            = (double **) malloc((loskBinNumb-1)*sizeof(double*));
-    for(j=0; j<loskBinNumb-1; j++) mean_losk[j]          = (double  *) malloc((perpkBinNumb-1)*sizeof(double));
-
+    // mean_losk                                            = (double **) malloc((loskBinNumb-1)*sizeof(double*));
+    // for(j=0; j<loskBinNumb-1; j++) mean_losk[j]          = (double  *) malloc((perpkBinNumb-1)*sizeof(double));
+    
     loskBinLimits                                        = (double *) malloc(loskBinNumb*sizeof(*loskBinLimits));
     perpkBinLimits                                       = (double *) malloc(perpkBinNumb*sizeof(*perpkBinLimits));
 
@@ -165,78 +125,14 @@ int assign2DPkMemory(int muBinNumb, int kBinNumb){
     polar2DBinnedPk                                      = (double **) malloc((muBinNumb-1)*sizeof(double*));
     for(j=0; j<muBinNumb-1; j++)   polar2DBinnedPk[j]    = (double  *) malloc((kBinNumb-1)*sizeof(double));
     
-    kMonopole                                            = (double  *) malloc((kBinNumb-1)*sizeof(*kMonopole));
-    kQuadrupole                                          = (double  *) malloc((kBinNumb-1)*sizeof(*kQuadrupole));
-    kHexadecapole                                        = (double  *) malloc((kBinNumb-1)*sizeof(*kHexadecapole));
-    
     kMonopole_expError                                   = (double  *) malloc((kBinNumb-1)*sizeof(*kMonopole_expError));
     kQuadrupole_expError                                 = (double  *) malloc((kBinNumb-1)*sizeof(*kQuadrupole_expError));
     
     wfMonopole                                           = (double  *) malloc((kBinNumb-1)*sizeof(*wfMonopole));
     wfQuadrupole                                         = (double  *) malloc((kBinNumb-1)*sizeof(*wfQuadrupole));
-    
-    fkBinLimits                                          = (float  *)  malloc((kBinNumb-1)*sizeof(*fkBinLimits));
-    
-    convMono                                             = (float  *)  malloc((kBinNumb-1)*sizeof(*convMono));
-    convQuad                                             = (float  *)  malloc((kBinNumb-1)*sizeof(*convQuad));
-    
-    convMono2d                                           = (float  *)  malloc((kBinNumb-1)*sizeof(*convMono2d));
-    convQuad2d                                           = (float  *)  malloc((kBinNumb-1)*sizeof(*convQuad2d));
 
     return 0;
-}
-
-
-int prepSphericalConv(int inputWindowfnBinNumb, int evalConvPkNumb){    
-    // Define arrays for Window function spline, with the usual NR offset. 
-    midKmodesperbin  = (int   *)   malloc(inputWindowfnBinNumb*sizeof(int));
-    midKBinNR        = (float *)   malloc(inputWindowfnBinNumb*sizeof(float)); 
-    WindowFuncNR     = (float *)   malloc(inputWindowfnBinNumb*sizeof(float)); 
-    WindowFunc2d     = (float *)   malloc(inputWindowfnBinNumb*sizeof(float)); 
-    
-    ConvolvedPk      = (double *)  malloc((evalConvPkNumb-1)*sizeof(double));
-    ConvolvedPk2d    = (double *)  malloc((evalConvPkNumb-1)*sizeof(double));
-    
-    for(j=0; j<evalConvPkNumb-1; j++)    ConvolvedPk[j] = 0.0;
-    
-    return 0;
-}
-
-
-int prepAnisoConvolution(){
-    inputPk                          = (double *)   malloc((n0+1)*(n1+1)*(n2+1)*sizeof(*inputPk));
-    
-    convolvedPk3d                    = (double *)   malloc((n0+1)*(n1+1)*(n2+1)*sizeof(*convolvedPk3d)); 
-
-    flattenedConvolvedPk3D           = (double **)  malloc((n0+1)*(n1+1)*(n2+1)*sizeof(*flattenedConvolvedPk3D));
-
-    for(j=0; j<(n0+1)*(n1+1)*(n2+1); j++){
-        flattenedConvolvedPk3D[j]    = (double *)   malloc(2*sizeof(double));
-
-        flattenedConvolvedPk3D[j][0] = 0.0;
-        flattenedConvolvedPk3D[j][1] = 0.0;
-    }
-
-    return 0;
-}
-
-
-int prep_wfKernelminAmp(){
-    wfKernel_minAmpIndices            = (int **)   malloc(largeAmpIndices*sizeof(*wfKernel_minAmpIndices));
-    
-    windowFunc3D                      = (double *) malloc(largeAmpIndices*sizeof(*windowFunc3D));       
-    
-    for(j=0; j<largeAmpIndices; j++){  
-        wfKernel_minAmpIndices[j]     = (int *)  malloc(4*sizeof(int));                     // columns 
-        
-        wfKernel_minAmpIndices[j][0]  = 0;
-        wfKernel_minAmpIndices[j][1]  = 0;
-        wfKernel_minAmpIndices[j][2]  = 0;
-        wfKernel_minAmpIndices[j][3]  = 0;
-    }
-
-    return 0;
-}
+}*/
 
 
 int LikelihoodMemory(){
@@ -348,50 +244,6 @@ int assignCovMat(int mocks){
     
     for(j=0; j<order; j++)  eigenVecs[j] = malloc(order*sizeof(**eigenVecs));
     */
-    return 0;
-}
-
-
-int ClippingModelling(){
-    PkCube             = (double *) realloc(PkCube,          n0*n1*n2*sizeof(*PkCube));
-    
-    Corrfn            = (double *)  realloc(Corrfn,             n0*n1*n2*sizeof(*Corrfn));
-    suppressedCorrfn  = (double *)  realloc(suppressedCorrfn,   n0*n1*n2*sizeof(*suppressedCorrfn));
-    distortedCorrfn   = (double *)  realloc(distortedCorrfn,    n0*n1*n2*sizeof(*distortedCorrfn));
-    clippedPk         = (double *)  realloc(clippedPk,          n0*n1*n2*sizeof(*clippedPk));
-    
-    rmodulus_vec      =             realloc(rmodulus_vec,       (1 + n0*n1*n2)*sizeof(*rmodulus_vec));
-    
-    for(j=0; j<=n0*n1*n2; j++){ 
-        rmodulus_vec[j] = malloc(2*sizeof(double));
-    }
-    
-    monoCorr          = (double *)  realloc(monoCorr,           4096*sizeof(*monoCorr));
-    rmonoCorr         = (double *)  realloc(rmonoCorr,          4096*sizeof(*rmonoCorr));
-    monoCorr2d        = (double *)  realloc(monoCorr2d,         4096*sizeof(*monoCorr2d));
-
-    return 0;
-}
-
-
-int assign_mixingmatrix(int kBinNumb, double kMonopole[], double kQuadrupole[]){
-    theta                     = malloc(2*(kBinNumb-1)*sizeof(double));
-        
-    for(j=0; j<kBinNumb-1; j++){  
-        theta[j]              =   kMonopole[j];   
-        theta[kBinNumb-1 + j] = kQuadrupole[j];
-    }
-    
-    mixingmatrix              = malloc(2*(kBinNumb-1)*sizeof(*mixingmatrix));
-    
-    for(j=0; j<2*(kBinNumb-1); j++){  
-        mixingmatrix[j]       = malloc(2*(kBinNumb-1)*sizeof(double));
-
-        for(k=0; k<2*(kBinNumb-1); k++){
-            mixingmatrix[j][k] = 0.0;
-        }
-    }
-    
     return 0;
 }
 

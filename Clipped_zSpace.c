@@ -55,76 +55,7 @@ int underclipDensity(double threshold){
     return 0;
 }
 
-
-int inputHODPk(){
-    // Interpolated theoretical P(k) on a regular grid in k. 
-    sdltk  = realloc(sdltk,          470*sizeof(*sdltk));
-    sdltPk = realloc(sdltPk,         470*sizeof(*sdltPk));
-              
-    // Second derivates of HOD P(k) for cubic spline.           
-    sdlt2d = realloc(sdlt2d,         470*sizeof(*sdlt2d));
-
-    sprintf(filepath, "%s/Data/HODTheoryPk/cambExtendedPk_hod_20.00.dat", root_dir);
-    
-    inputfile = fopen(filepath, "r");
-    
-    for(j=0; j<470; j++)  fscanf(inputfile, "%le \t %le \n", &sdltk[j], &sdltPk[j]);
-    
-    fclose(inputfile);
-
-    spline(sdltk, sdltPk, 470, 1.0e31, 1.0e31, sdlt2d);
-    
-    pt2Pk   = &HODPk_Gaussian;
-    
-    // Approx. model to HOD P(k), inflationary power law with exponential truncation. 
-    pt2Xi   = &Pk_powerlaw_truncated_xi;
-    
-    sprintf(theoryPk_flag, "HOD_-20.0");
-   
-    return 0;
-}
-
-double HODPk_Gaussian(double k){
-    return  0.02*splintHODpk(k)*exp(-0.5*pow(3.*k, 2.));
-}
-
-
-double linearPk_Gaussian(double k){
-    return splintLinearPk(k)*exp(-0.5*pow(3.*k, 2.));
-}
-
-int inputLinearPk(){
-    // Interpolated theoretical P(k) on a regular grid in k. 
-    lineark  = realloc(lineark,          470*sizeof(*lineark));
-    linearPk = realloc(linearPk,         470*sizeof(*linearPk));
-              
-    // Second derivates of HOD P(k) for cubic spline.           
-    linear2d = realloc(linear2d,         470*sizeof(*linear2d));
-
-    sprintf(filepath, "%s/Data/HODTheoryPk/camb_matterPk.dat", root_dir);
-    
-    inputfile = fopen(filepath, "r");
-    
-    for(j=0; j<470; j++) fscanf(inputfile, "%le \t %le \n", &lineark[j], &linearPk[j]);
-    
-    for(j=0; j<470; j++) linearPk[j] *= linearBias*linearBias;
-    
-    fclose(inputfile); 
-    
-    
-    spline(lineark, linearPk, 470, 1.0e31, 1.0e31, linear2d);
-    
-    pt2Pk = &linearPk_Gaussian;
-    
-    // Approx. model to HOD P(k), inflationary power law with exponential truncation. 
-    pt2Xi = &Pk_powerlaw_truncated_xi;
-    
-    sprintf(theoryPk_flag, "linear_-20.0");
-    
-    return 0;
-}
-
-
+/*
 int formPkCube(){
     // hz                 = pow(Om_v + Om_m*pow(1. + 0.8, 3.), 0.5);  // Units of h, [h]
  
@@ -157,14 +88,13 @@ int formPkCube(){
                 PkCube[Index]                     /= TotalVolume; 
                  
                 // Impose spherical filter to calculate sigma_8.
-                /*
-                y                                  = kmodulus*8.;  
+                
+                // y                                  = kmodulus*8.;  
 
-                if(kmodulus != 0.0){                
-                    PkCube[Index]                 *= 3.*pow(y, -3.)*(sin(y) - y*cos(y));
-                    PkCube[Index]                 *= 3.*pow(y, -3.)*(sin(y) - y*cos(y));
-                }
-                */    
+                //if(kmodulus != 0.0){                
+                //    PkCube[Index]                 *= 3.*pow(y, -3.)*(sin(y) - y*cos(y));
+                //    PkCube[Index]                 *= 3.*pow(y, -3.)*(sin(y) - y*cos(y));
+                //}    
                 
                 PkCube[Index]                     *= 1. + 0.5*pow(mu, 2.);
                 
@@ -173,21 +103,21 @@ int formPkCube(){
                 // Lorentzian factor for non-linear redshift space distortions. 
                 // PkCube[Index]                  /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
                 
-                /*
-                WindowFunc                         = 1.;
+                
+                // WindowFunc                         = 1.;
 
-                if(k_x != 0.){
-		            WindowFunc                    *= sin(pi*k_x*0.5/NyquistWaveNumber)/(pi*k_x*0.5/NyquistWaveNumber);}
+                //if(k_x != 0.){
+		        //    WindowFunc                    *= sin(pi*k_x*0.5/NyquistWaveNumber)/(pi*k_x*0.5/NyquistWaveNumber);}
                 
-                if(k_y != 0.){
-		            WindowFunc                    *= sin(pi*k_y*0.5/NyquistWaveNumber)/(pi*k_y*0.5/NyquistWaveNumber);}
+                //if(k_y != 0.){
+		        //    WindowFunc                    *= sin(pi*k_y*0.5/NyquistWaveNumber)/(pi*k_y*0.5/NyquistWaveNumber);}
                 
-                if(k_z != 0.){
-		            WindowFunc                    *= sin(pi*k_z*0.5/NyquistWaveNumber)/(pi*k_z*0.5/NyquistWaveNumber);}		      
+                // if(k_z != 0.){
+		        //    WindowFunc                    *= sin(pi*k_z*0.5/NyquistWaveNumber)/(pi*k_z*0.5/NyquistWaveNumber);}		      
 	        
-	            PkCube[Index]                     *= pow(WindowFunc, 2.);
-	        	PkCube[Index]                     *= pow(WindowFunc, 2.);
-                */
+	            // PkCube[Index]                     *= pow(WindowFunc, 2.);
+	        	// PkCube[Index]                     *= pow(WindowFunc, 2.);
+                
                 // Gaussian factor for non-linear redshift space distortion.
                 // PkCube[Index]                  *= exp(-kmodulus*kmodulus*mu*mu*velDispersion*velDispersion);
              }
@@ -198,60 +128,9 @@ int formPkCube(){
     PkCube[0] = 0.0;
 
     return 0;
-}
+}*/
 
-
-double HermitePolynomial(double x, int n){
-    switch(n){
-        case 0:
-            return 1.0;
-        case 1:
-            return 2.0*x;
-        case 2:
-            return 4.0*pow(x, 2.0)   - 2.0;
-        case 3:
-            return 8.0*pow(x, 3.0)   - 12.0*x;
-        case 4:
-            return 16.0*pow(x, 4.0)  - 48.*pow(x, 2.0)   + 12.;
-        case 5:
-            return 32.0*pow(x, 5.0)  - 160.*pow(x, 3.0)  + 120.*x;
-        case 6:
-            return 64.0*pow(x, 6.0)  - 480.*pow(x, 4.0)  + 720.*pow(x, 2.0)   - 120.;
-        case 7:
-            return 128.0*pow(x, 7.0) - 1344.*pow(x, 5.0) + 3360.*pow(x, 3.0)  - 1680.*x;
-        case 8:
-            return 256.*pow(x, 8.)   - 3584.*pow(x, 6.)  + 13440.*pow(x, 4.)  - 13440.*pow(x, 2.)  + 1680.;
-        case 9:
-            return 512.*pow(x, 9.)   - 9216.*pow(x, 7.)  + 48384.*pow(x, 5.)  - 80640.*pow(x, 3.0) + 30240.*x;
-        case 10:
-            return 1024.*pow(x, 10.) - 23040.*pow(x, 8.) + 161280.*pow(x, 6.) - 403200.*pow(x, 4.) + 302400.*pow(x, 2.0) - 30240.;   
-    }
-}
-
-
-double LegendrePolynomials(double x, int n){
-    switch(n){
-        case 0:
-            return 1.;  
-        case 1:
-            return x;
-        case 2:
-            return 0.5*(3.*pow(x, 2.) - 1.);
-        case 3:
-            return 0.5*(5.*pow(x, 3.) - 3.*x);
-        case 4:
-            return (1./8.)*(35.*pow(x, 4.) - 30.*pow(x, 2.) + 3.);
-        case 6:
-            return (1./16.)*(231.*pow(x, 6.) - 315.*pow(x, 4.) + 105.*pow(x, 2.) -5.);
-    }
-}
-
-
-double C_n(double x, int n){                                                // (n+1)! = Gamma (n+2)
-    return pow(HermitePolynomial(x, n-1), 2.)*exp(-2.*x*x)/(pi*pow(2., n)*gsl_sf_gamma(n + 2));
-}
-
-
+/*
 int clipCorrfn(){
     for(j=0; j<n0*n1*n2; j++) in[j][0] = (double) PkCube[j];
     for(j=0; j<n0*n1*n2; j++) in[j][1] = (double) 0.0;
@@ -291,9 +170,9 @@ int clipCorrfn(){
     // ClippedMultipole();
     
     return 0;    
-}
+}*/
 
-
+/*
 int corrfn_multipoles(double Corrfn[], char filepath[]){
     int    rbinNumb   =  100;
     double rbinlength =  5.0;
@@ -354,9 +233,9 @@ int corrfn_multipoles(double Corrfn[], char filepath[]){
     MultipoleCalc(rbinNumb, meanKBin, kMonopole, kQuadrupole, polar2Dpk, polarPk_modeCount, filepath, 0.0, 1.0, rbinlength, 1);
     
     return 0;
-}
+}*/
 
-
+/*
 int ClippedMultipole(){
     polarPk_modeCount = 0;
 
@@ -414,4 +293,4 @@ int ClippedMultipole(){
     MultipoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, polar2Dpk, polarPk_modeCount, filepath, 0.0, 1.0, kbinInterval, 1);
 
     return 0;
-}
+}*/

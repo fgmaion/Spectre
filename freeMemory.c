@@ -1,4 +1,4 @@
-int freeHOD(){
+int free_HOD(){
 // Free dynamic memory allocated for ZADE catalogue + derived parameters.                                                                                                     
   free(id);
   free(ra);
@@ -25,74 +25,58 @@ int freeHOD(){
   //free(pointing);
   //free(quadrant);
 
-  // derived parameters.                                                                                                 
+  // derived parameters.      
+  free(Acceptanceflag);                                                                                           
   free(polarAngle);
   free(rDist);
   free(xCoor);
   free(yCoor);
   free(zCoor);
+  
   return 0;
 }
 
 
-int freeNGP(){
- // NGP density arrays for both ZADE galaxies and randoms.                                                              
-  free(densityArray);
-  free(FKPweights);
+int free_grid(){
+  free(overdensity);
   
-  free(Cell_rotatedXvals);
-  free(Cell_rotatedYvals);
-  free(Cell_rotatedZvals);
-  
-  free(Cell_raVIPERSsystem);
-  free(Cell_decVIPERSsystem);
-  free(Cell_chiVIPERSsystem);
-  
-  free(Cell_VIPERSweights);
-  free(Cell_VIPERSbools);
-  
-  free(booldensity);
   return 0;
 }
 
 
-int freeFFTw(){
-    fftw_free(in);
-    fftw_free(out);
+int free_pkRegression(){
+  fftw_free(H_k);
+  
+  fftw_destroy_plan(p);
     
-    for(j=0; j<n0*n1*n2; j++)  free(PkArray[j]);
-    free(PkArray);
+  for(j=0; j<n0*n1*n2; j++)  free(polar_pk[j]);
     
-    fftw_destroy_plan(p);
-    return 0;
-}
-
-
-int freeBinning(){
-
+  free(polar_pk);
+    
   // binned Pk arrays.                                                                                                   
-  free(kBinLimits); 
-  free(del2);   
-  free(midKBin);
-  free(meanKBin);
+  free(logk_limits); 
+  free(mean_modk);
   free(binnedPk);
-  free(modesPerBin);
-  free(linearErrors);
+  free(modes_perbin);
+  
+  free(kMonopole);
+  free(kQuadrupole);
+  free(kHexadecapole);
   
   return 0;
 }
 
 
-int free2DBinning(){
-
+int free2dPk(){
     for(j=0; j<n0*n1*n2; j++){
-        free(polar2Dpk[j]);
-        free(TwoDpkArray[j]);
+        free(polar_pk[j]);
+        // free(TwoDpkArray[j]);
     }
     
-    free(polar2Dpk);
-    free(TwoDpkArray);
+    free(polar_pk);
+    // free(TwoDpkArray);
     
+    /*
     free(muBinLimits);
     
     for(j=0; j<muBinNumb-1; j++)  free(polar_modesPerBin[j]);
@@ -106,7 +90,7 @@ int free2DBinning(){
     
     for(j=0; j<muBinNumb-1; j++)  free(polar2DBinnedPk[j]);
     free(polar2DBinnedPk);
-    
+    */   
     return 0;
 }
 
@@ -126,17 +110,7 @@ int free_linear(){
     return 0;
 }
 
-
-int freeClipped(){  
-  free(PkCube);
-  free(Corrfn);
-  free(suppressedCorrfn);
-  free(distortedCorrfn);
-  free(clippedPk);
-  return 0;
-}
-
-
+/*
 int free2dPk(){
     for(j=0; j<n0*n1*n2; j++) free(TwoDpkArray[j]);
     free(TwoDpkArray);
@@ -154,20 +128,4 @@ int free2dPk(){
     free(mean_perpk);
     
     return 0;
-}
-
-
-int freeConvolutionMemory(){
-    free(kVals);
-    free(interpolatedPk);
-    
-    free(midKmodesperbin);
-    free(midKBinNR);
-    free(WindowFuncNR);
-    free(WindowFunc2d);
-    
-    free(ConvolvedPk);
-    free(ConvolvedPk2d);
-    
-    return 0;
-}
+}*/

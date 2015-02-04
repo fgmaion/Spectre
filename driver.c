@@ -27,111 +27,86 @@
 
 #include "Scripts/header.h"
 
-#include "/disk1/mjw/Aux_functions/SVD.c"
-
 #include "Scripts/comovDistRedshiftCalc.c"
 
-#include "Scripts/JenkinsRun.c"
+// #include "Scripts/JenkinsRun.c"
 #include "Scripts/GridParams.c"
 
 #include "Scripts/assignMemory.c"
 
+#include "Scripts/load_mask.c"
+
 #include "Scripts/assignAcceptance.c"
+
 #include "Scripts/CoordinateCalc.c"
 
-#include "Scripts/Padding.c"
-// #include "Scripts/NGPCalc.c" // outdated.
 #include "Scripts/overdensity_calc.c"
 #include "Scripts/CloudInCell.c"
-#include "Scripts/BasisChange.c"
-#include "Scripts/CalcCellraDec.c"
-#include "Scripts/ApodiseWindowFunc.c"
+// #include "Scripts/BasisChange.c"
+// #include "Scripts/CalcCellraDec.c"
 
-#include "Scripts/FKPweights.c"
-#include "Scripts/Windowfn_PkCorrections.c"
-
-#include "Scripts/KaiserMultipoles.c"
+// #include "Scripts/KaiserMultipoles.c"
 // #include "Scripts/KaiserGaussMultipoles.c"
 #include "Scripts/KaiserLorentzMultipoles.c"
 
 #include "Scripts/qSortCompare.c"
 #include "Scripts/FFTw_3D.c"
-#include "Scripts/FFTw_3Dwf.c"
-#include "Scripts/axesWfSlices.c"
-#include "Scripts/mixingMatrix.c"
-
-#include "Scripts/MeasureWfKernel.c"
-// #include "Scripts/sphericalConvolvePk.c"
-#include "Scripts/setConvolutionKernels.c"
-// #include "Scripts/AnalyticTestConvolution.c"
-#include "Scripts/ConvolvePkAnisoWf.c"
-
-#include "Scripts/IntegralConstraintCorrection.c"
 
 #include "Scripts/nbar.c"
 // #include "Scripts/MockAvgComovingDensity.c"
-// #include "Scripts/fitting_nz.c"
 
-#include "Scripts/AgeOftheUniverse.c"
-#include "Scripts/linearGrowthRate.c"
-#include "Scripts/growthfactor_derivative.c"
+// #include "Scripts/AgeOftheUniverse.c"
+// #include "Scripts/linearGrowthRate.c"
+// #include "Scripts/growthfactor_derivative.c"
 
-#include "Scripts/InvErrorfn.c"
-#include "Scripts/MatrixInverse.c"
-
-#include "Scripts/Clipped_zSpace.c"
+#include "Scripts/matter_pk.c"
+// #include "Scripts/Clipped_zSpace.c"
 #include "Scripts/toymodel_pk_xi.c"
 
-#include "Scripts/PowellsRoutine.c"
-#include "Scripts/Powells_mnbrak.c"
-#include "Scripts/Powells_linmin.c"
-#include "Scripts/Powells_Brent.c"
+// #include "Scripts/ArtificialWf.c"
+// #include "Scripts/BootStrap.c"
 
-#include "Scripts/randGen_old.c" // should be outdated?
-
-#include "Scripts/ArtificialWf.c"
-#include "Scripts/BootStrap.c"
-
-#include "Scripts/correlation_fns.c"
+// #include "Scripts/correlation_fns.c"
 
 #include "Scripts/randGen.c"
 
 #include "Scripts/FFT_log.h"
 #include "Scripts/FFT_log.c"
 
-#include "Scripts/cubature/cubature.h"
-#include "Scripts/FFT_log_zeldovich.h"
-#include "Scripts/FFT_log_zeldovich.c"
+/*#include "Scripts/cubature/cubature.h"*/
+/*#include "Scripts/FFT_log_zeldovich.h"*/
+/*#include "Scripts/FFT_log_zeldovich.c"*/
 
-#include "Scripts/anisotropicGaussian_multipoles.c"
+/*#include "Scripts/anisotropicGaussian_multipoles.c"*/
 
-#include "Scripts/HOD_mock_theoryExp.c"
+/*#include "Scripts/HOD_mock_theoryExp.c"*/
 
-// #include "Scripts/slowDFT.c"
+/*#include "Scripts/MultipoleCovariance.c"*/
+/*#include "Scripts/MultipoleCovariance_eigenvecs.c"*/
+/*#include "Scripts/ChiSq_minimisation.c"*/
+/*#include "Scripts/posteriors_1D.c"*/
+/*#include "Scripts/posteriors_2D.c"*/
 
-#include "Scripts/MultipoleCovariance.c"
-#include "Scripts/MultipoleCovariance_eigenvecs.c"
-// #include "Scripts/MultipoleCovariance_Inverse.c"
-// #include "Scripts/MultipolesRealisation_MultiVariateGauss.c"
-#include "Scripts/ChiSq_minimisation.c"
-#include "Scripts/posteriors_1D.c"
-#include "Scripts/posteriors_2D.c"
+/*#include "Scripts/MonteCarlo_SSPOC.c"*/
+/*#include "Scripts/AngularSelectionCats.c"*/
+/*#include "Scripts/SaundersDeproject.c"*/
 
-#include "Scripts/freeMemory.c"
-
-#include "Scripts/MonteCarlo_SSPOC.c"
-#include "Scripts/AngularSelectionCats.c"
-#include "Scripts/SaundersDeproject.c"
+#include "Scripts/smith_mjw.h"
+#include "Scripts/smith_mjw.c"
 
 #include "Scripts/libkdtree.h"
 #include "Scripts/kdtree_xi_mom.c"
 #include "Scripts/buildTree.c"
 #include "Scripts/libkdtree.c"
 
-#include "Scripts/mockGalaxyCats.c"
+/*#include "Scripts/mockGalaxyCats.c"*/
 
-#include "Scripts/NFW_profile.c"
+#include "Scripts/halomodel_pk.c"
 #include "Scripts/VIPERS_window.c"
+
+// #include "tinker.c"
+
+#include "Scripts/freeMemory.c"
 
 
 int main(int argc, char **argv){
@@ -160,28 +135,27 @@ int main(int argc, char **argv){
   // AxisLimsArray[0][2]   =     -75.0;                                                  // h^-1 Mpc
   // AxisLimsArray[1][2]   =     -10.0;                                                  // h^-1 Mpc
 
-
-  // Stefano basis. 
+  // Embedding volume for P(k) measurement. Stefano basis. 
   AxisLimsArray[0][0]   =       0.0;                                                     // h^-1 Mpc
-  AxisLimsArray[1][0]   =     500.0;
+  AxisLimsArray[1][0]   =     800.0;
  
   AxisLimsArray[0][1]   =       0.0;                                                     // h^-1 Mpc
-  AxisLimsArray[1][1]   =     500.0;
+  AxisLimsArray[1][1]   =     800.0;
 
   AxisLimsArray[0][2]   =       0.0;                                                     // h^-1 Mpc
-  AxisLimsArray[1][2]   =     500.0;
+  AxisLimsArray[1][2]   =     800.0;
 
   // degree of translation for Stefano's co-ordinates, fit survey into surrounding volume. 
   stefano_trans_x       =     +250.;
   stefano_trans_y       =     +250.;
-  stefano_trans_z       =    -1650.;
+  stefano_trans_z       =    -1500.;
 
   // stefano_trans_x       =     +100.;
   // stefano_trans_y       =     +300.;
   // stefano_trans_z       =    -1500.;
 
   // limits in right asecension.
-  // W1 catalogue.
+  // W1 catalogue. new 500s mocks.
   LowerRAlimit          =      30.1; 
   UpperRAlimit          =      38.8;
   CentreRA              =     34.45;
@@ -203,7 +177,7 @@ int main(int argc, char **argv){
   // Total angular areas, 
 
   // W1: 10.875 sq. degs.    // 500s      // value added. obsolete.  
-  W1area                =     15.66;             // 10.875;
+  W1area                =     15.66;      // 10.875;
 
   // W4:  8.8   sq. degs.
   // W4area                =    8.8;
@@ -213,12 +187,15 @@ int main(int argc, char **argv){
   // TotalW1W4area         =    19.675; 
 
   // Cell size, comoving distance, h^-1 Mpc. 
-  CellSize              =       2.0;     
+  fft_size              =        32;     
 
   // Selection parameters.
-  absMagCut             =     20.00;
-  redshiftLowLimit      =      0.70;
-  redshiftHiLimit       =      0.80;
+  lo_MBlim              =     -20.5;   
+  hi_MBlim              =     -19.5;
+  
+  lo_zlim               =      0.60;
+  hi_zlim               =      0.90;
+  z_eff                 =      0.00;                  // set to volume avg. redshift of the survey? prior to FKP weights.
 
   // Non-linear RSD
   velDispersion         =       2.5;                  // units of h^-1 Mpc rather than 300 km s^-1
@@ -239,6 +216,7 @@ int main(int argc, char **argv){
   min_A11Sq             =      0.55;
   max_A11Sq             =      0.65;
 
+  // Number of fitted parameters, defines degrees of freedom in chi sq. expectation. 
   paramNumber           =       3.0;
 
   // Resolution of the Likelihood evaluation [voxel number].
@@ -252,64 +230,53 @@ int main(int argc, char **argv){
   hiMultipoleOrder      =         2;
 
   // linearBias.txt in dir. /HODTheoryPk/
-  // -22.0  2.924277
-  // -21.5  2.199471
-  // -21.0  1.824770
-  // -20.5  1.618792
-  // -20.0  1.495903
-  // -19.5  1.415186
-  // -20.75 1.707502
-  // -20.25 1.550205
-  // -20.15 1.527030
-  //
+  // -22.0  
+  // -21.5  
+  // -21.0  
+  // -20.5  
+  // -20.0  
+  // -19.5  
+  // -20.75 
+  // -20.25 
+  // -20.15 
 
   // -20.0 mags lim. sample. See linearBias.txt in HODTheoryPk dir.
   linearBias            =  1.495903;
 
-  // Comoving number density, n(z), measurement. 
-  // zBinWidth          =      0.03; 
+  // Comoving number density, n(z), measurement. Change to equal increments in volume?
   chi_interval          =     16.00;
-  // nzSigma            =      50.0;
 
   // Apply Jenkins contraction to beat aliasing. 
   JenkinsScalefactor    =       1.0;
 
   // FKP P(k) of interest;
-  fkpPk                 =    1000.0;                                                  // [h^-1 Mpc]^3, Peeble's convention.
+  fkpPk                 =    1000.0;            // [h^-1 Mpc]^3.
   meanSampling          =       0.4;
 
   // Binning interval for P(k).
-  kbinInterval          =      0.01;
   modkMax               =      1.00;
   muBinNumb             =       100;
+  kbin_no               =        40;
 
   // Interval in k^2 for perp k binning of 2D P(k).
   perpkInterval         =      0.01;
  
   // Total number of HOD mocks. 
-  CatalogNumber         =        26;
+  CatalogNumber         =       306;
 
   //  Apodise the window fn. to supress the Gibb's phenomenon.
   GibbsSkinDepth        =       5.0;
-
-  // Random variable generation.    
-  gsl_rng_env_setup();
-
-  gsl_ran_T = gsl_rng_default;
-  gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
     
-  // Clipping variables. Currently underclip. 
+  // Clipping variables. 
   appliedClippingThreshold  =   1.0;    
-  A11Sq                     = 0.999;
 
-  // NFW halo generation
-  haloNumber = 10000;
-  NFW_conc   =   1.0; 
+  // nfw halo generation
+  nfw_conc              =   1.0; 
 
   // Correlation fn's, logarithmic binning in r. 
   zerolog  =             log10(0.001);
-  maxlog   =             log10(10.0); // hiRes: 10., lowRes: 2000.
-  logbinsz =             log10( 1.01); // previously 1.4, must be >1.0 otherwise log gives 0. or -ve.
+  maxlog   =             log10(20.0);       // hiRes: 20., lowRes: 2000.
+  logbinsz =             log10( 1.01);      // previously 1.4, must be >1.0 otherwise log gives 0. or -ve.
   
   nlogbins =  (int) ceil((maxlog - zerolog)/logbinsz);
 
@@ -319,41 +286,60 @@ int main(int argc, char **argv){
   linbinsz =                   0.05;
 
   nlinbins =  (int) ceil((maxlin - zerolin)/linbinsz);
+  
+  printf("\nPair counting binning: %d \t %d", nlogbins, nlinbins);
 
-  printf("\n\nPair counting binning: %d \t %d", nlogbins, nlinbins);
+  // Random variable generation.    
+  gsl_rng_env_setup();
 
-  // padVolume(0.0, 0.0, 0.0);
+  gsl_ran_T = gsl_rng_default;
+  gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
 
+  
   comovDistReshiftCalc();
-
-  // VIPERS_SolidAngle = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
+  
+  VIPERS_SolidAngle = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
 
   // JenkinsCoordinates();
 
-  // Checked.
   EvaluateGridParameters();
+  
+  // cosmology has changed, recalculate linear power spectrum using CAMB. 
+  // inputLinearPk();     
+  
+  // prep_NFWhaloCat(10000, 100000);
 
-  // assign binning interval in k, and calcualate number of bins required. Checked. 
-  assignbinninginterval(kbinInterval);
-
-  // Checked.
-  prepNGP();
+  // printf("\n%e", haloModel_pk(0.1, 0.1, 0.5, 0));
+  
+  // assign2DPkMemory(muBinNumb, kBinNumb);   
 
   // knownGRF_mask();
 
-  // regenerate randoms in the new cosmology. with new centre ra and center dec. 
-  randGen();
+  // generate randoms for the mask in a given cosmology. celestial coordinates (ra and dec, spherical)
+  // randoms_maskGen();
   
-  // recalculate multipole moments of the window. 
-  // randWindow_pairCount();
+  // sampling: 0.032 for w^2 hi res measurement, 0.001 for lo res, 1.00 for creating mask for P(k)
+  load_homogeneous_rands_window(1, 0.09);
+  
+  // calculate multipole moments of the window. 
+  randWindow_pairCount();
+  
+  // calculate nbar, in a given cosmology: nbar(chi)
+  // nbar_calc(306);
+  
+  // spline_nbar();
+  
+  // calculate volume avg. shot noise for shot noise correction. 
+  // volavg_invnbar = calc_volavg_invnbar();
+  
+  // printf("\n\nvol. avg. nbar: %.3lf (%.3f)", volavg_invnbar, 1./interp_nz(1800.));
+  
+  // add_fkp();
+  
+  // calc_mask_amplitudeCorrection();
   
   // Must be uncommented for fftlog calcs. 
-  // prep_VIPERS_maskMultipoles();              
-
-  // sampling: 0.032 for w^2 hi res measurement, 0.008 for lo res, 1.00 for creating mask for P(k)
-  // homogeneous_rands_window_volCalc(0.95);
-  // load_homogeneous_rands_window(1, 1.0);
-  // write_homogeneous_rands_window_gridded(50000000., 1, 1.0);
+  prep_VIPERS_maskMultipoles();              
 
   // FullCube();
 
@@ -365,25 +351,15 @@ int main(int argc, char **argv){
 
   // apodisedVolume        = CellVolume*SumDoubleArray(Cell_AppliedWindowFn, n0*n1*n2);
   
-  prepBootStrap(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
+  // prepBootStrap(n0*n1*n2, Cell_rotatedXvals, Cell_rotatedYvals, Cell_rotatedZvals, 1000.);
 
-  // Applied window fn.
-  Cell_AppliedWindowFn  = &Cell_SurveyLimitsMask[0];
-
-  // Checked.
-  CalcWfCorrections();
-
-  prepFFTw(n0, n1, n2);
-
-  prepFFTbinning(kbinInterval);
-
-  assign2DPkMemory(muBinNumb, kBinNumb);       
-
-  // cosmology has changed, get new halo model p(k) from Sylvain. 
   inputHODPk();
   
-  // cosmology has changed, recalculate linear power spectrum. 
-  // inputLinearPk();     
+  VIPERS_mask_cnvldpk();
+  
+  // VIPERS_mask_intCnsrt();
+  
+  // halofit();
 
   // pt2shot = &lightconeShot;
 
@@ -412,14 +388,13 @@ int main(int argc, char **argv){
 
   // ChiSq_minimisation();
 
-  // recalculate nbar, cosmology has changed. 
-  // nbar_calc(306);
-
   // halo model p(k), linear bias, cosmology, linear growth factor to z=0.7, evolution of bias. 
   // HOD_mock_theoryExp();
-
-  // spline_nbar();
-
+      
+  // mass_fn();
+  
+  // halobias_fn();
+  
   for(loopCount=1; loopCount<1; loopCount++){
     printf("\n\n%d", loopCount);
     
@@ -427,36 +402,23 @@ int main(int argc, char **argv){
 
     // if(loopCount<10)  sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_00%d_ALLINFO.cat", vipersHOD_dir, loopCount);
     // else              sprintf(filepath, "%s/mocks_W1_v1.2/mock_W1_0%d_ALLINFO.cat",  vipersHOD_dir, loopCount);
-
-    // new 500s. limit to 0.7<z<0.8, limit to linear bias of 1.495903 corresponding to ~ -20.0 mag galaxies. at this mag. volume limited to z=0.85
-    if(loopCount<10)        sprintf(filepath, "%s/mocks_W1_v9.0_500/mock_00%d_parent.dat", vipersHOD_dir, loopCount);
-    else if(loopCount<100)  sprintf(filepath, "%s/mocks_W1_v9.0_500/mock_0%d_parent.dat",  vipersHOD_dir, loopCount);
-    else                    sprintf(filepath, "%s/mocks_W1_v9.0_500/mock_%d_parent.dat",  vipersHOD_dir, loopCount);
-    // Choice of redshift from zcos, zpec, zphot, zobs.
+    
+    //new 500s. limit to 0.7<z<0.8, limit to linear bias of 1.495903 corresponding to ~ -20.0 mag galaxies. at this mag. volume limited to z=0.85
+    if(loopCount<10)        sprintf(filepath, "%s/mocks_W1_v9.0_500/mock_lm_00%d_gal.dat", vipersHOD_dir, loopCount);
+    else if(loopCount<100)  sprintf(filepath, "%s/mocks_W1_v9.0_500/mock_lm_0%d_gal.dat",  vipersHOD_dir, loopCount);
+    else                    sprintf(filepath, "%s/mocks_W1_v9.0_500/mock_lm_%d_gal.dat",   vipersHOD_dir, loopCount);
     
     CatalogueInput_500s(filepath);
     
-    // zUtilized = &zcos[0];
-    zUtilized = &zobs[0];
-    
-    // assignAcceptance();
+    // Choice of redshift from zcos, zpec, zphot, zobs.
+    gal_z = &zobs[0];
 
-    // Must be run for all 27 mocks in preparation for P(k) calc.
-    // ComovingNumberDensityCalc();
-    // pt2nz = &interp_nz;
-
-    // splineGaussfilteredW1_W4_nz();
+    // Set redshift and absolute mag. cuts. 
+    assignAcceptance();
     
-    // splineMockAvg_nz();
+    // Convert from (ra, dec, redshift) to (x, y, z) in Stefano's basis. basis choice must be consistent with that used for the mask defined by the randoms. 
+    StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);
     
-    // pt2nz = &MockAvg_nz;
-    
-    // My basis, otherwise use Stefano basis. Never use both in conjuction. 
-    // CoordinateCalc();
-    
-    // Convert from ra, dec, z to x, y, z in Stefano's basis. 
-    // StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);
-   
     // fiberCollision_cat(rand_number, rand_redshift, rand_x, rand_y, rand_z);
     
     // fiberCollision_cat(Vipers_Num, zUtilized, xCoor, yCoor, zCoor);
@@ -472,7 +434,6 @@ int main(int argc, char **argv){
     // projectVIPERSsystem();
 
     // VIPERSbasis(CentreRA, CentreDec, xCoor, yCoor, zCoor, Vipers_Num);
-
     
     // Gaussianfield();
     
@@ -485,7 +446,7 @@ int main(int argc, char **argv){
     // poissonSample_lnNorm();
     
     // Do not forget call to prep Cat. 
-    // HaloCatalogue_NFWprofile(3000000);
+    // haloCatalogue_nfwprofile(3000000);
     
     // Note: Dangerous non-commutation of sampling and randomise in load_clustered. may generate biased population if not careful. //
     // load_clustered(1, 0.01);
@@ -504,18 +465,13 @@ int main(int argc, char **argv){
     // redshift range selection handled by randoms mask. 
     calc_overdensity();
     
-    // ApplyFKPweights(meanSampling);
-
-    cleanFFTbinning();
+    // Apply FKPweights(meanSampling);
   
     PkCalc();
     
     // slowDFTcalc();
   }
-  // VIPERS_mask_intCnsrt();
-
-  // VIPERS_mask_cnvldpk();
- 
+  
   // spherical_randDistribution();
 
   // print_pairwisepdf();

@@ -40,39 +40,24 @@ double AcceptedMin(double a[], bool b[], int n){
 
 int assignAcceptance(){
     for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j]  = false;
-
-    // Cannot apply acceptance based on ra & dec cuts currently, due to the application of Acceptance during
-    // Comoving number density calc., which includes both W1 and W4.
-
+    
     for(j=0; j<Vipers_Num; j++){
-        if((redshiftLowLimit<zUtilized[j]) && (zUtilized[j]<redshiftHiLimit) && (M_B[j]<absMagCut)){
+        if((lo_zlim<gal_z[j]) && (gal_z[j]<hi_zlim) && (lo_MBlim<M_B[j]) && (M_B[j]<hi_MBlim)){
             Acceptanceflag[j]  = true;
         }
     }
-
-    /*
-    printf("\n\nAccepted limits (in the VIPERS basis..)");
-    printf("\nx max:  %lf \t x min:  %lf", AcceptedMax(xCoor, Acceptanceflag, Vipers_Num), AcceptedMin(xCoor, Acceptanceflag, Vipers_Num));
-    printf("\ny max:  %lf \t y min:  %lf", AcceptedMax(yCoor, Acceptanceflag, Vipers_Num), AcceptedMin(yCoor, Acceptanceflag, Vipers_Num));
-    printf("\nz max:  %lf \t z min:  %lf", AcceptedMax(zCoor, Acceptanceflag, Vipers_Num), AcceptedMin(zCoor, Acceptanceflag, Vipers_Num));
-    */
-    
-    printf("\n\nVIPERS gals. meeting redshift acceptance.");
-    printf("\nx max:  %e \t x min:  %e",     AcceptedMax(xCoor, Acceptanceflag, Vipers_Num), AcceptedMin(xCoor, Acceptanceflag, Vipers_Num));
-    printf("\ny max:  %e \t y min:  %e",     AcceptedMax(yCoor, Acceptanceflag, Vipers_Num), AcceptedMin(yCoor, Acceptanceflag, Vipers_Num));
-    printf("\nz max:  %e \t z min:  %e",     AcceptedMax(zCoor, Acceptanceflag, Vipers_Num), AcceptedMin(zCoor, Acceptanceflag, Vipers_Num));
-    printf("\nchi max:  %e \t chi min:  %e", AcceptedMax(rDist, Acceptanceflag, Vipers_Num), AcceptedMin(rDist, Acceptanceflag, Vipers_Num));
         
-    int AcceptedNumber = 0;
+    
+    int accepted = 0;
     
     for(j=0; j<Vipers_Num; j++){
         if(Acceptanceflag[j] == true){
-            AcceptedNumber += 1;
+            accepted += 1;
         }
     }
 
-    printf("\nNumber of accepted VIPERS gals.: %d", AcceptedNumber);
-
+    printf("\n\nTotal number of galaxies %d, accepted %d", Vipers_Num, accepted);
+    
     return 0;
 }
 

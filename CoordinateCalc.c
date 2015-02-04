@@ -114,7 +114,7 @@ int CatalogueInput_500s(char filepath[]){
     // Column  2: dec                                                                                                                                                                
     // Column  3: zobs presumably.                                                                           
     // Column  4: MB, abs mag from the parent HOD. 
-    // Column  5: weight? 
+    // Column  5: apparent mags. 
     
     ch         = 0;
     Vipers_Num = 0;
@@ -127,67 +127,79 @@ int CatalogueInput_500s(char filepath[]){
 
     rewind(inputfile);
     
-    id             =  (int   *)   realloc(id,             Vipers_Num*sizeof(*id));
-    ra             =  (double *)  realloc(ra,             Vipers_Num*sizeof(*ra));
-    dec            =  (double *)  realloc(dec,            Vipers_Num*sizeof(*dec));
-    zobs           =  (double *)  realloc(zobs,           Vipers_Num*sizeof(*zobs)); 
-    M_B            =  (double *)  realloc(M_B,            Vipers_Num*sizeof(*M_B));
+    id             =  (int   *)   malloc(Vipers_Num*sizeof(*id));
+    ra             =  (double *)  malloc(Vipers_Num*sizeof(*ra));
+    dec            =  (double *)  malloc(Vipers_Num*sizeof(*dec));
+    zobs           =  (double *)  malloc(Vipers_Num*sizeof(*zobs)); 
+    zcos           =  (double *)  malloc(Vipers_Num*sizeof(*zcos)); 
+    M_B            =  (double *)  malloc(Vipers_Num*sizeof(*M_B));
 
     // derived parameters. 
-    Acceptanceflag =  (bool  *)   realloc(Acceptanceflag, Vipers_Num*sizeof(*Acceptanceflag));
-    polarAngle     =  (double *)  realloc(polarAngle,     Vipers_Num*sizeof(*polarAngle));
-    rDist          =  (double *)  realloc(rDist,          Vipers_Num*sizeof(*rDist));
-    xCoor          =  (double *)  realloc(xCoor,          Vipers_Num*sizeof(*xCoor));
-    yCoor          =  (double *)  realloc(yCoor,          Vipers_Num*sizeof(*yCoor));
-    zCoor          =  (double *)  realloc(zCoor,          Vipers_Num*sizeof(*zCoor));
-    
-    for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j]  = false;
+    Acceptanceflag =  (bool  *)   malloc(Vipers_Num*sizeof(*Acceptanceflag));
+    polarAngle     =  (double *)  malloc(Vipers_Num*sizeof(*polarAngle));
+    rDist          =  (double *)  malloc(Vipers_Num*sizeof(*rDist));
+    xCoor          =  (double *)  malloc(Vipers_Num*sizeof(*xCoor));
+    yCoor          =  (double *)  malloc(Vipers_Num*sizeof(*yCoor));
+    zCoor          =  (double *)  malloc(Vipers_Num*sizeof(*zCoor));
     
     // redshift range 0.7<z<0.8, as traced by randoms. magnitude cut for known linear bias. volume limited to z=0.85
     for(j=0; j<Vipers_Num; j++){  
-        fscanf(inputfile, "%d \t %le \t %le \t %le \t %le \t %*le \n", &id[j], &ra[j], &dec[j], &zobs[j], &M_B[j]);
+        id[j] = j;
     
-        if((-20.2<M_B[j]) && (M_B[j] < -19.8) && (0.7<zobs[j]) && (zobs[j]<0.8))  Acceptanceflag[j] = true;
+        fscanf(inputfile, "%le \t %le \t %le \t %le \t %*le \t %*le \t %*le \t %*le \t %*le \t %*le \t %le \t %*le %*le \t %*d \t %*d \t %*d \n", &ra[j], &dec[j], &zobs[j], &zcos[j], &M_B[j]);
+    
+        // if((-20.2<M_B[j]) && (M_B[j] < -19.8) && (0.7<zobs[j]) && (zobs[j]<0.8))  Acceptanceflag[j] = true;
     }
     
-    // for(j=0; j<10; j++)  printf("\n%d \t %e \t %e \t %e \t %e", id[j], ra[j], dec[j], zobs[j], M_B[j]);
+    // for(j=0; j<10; j++)  printf("\n%d \t %.4lf \t %.4lf \t %.4lf \t %.4lf \t %.4lf", id[j], ra[j], dec[j], zobs[j], zcos[j], M_B[j]);
     
     fclose(inputfile);
     
     printf("\nHOD 500s catalogue input successful.");
-    printf("\nNumber of galaxies in catalogue:  %d", Vipers_Num);
-
+    
     return 0;
 }
 
 
-int CoordinateCalc(){
-    // Not to be used in conjunction with Stefano Basis. 
-
-    for(j=0; j<Vipers_Num; j++){
-            //  Derived parameters 
-            polarAngle[j]         =  pi/2.0 - (pi/180.0)*dec[j];                // Converted to radians. 
-            ra[j]                *= (pi/180.0);                                 // Converted to radians.
-
-            //  Cosmology dependent, HOD mock parameters assumed - see header.h
-            rDist[j]              = interp_comovingDistance(zUtilized[j]);      // Comoving distances in h^-1 Mpc
-            
-            xCoor[j]              = rDist[j]*sin(polarAngle[j])*cos(ra[j]);
-            yCoor[j]              = rDist[j]*sin(polarAngle[j])*sin(ra[j]);
-            zCoor[j]              = rDist[j]*cos(polarAngle[j]);
-            ra[j]                /= (pi/180.0);                                 // Converted to degrees  
-    }
-
-    printf("\n\nOn input...");
-    printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
-    printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
-    printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
+double invert_StefanoBasis(double centreRA, double centreDec, double* xval, double* yval, double* zval){
+    double x,  y,   z;
+    double x1, y1, z1;
+    double x2, y2, z2;
     
-    printf("\n\nRedshift max:  %f \t Redshift min:  %f", arrayMax(zUtilized, Vipers_Num), arrayMin(zUtilized, Vipers_Num));
+    double c_ra, c_dec;
     
-    printf("\n\nAbs. mag. max:  %f \t Abs. mag. min:  %f", arrayMax(M_B, Vipers_Num), arrayMin(M_B, Vipers_Num));
+    double rmod;
+    
+    x       = *xval;
+    y       = *yval;
+    z       = *zval;
+    
+    c_ra    =  centreRA*(pi/180.);
+    c_dec   = centreDec*(pi/180.);
 
-    return 0;
+    // reverse translation. 
+    x  -= stefano_trans_x;
+    y  -= stefano_trans_y;
+    z  -= stefano_trans_z;   
+        
+    // invert R2, x'' to x'
+    x2         =  -sin(c_dec)*x + cos(c_dec)*z; 
+    y2         =              y;
+    z2         =  -cos(c_dec)*x - sin(c_dec)*z;
+    
+    // invert R1, x' to x.
+    x1         =  cos(c_ra)*x2 - sin(c_ra)*y2;
+    y1         =  sin(c_ra)*x2 + cos(c_ra)*y2;
+    z1         =  z2;  
+    
+    // invert z inversion through xy plane. 
+    *xval      =  x1;
+    *yval      =  y1;
+    *zval      = -z1; 
+    
+    rmod       = sqrt(x1*x1 + y1*y1 + z1*z1);
+
+    return rmod;
 }
 
 
@@ -198,53 +210,60 @@ int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoo
          ra[j]               *= (pi/180.0);                                 // Converted to radians.
         dec[j]               *= (pi/180.0);                                 // Converted to radians.
         
-        rDist[j]              = interp_comovingDistance(zUtilized[j]);      // Comoving distances in h^-1 Mpc
+        rDist[j]              = interp_comovingDistance(gal_z[j]);          // Comoving distances in h^-1 Mpc
     
-        xCoor[j]              =     rDist[j]*cos(dec[j])*cos(ra[j]);        
-        yCoor[j]              =     rDist[j]*cos(dec[j])*sin(ra[j]);
-        zCoor[j]              = -1.*rDist[j]*sin(dec[j]);
+        xCoor[j]              = rDist[j]*cos(dec[j])*cos(ra[j]);        
+        yCoor[j]              = rDist[j]*cos(dec[j])*sin(ra[j]);
+        zCoor[j]              = rDist[j]*sin(dec[j]);                   // usual spherical co-ordinates.
         
         ra[j]                /= (pi/180.0);                                 // Converted to degrees.
         dec[j]               /= (pi/180.0);                                 // Converted to degrees.
     }
     
-    printf("\n\nOn input...");
-    printf("\nx max:  %f \t x min:  %f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
-    printf("\ny max:  %f \t y min:  %f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
-    printf("\nz max:  %f \t z min:  %f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
-    printf("\nr max:  %f \t r min:  %f", arrayMax(rDist, Vipers_Num), arrayMin(rDist, Vipers_Num));
     
-    printf("\n\nRedshift max:  %f \t Redshift min:  %f", arrayMax(zUtilized, Vipers_Num), arrayMin(zUtilized, Vipers_Num));
+    printf("\n\nOn input...");
+    printf("\nx max:  %.3f \t x min:  %.3f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
+    printf("\ny max:  %.3f \t y min:  %.3f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
+    printf("\nz max:  %.3f \t z min:  %.3f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
+    printf("\nr max:  %.3f \t r min:  %.3f", arrayMax(rDist, Vipers_Num), arrayMin(rDist, Vipers_Num));
+    
+    printf("\n\nRedshift max:  %f \t Redshift min:  %f", arrayMax(gal_z, Vipers_Num), arrayMin(gal_z, Vipers_Num));
 
     printf("\n\nAbs. mag. max:  %f \t Abs. mag. min:  %f", arrayMax(M_B, Vipers_Num), arrayMin(M_B, Vipers_Num));
     
-    /*
-    sprintf(filepath, "%s/Data/ra_decCells/OriginalCoordinates.dat", root_dir);
     
-    output = fopen(filepath, "w");
-    
-    for(j=0; j<Vipers_Num; j++)  fprintf(output, "%e \t %e \t %e \n", xCoor[j], yCoor[j], zCoor[j]);
-    
-    fclose(output);
-    */
+    StefanoReflection(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
     
     // Rotate the input co-ordinates such that the ra direction is aligned more or less with the y axis, dec direction with x, and redshift along z. 
     StefanoRotated(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
-             
-    printf("\n\nrotated & translated");                                                                                                                                   
-    printf("\nx max:  %e \t x min:  %e", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
-    printf("\ny max:  %e \t y min:  %e", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
-    printf("\nz max:  %e \t z min:  %e", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
-    printf("\nr max:  %e \t r min:  %e", arrayMax(rDist, Vipers_Num), arrayMin(rDist, Vipers_Num));
+    
+    printf("\n\ninverted, rotated & translated");                                                                                                                                   
+    printf("\nx max:  %.3f \t x min:  %.3f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
+    printf("\ny max:  %.3f \t y min:  %.3f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
+    printf("\nz max:  %.3f \t z min:  %.3f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
+    printf("\nr max:  %.3f \t r min:  %.3f", arrayMax(rDist, Vipers_Num), arrayMin(rDist, Vipers_Num));
                                                                                                                                                                                  
-    printf("\n\naccepted. rotated & translated");                                                                  
-    printf("\nx max:  %e \t x min:  %e", AcceptedMax(xCoor, Acceptanceflag, Vipers_Num), AcceptedMin(xCoor, Acceptanceflag, Vipers_Num));                       
-    printf("\ny max:  %e \t y min:  %e", AcceptedMax(yCoor, Acceptanceflag, Vipers_Num), AcceptedMin(yCoor, Acceptanceflag, Vipers_Num));         
-    printf("\nz max:  %e \t z min:  %e", AcceptedMax(zCoor, Acceptanceflag, Vipers_Num), AcceptedMin(zCoor, Acceptanceflag, Vipers_Num));                                     
-    printf("\nr max:  %e \t r min   %e", AcceptedMax(rDist, Acceptanceflag, Vipers_Num), AcceptedMin(rDist, Acceptanceflag, Vipers_Num));                         
+    printf("\n\naccepted. inverted, rotated & translated");                                                                  
+    printf("\nx max:  %.3f \t x min:  %.3f", AcceptedMax(xCoor, Acceptanceflag, Vipers_Num), AcceptedMin(xCoor, Acceptanceflag, Vipers_Num));                       
+    printf("\ny max:  %.3f \t y min:  %.3f", AcceptedMax(yCoor, Acceptanceflag, Vipers_Num), AcceptedMin(yCoor, Acceptanceflag, Vipers_Num));         
+    printf("\nz max:  %.3f \t z min:  %.3f", AcceptedMax(zCoor, Acceptanceflag, Vipers_Num), AcceptedMin(zCoor, Acceptanceflag, Vipers_Num));                                     
+    printf("\nr max:  %.3f \t r min   %.3f", AcceptedMax(rDist, Acceptanceflag, Vipers_Num), AcceptedMin(rDist, Acceptanceflag, Vipers_Num));                         
     
     return 0;
 }
+
+
+int StefanoReflection(int Number, double centreRA, double centreDec, double xCoors[], double yCoors[], double zCoors[]){
+    // inversion through the xy plane.
+    for(j=0; j<Number; j++){
+        xCoors[j] *=  1.;
+        yCoors[j] *=  1.;
+        zCoors[j] *= -1.;   
+    }
+
+    return 0;
+}
+
 
 int StefanoRotated(int Number, double centreRA, double centreDec, double xCoors[], double yCoors[], double zCoors[]){
     double x1, y1, z1;
@@ -254,30 +273,28 @@ int StefanoRotated(int Number, double centreRA, double centreDec, double xCoors[
     c_ra    =  centreRA*(pi/180.);
     c_dec   = centreDec*(pi/180.);
 
+    // basis formed by: normal spherical co-ordinates subject to inversion through xy plane, then R1 and finally R2. 
     for(j=0; j<Number; j++){
-        // Rotation by mean RA about z-axis. Counter-clockwise rotation by - mean_RA.
+        // R1: rotation about z such that in the new basis, (x',y',z'), x' hat lies in x-y plane at an angle centreRA to x.
         x1  =     cos(c_ra)*xCoors[j] + sin(c_ra)*yCoors[j];
-        y1  = -1.*sin(c_ra)*xCoors[j] + cos(c_ra)*yCoors[j];
-        z1  = zCoors[j];
+        y1  =    -sin(c_ra)*xCoors[j] + cos(c_ra)*yCoors[j];
+        z1  =               zCoors[j];
         
-        x2  = cos(c_dec + pi/2.)*x1  - sin(c_dec + pi/2.)*z1;
-        y2  = y1;
-        z2  = sin(c_dec + pi/2.)*x1  + cos(c_dec + pi/2.)*z1;
-    
+        // R2: rotation about y such that in the new basis, (x'', y'', z''), z'' hat lies in (x', z') plane at an angle -CentreDec to x' hat.
+        x2  = -sin(c_dec)*x1  - cos(c_dec)*z1;
+        y2  =  y1;
+        z2  =  cos(c_dec)*x1  - sin(c_dec)*z1;
+        
+        // obsolete
+        // x2  = cos(c_dec + pi/2.)*x1  - sin(c_dec + pi/2.)*z1;
+        // y2  = y1;
+        // z2  = sin(c_dec + pi/2.)*x1  + cos(c_dec + pi/2.)*z1;
+        
+        // finally translation in the box. P(k) unaffected. 
         xCoors[j] = x2 + stefano_trans_x;
         yCoors[j] = y2 + stefano_trans_y;
         zCoors[j] = z2 + stefano_trans_z;   
     }
-
-    /*
-    sprintf(filepath, "%s/Data/ra_decCells/StefanoCoordinates.dat", root_dir);
-    
-    output = fopen(filepath, "w");
-    
-    for(j=0; j<Vipers_Num; j++)  fprintf(output, "%e \t %e \t %e \n", xCoor[j], yCoor[j], zCoor[j]);
-    
-    fclose(output);
-    */
 
     return 0;
 }

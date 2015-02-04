@@ -27,8 +27,6 @@ float linearGrowth_factor_scndDeriv(float x){
 
 
 int growthfactor_derivative(){
-    #include "/disk1/mjw/Aux_functions/numeric_derivative.c" 
-    
     linearGrowthRate();
     
     nDerivs                       = 8000;

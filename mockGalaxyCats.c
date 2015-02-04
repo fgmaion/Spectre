@@ -293,60 +293,6 @@ int load_homogeneous_rands(double maxGals, int load){
 }
 
 
-int load_homogeneous_rands_window(int load, double sampling){
-    sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/likelihood/randoms_W1_500s_xyz_0.7_0.8.cat");
-    // sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/VIPERS_window2/randoms_W1_Nagoya_xyz_0.7_0.8.cat");
-    // sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/VIPERS_window2/randoms_W1_Nagoya_xyz_0.7_0.8_gridded.cat"); // To be used for pair counting. 
-
-    inputfile   = fopen(filepath, "r");
-
-    ch          = 0;
-    rand_number = 0;
-
-    do{
-        ch = fgetc(inputfile);
-        
-        if(ch == '\n')
-            rand_number += 1;
-    } while(ch != EOF);
-    
-    // assumes catalogue is in a random order.
-    lowerSampling_randomisedCatalogue(sampling);
-
-    printf("\n\n%d randoms number", rand_number);
-
-    if(load ==1){
-        rewind(inputfile);
-
-        rand_x          =  (double *)  realloc(rand_x,          rand_number*sizeof(*rand_x));
-        rand_y          =  (double *)  realloc(rand_y,          rand_number*sizeof(*rand_y));
-        rand_z          =  (double *)  realloc(rand_z,          rand_number*sizeof(*rand_z));
-
-        // for(j=0; j<rand_number; j++)   fscanf(inputfile, "%le \t %le \t %le", &rand_x[j], &rand_y[j], &rand_z[j]);
-        for(j=0; j<rand_number; j++)   fscanf(inputfile, "%*le \t %*le \t %le \t %le \t %le", &rand_x[j], &rand_y[j], &rand_z[j]);
-    }
-
-    fclose(inputfile);
-    
-    for(j=0; j<rand_number; j++){
-        boxlabel = boxCoordinates(rand_x, rand_y, rand_z, j);
-    
-        Cell_SurveyLimitsMask[boxlabel] = 1.0;
-    }
-    
-    // double masktotal = 0.0;
-    // for(j=0; j<n0*n1*n2; j++) masktotal += Cell_SurveyLimitsMask[j];
-    // printf("\n\nsummed mask: %e", masktotal);
-    
-    // free if not pair counting window. 
-    free(rand_x);
-    free(rand_y);
-    free(rand_z);
-    
-    return 0;
-}
-
-
 int write_homogeneous_rands_window_gridded(int load, double sampling){
     // never load already smoothed randoms. 
     load_homogeneous_rands_window(load, sampling);
@@ -607,13 +553,6 @@ int shuffletest(){
    shuffle(array, shuffle_rows, 100);
     
    return 0;
-}
-
-
-int lowerSampling_randomisedCatalogue(double sampling){
-    rand_number = (int) ceil(rand_number*sampling);
-
-    return 0;
 }
 
 

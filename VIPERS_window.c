@@ -82,14 +82,16 @@ double splint_VIPERS_maskMultipoles(double r, int transformOrder){
 
 
 int print_windowCorrfn(){
-    sprintf(filepath, "%s/Data/likelihood/rand__W1_500s_mask_0.7_0.8_hex_normed_mixedRes.dat", root_dir);
+    sprintf(filepath, "%s/Data/500s/maskmultipoles_W1_500s_xi_0.6_0.9_mixedRes_hex.dat", root_dir);
+    
+    double r;
     
     output = fopen(filepath, "w");
     
-    for(j=0; j<mono_config->N; j++){  
-        if((mono_config->krvals[j][1] > 0.01) && (mono_config->krvals[j][1] < 400.)){
-            fprintf(output, "%e \t %e \t %e \t %e \n", mono_config->krvals[j][1],  splint_VIPERS_maskMono(mono_config->krvals[j][1]), splint_VIPERS_maskQuad(mono_config->krvals[j][1]), splint_VIPERS_maskHex(mono_config->krvals[j][1]));
-        }
+    for(j=0; j<1000; j++){  
+        r = (j+1)*0.5;
+    
+        fprintf(output, "%e \t %e \t %e \t %e \n", r,  splint_VIPERS_maskMono(r), splint_VIPERS_maskQuad(r), splint_VIPERS_maskHex(r));
     }
 
     fclose(output);
@@ -100,8 +102,7 @@ int print_windowCorrfn(){
 
 int prep_VIPERS_maskMultipoles(){
     // high resolution
-    sprintf(filepath, "%s/Data/likelihood/rand_W1_500s_xi_mask_0.7_0.8_hiRes_hex_multipoles.dat", root_dir);    // 500s mask.
-    // sprintf(filepath, "%s/Data/VIPERS_window2/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_hihiRes_hex_multipoles.dat", root_dir); // masked RSD draft,  W1mask. 
+    sprintf(filepath, "%s/Data/500s/maskmultipoles_W1_500s_xi_0.6_0.9_hiRes_hex.dat", root_dir);    // 500s mask.
 
     inputfile = fopen(filepath, "r");
     
@@ -128,7 +129,7 @@ int prep_VIPERS_maskMultipoles(){
     for(j=0; j<VIPERS_mask_lineNo_hi; j++)  fscanf(inputfile, "%le \t %le \t %le \t %le \n", &VIPERS_maskr_hi[j], &VIPERS_maskMono_hi[j], &VIPERS_maskQuad_hi[j], &VIPERS_maskHex_hi[j]);
     
     // calc. hi res amplitude factor. 
-    powerlaw_regression(VIPERS_mask_lineNo_hi, 0.9, 1.0, 1.0, VIPERS_maskr_hi, VIPERS_maskMono_hi, &mask_monopolenorm_hi);
+    powerlaw_regression(VIPERS_mask_lineNo_hi, 0.9, 1.0, 1.0, VIPERS_maskr_hi, VIPERS_maskMono_hi, &mask_monopolenorm_hi, &dummy);
     
     for(j=0; j<VIPERS_mask_lineNo_hi; j++){
         VIPERS_maskMono_hi[j] /= mask_monopolenorm_hi*pow(VIPERS_maskr_hi[j], 3.);
@@ -150,8 +151,7 @@ int prep_VIPERS_maskMultipoles(){
 
 
     // lower resolution on larger scales.
-    sprintf(filepath, "%s/Data/likelihood/rand_W1_500s_xi_mask_0.7_0.8_loRes_hex_multipoles.dat", root_dir);    // 500s mask.
-    // sprintf(filepath, "%s/Data/VIPERS_window2/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_loRes_hex_multipoles.dat", root_dir);
+    sprintf(filepath, "%s/Data/500s/maskmultipoles_W1_500s_xi_0.6_0.9_loRes_hex.dat", root_dir);    // 500s mask.
 
     inputfile = fopen(filepath, "r");
     
@@ -201,7 +201,9 @@ int prep_VIPERS_maskMultipoles(){
     spline(VIPERS_maskr_lo, VIPERS_maskHex_lo,  VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskHex2D_lo);
     
     // for integral constraint, I think.
-    // prepVIPERS_kSpaceMultipole();
+    prepVIPERS_kSpaceMultipole();
+    
+    print_windowCorrfn();
     
     return 0;
 }
@@ -238,7 +240,7 @@ double splint_VIPERS_kSpaceQuad(double k){
 
 
 int prepVIPERS_kSpaceMultipole(){
-    sprintf(filepath, "%s/Data/VIPERS_window2/VIPERS_window_kMultipoles_fftLog.dat", root_dir);
+    sprintf(filepath, "%s/Data/500s/500s_kmaskMultipoles.dat", root_dir);
 
     inputfile = fopen(filepath, "r");
     
@@ -290,7 +292,7 @@ int lowRes_amplitudeCalc(int Nhi, double rmin, double rmax, double rhi[], double
 }
 
 
-int powerlaw_regression(int N, double rmin, double rmax, double sign, double ri[], double Di[], double* norm){
+int powerlaw_regression(int N, double rmin, double rmax, double sign, double ri[], double Di[], double* norm, double* index){
     // W    = A r^(n + 3.).
     // ln W = A' + n*log(r).
     
@@ -327,7 +329,7 @@ int powerlaw_regression(int N, double rmin, double rmax, double sign, double ri[
         }
     }
     
-    printf("\n\n%d good N", goodN);
+    // printf("\n\n%d good N", goodN);
     
     // For a matrix A, paramater vector (A', n)^T, and vector B
     // Required to invert AP  = B. 2x2 matrix inversion.
@@ -352,9 +354,11 @@ int powerlaw_regression(int N, double rmin, double rmax, double sign, double ri[
     
     n     = pow(detA, -1.)*(-sum_lnri*b1 + goodN*b2); 
     
-    printf("\n\n%e \t %e", sign*A, n);
+    // printf("\n\n%e \t %e", sign*A, n);
     
     *norm = sign*A;
+
+    *index = n;
 
     return 0;
 }

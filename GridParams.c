@@ -1,25 +1,31 @@
 int EvaluateGridParameters(){
     // Galaxy distribution plus padding.
-    n0                    = (int) floor((AxisLimsArray[1][2] - AxisLimsArray[0][2])/CellSize);
-    n1                    = (int) floor((AxisLimsArray[1][1] - AxisLimsArray[0][1])/CellSize);
-    n2                    = (int) floor((AxisLimsArray[1][0] - AxisLimsArray[0][0])/CellSize);
+    // n0                    = (int) floor((AxisLimsArray[1][2] - AxisLimsArray[0][2])/CellSize);
+    // n1                    = (int) floor((AxisLimsArray[1][1] - AxisLimsArray[0][1])/CellSize);
+    // n2                    = (int) floor((AxisLimsArray[1][0] - AxisLimsArray[0][0])/CellSize);
 
     // Dimensions should be divisible by 2. 
-    if(n0%2 == 1)  n0    += 1;
-    if(n1%2 == 1)  n1    += 1;
-    if(n2%2 == 1)  n2    += 1;
+    // if(n0%2 == 1)  n0    += 1;
+    // if(n1%2 == 1)  n1    += 1;
+    // if(n2%2 == 1)  n2    += 1;
+
+    n0 = n1 = n2 = fft_size;
 
     printf("\n\nDimensions:  %d \t %d \t %d", n0, n1, n2);
 
+    // assumes cubic cells. 
+    CellSize              = (AxisLimsArray[1][2] - AxisLimsArray[0][2])/fft_size;
+
     CellVolume            = pow(CellSize, 3);                                         // h^-3 Mpc^3
+    
     TotalVolume           = n0*n1*n2*CellVolume;                                      // h^-3 Mpc^3
     
     clippedVolume         = 0.0;
 
-    LowerChiLimit         = interp_comovingDistance(redshiftLowLimit);
-    UpperChiLimit         = interp_comovingDistance(redshiftHiLimit);
+    loChi                 = interp_comovingDistance(lo_zlim);
+    hiChi                 = interp_comovingDistance(hi_zlim);
     
-    printf("\nRedshift limits, lower bound: %e \t %e, \n\t\t upper bound: %e \t %e", redshiftLowLimit, LowerChiLimit, redshiftHiLimit, UpperChiLimit);
+    printf("\nRedshift limits, lower bound: %.2e \t %.2e h^-1 Mpc, \n\t\t upper bound: %.2e \t %.2e h^-1 Mpc", lo_zlim, loChi, hi_zlim, hiChi);
     
     // FFTw calc assignment.
     xNyquistIndex         = n2/2 + 1;
@@ -32,25 +38,6 @@ int EvaluateGridParameters(){
     kIntervaly            = 2.*pi*pow(n1, -1)*pow(CellSize, -1);
     kIntervalz            = 2.*pi*pow(n0, -1)*pow(CellSize, -1);
     
-    return 0;
-}
-
-
-int assignbinninginterval(double interval){
-    kbinInterval      = interval;
-    
-    kBinNumb          =  (int) ceil(modkMax/kbinInterval);   
-    
-    loskBinNumb       =  (int) ceil(modkMax/(10.*kbinInterval)); 
-    
-    perpkBinNumb      =  (int) ceil(modkMax/(4.*kbinInterval));
-
-    printf("\n\nkbinterval:  %f", kbinInterval);
-    printf("\nNumber of k bins:  %d", kBinNumb);
-    
-    printf("\nLos bin number:  %d", loskBinNumb);
-    printf("\nPerp bin number: %d", perpkBinNumb);
-
     return 0;
 }
 
