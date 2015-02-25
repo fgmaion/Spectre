@@ -7,12 +7,14 @@ int Covariance_eigenVecs(int mocks){
     // Descending sort in magnitude. eigenvalues should be non-negative definite.
     gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_ABS_DESC);
     
+    printf("\n\nCovariance matrix eigenvalues.");
+    
     for(i=0; i<order; i++){
         double eval_i          = gsl_vector_get(eval, i);
 
         gsl_vector_view evec_i = gsl_matrix_column(evec, i);
         
-        printf("eigenvalue  = %.3e \n", eval_i);
+        printf("\n%.4e", eval_i);
 
         // printf("eigenvalue  = %.3e, eigenvector = \n", eval_i);
         
@@ -20,7 +22,7 @@ int Covariance_eigenVecs(int mocks){
     }
     
     // The diagonal and lower triangular part of covariance are destroyed during the eigenvalue/vector calculation. reassign.
-    initialiseCovariance(mocks);
+    // initialiseCovariance(mocks);
     
     // prewhiten(mocks);
     /*
@@ -59,7 +61,7 @@ int Covariance_eigenVecs(int mocks){
     
     // Store correlated, zero mean, unit variance variables. 
     for(k=0; k<order; k++){
-      for(i=0; i<mocks; i++)  Multipoles[i][k] = dMultipoles[i][k]*gsl_matrix_get(sigma_norm, k, k);
+        for(i=0; i<mocks; i++)  Multipoles[i][k] = dMultipoles[i][k]*gsl_matrix_get(sigma_norm, k, k);
     }
     
     printf("\n");
@@ -78,7 +80,7 @@ int Covariance_eigenVecs(int mocks){
         }
     }
     
-    printf("Decorrelated multipoles calculated.\n");
+    printf("\n\nDecorrelated multipoles calculated.\n");
     
     // Reform covariance of decorrelated, zero mean, unit variance variables. Should be diagonal, with non-negative definite eigenvalues corresponding to eval. 
     
@@ -92,7 +94,7 @@ int Covariance_eigenVecs(int mocks){
 
 
 int fprintf_dCov(){
-    sprintf(filepath, "%s/Data/likelihood/dClipped_mask500s_Covariance.dat", root_dir);
+    sprintf(filepath, "%s/Data/500s/zobs_multipoles_dCov.dat", root_dir);
 
     output = fopen(filepath, "w"); 
 

@@ -1,9 +1,9 @@
 int PkCalc(){
-    // assign memory for H_k and plan. 
-    prep_fftw();
-    
     // The true density field multiplied by a (currently binary) mask, W(x). 
     for(j=0; j<n0*n1*n2; j++) overdensity[j][0] *= surveyMask[j]; //*BootStrap_Wght[j];
+    
+    // assign memory for H_k and plan. 
+    prep_fftw();
     
     fftw_execute(p);
     
@@ -34,14 +34,12 @@ int PkCalc(){
 
 
 int observedQuadrupole(int modeCount){
-    // sprintf(filepath, "%s/Data/Multipoles/Polar2Dpk_%s_%.3f_%d.dat", root_dir, surveyType, kbinInterval, loopCount);
-
     // polar2DpkBinning(modeCount);
-    
-    // if(loopCount<10)  sprintf(filepath, "%s/Data/window_fft/Multipoles_%s_kbin_%.3f_00%d.dat", root_dir,  surveyType, kbinInterval, loopCount);
-    // else              sprintf(filepath, "%s/Data/window_fft/Multipoles_%s_kbin_%.3f_0%d.dat",  root_dir, surveyType, kbinInterval, loopCount);
 
-    sprintf(filepath,"%s/Data/500s/HOD_mocks/HOD_mock_512_%d.dat", root_dir, loopCount);
+    sprintf(filepath,"%s/Data/500s/spoc_zobs_allgals/HOD_mock_512_spec_%d.dat", root_dir, loopCount);
+    // sprintf(filepath,"%s/Data/500s/spoc_zobs_allgals/HOD_mock_512_specmask_%d.dat", root_dir, loopCount); 
+    // sprintf(filepath,"%s/Data/500s/spoc_zobs_allgals/HOD_mock_512_specweight_%d.dat", root_dir, loopCount);
+    // sprintf(filepath,"%s/Data/500s/spoc_zobs_allgals/HOD_mock_512_slowDFT_%d.dat", root_dir, loopCount);
 
     // MonopoleCalc(kbin_no, mean_modk, kMonopole, polar_pk, modeCount, filepath, 0.0, 1.0, 1);
 
@@ -425,15 +423,45 @@ double chisq(double chi){
     return chi*chi;
 }
 
+double chicubed(double chi){
+    return chi*chi*chi;
+}
+
+double chicubed_nbar(double chi){
+    return chi*chi*chi*interp_nz(chi);
+}
+
+double chisq_nbar(double chi){
+    return chi*chi*interp_nz(chi);
+}
+
 double calc_volavg_invnbar(){
     // Shot noise correction for a varying background number density.  
-    // P(k) is the volume avg. as therefore must be the shot noise correction. 
+    // P(k) is the volume avg. therefore so must be the shot noise correction. 
 
     double vol            =  qromb(&chisq, loChi, hiChi);
     
     double volavg_invnbar =  qromb(&invnbar_chisq, loChi, hiChi);
     
     return volavg_invnbar/vol;
+}
+
+
+double calc_volavg_chi(){
+    double vol            =  qromb(&chisq, loChi, hiChi);
+    
+    double volavg_chi     =  qromb(&chicubed, loChi, hiChi);
+    
+    return volavg_chi/vol;
+}
+
+
+double calc_galavg_chi(){
+    double vol            =  qromb(&chisq_nbar, loChi, hiChi);
+    
+    double volavg_chi     =  qromb(&chicubed_nbar, loChi, hiChi);
+    
+    return volavg_chi/vol;
 }
 
 

@@ -27,7 +27,7 @@ int halofit(){
 
     // set_testparams();
 
-    double z0 = 0.75;
+    double z0 = 0.85; // 0.75
     
     double     aexp; // expansion factor for desired redshift. 
     
@@ -80,7 +80,7 @@ int halofit(){
         rknlCalc(&rknl, &rneff, &rncur);
         
         
-        sprintf(filepath, "%s/Data/500s/EisensteinHu_halofit_pk.dat", root_dir);
+        sprintf(filepath, "%s/Data/500s/EisensteinHu_halofit_pk_%.2f.dat", root_dir, z0);
     
         output = fopen(filepath, "w");
         
@@ -99,7 +99,7 @@ int halofit(){
     
             pnlin /= pow(rk, 3.)/(2.*pi*pi);
         
-            fprintf(output, "%e \t %e \t %e \t %e \n", rk, plin, pnlin, splintHODpk(rk));
+            fprintf(output, "%e \t %e \t %e \n", rk, plin, pnlin);
         }
     
         fclose(output);

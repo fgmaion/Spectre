@@ -30,16 +30,22 @@ int nbar_calc(int mocks){
     
     double chi;
     
-    for(loopCount=1; loopCount<mocks; loopCount++){
+    for(loopCount=1; loopCount<mocks+1; loopCount++){
         printf("\n\n%d", loopCount);
     
         // new 500s. limit to 0.7<z<0.8, limit to linear bias of 1.495903 corresponding to ~ -20.0 mag galaxies. at this mag. volume limited to z=0.85
-        if(loopCount<10)        sprintf(filepath, "%s/mocks_W1_v9.0_500/mock_lm_00%d_gal.dat", vipersHOD_dir, loopCount);
-        else if(loopCount<100)  sprintf(filepath, "%s/mocks_W1_v9.0_500/mock_lm_0%d_gal.dat",  vipersHOD_dir, loopCount);
-        else                    sprintf(filepath, "%s/mocks_W1_v9.0_500/mock_lm_%d_gal.dat",   vipersHOD_dir, loopCount);
+        // if(loopCount<10)        sprintf(filepath, "%s/mocks_W1_v8.0_500/mock_lm_00%d_gal.dat", vipersHOD_dir, loopCount);
+        // else if(loopCount<100)  sprintf(filepath, "%s/mocks_W1_v9.0_500/mock_lm_0%d_gal.dat",  vipersHOD_dir, loopCount);
+        // else                    sprintf(filepath, "%s/mocks_W1_v9.0_500/mock_lm_%d_gal.dat",   vipersHOD_dir, loopCount);
+      
+        if(loopCount<10)        sprintf(filepath, "%s/mocks_W1_v8.0_500/mock_00%d_spec.dat", vipersHOD_dir, loopCount);
+        else if(loopCount<100)  sprintf(filepath, "%s/mocks_W1_v8.0_500/mock_0%d_spec.dat",  vipersHOD_dir, loopCount);
+        else                    sprintf(filepath, "%s/mocks_W1_v8.0_500/mock_%d_spec.dat",   vipersHOD_dir, loopCount);
       
         // Choice of redshift from zcos, zpec, zphot, zobs.
         CatalogueInput_500s(filepath);
+        
+        spec_weights();
         
         for(j=0; j<Vipers_Num; j++){
             if((lo_MBlim<M_B[j]) && (M_B[j]<hi_MBlim)){        
@@ -47,9 +53,11 @@ int nbar_calc(int mocks){
             
                 Index           = (int) floor(chi/chi_interval);
             
-                chibins[Index] += chi;
+                // chibins[Index] += chi;
+                chibins[Index] += chi/sampling[j];
             
-                Nchi[Index]    +=  1.;
+                // Nchi[Index]    +=  1.;
+                Nchi[Index]    +=  1./sampling[j];
             }
         } 
     }
@@ -68,7 +76,10 @@ int nbar_calc(int mocks){
     for(j=0; j<chibin_no; j++)     nbar[j]   = Nchi[j]/comovVol[j]; 
     
     
-    sprintf(filepath, "%s/Data/500s/nbar_%.2lf_%.2lf_mags.dat", root_dir, lo_MBlim, hi_MBlim);
+    // sprintf(filepath, "%s/Data/500s/nbar_%.2lf_%.2lf_parent.dat", root_dir, lo_MBlim, hi_MBlim);
+    sprintf(filepath, "%s/Data/500s/nbar_%.2lf_%.2lf_v4_Nagoya_v4_spec.dat", root_dir, lo_MBlim, hi_MBlim);
+    // sprintf(filepath, "%s/Data/500s/nbar_%.2lf_%.2lf_Nagoya_v4_specmask.dat", root_dir, lo_MBlim, hi_MBlim);
+    // sprintf(filepath, "%s/Data/500s/nbar_%.2lf_%.2lf_Nagoya_v4_specweight.dat", root_dir, lo_MBlim, hi_MBlim);
     
     output = fopen(filepath, "w");
     
@@ -83,7 +94,10 @@ int nbar_calc(int mocks){
 int spline_nbar(){
     prep_nbar();
 
-    sprintf(filepath, "%s/Data/500s/nbar_%.2lf_%.2lf_mags.dat", root_dir, lo_MBlim, hi_MBlim);
+    // sprintf(filepath, "%s/Data/500s/nbar_%.2lf_%.2lf_parent.dat", root_dir, lo_MBlim, hi_MBlim);
+    sprintf(filepath, "%s/Data/500s/nbar_%.2lf_%.2lf_Nagoya_v4_spec.dat", root_dir, lo_MBlim, hi_MBlim);
+    // sprintf(filepath, "%s/Data/500s/nbar_%.2lf_%.2lf_Nagoya_v4_specmask.dat", root_dir, lo_MBlim, hi_MBlim);
+    // sprintf(filepath, "%s/Data/500s/nbar_%.2lf_%.2lf_Nagoya_v4_specweight.dat", root_dir, lo_MBlim, hi_MBlim);
 
     inputfile = fopen(filepath, "r");
 

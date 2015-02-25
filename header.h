@@ -35,6 +35,7 @@ double       (*pt2RSD_r)(double, double, int)       = NULL;
 double       (*pt2nz)(double)                       = NULL;
 
 double       volavg_invnbar;
+double       volavg_redshift;
 
 int          VIPERSbasis(double centerRA, double centerDec, double xCoors[], double yCoors[], double zCoors[], int len);
 
@@ -126,6 +127,7 @@ double        HubbleCnst(double z);
 double        lo_zlim;
 double        hi_zlim;
 double          z_eff; 
+double           aexp;
 
 double        lo_MBlim;
 double        hi_MBlim;  
@@ -220,6 +222,7 @@ double*          zVel   = NULL;
 // randoms.
 double       alpha;
 
+int          accepted_gals;
 int          rand_number   = 0;
 int          accepted_rand = 0;
 
@@ -312,6 +315,9 @@ double       f;
 double       beta;
 double       y;
 
+double       fsigma8;
+double       bsigma8;
+
 const double gamma_GR           =    0.545;
 const double gamma_DGP          =  11./16.;
 
@@ -340,7 +346,6 @@ double**     zSpaceBinnedPk     = NULL;
 
 // Comoving number density calculation.
 // double       zBinWidth;
-double       VIPERS_SolidAngle;
 
 double*      zbins    = NULL;
 double*      chibins  = NULL;
@@ -513,8 +518,8 @@ int polarPk_modeCount = 0;
 
 
 // Calculation fof the age of the universe, leading to linear growth rate.  Change to double precision.
-float*  AgeOftheUniverse;  // Units of H_0
-float*  HubbleCnstWithTime;
+double*  AgeOftheUniverse;  // Units of H_0
+double*  HubbleCnstWithTime;
 
 // Calculation of the linear growth rate. 
 void  (*pt2derivs)(float, float[], float[]) = NULL;
@@ -537,29 +542,23 @@ float FinalTime;
 float Initial_lnScalefactor;
 float Final_lnScalefactor;
 
-float (*pt2f_Om_545)(float);
-float (*pt2AgeIntegrand)(float);
-
-float (*pt2linearGrowthRate)(float)         = NULL;
-float (*pt2lnlinearGrowthRate)(float)       = NULL;
-float (*pt2linearGrowthRate_deriv)(float)   = NULL;
-float (*pt2linearGrowthRate_2deriv)(float)  = NULL;
     
-    // Defining declarations for these variables, with memory allocation xp[1..kmax] and yp[1..nvar][1..kmax]
-    // for the arrays, should be in the calling program.
+// Defining declarations for these variables, with memory allocation xp[1..kmax] and yp[1..nvar][1..kmax]
+// for the arrays, should be in the calling program.
 
 // float* TimeArray;
-float* Age2derivatives;
-float* Om_mOfa;
-float* f_Om_mOfa545;
-float* f_Om_mOfa545_2derivs;
-float* approx2linear_growthfactor;
+double* Age2derivatives;
+double* Om_mOfa;
+double* f_Om_mOfa545;
+double* f_Om_mOfa545_2derivs;
+double* approx2linear_growthfactor;
 
-float* lnAarray;
-float* lnA2derivatives;
-float* linear_growthfactor;
-float* SplineParams_ofgrowthfactor;
-float* SplineParams_ofgdot;
+double* lnAarray;
+double* lnA2derivatives;
+double* linear_growthfactor;
+double* SplineParams_ofgrowthfactor;
+double* SplineParams_ofgdot;
+
 float* xVals;
 float* length_scales;
 float* gdot;
@@ -576,7 +575,7 @@ double growthfactor_today;
 double approx_growthfactor_today;
 
 // float* HubbleConstantArray;
-float* HubbleConstant2derivatives;
+double* HubbleConstant2derivatives;
 
 // Likelihood calculation.
 double**     Multipoles;
@@ -586,12 +585,20 @@ double*       sigmaNorm;
 
 // flattened covariance matrix. 
 
+double  app_sigma8; 
+
 double  ChiSq_kmax;
 double  ChiSq_kmin;
 
-double* betaPosterior;
-double* sigmaPosterior;
-double** betaSigmaPosterior;
+double  min_fsigma8;
+double  max_fsigma8;
+
+double  min_bsigma8;
+double  max_bsigma8; 
+
+double* bsigma8Posterior;
+double* fsigma8Posterior;
+double*   sigmaPosterior;
 
 double  PosteriorNorm = 0.0;
 
@@ -621,23 +628,18 @@ double*** ChiSqGrid;
 double*** lnLikelihoodGrid;
 double    minChiSq;
 
-double    minChiSq_beta;
+double    minChiSq_fsigma8;
 double    minChiSq_A11Sq;
 double    minChiSq_sigma;
+double    minChiSq_bsigma8;
 
 double    paramNumber;
-
-double    min_beta;
-double    max_beta;
 
 double    min_velDisperse;
 double    max_velDisperse;
 
 double    min_A11Sq;
 double    max_A11Sq;
-
-double    min_linearbias;
-double    max_linearbias;
 
 double    clippedVolume;
 
@@ -654,7 +656,7 @@ double*  eigenVals;
 double** eigenVecs;
     
 // double** sigmaNorm;
-int order, nrotations;
+int order, nrotations, mono_order;
 
 double* xdata;
 double* xtheory;
@@ -663,7 +665,9 @@ double* ydata;
 double* ytheory;
 
 double  smallestEigenvalue;
+
 int     chiSq_kmaxIndex;
+int     chiSq_kminIndex;
 
 int     hiMultipoleOrder;
 int     lineNo;

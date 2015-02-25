@@ -151,6 +151,30 @@ int cube_PkCorrections(){
 }
 
 
+int clipDensity_cube(double threshold){
+    printf("\n\nClipping threshold: %e", appliedClippingThreshold);
+
+    for(j=0; j<n0*n1*n2; j++){
+        if(overdensity[j][0]>threshold){ 
+	        overdensity[j][0] = threshold;
+        }
+    }
+     
+    // May introduce integral constraint like term if the field is not re-zeroed. 
+    double mean          = 0.0;
+    
+    for(j=0; j<n0*n1*n2; j++)  mean += overdensity[j][0];
+    
+    mean /= n0*n1*n2;
+    
+    printf("\nmean of clipped field: %e", mean);
+    
+    for(j=0; j<n0*n1*n2; j++)  overdensity[j][0] -= mean;
+    
+    return 0;
+}
+
+
 int cube_PkCalc(){
     // assign memory for H_k and plan. 
     prep_fftw();
@@ -165,7 +189,7 @@ int cube_PkCalc(){
     cube_PkCorrections();
     
     
-    sprintf(filepath,"%s/Data/500s/HOD_mocks/cube_-20.0_512.dat", root_dir);
+    sprintf(filepath,"%s/Data/500s/hod_cube/clipped_cube_-20.0_512.dat", root_dir);
 
     MultipoleCalc(kbin_no, mean_modk, kMonopole, kQuadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 1);
 

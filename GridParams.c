@@ -25,7 +25,7 @@ int EvaluateGridParameters(){
     loChi                 = interp_comovingDistance(lo_zlim);
     hiChi                 = interp_comovingDistance(hi_zlim);
     
-    printf("\nRedshift limits, lower bound: %.2e \t %.2e h^-1 Mpc, \n\t\t upper bound: %.2e \t %.2e h^-1 Mpc", lo_zlim, loChi, hi_zlim, hiChi);
+    printf("\n\nRedshift limits, lower bound: %.2e \t %.2e h^-1 Mpc, \n\t\t upper bound: %.2e \t %.2e h^-1 Mpc", lo_zlim, loChi, hi_zlim, hiChi);
     
     // FFTw calc assignment.
     xNyquistIndex         = n2/2 + 1;

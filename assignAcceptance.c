@@ -47,16 +47,15 @@ int assignAcceptance(){
         }
     }
         
-    
-    int accepted = 0;
+    accepted_gals = 0;
     
     for(j=0; j<Vipers_Num; j++){
         if(Acceptanceflag[j] == true){
-            accepted += 1;
+            accepted_gals += 1;
         }
     }
 
-    printf("\n\nTotal number of galaxies %d, accepted %d", Vipers_Num, accepted);
+    printf("\n\nTotal number of galaxies %d, accepted %d", Vipers_Num, accepted_gals);
     
     return 0;
 }

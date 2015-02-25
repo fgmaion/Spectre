@@ -1,5 +1,6 @@
 int load_homogeneous_rands_window(int load, double sampling){
-    sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/500s/randoms_W1_500s_xyz_%.1f_%.1f.cat", lo_zlim, hi_zlim);
+    // sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/500s/randoms_W1_500s_parent_xyz_%.1f_%.1f.cat", lo_zlim, hi_zlim);
+    sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/500s/randoms_W1_500s_Nagoya_v4_xyz_%.1f_%.1f.cat", lo_zlim, hi_zlim);
     
     inputfile   = fopen(filepath, "r");
 
@@ -94,7 +95,7 @@ int add_fkp(){
 }
 
 
-int calc_mask_amplitudeCorrection(){  
+int calc_DigitalAmplitudeCorrection(){  
     fkpWeightedVolume  = 0.0;
     fkpSqWeightsVolume = 0.0;
     
@@ -106,8 +107,26 @@ int calc_mask_amplitudeCorrection(){
     fkpWeightedVolume                            *= CellVolume;
     fkpSqWeightsVolume                           *= CellVolume;
     
-    printf("\n\nFKP     weighted volume:     %e    [Total Volume]", fkpWeightedVolume/TotalVolume);
+    printf("\n\nDigital estimate");
+    
+    printf("\nFKP     weighted volume:     %e    [Total Volume]", fkpWeightedVolume/TotalVolume);
     printf("\nFKP Sq. weighted volume:     %e    [Total Volume]",   fkpSqWeightsVolume/TotalVolume);
     
+    return 0;
+}
+
+
+int calc_AnalogAmplitudeCorrection(){  
+    // assuming unit fkp weights, currently. 
+    fkpWeightedVolume  = sqdegs2steradians(W1area)*(pow(hiChi, 3.) - pow(loChi, 3.))/3.;
+    
+    // binary mask. 
+    fkpSqWeightsVolume = fkpWeightedVolume;
+    
+    printf("\n\nAnalog estimate.");
+        
+    printf("\nFKP     weighted volume:     %e    ", fkpWeightedVolume);
+    printf("\nFKP Sq. weighted volume:     %e    ", fkpSqWeightsVolume);
+        
     return 0;
 }

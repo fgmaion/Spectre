@@ -14,7 +14,7 @@ int assign_randmemory(){
 
 
 int randoms_maskGen(){   
-    rand_number = 10000000;
+    rand_number = 20000000;
                   
     assign_randmemory();
     
@@ -44,7 +44,8 @@ int randoms_maskGen(){
       rand_dec[j]   /= (pi/180.0);                                 // Converted to radians.
     }
     
-    sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/500s/randoms_W1_500s_xyz_%.1f_%.1f.cat", lo_zlim, hi_zlim);
+    
+    sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/500s/randoms_W1_500s_parent_xyz_%.1f_%.1f.cat", lo_zlim, hi_zlim);
 
     output = fopen(filepath, "w");
     

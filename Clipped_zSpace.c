@@ -1,38 +1,39 @@
 int clipDensity(double threshold){
-    int    CellsClipped =  0;
+    int CellsClipped =  0;
+
+    // account for mask 
+    for(j=0; j<n0*n1*n2; j++) overdensity[j][0] *= surveyMask[j];
 
     printf("\n\nClipping threshold: %e", appliedClippingThreshold);
 
-    printf("\nMax overdensity: %f", arrayMax(densityArray, n0*n1*n2));
-
     for(j=0; j<n0*n1*n2; j++){
-        if(densityArray[j]  > threshold){ 
-	        densityArray[j] = threshold;
+        if(overdensity[j][0]>threshold){ 
+	        overdensity[j][0] = threshold;
 	        
-		    CellsClipped   += 1; 
+		CellsClipped     += 1; 
         }
     }
 
     clippedVolume = CellVolume*CellsClipped;
-
-    printf("\nUnclipped volume: %e", 1. - clippedVolume/TotalVolume);
-    
-    
+     
     // May introduce integral constraint like term if the field is not re-zeroed. 
-    double mean = 0.0;
+    double mean          = 0.0;
+    double unmaskedcells = 0.0;
+
+    // assuming binary mask.
+    for(j=0; j<n0*n1*n2; j++)  unmaskedcells +=  surveyMask[j];
+    for(j=0; j<n0*n1*n2; j++)  mean          += overdensity[j][0]*surveyMask[j];
     
-    for(j=0; j<n0*n1*n2; j++)  mean += densityArray[j];
-    
-    mean /= (double) n0*n1*n2;
+    mean /= (double) unmaskedcells;
     
     printf("\nmean of clipped field: %e", mean);
     
-    for(j=0; j<n0*n1*n2; j++)  densityArray[j] -= mean;
+    for(j=0; j<n0*n1*n2; j++)  overdensity[j][0] -= mean;
     
     return 0;
 }
 
-
+/*
 int underclipDensity(double threshold){
     int    CellsClipped =  0;
 
@@ -53,7 +54,7 @@ int underclipDensity(double threshold){
     printf("\nUnclipped volume: %e", 1. - clippedVolume/TotalVolume);
     
     return 0;
-}
+    }*/
 
 /*
 int formPkCube(){

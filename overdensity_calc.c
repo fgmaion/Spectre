@@ -10,19 +10,16 @@ int boxCoordinates(double xCoor[], double yCoor[], double zCoor[], int rowNumber
 
 
 int calc_overdensity(){
+    printf("\n\nCalculating overdensity...");
+
     double  chi;    
-    double* meanCellRedshift;
     double  app_mean;
-    
-    meanCellRedshift = (double *) malloc(n0*n1*n2*sizeof(*meanCellRedshift));
 
     // assign memory for overdensity.
     prep_grid();
 
     for(j=0; j<n0*n1*n2; j++)           overdensity[j][0] = 0.0;
     for(j=0; j<n0*n1*n2; j++)           overdensity[j][1] = 0.0;
-    
-    for(j=0; j<n0*n1*n2; j++)      meanCellRedshift[j]    = 0.0;
 
     for(j=0; j<Vipers_Num; j++){
         // magnitude and redshift selection. 
@@ -30,32 +27,41 @@ int calc_overdensity(){
             boxlabel                    = boxCoordinates(xCoor, yCoor, zCoor, j);
             
             overdensity[boxlabel][0]   += 1;
-            
-            meanCellRedshift[boxlabel] += gal_z[j];
+            // overdensity[boxlabel][0]   += sampling[j];
             
             // cic_assign(xCoor[j], yCoor[j], zCoor[j], gal_z[j], 1.0);
         }
     }
     
-    for(j=0; j<n0*n1*n2; j++){
-        if(overdensity[j][0] > 0.0){
-	        // Currently densityArray contains solely galaxy counts per cell.
-            meanCellRedshift[j] /= overdensity[j][0];
-        
-            chi                  = interp_comovingDistance(meanCellRedshift[j]);
-        
-            overdensity[j][0]   /= CellVolume*interp_nz(chi);
+    double x, y, z;
+    
+    for(k=0; k<n0; k++){
+        // printf("\n%.2lf percentage complete.", 100.*k/n0);
+        for(j=0; j<n1; j++){
+            for(i=0; i<n2; i++){
+               Index = i + n2*j + n2*n1*k;
             
-            overdensity[j][0]   -= 1.;  
+               if(overdensity[Index][0] > 0.0){ 
+                 x = (i + 0.5)*CellSize;
+                 y = (j + 0.5)*CellSize;
+                 z = (k + 0.5)*CellSize;
+               
+                 chi   = invert_StefanoBasis(CentreRA, CentreDec, &x, &y, &z);
+            
+                 overdensity[Index][0]   /= CellVolume*interp_nz(chi);
+             
+                 overdensity[Index][0]   -= 1.;  
+               }
+               
+               // no galaxies. delta = -1. zeros handled by mask. 
+               else overdensity[Index][0]   = -1.; 
+           }
         }
-        
-        // no galaxies. delta = -1. zeros handled by mask. 
-        else overdensity[j][0]   = -1.;
     }
     
-    free(meanCellRedshift);
-    
     free_HOD();
+    
+    printf("\nOverdensity calculation complete.");
     
     return 0;
 }

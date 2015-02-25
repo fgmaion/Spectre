@@ -39,6 +39,82 @@ Ben
 
 
 // Florian
+Dear Michael
+I finally had a chance to look at your paper. Sorry for taking so long. I think this is a very interesting analysis and definitely worth publishing.
+
+When you talk about a 3D FFT, do you mean that one calculates the convolution on a mode-to-mode basis? In my case the convolution is a sum over the number of k bins (see eq. 32 in http://arxiv.org/pdf/1312.4611v2.pdf). While calculating the likelihood I do not need to evaluate the window function on a mode-to-mode basis. 
+
+I don't quite understand your discussion of the plain-parallel approximation in the introduction ("Although we have presented..."). What do you mean with "the angular position of all galaxies are to a good approximation identical"? Do you mean that the line-of-sight for all galaxies is the same (lets call that global plain parallel approximation)? In this case I think you misunderstand the Yoo & Seljak paper... they in fact state that this approximation is not valid for BigBOSS.
+
+The fact that you calculate your convolved power spectrum through a 1D FFT does suggest that you also assume a global plain parallel approximation. This might all be ok in the case of VIPERS (given the small angle), but it would not work for BOSS. Given your eq. 18 I figure you do not assume a spherical symmetric window function, which is definitely better than what people usually do when using this approach. 
+cheers
+fl
+
+ Hi Michael
+The complexity of calculating the window function multipoles in my method is O(N^2_ran), were N_ran is the number of random galaxies. N_ran does not need to be large though... this is eq. 33 in http://arxiv.org/pdf/1312.4611v2.pdf. I guess this is the same in your method? Or can you do this any faster? 
+After one has calculated the window function multipoles the convolution can be done in O(k_bin*k'_bin) were k_bin is the number of bins of the power spectrum measurement and k'_bin is the number of bins for the convolution (eq. 32) in my paper. When I evaluate the likelihood I need to convolve a model power spectrum with the window function for each element of the MCMC chain. k_bin is usually small (50 or so) and k'_bin does not need to be much larger than k_bin.
+Your method uses FFT, so your complexity is O(k_bin*log(k_bin)), which looks faster than my method. However, in my method I calculate the power spectrum only for each k_bin (or k'_bin) were I actually measured the power spectrum. Since you calculate an FT, you need a large range in k, so that you can effectively integrate over it. So your k_bin will be (much) larger than mine. Since calculating a complicated power spectrum model using perturbation theory is time consuming, calculating this model for many k bins is a problem. So even if your convolution is faster than mine, I fear you have to evaluate the power spectrum model at so many bins, that you method would be much slower. Does this make sense? 
+cheers
+fl
+
+
+
 
 // Gigi
+Dear Mike,
 
+ I think the paper looks very interesting and in my opinion the topic is worth having an independent letter, separated from the actual RSD analysis planned on VIPERS.  It’s a neat idea and I believe it would be lost if embedded into another paper where the focus will be inevitably on the RSD measurement.
+
+I only have a few comments for small text modifications, to better clarify how you use the VIPERS geometry as test bench:
+
+— Abstract, final sentence I would say: “We present a concrete application of this approach to the complex geometry of the VIPERS survey PDR-1 release, and discuss possible issues in extending the method to wider-angle surveys.
+
+— At the bottom of pag.2, 3rd last paragraph, you ask about multipole decomposition of the Scoccimarro and Taruya models. This is discussed in detail in the VIPERS RSD paper (de la Torre et al. 2013), where in the end we used Scoccimarro’s.  I am sure Sylvain can add discussion here.
+
+— Caption to Fig.2: End of first sentence, add “… across the VIPERS W1 field, for the PDR-1 data release"
+
+— Section 3, first sentence: “…we present a concrete application to the geometry of […] “. Otherwise it looks you are doing something with the data.  
+Also, my understanding is that in the end you only use the W1 area mask, right?  This should be mentioned more explicitly somewhere.
+
+— End of same paragraph: “geomtery” 
+
+— Title of Appendix B: “DERIVATTION"
+
+— Somewhere it would also be useful to mention in the light of this paper the VIPERS P(k) paper by Stefano, just to let people know that more is coming on P(k) 
+
+This is all for now, congratulations at a nice piece of work,
+
+gigi
+
+
+Ah yes,
+
+ one recommendation could be send the paper to the VIPERS team before going to the archive, both because it is interesting and also to avoid any misunderstanding, i.e. to show that no VIPERS proprietary information has been used.  You can talk with Sylvain about when and how to do this.
+
+All the best wishes,
+
+Gigi
+
+
+
+
+Hi Michael
+The complexity of calculating the window function multipoles in my method is O(N^2_ran), were N_ran is the number of random galaxies. N_ran does not need to be large though... this is eq. 33 in http://arxiv.org/pdf/1312.4611v2.pdf. I guess this is the same in your method? Or can you do this any faster?
+>     Yes, for three reasons.  Firstly, you can use a kdtree or similar to count only necessary pairs.  So at no
+> point do you calculate N_ran by N_ran, only subsets.  This is for the equivalent calculation of the multipole
+> moments of the autocorrelation of the window.
+>     Secondly, there's a freedom in the density of randoms, for large separations you can
+> afford e.g. 0.1 N_Ran. and therefore get a x100 speed up, again the tree allows you to
+> separate the density according to spatial scale.
+>     Lastly, in your eqn. 33 for the window it's necessary to evaluate spherical Bessel functions
+> for each random pair.  In my experience evaluation of these functions are very slow, so I would
+> imagine the calculation of 33 is aswell? In essence I've moved the bessel functions into the likelihood
+> evaluation at each point in parameter space.  This may be beneficial if you have less of such points than N_ran^2
+> but is definitely advantageous when you realise the bessel fns. correspond to  Hankel transforms and can therefore
+> be calculated by 1D FFT.
+>     As such, I can compute the window moments in of order 20mins for VIPERS, or on rare occasions overnight if almost
+> total suppression of statistical noise is required.
+>    Finally from a purely aesthetic point, the approach also minimises the number of window fns, contrasting your figure 7. with my fig. 3,
+> as you have defined them the number of window fns. scales with the higher order of measured multipoles, e.g. if you measured a hexadecapole
+> you would have 6 subplots (as far as I can tell).  This isn't particularly physical, as you may realise from the discussion in sec. 2.1, (for a given
+> precision the number of multipoles shown in my fig. 3. is fixed no matter the number of measure     

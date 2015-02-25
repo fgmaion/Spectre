@@ -490,7 +490,7 @@ int print_W2_2D(){
 
 
 int randWindow_pairCount(){
-    sprintf(surveyType, "maskmultipoles_W1_500s_xi_%.1f_%.1f_hiRes_hex", lo_zlim, hi_zlim);
+    sprintf(surveyType, "maskmultipoles_W1_Nagoya_v4_xi_%.1f_%.1f_hiRes_hex", lo_zlim, hi_zlim);
 
     assignMemory_xi();
     
@@ -665,7 +665,7 @@ int load2d(char filename[], double** array){
 
 
 int print_xiMultipoles(){
-    sprintf(filepath, "%s/Data/500s/%s.dat", root_dir, surveyType);
+  sprintf(filepath, "%s/Data/500s/%s.dat", root_dir, surveyType);
 
   output = fopen(filepath, "w");
 

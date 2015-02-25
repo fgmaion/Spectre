@@ -1,7 +1,7 @@
 double splint_VIPERS_maskMono(double r){
-    if(r<1.0)   return 1.;
+    if(r<0.7)   return 1.;
     
-    if(r>400.)  return 0.;
+    if(r>900.)  return 0.;
     
     if(r<loRes_highRes_join){
         double Interim;
@@ -26,7 +26,7 @@ double splint_VIPERS_maskMono(double r){
 double splint_VIPERS_maskQuad(double r){
     if(r<0.7)   return 0.;
     
-    if(r>400.0) return 0.;
+    if(r>900.0) return 0.;
     
     if(r<loRes_highRes_join){
         double Interim;
@@ -49,7 +49,7 @@ double splint_VIPERS_maskQuad(double r){
 double splint_VIPERS_maskHex(double r){
     if(r<0.7)   return 0.;
     
-    if(r>400.0) return 0.;
+    if(r>900.0) return 0.;
     
     if(r<loRes_highRes_join){
         double Interim;
@@ -82,14 +82,14 @@ double splint_VIPERS_maskMultipoles(double r, int transformOrder){
 
 
 int print_windowCorrfn(){
-    sprintf(filepath, "%s/Data/500s/maskmultipoles_W1_500s_xi_0.6_0.9_mixedRes_hex.dat", root_dir);
+    sprintf(filepath, "%s/Data/500s/maskmultipoles_W1_Nagoya_v4_xi_%.1f_%.1f_mixedRes_hex.dat", root_dir, lo_zlim, hi_zlim);
     
     double r;
     
     output = fopen(filepath, "w");
     
-    for(j=0; j<1000; j++){  
-        r = (j+1)*0.5;
+    for(j=1; j<1400; j++){  
+        r = j*0.25;
     
         fprintf(output, "%e \t %e \t %e \t %e \n", r,  splint_VIPERS_maskMono(r), splint_VIPERS_maskQuad(r), splint_VIPERS_maskHex(r));
     }
@@ -102,7 +102,8 @@ int print_windowCorrfn(){
 
 int prep_VIPERS_maskMultipoles(){
     // high resolution
-    sprintf(filepath, "%s/Data/500s/maskmultipoles_W1_500s_xi_0.6_0.9_hiRes_hex.dat", root_dir);    // 500s mask.
+    // sprintf(filepath, "%s/Data/500s/maskmultipoles_W1_500s_xi_%.1f_%.1f_hiRes_hex.dat", root_dir, lo_zlim, hi_zlim);    // 500s mask.
+    sprintf(filepath, "%s/Data/500s/maskmultipoles_W1_Nagoya_v4_xi_%.1f_%.1f_hiRes_hex.dat", root_dir, lo_zlim, hi_zlim);  // Nagoya v4.
 
     inputfile = fopen(filepath, "r");
     
@@ -151,7 +152,8 @@ int prep_VIPERS_maskMultipoles(){
 
 
     // lower resolution on larger scales.
-    sprintf(filepath, "%s/Data/500s/maskmultipoles_W1_500s_xi_0.6_0.9_loRes_hex.dat", root_dir);    // 500s mask.
+    // sprintf(filepath, "%s/Data/500s/maskmultipoles_W1_500s_xi_%.1f_%.1f_loRes_hex.dat", root_dir, lo_zlim, hi_zlim);    // 500s mask.
+    sprintf(filepath, "%s/Data/500s/maskmultipoles_W1_Nagoya_v4_xi_%.1f_%.1f_loRes_hex.dat", root_dir, lo_zlim, hi_zlim);           // Nagoya v4. 
 
     inputfile = fopen(filepath, "r");
     
@@ -200,8 +202,8 @@ int prep_VIPERS_maskMultipoles(){
     spline(VIPERS_maskr_lo, VIPERS_maskQuad_lo, VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskQuad2D_lo);
     spline(VIPERS_maskr_lo, VIPERS_maskHex_lo,  VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskHex2D_lo);
     
-    // for integral constraint, I think.
-    prepVIPERS_kSpaceMultipole();
+    // for integral constraint.
+    // prepVIPERS_kSpaceMultipole();
     
     print_windowCorrfn();
     

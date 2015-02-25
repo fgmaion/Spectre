@@ -1,7 +1,10 @@
-int CovarianceMatrix(int mocks){
+int CovarianceMatrix(int mocks, int start){
     // Retrieve the number of rows necessary before k value is greater than kmax for chi sq. evaluation. 
     // sprintf(filepath,"%s/Data/likelihood/ClippedGaussian_fields_noCosVar/clipped_fullCube_500_noCosVar_kaiserLorentz_%d.dat", root_dir, 0);
-    sprintf(filepath,"%s/Data/likelihood/ClippedGaussian_fields_noCosVar_window500s_zeromean/clipped_fullCube_500_noCosVar_window500s_zeromean_kaiserLorentz_%d.dat", root_dir, 0); // 500s mask
+    // sprintf(filepath,"%s/Data/likelihood/ClippedGaussian_fields_noCosVar_window500s_zeromean/clipped_fullCube_500_noCosVar_window500s_zeromean_kaiserLorentz_%d.dat", root_dir, 0); // 500s mask
+    // sprintf(filepath,"%s/Data/500s/HOD_mocks_zobs_allgals_clipped/HOD_mock_512_%d.dat", root_dir, start);
+    
+    sprintf(filepath,"%s/Data/500s/spoc_zobs_allgals/HOD_mock_512_specmask_%d.dat", root_dir, start);
     
     inputfile  = fopen(filepath, "r");
     
@@ -11,17 +14,23 @@ int CovarianceMatrix(int mocks){
     
     do{
         ch = fgetc(inputfile);        
+    
         if(ch    == '\n')
        	  lineNo += 1;
-    } while (ch  != EOF);
+    } while(ch  != EOF);
 
     rewind(inputfile);
 
     for(i=0; i<lineNo; i++){
         fscanf(inputfile, "%le \t %*le \t %*le \t %*d \n", &Interim);
-    
+        
+        if(Interim<ChiSq_kmin){
+            // printf("\n %d \t %e", i, Interim);
+            chiSq_kminIndex = i + 1;
+        }
+     
         if(Interim>ChiSq_kmax){
-            chiSq_kmaxIndex = (i -1);
+            chiSq_kmaxIndex = i;
         
             break;
         }
@@ -29,10 +38,14 @@ int CovarianceMatrix(int mocks){
     
     fclose(inputfile);
     
-    printf("\n\nkmax limit for ChiSq: %e (%d) \n\n", ChiSq_kmax, chiSq_kmaxIndex);
+    printf("\n\nkmin limit for ChiSq: %e (%d)", ChiSq_kmin, chiSq_kminIndex);
+    
+    printf("\nkmax limit for ChiSq: %e (%d) \n\n", ChiSq_kmax, chiSq_kmaxIndex);
     
     // total number of data points.
-    order = chiSq_kmaxIndex*hiMultipoleOrder;
+    mono_order = chiSq_kmaxIndex - chiSq_kminIndex;
+    
+    order      = mono_order*hiMultipoleOrder;
     
     // Number of mocks, number of bins to kmax, number of multipoles to be fit. 
     assignCovMat(mocks);
@@ -40,14 +53,24 @@ int CovarianceMatrix(int mocks){
     // Be careful with 0 or 1 for the mock numbering. 
     for(k=0; k<mocks; k++){
         // sprintf(filepath,"%s/Data/likelihood/ClippedGaussian_fields_noCosVar/clipped_fullCube_500_noCosVar_kaiserLorentz_%d.dat", root_dir, k);
-        sprintf(filepath,"%s/Data/likelihood/ClippedGaussian_fields_noCosVar_window500s_zeromean/clipped_fullCube_500_noCosVar_window500s_zeromean_kaiserLorentz_%d.dat", root_dir, k); // 500s mask
+        // sprintf(filepath,"%s/Data/likelihood/ClippedGaussian_fields_noCosVar_window500s_zeromean/clipped_fullCube_500_noCosVar_window500s_zeromean_kaiserLorentz_%d.dat", root_dir, k); // 500s mask
+        // sprintf(filepath,"%s/Data/500s/HOD_mocks_zobs_allgals_clipped/HOD_mock_512_%d.dat", root_dir, start + k);
+        sprintf(filepath,"%s/Data/500s/spoc_zobs_allgals/HOD_mock_512_specmask_%d.dat", root_dir, start + k);
             
         inputfile = fopen(filepath, "r");
 
-        for(i=0; i<chiSq_kmaxIndex; i++)  fscanf(inputfile, "%le \t %le \t %le \t %*d \n", &kVals[i], &Multipoles[k][i], &Multipoles[k][i+chiSq_kmaxIndex]);
+        for(i=0; i<chiSq_kmaxIndex; i++){  
+            if(i<chiSq_kminIndex) fscanf(inputfile, "%*le \t %*le \t %*le \t %*d \n");
+        
+            else{
+                fscanf(inputfile, "%le \t %le \t %le \t %*d \n", &kVals[i - chiSq_kminIndex], &Multipoles[k][i - chiSq_kminIndex], &Multipoles[k][mono_order + i - chiSq_kminIndex]);
+            
+                // printf("\n%e \t %e \t %e", kVals[i - chiSq_kminIndex], Multipoles[k][i - chiSq_kminIndex], Multipoles[k][chiSq_kmaxIndex + i - chiSq_kminIndex]);
+            }
+        }
     
         fclose(inputfile);    
-    }  
+    } 
     
     for(k=0; k<order; k++){
         for(i=0; i<mocks; i++){
@@ -55,9 +78,11 @@ int CovarianceMatrix(int mocks){
         }
     }
     
-    // printf("\n\nMean multipoles:");
+    printf("Mean multipoles:");
     
-    // for(k=0; k<chiSq_kmaxIndex; k++)  printf("\n%e \t %e \t %e", kVals[k], MeanMultipoles[k], MeanMultipoles[k+chiSq_kmaxIndex]);
+    for(k=0; k<mono_order; k++)  printf("\n%e \t %e \t %e", kVals[k], MeanMultipoles[k], MeanMultipoles[k + mono_order]);
+    
+    // fprintf_meanMultipoes();
     
     for(k=0; k<order; k++){
         // New variables have zero mean. 
@@ -72,7 +97,7 @@ int CovarianceMatrix(int mocks){
     // Pre-whiten data and covariance. 
     prewhitenCov(mocks);
     
-    fprintf_Cov();
+    // fprintf_Cov();
     
     Covariance_eigenVecs(mocks);
     
@@ -102,6 +127,7 @@ int prewhitenCov(int mocks){
           gsl_matrix_set(sigma_norm, j, k, 0.0);
         }
         
+        // NB sigma_norm is   1./sigma 
         gsl_matrix_set(sigma_norm, j, j, pow(gsl_matrix_get(Covariance, j, j), -0.5));
     }
     
@@ -116,8 +142,21 @@ int prewhitenCov(int mocks){
 }
 
 
+int fprintf_meanMultipoes(){
+    sprintf(filepath, "%s/Data/500s/spoc_zobs_meanmultipoles.dat", root_dir);
+
+    output = fopen(filepath, "w"); 
+
+    for(k=0; k<mono_order; k++)  fprintf(output, "%e \t %e \t %e \n", kVals[k], MeanMultipoles[k], MeanMultipoles[k + mono_order]);
+
+    fclose(output);
+    
+    return 0;
+}
+
+
 int fprintf_Cov(){
-    sprintf(filepath, "%s/Data/likelihood/Clipped_mask500s_Covariance.dat", root_dir);
+    sprintf(filepath, "%s/Data/500s/clipped_zobs_allgals_multipoles_cov.dat", root_dir);
 
     output = fopen(filepath, "w"); 
 

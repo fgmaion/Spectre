@@ -51,22 +51,36 @@ double linearPk_Gaussian(double k){
 
 double splintHODpk(double k){
     // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec). 
-    if(k>20.)          return pk_hiA*pow(k, 3. + pk_hin)*pow(linearBias/1.495903, 2.);
+    if(k>20.)          return pk_hiA*pow(k, 3. + pk_hin);
     
-    else if(k<0.0001)  return pk_loA*pow(k, 3. + pk_lon)*pow(linearBias/1.495903, 2.); 
+    else if(k<0.0001)  return pk_loA*pow(k, 3. + pk_lon); 
 
     else{
         double Interim;
     
         splint(sdltk, sdltPk, sdlt2d, pk_lineNo, k, &Interim);
     
-        return Interim*pow(linearBias/1.495903, 2.);
+        return Interim;
     }
 }
 
 
+double sigma8_integrand(double k){
+    return pow(2.*pi, -3.)*splintHODpk(k)*4.*pi*k*k*spherical_tophat(k, 8.)*spherical_tophat(k, 8.);
+}
+
+
+double sigma8_calc(){
+    double Interim;
+    
+    Interim = qromb(&sigma8_integrand, 0.0000001, 200.);
+    
+    return sqrt(Interim);
+}
+
+
 int inputHODPk(){
-    sprintf(filepath, "%s/Data/500s/EisensteinHu_halofit_pk.dat", root_dir);
+    sprintf(filepath, "%s/Data/500s/EisensteinHu_halofit_pk_%.2f.dat", root_dir, z_eff);
     
     inputfile  = fopen(filepath, "r");
     
@@ -82,34 +96,37 @@ int inputHODPk(){
     rewind(inputfile);
     
     // Interpolated theoretical P(k) on a regular grid in k. 
-    sdltk  = realloc(sdltk,          pk_lineNo*sizeof(*sdltk));
-    sdltPk = realloc(sdltPk,         pk_lineNo*sizeof(*sdltPk));
-              
+    sdltk  = realloc(sdltk,  pk_lineNo*sizeof(*sdltk));
+    sdltPk = realloc(sdltPk, pk_lineNo*sizeof(*sdltPk));
+    
     // Second derivates of HOD P(k) for cubic spline.           
     sdlt2d = realloc(sdlt2d,         pk_lineNo*sizeof(*sdlt2d));
 
-    
-    for(j=0; j<pk_lineNo; j++)  fscanf(inputfile, "%le \t %*le \t %le \t %*le \n", &sdltk[j], &sdltPk[j]);
+    for(j=0; j<pk_lineNo; j++)       fscanf(inputfile, "%le \t %*le \t %le \n", &sdltk[j], &sdltPk[j]);
     
     // for(j=0; j<pk_lineNo; j++)  printf("\n%e \t %e", sdltk[j], sdltPk[j]);
     
     fclose(inputfile);
-
-    spline(sdltk, sdltPk, pk_lineNo, 1.0e31, 1.0e31, sdlt2d);
     
+    
+    spline(sdltk, sdltPk, pk_lineNo, 1.0e31, 1.0e31, sdlt2d);
+        
+
     powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon);
     
     powerlaw_regression(pk_lineNo, 20., 100., 1., sdltk, sdltPk, &pk_hiA, &pk_hin);
+
     
-    pt2Pk = &splintHODpk;
+    pt2Pk      = &splintHODpk;
     
-    // pt2Pk   = &HODPk_Gaussian;
+    aexp       = 1./(1. + z_eff);  
     
-    // Approx. model to HOD P(k), inflationary power law with exponential truncation. 
-    // pt2Xi   = &Pk_powerlaw_truncated_xi;
+    app_sigma8 = 0.0;
+
+    app_sigma8 = sigma8_calc()/linearGrowth_factor(log(aexp));
     
-    // sprintf(theoryPk_flag, "HOD_-20.0");
-   
+    printf("\n\napp_sigma_8(%.2e): %.4e, sigma_8(0.0): %.4e", z_eff, sigma8_calc(), app_sigma8);
+    
     return 0;
 }
 

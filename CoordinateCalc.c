@@ -131,7 +131,7 @@ int CatalogueInput_500s(char filepath[]){
     ra             =  (double *)  malloc(Vipers_Num*sizeof(*ra));
     dec            =  (double *)  malloc(Vipers_Num*sizeof(*dec));
     zobs           =  (double *)  malloc(Vipers_Num*sizeof(*zobs)); 
-    zcos           =  (double *)  malloc(Vipers_Num*sizeof(*zcos)); 
+    // zcos           =  (double *)  malloc(Vipers_Num*sizeof(*zcos)); 
     M_B            =  (double *)  malloc(Vipers_Num*sizeof(*M_B));
 
     // derived parameters. 
@@ -141,22 +141,51 @@ int CatalogueInput_500s(char filepath[]){
     xCoor          =  (double *)  malloc(Vipers_Num*sizeof(*xCoor));
     yCoor          =  (double *)  malloc(Vipers_Num*sizeof(*yCoor));
     zCoor          =  (double *)  malloc(Vipers_Num*sizeof(*zCoor));
+    sampling       =  (double *)  malloc(Vipers_Num*sizeof(*sampling));
     
     // redshift range 0.7<z<0.8, as traced by randoms. magnitude cut for known linear bias. volume limited to z=0.85
     for(j=0; j<Vipers_Num; j++){  
         id[j] = j;
     
-        fscanf(inputfile, "%le \t %le \t %le \t %le \t %*le \t %*le \t %*le \t %*le \t %*le \t %*le \t %le \t %*le %*le \t %*d \t %*d \t %*d \n", &ra[j], &dec[j], &zobs[j], &zcos[j], &M_B[j]);
+        fscanf(inputfile, "%*d \t %le \t %le \t %le \t %le \t %*le \n", &ra[j], &dec[j], &zobs[j], &M_B[j]);
     
         // if((-20.2<M_B[j]) && (M_B[j] < -19.8) && (0.7<zobs[j]) && (zobs[j]<0.8))  Acceptanceflag[j] = true;
     }
     
-    // for(j=0; j<10; j++)  printf("\n%d \t %.4lf \t %.4lf \t %.4lf \t %.4lf \t %.4lf", id[j], ra[j], dec[j], zobs[j], zcos[j], M_B[j]);
+    // for(j=0; j<10; j++)  printf("\n%d \t %.4lf \t %.4lf \t %.4lf \t %.4lf", id[j], ra[j], dec[j], zobs[j], M_B[j]);
     
     fclose(inputfile);
     
     printf("\nHOD 500s catalogue input successful.");
     
+    return 0;
+}
+
+
+int spec_weights(){
+    if(loopCount<10)        sprintf(filepath, "%s/Venice/mocks_W1_v8.0_500_spocWeights/mock_00%d_W1_spec_weights.dat", root_dir, loopCount);
+    else if(loopCount<100)  sprintf(filepath, "%s/Venice/mocks_W1_v8.0_500_spocWeights/mock_0%d_W1_spec_weights.dat",  root_dir, loopCount);
+    else                    sprintf(filepath, "%s/Venice/mocks_W1_v8.0_500_spocWeights/mock_%d_W1_spec_weights.dat",   root_dir, loopCount);
+
+    inputfile     = fopen(filepath, "r");  
+
+    for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%*d \t %*lf \t %*lf \t %lf \n", &sampling[j]);
+
+    fclose(inputfile);
+    
+    for(j=0; j<Vipers_Num; j++)  sampling[j] = 1./sampling[j];
+
+    // normalise to sum_i w_i = 1., with respect to accepted galaxies only;
+    double norm = 0.0;
+    
+   for(j=0; j<Vipers_Num; j++){
+        if(Acceptanceflag[j] == true){
+            norm += sampling[j];
+        }
+    }
+    
+    for(j=0; j<Vipers_Num; j++)  sampling[j] *= accepted_gals/norm;
+
     return 0;
 }
 

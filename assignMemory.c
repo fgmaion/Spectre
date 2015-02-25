@@ -159,15 +159,15 @@ int LikelihoodMemory(){
     }
 
 
-    betaPosterior = (double *)  malloc(Res*sizeof(*betaPosterior));    
+    fsigma8Posterior = (double *)  malloc(Res*sizeof(*fsigma8Posterior));    
     
-    for(i=0; i<Res; i++)  betaPosterior[i] = 0.0;
+    for(i=0; i<Res; i++)  fsigma8Posterior[i] = 0.0;
     
     sigmaPosterior = (double *)  malloc(Res*sizeof(*sigmaPosterior));    
 
     for(i=0; i<Res; i++)  sigmaPosterior[i] = 0.0;
     
-    
+    /*
     betaSigmaPosterior = (double **) malloc(Res*sizeof(*betaSigmaPosterior));
     
     for(j=0; j<Res; j++)  betaSigmaPosterior[j] = malloc(Res*sizeof(**betaSigmaPosterior));
@@ -176,7 +176,7 @@ int LikelihoodMemory(){
         for(j=0; j<Res; j++){
             betaSigmaPosterior[i][j] = 0.0;
         }
-    }
+    }*/
     
     return 0;
 }
@@ -201,7 +201,7 @@ int assignCovMat(int mocks){
         }
     }
     
-    kVals                                                  = (double  *) malloc(chiSq_kmaxIndex*sizeof(*kVals));
+    kVals                                                  = (double  *) malloc(mono_order*sizeof(*kVals));
 
     MeanMultipoles                                         = (double  *) malloc(order*sizeof(*MeanMultipoles));    
     
@@ -220,30 +220,6 @@ int assignCovMat(int mocks){
     // Assign gsl_vector for eigenvector. 
     col        = gsl_vector_alloc(order);
     
-    
-    // Covariance is an N x N matrix, where N corresponds to hiMultipoleOrder*chiSq_kmaxIndex, here hiMultipoleOrder is due to Mono-Mono, Mono-Quad, Quad-Quad, etc... elements. Here hex-blah elements are 
-    // ignored. 
-        /*
-    Covariance                                                      = (double **) malloc(order*sizeof(*Covariance));
-    
-    for(j=0; j<order; j++) Covariance[j]                            = (double  *) malloc(order*sizeof(**Covariance));
-        
-    for(k=0; k<order; k++){
-        for(j=0; j<order; j++){
-            Covariance[j][k]                = 0.0;
-        }
-    }
-    
-    sigmaNorm = (double *)  malloc(order*sizeof(*sigmaNorm));
-    
-    smallestEigenvalue = pow(10., 12.);
-    
-    // order has been assigned in MultipoleCovariance.
-    eigenVals = malloc(order*sizeof(*eigenVals));
-    eigenVecs = malloc(order*sizeof(*eigenVecs)); 
-    
-    for(j=0; j<order; j++)  eigenVecs[j] = malloc(order*sizeof(**eigenVecs));
-    */
     return 0;
 }
 
