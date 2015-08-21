@@ -74,9 +74,7 @@ int Covariance_eigenVecs(int mocks){
         for(i=0; i<mocks; i++){            
             dMultipoles[i][j] = 0.0;
         
-            for(k=0; k<order; k++){
-                dMultipoles[i][j] += gsl_vector_get(col, k)*Multipoles[i][k];
-            }
+            for(k=0; k<order; k++)  dMultipoles[i][j] += gsl_vector_get(col, k)*Multipoles[i][k];
         }
     }
     

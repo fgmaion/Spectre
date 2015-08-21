@@ -14,7 +14,7 @@ int set_testparams(){
 }
 
 
-int halofit(){
+int halofit(double z0){
     // The `halofit' code models the nonlinear evolution of cold matter 
     // cosmological power spectra. The full details of the way in which 
     // this is done are presented in Smith et al. (2003), MNRAS, 341, 1311. 
@@ -26,29 +26,26 @@ int halofit(){
     // Further edits 17.11.2008 by JAP
 
     // set_testparams();
-
-    double z0 = 0.85; // 0.75
     
     double     aexp; // expansion factor for desired redshift. 
     
     double    Om_mz;
     double    Om_vz;
     
-    // usual Om_m problem. Calculation of the shape parameter.
-    pk_gamma = Om_m*h*exp(-Om_b*(1. + sqrt(2.*h))/Om_m);
-    
     double sig8_app, gg, gg0, plin, pnlin; 
-    double rknl, rneff, rncur, dummy, rk;
+    double rknl, rneff, rncur, dummy, rk;    
+    
+    // Calculation of the Bond-Efstathiou shape parameter.
+    pk_gamma = Om_m*h*exp(-Om_b*(1. + sqrt(2.*h))/Om_m);
     
     printf("\n\nHalofit.");
     
     printf("\n\nOm_m: %.3e, Om_b: %.3e, Om_v: %.3e, h: %.3e, sigma 8: %.3e, p index: %.3e", Om_m, Om_b, Om_v, h, sigma_8, p_index);
     
-    printf("\n\nDesired redshift: %.2f, scale factor: %.2e, Gamma: %.8e, Om_m(z): %.2e, Om_v(z): %.2e, CPT D+: %.2e\n", z0, aexp, pk_gamma, Om_mz, Om_vz, gg);
+    printf("\n\nDesired redshift: %.2f, scale factor: %.2e, Gamma: %.8e, Om_m(z): %.2e, Om_v(z): %.2e, Carroll-Press-Turner D+: %.2e\n", z0, aexp, pk_gamma, Om_mz, Om_vz, gg);
     
     for(ii=0; ii<1; ii++){
         // possibility of multiple redshifts. 
-    
         aexp  = 1./(1. + z0);          
     
         Om_mz = omega_m(aexp, Om_m, Om_v);
@@ -72,7 +69,6 @@ int halofit(){
         // sigma_8 (defined today.), checked against jap.  
         // printf("\napparent sigma_8: %.16e", sig8_app);
     
-        // bit baffled by aexp here. 
         amp = (aexp*gg/gg0)*(sigma_8/sig8_app);
     
         // printf("\namplitude correction: %.6e, apparent sigma_8: %.6e, current: %.6e, scaled to z=0: %.6e", amp, sig8_app, sigint(8.0), sigint(8.0)*(gg0/gg));
@@ -135,7 +131,7 @@ double omega_m(double aa, double om_m0, double om_v0){
       
     omega_t = 1.0 + (om_m0 + om_v0 - 1.0)/(1. - om_m0 - om_v0 + om_v0*aa*aa + om_m0/aa);
       
-    omega_m = omega_t*om_m0/(om_m0+om_v0*aa*aa*aa);
+    omega_m = omega_t*om_m0/(om_m0 + om_v0*aa*aa*aa);
       
     return omega_m;
 }
@@ -145,9 +141,9 @@ double omega_v(double aa, double om_m0, double om_v0){
     // evolution of omega lambda with expansion factor
     double omega_v, omega_t;
       
-    omega_t=1.0+(om_m0+om_v0-1.0)/(1.-om_m0-om_v0+om_v0*aa*aa+om_m0/aa);
+    omega_t = 1.0 + (om_m0 + om_v0 - 1.0)/(1. - om_m0 - om_v0 + om_v0*aa*aa + om_m0/aa);
       
-    omega_v=omega_t*om_v0/(om_v0+om_m0/aa/aa/aa);
+    omega_v = omega_t*om_v0/(om_v0 + om_m0/aa/aa/aa);
       
     return omega_v;
 }

@@ -1,5 +1,5 @@
 int grow_randTree(){
-    assignLeafValues(point_rands,  rand_x, rand_y, rand_z, rand_z, rand_number);
+    assignLeafValues(point_rands,  rand_x, rand_y, rand_z, rand_weight, rand_number);
     
     randTree = buildTree(point_rands,  rand_number);
 
@@ -10,7 +10,7 @@ int grow_randTree(){
 
 
 int grow_galTree(){
-    assignLeafValues( point_gals,   xCoor,  yCoor,  zCoor, zCoor, Vipers_Num);
+    assignLeafValues(point_gals,   xCoor,  yCoor,  zCoor, zCoor, Vipers_Num);
     
     galTree  = buildTree(point_gals,   Vipers_Num);
 
@@ -27,20 +27,39 @@ int grow_galTree(){
 int CountPairs_rMu(double **C0, double **C2, double **C4, double **r, double **mu, Node* firstTree, Node* secndTree, int sameTree){
   findSuitableNodePairs_bruteforcePairCount(C0, C2, C4, r, mu, firstTree, secndTree, sameTree);
   
+  double mu0weighted_paircount, mu2weighted_paircount, mu4weighted_paircount;
+  
   for(i=0; i<nlogbins; i++){
     for(j=0; j<nlinbins; j++){
-         r[i][j] /= C0[i][j];
+        if(C0[i][j] > 0.){
+            mu0weighted_paircount   = C0[i][j];
+            mu2weighted_paircount   = C2[i][j];
+            mu4weighted_paircount   = C4[i][j];
+    
+            C2[i][j]  =  3.*mu2weighted_paircount - mu0weighted_paircount;
+            C4[i][j]  = 35.*mu4weighted_paircount - 30.*mu2weighted_paircount + 3.*mu0weighted_paircount;
+            
+            // l=2, (2l+1) L_2
+            C2[i][j] *=   5.*0.5;
+            
+            // l=4, (2l+1) L_4
+            C4[i][j] *= 9.*0.125;
+            
+            // printf("\n%e \t %e", C2[i][j], C4[i][j]);
+        }
         
-        mu[i][j] /= C0[i][j];
+       //  r[i][j] /= C0[i][j];
+        
+       // mu[i][j] /= C0[i][j];
     }
   }
   
-  sumPairs(C0);
+  // sumPairs(C0);
 
-  printf("\n\nDistinct pair count: %d", Distinct_pairCount);
+  // printf("\n\nDistinct pair count: %d", Distinct_pairCount);
     
-  printf("\n\nSeparations, min: %e, max: %e", pow(10., min_pairSeparation), pow(10., max_pairSeparation)); 
-  printf("\nmu,          min: %e, max: %e",   min_mu,  max_mu); 
+  // printf("\n\nSeparations, min: %e, max: %e", pow(10., min_pairSeparation), pow(10., max_pairSeparation)); 
+  // printf("\nmu,          min: %e, max: %e",   min_mu,  max_mu); 
 
   return 0;
 }
@@ -56,7 +75,7 @@ double computeNorm(int Nfirst, int Nsecnd){
 }
 
 
-int assignLeafValues(Particle* cat, double xCoors[], double yCoors[], double zCoors[], double disp[], int N){
+int assignLeafValues(Particle* cat, double xCoors[], double yCoors[], double zCoors[], double weight[], int N){
     // Initialise tree with the co-ordinates of each particle. 
     for(i=0; i<N; i++){      	    
 	    cat[i].x[0]        = xCoors[i];
@@ -64,8 +83,8 @@ int assignLeafValues(Particle* cat, double xCoors[], double yCoors[], double zCo
 	    cat[i].x[2]        = zCoors[i];
 	    
 	    cat[i].index       = i;
-	    cat[i].weight      = 1.0;
-	    cat[i].disp        = disp[i];
+	    cat[i].weight      = weight[i];
+	    // cat[i].disp        =   disp[i];
     }
     
     return 0;
@@ -146,7 +165,7 @@ int print_nodeLimits(Node *node){
 
 
 int findSuitableNodePairs_bruteforcePairCount(double **C0, double** C2, double** C4, double **r, double **mu, Node *node1, Node *node2, int sameTree){
-    if((node1->label%10 == 0) && (node2->label%50 == 0))  printf("\n%d \t %d", node1->label, node2->label);
+    if((node1->label%50 == 0) && (node2->label%250 == 0))  printf("\n%d \t %d", node1->label, node2->label);
     
     // Given two nodes, is their maximum displacement smaller than the smallest bin? is their minimum displacement larger than the largest bin -> don't bother counting pairs. 
     // Otherwise, brute force count between the nodes. 
@@ -185,44 +204,58 @@ int findSuitableNodePairs_bruteforcePairCount(double **C0, double** C2, double**
 
 int bruteforceCountpairs_betweenChildren(double **C0, double **C2, double **C4, double **r, double **mu, Node *node1, Node *node2, int sameTree){   
     double log10_r;
+    double  weight;
     double pair_mu;
+    double pair_mu2;
  
     // Only called for children.      
     if((sameTree == 1) && (node1->label == node2->label)){
         // Same tree, same child. count distinct pairs.
         for(ii=0; ii<node1->N; ii++){
             for(jj=ii+1; jj<node2->N; jj++){
-                Distinct_pairCount+= 1;
+                // Distinct_pairCount+= 1;
                 
                 log10_r            = log10_particleSeparation(node1->particle[ii], node2->particle[jj]); 
             
-                pair_mu            = pair_zmu(node1->particle[ii],  node2->particle[jj]);
+                // max_pairSeparation = maximum_twodoubles(max_pairSeparation, log10_r);
+                // min_pairSeparation = minimum_twodoubles(min_pairSeparation, log10_r);
             
-                max_pairSeparation = maximum_twodoubles(max_pairSeparation, log10_r);
-                min_pairSeparation = minimum_twodoubles(min_pairSeparation, log10_r);
-            
-                max_mu             = maximum_twodoubles(max_mu, pair_mu);
-                min_mu             = minimum_twodoubles(min_mu, pair_mu);
+                // max_mu             = maximum_twodoubles(max_mu, pair_mu);
+                // min_mu             = minimum_twodoubles(min_mu, pair_mu);
             
                 if(log10_r>zerolog){
                     // logarithmic binning in r.	    
                     indi           = (int) floor(  (log10_r - zerolog)/logbinsz);
 	    
+	                pair_mu        = pair_zmu(node1->particle[ii],  node2->particle[jj]);
+	        	    
     	            // linear binning in mu.
     	            indj           = (int) floor(  (pair_mu - zerolin)/linbinsz);
        
-                    if((indi<nlogbins) && (indj<nlinbins) && (indi>=0) && (indj >=0)){  
-                        C0[indi][indj]  += 1.0;
+                    if((indi<nlogbins) && (indj<nlinbins) && (indi>=0) && (indj >=0)){                      
+                        pair_mu2         = pair_mu*pair_mu;
                     
-                                           // l=2, (2l+1) L_2
-                        C2[indi][indj]  += 5.*0.5*(3.*pair_mu*pair_mu - 1.);
+                    	weight           = node1->particle[ii].weight*node2->particle[jj].weight;
                     
+                        // C0[indi][indj]  += 1.0;
+                        C0[indi][indj] += weight;
+                        
+                        //----------------------------------------------------------------------//
+                        
+                        // l=2, (2l+1) L_2
+                        // C2[indi][indj]  += (3.*pair_mu2 - 1.);
+                        // C2[indi][indj]  += pair_mu2;
+                        C2[indi][indj] += pair_mu2*weight;
+                    
+                        //----------------------------------------------------------------------//
                                            // l=4, (2l+1) L_4
-                        C4[indi][indj]  += 9.*0.125*(35.*pow(pair_mu, 4.) - 30.*pow(pair_mu, 2.) + 3.);
+                        // C4[indi][indj]  += (35.*pair_mu2*pair_mu2 - 30.*pair_mu2 + 3.);
+                        // C4[indi][indj]  += pair_mu2*pair_mu2;
+                        C4[indi][indj] += pair_mu2*pair_mu2*weight;
                     
-                        r[indi][indj]   += log10_r; 
+                        // r[indi][indj]   += log10_r; 
     	            
-        	            mu[indi][indj]  += pair_mu;
+        	            // mu[indi][indj]  += pair_mu;
         	            
         	           /*  
         	           if((10.<pow(10., log10_r)) && (pow(10., log10_r)<15.)){        	           
@@ -245,37 +278,50 @@ int bruteforceCountpairs_betweenChildren(double **C0, double **C2, double **C4, 
 	   // Either different tree, or different children with node1 > node2. all pairs are distinct at this point. 
 	   for(ii=0; ii<node1->N; ii++){
             for(jj=0; jj<node2->N; jj++){
-                Distinct_pairCount += 1;
+                // Distinct_pairCount += 1;
                 
                 log10_r            = log10_particleSeparation(node1->particle[ii], node2->particle[jj]); 
             
-                pair_mu            = pair_zmu(node1->particle[ii],  node2->particle[jj]);
+                // max_pairSeparation = maximum_twodoubles(max_pairSeparation, log10_r);
+                // min_pairSeparation = minimum_twodoubles(min_pairSeparation, log10_r);
             
-                max_pairSeparation = maximum_twodoubles(max_pairSeparation, log10_r);
-                min_pairSeparation = minimum_twodoubles(min_pairSeparation, log10_r);
-            
-                max_mu             = maximum_twodoubles(max_mu, pair_mu);
-                min_mu             = minimum_twodoubles(min_mu, pair_mu);
+                // max_mu             = maximum_twodoubles(max_mu, pair_mu);
+                // min_mu             = minimum_twodoubles(min_mu, pair_mu);
             
                 if(log10_r>zerolog){
                     // logarithmic binning in r.	    
                     indi           = (int) floor(  (log10_r - zerolog)/logbinsz);
 	    
+	                pair_mu        = pair_zmu(node1->particle[ii],  node2->particle[jj]);
+	    
     	            // linear binning in mu.
     	            indj           = (int) floor(  (pair_mu - zerolin)/linbinsz);
        
-                    if((indi<nlogbins) && (indj<nlinbins) && (indi>=0) && (indj >=0)){  
-                        C0[indi][indj] += 1.0;
+                    if((indi<nlogbins) && (indj<nlinbins) && (indi>=0) && (indj >=0)){                      
+                        pair_mu2        = pair_mu*pair_mu;
+                                        
+                        weight          = node1->particle[ii].weight*node2->particle[jj].weight;
+                                        
+                        // C0[indi][indj] += 1.0;
+                        C0[indi][indj] += weight;
                     
+                        //----------------------------------------------------------------------//
+
                                           // l=2, (2l+1) L_2
-                        C2[indi][indj] += 5.*0.5*(3.*pair_mu*pair_mu - 1.);
+                        // C2[indi][indj] += (3.*pair_mu2 - 1.);
+                        // C2[indi][indj]  += pair_mu2;
+                        C2[indi][indj] += pair_mu2*weight;
+                        
+                        //----------------------------------------------------------------------//
                         
                                           // l=4, (2l+1) L_4
-                        C4[indi][indj] += 9.*0.125*(35.*pow(pair_mu, 4.) - 30.*pow(pair_mu, 2.) + 3.);
+                        // C4[indi][indj] += (35.*pair_mu2*pair_mu2 - 30.*pair_mu2  + 3.);
+                        // C4[indi][indj]  += pair_mu2*pair_mu2;
+                        C4[indi][indj] += pair_mu2*pair_mu2*weight;
                     
-                        r[indi][indj]  += log10_r; 
+                        // r[indi][indj]  += log10_r; 
     	            
-        	            mu[indi][indj] += pair_mu;
+        	            // mu[indi][indj] += pair_mu;
         	            
         	           /* 
         	           if((10.<pow(10., log10_r)) && (pow(10., log10_r)<15.)){        	           
@@ -298,14 +344,14 @@ int bruteforceCountpairs_betweenChildren(double **C0, double **C2, double **C4, 
 }
 
 
-int bruteforce_nonodes(double **C0, double **C2, double **r, double **mu, Particle* cat, Particle* cat2, int N, int N2, int sameTree){    
+int bruteforce_nonodes(double **C0, double **C2, double **C4, double **r, double **mu, Particle* cat, Particle* cat2, int N, int N2, int sameTree){    
     double log10_r;
     double pair_mu;
         
     if(sameTree == 1){
         // Counting Distinct pairs. 
         for(ii=0; ii<N; ii++){
-            // printf("\n%e", 100.*ii/Vipers_Num);
+            if(ii%20 == 0)  printf("\n%e", 100.*ii/N);
         
             for(jj=ii+1; jj<N; jj++){
                 Distinct_pairCount += 1;
@@ -314,12 +360,12 @@ int bruteforce_nonodes(double **C0, double **C2, double **r, double **mu, Partic
             
                 pair_mu            = pair_zmu(cat[ii], cat[jj]);
             
-                max_pairSeparation = maximum_twodoubles(max_pairSeparation, log10_r);
-                min_pairSeparation = minimum_twodoubles(min_pairSeparation, log10_r);
+                // max_pairSeparation = maximum_twodoubles(max_pairSeparation, log10_r);
+                // min_pairSeparation = minimum_twodoubles(min_pairSeparation, log10_r);
             
-                max_mu             = maximum_twodoubles(max_mu, pair_mu);
-                min_mu             = minimum_twodoubles(min_mu, pair_mu);
-
+                // max_mu             = maximum_twodoubles(max_mu, pair_mu);
+                // min_mu             = minimum_twodoubles(min_mu, pair_mu);
+                
                 if(log10_r>zerolog){
                     // logarithmic binning in r.	    
                     indi           = (int) floor(  (log10_r - zerolog)/logbinsz);
@@ -329,6 +375,7 @@ int bruteforce_nonodes(double **C0, double **C2, double **r, double **mu, Partic
        
                     if((indi<nlogbins) && (indj<nlinbins) && (indi>=0) && (indj >=0))  C0[indi][indj] += 1.0;
                 }
+            
                 
                 else{
                     printf("\nUnderflow, reduce lower zerolog (%e) to: %e", zerolog, log10_r);
@@ -348,11 +395,11 @@ int bruteforce_nonodes(double **C0, double **C2, double **r, double **mu, Partic
             
                 pair_mu            = pair_zmu(cat[ii], cat2[jj]);
                 
-                max_pairSeparation = maximum_twodoubles(max_pairSeparation, log10_r);
-                min_pairSeparation = minimum_twodoubles(min_pairSeparation, log10_r);
+                // max_pairSeparation = maximum_twodoubles(max_pairSeparation, log10_r);
+                // min_pairSeparation = minimum_twodoubles(min_pairSeparation, log10_r);
             
-                max_mu             = maximum_twodoubles(max_mu, pair_mu);
-                min_mu             = minimum_twodoubles(min_mu, pair_mu);
+                // max_mu             = maximum_twodoubles(max_mu, pair_mu);
+                // min_mu             = minimum_twodoubles(min_mu, pair_mu);
             
                 if(log10_r>zerolog){
                     // logarithmic binning in r.	    
@@ -375,8 +422,8 @@ int bruteforce_nonodes(double **C0, double **C2, double **r, double **mu, Partic
 
     printf("\n\nDistinct pair count: %d", Distinct_pairCount);
     
-    printf("\n\nSeparations, min: %e, max: %e", pow(10., min_pairSeparation), pow(10., max_pairSeparation)); 
-    printf("\nmu,          min: %e, max: %e",   min_mu,  max_mu); 
+    // printf("\n\nSeparations, min: %e, max: %e", pow(10., min_pairSeparation), pow(10., max_pairSeparation)); 
+    // printf("\nmu,          min: %e, max: %e",   min_mu,  max_mu); 
 
     return 0;
 }

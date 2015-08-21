@@ -10,6 +10,12 @@ int prep_mask(){
 int prep_grid(){    
     overdensity                = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);
     
+    smooth_overdensity         = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);
+    
+    // initialise overdensity[0]
+    for(j=0; j<n0*n1*n2;   j++) overdensity[j][0] = 0.;
+    for(j=0; j<n0*n1*n2;   j++) overdensity[j][1] = 0.;
+    
     return 0;
 }
 
@@ -17,8 +23,10 @@ int prep_grid(){
 int prep_fftw(){    
     H_k                = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(fftw_complex)); 
     
-    p                  = fftw_plan_dft_3d(n0, n1, n2, overdensity, H_k, FFTW_FORWARD,  FFTW_ESTIMATE);
+    H2_k               = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(fftw_complex)); 
     
+    p                  = fftw_plan_dft_3d(n0, n1, n2, overdensity, H_k, FFTW_FORWARD,  FFTW_ESTIMATE);
+
     /*
     PkArray            = (double **)     malloc(n0*n1*n2*sizeof(double*));             // rows
     
@@ -56,7 +64,6 @@ int prep_pkRegression(double logk_min, double logk_max, double bin_no){
     // cols of mod k, mu, pk.
     for(j=0; j<n0*n1*n2; j++)  polar_pk[j]    = (double *)  malloc(3*sizeof(double)); 
 
- 
     logk_interval        = (logk_max - logk_min)/bin_no;
  
     logk_limits          = (double *) malloc(bin_no*sizeof(*logk_limits));
@@ -78,61 +85,20 @@ int prep_pkRegression(double logk_min, double logk_max, double bin_no){
     return 0;
 }
 
-/*
-int assign2DPkMemory(int muBinNumb, int kBinNumb){
-    polar2Dpk             = (double **) malloc(n0*n1*n2*sizeof(double*));
-    TwoDpkArray           = (double **) malloc(n0*n1*n2*sizeof(double*));                         
+
+int assign2DPkMemory(){
+    twodim_pk           = (double **) realloc(twodim_pk, n0*n1*n2*sizeof(double*));                         
  
-    for(j=0; j<n0*n1*n2; j++){
-          polar2Dpk[j]    = (double *)  malloc(3*sizeof(double)); 
-        TwoDpkArray[j]    = (double *)  malloc(3*sizeof(double));
+    for(j=0; j<n0*n1*n2; j++)  twodim_pk[j]    = (double *)  malloc(3*sizeof(double));
     
-          polar2Dpk[j][0] = 0.0;
-          polar2Dpk[j][1] = 0.0;
-          polar2Dpk[j][2] = 0.0;
-          
-        TwoDpkArray[j][0] = 0.0; 
-        TwoDpkArray[j][1] = 0.0;
-        TwoDpkArray[j][2] = 0.0;
-    }
+    d2_binnedpk         = (double **) realloc(d2_binnedpk, 50*sizeof(double* ));
     
-    // zSpaceBinnedPk                                       = (double **) malloc((loskBinNumb-1)*sizeof(double*));
-    // for(j=0; j<loskBinNumb-1; j++) zSpaceBinnedPk[j]     = (double  *) malloc((perpkBinNumb-1)*sizeof(double));
+    for(j=0; j<50; j++) d2_binnedpk[j] = (double *) malloc(50*sizeof(double));
     
-    // zSpacemodesPerBin                                    = (int **)    malloc((loskBinNumb-1)*sizeof(int*));
-    // for(j=0; j<loskBinNumb-1; j++) zSpacemodesPerBin[j]  = (int  *)    malloc((perpkBinNumb-1)*sizeof(int));
+    for(k=0; k<50; k++) for(j=0; j<50; j++)  d2_binnedpk[k][j] = 0.0;
     
-    // mean_perpk                                           = (double **) malloc((loskBinNumb-1)*sizeof(double*));
-    // for(j=0; j<loskBinNumb-1; j++) mean_perpk[j]         = (double *)  malloc((perpkBinNumb-1)*sizeof(double));
-    
-    // mean_losk                                            = (double **) malloc((loskBinNumb-1)*sizeof(double*));
-    // for(j=0; j<loskBinNumb-1; j++) mean_losk[j]          = (double  *) malloc((perpkBinNumb-1)*sizeof(double));
-    
-    loskBinLimits                                        = (double *) malloc(loskBinNumb*sizeof(*loskBinLimits));
-    perpkBinLimits                                       = (double *) malloc(perpkBinNumb*sizeof(*perpkBinLimits));
-
-    muBinLimits                                          = (double *) malloc(muBinNumb*sizeof(*muBinLimits));
-
-    polar_modesPerBin                                    = (int   **) malloc((muBinNumb-1)*sizeof(int*));
-    for(j=0; j<muBinNumb-1; j++)   polar_modesPerBin[j]  = (int    *) malloc((kBinNumb-1)*sizeof(int));
-
-    mean_mu                                              = (double **) malloc((muBinNumb-1)*sizeof(double*));
-    for(j=0; j<muBinNumb-1; j++)   mean_mu[j]            = (double  *) malloc((kBinNumb-1)*sizeof(double));
-
-    mean_modk                                            = (double **) malloc((muBinNumb-1)*sizeof(double*));
-    for(j=0; j<muBinNumb-1; j++)   mean_modk[j]          = (double  *) malloc((kBinNumb-1)*sizeof(double));
-
-    polar2DBinnedPk                                      = (double **) malloc((muBinNumb-1)*sizeof(double*));
-    for(j=0; j<muBinNumb-1; j++)   polar2DBinnedPk[j]    = (double  *) malloc((kBinNumb-1)*sizeof(double));
-    
-    kMonopole_expError                                   = (double  *) malloc((kBinNumb-1)*sizeof(*kMonopole_expError));
-    kQuadrupole_expError                                 = (double  *) malloc((kBinNumb-1)*sizeof(*kQuadrupole_expError));
-    
-    wfMonopole                                           = (double  *) malloc((kBinNumb-1)*sizeof(*wfMonopole));
-    wfQuadrupole                                         = (double  *) malloc((kBinNumb-1)*sizeof(*wfQuadrupole));
-
     return 0;
-}*/
+}
 
 
 int LikelihoodMemory(){
@@ -205,9 +171,7 @@ int assignCovMat(int mocks){
 
     MeanMultipoles                                         = (double  *) malloc(order*sizeof(*MeanMultipoles));    
     
-    for(j=0; j<order; j++){
-        MeanMultipoles[j]   = 0.0;
-    }
+    for(j=0; j<order; j++)  MeanMultipoles[j]   = 0.0;
     
     Covariance = gsl_matrix_alloc(order, order);
     sigma_norm = gsl_matrix_alloc(order, order);

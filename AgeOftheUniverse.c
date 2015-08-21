@@ -17,10 +17,10 @@ int UniverseAge(){
     
     H_0inPerSec                 = H_0*pow(3.08567758, -1.)*pow(10.0, -19.0);                          // s^{-1}                    
                
-    HubbleTime                  = pow(H_0inPerSec, -1.)*pow(OneYearInSeconds, -1.)*pow(10., -9.);      // Hubble time in Gyears
+    HubbleTime                  = pow(H_0inPerSec, -1.)*pow(OneYearInSeconds, -1.)*pow(10., -9.);     // Hubble time in Gyears
     
     
-    linearGrowth_nPoints        = 1100;
+    linearGrowth_nPoints        = 1120;
     
     // AgeOftheUniverse         = malloc(linearGrowth_nPoints*sizeof(*AgeOftheUniverse));
     // Age2derivatives          = malloc(linearGrowth_nPoints*sizeof(*Age2derivatives));
@@ -46,10 +46,12 @@ int UniverseAge(){
     
         // AgeOftheUniverse[i]     =   qromb(&age_Integrand, -13.5, lnAarray[i]);                  // In units of H_0
         
+        // matter and vacuum energy. 
         HubbleCnstWithTime[i]   =   H_0*pow(1. - Om_m + Om_m*pow(e, -3.0*lnAarray[i]), 0.5);     // In units of km s^-1 Mpc^-1
         
         Om_mOfa[i]              =   Om_m*pow(H_0/HubbleCnstWithTime[i], 2.0)*pow(e, -3.0*lnAarray[i]);
         
+        // GR
         f_Om_mOfa545[i]         =   pow(Om_mOfa[i], 0.545);
     
         // printf("\n%d \t %.4e \t %.4e \t %.4e \t %.4e \t %.4e \t %.4e", i, lnAarray[i], 1./exp(lnAarray[i]) - 1., HubbleTime*AgeOftheUniverse[i], HubbleCnstWithTime[i], Om_mOfa[i], f_Om_mOfa545[i]);

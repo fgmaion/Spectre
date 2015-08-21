@@ -162,6 +162,125 @@ int addgal_overlapPoly_counts(NodeP *polyTree, double *x0, double ra, double dec
 }
 
 
+double poly_area(int poly_id){
+  // Given an irregular polygon, whose vertices are in clockwise order. returns the polygon area. 
+  double area = 0.0;         // Accumulates area in the loop
+
+  // http://mathworld.wolfram.com/PolygonArea.html
+  // http://www.mathopenref.com/coordpolygonarea2.html
+  
+  j = polysAll[poly_id].N - 1;
+  
+  for(i=0; i<polysAll[poly_id].N; i++){ 
+    area += (polysAll[poly_id].x[j] + polysAll[poly_id].x[i])*(polysAll[poly_id].y[j] - polysAll[poly_id].y[i]); 
+    
+    j     = i;
+  }
+
+  return area/2.;
+}
+
+
+double clockwise_vertices(int poly_id){
+    // for(j=0; j<polysAll[poly_id].N; j++)  printf("\n%.4f \t %.4f", polysAll[poly_id].x[j], polysAll[poly_id].y[j]);
+    double centre_ra  = 0.0;
+    double centre_dec = 0.0;
+    
+    double theta[polysAll[poly_id].N];
+    
+    for(j=0; j<polysAll[poly_id].N; j++)  centre_ra  += polysAll[poly_id].x[j]/polysAll[poly_id].N;
+    for(j=0; j<polysAll[poly_id].N; j++)  centre_dec += polysAll[poly_id].y[j]/polysAll[poly_id].N;
+    
+    // printf("\n\n%.4f \t %.4f", centre_ra, centre_dec);
+    
+    // relative to centre point.
+    for(j=0; j<polysAll[poly_id].N; j++){  
+        polysAll[poly_id].x[j] -= centre_ra;
+        polysAll[poly_id].y[j] -= centre_dec;
+        
+        // calculate polar angle. 
+        theta[j]          = 180. + (180./pi)*atan2(polysAll[poly_id].y[j], polysAll[poly_id].x[j]);
+        
+        // counter clockwise to clockwise. 
+        theta[j]          = 360.  - theta[j];
+        
+        // theta[j]       = 180. + (180./pi)*atan2(0., -1.);
+    }
+    
+    
+    // for sorting vectices in clockwise order. 
+    double keep_ra, keep_dec, keep_theta;
+    double diff, min_diff;
+    
+    int    min_index;
+    
+    // testing. will NOT allow poly area to be calculated correctly, theta does not match to (ra, dec) of point.
+    // for(j=0; j<polysAll[poly_id].N; j++)  theta[j] = 360.*gsl_rng_uniform (gsl_ran_r);
+    
+    double zero_point = theta[0];
+    
+    for(j=0; j<polysAll[poly_id].N; j++){
+        theta[j] -= zero_point;
+        
+        if(theta[j] < 0.)  theta[j] += 360.;
+    }
+
+    // printf("\n\n");
+    
+    // for(j=0; j<polysAll[poly_id].N; j++)  printf("%.4f \t %.4f \t %.4f \n", theta[j], polysAll[poly_id].x[j], polysAll[poly_id].y[j]);
+    
+    for(j=0; j<polysAll[poly_id].N -1; j++){
+        min_diff = 9999.;
+    
+        for(i=j+1; i<polysAll[poly_id].N; i++){
+            diff = theta[i] - theta[j];
+                    
+            if(diff<min_diff){
+                min_index = i;
+                
+                min_diff  = diff;
+            } 
+        }
+        
+        // printf("\n\nmin index %.4f", theta[min_index]);
+        
+        keep_ra    = polysAll[poly_id].x[j+1];
+        keep_dec   = polysAll[poly_id].y[j+1];
+        keep_theta =         theta[j+1]; 
+            
+        polysAll[poly_id].x[j+1] = polysAll[poly_id].x[min_index];
+        polysAll[poly_id].y[j+1] = polysAll[poly_id].y[min_index];
+                theta[j+1] =         theta[min_index];
+    
+        polysAll[poly_id].x[min_index] = keep_ra;
+        polysAll[poly_id].y[min_index] = keep_dec;
+                theta[min_index] = keep_theta;
+    }
+    
+    // printf("\n\n");
+    
+    // for(j=0; j<polysAll[poly_id].N; j++)  printf("\n%.4f \t %.4f \t %.4f", theta[j], polysAll[poly_id].x[j], polysAll[poly_id].y[j]);
+    
+    /*
+    sprintf(filepath, "%s/polygon_vertices.dat", root_dir);
+    
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<polysAll[poly_id].N; j++)  fprintf(output, "\n%d \t %.4f \t %.4f \t %.4f", j, theta[j], polysAll[poly_id].x[j], polysAll[poly_id].y[j]);
+    
+    fclose(output);
+    */
+    
+    double area;
+    
+    area  = poly_area(poly_id);
+    
+    // printf("\n\narea: %e", area);
+    
+    return area;
+}
+
+
 int overlapping_polygonCounts(NodeP *polyTree, double x0[2], double x[2], int *poly_id, double* weights){
   // given a galaxy, and a list of weights[Npolygon], add 1 to weight[i] if gal is in polygon i. 
   // gal can be in more than one polygon. 
@@ -222,7 +341,10 @@ int overlapping_polygonCounts(NodeP *polyTree, double x0[2], double x[2], int *p
 	
 	        // gal lies inside polygon. i is an absolute id for the polygon, ie relative to original catalogue, not list
 	        // corresponding to the leaf (which would be k).
+	        
 	        weights[i] += 1;
+	        
+	        // printf("\n%.6lf \t %.6lf", x[0], x[1]);
 	    }
       }
     

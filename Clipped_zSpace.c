@@ -29,6 +29,8 @@ int clipDensity(double threshold){
     printf("\nmean of clipped field: %e", mean);
     
     for(j=0; j<n0*n1*n2; j++)  overdensity[j][0] -= mean;
+
+    for(j=0; j<n0*n1*n2; j++) overdensity[j][0]  *= surveyMask[j];
     
     return 0;
 }
@@ -56,7 +58,7 @@ int underclipDensity(double threshold){
     return 0;
     }*/
 
-/*
+
 int formPkCube(){
     // hz                 = pow(Om_v + Om_m*pow(1. + 0.8, 3.), 0.5);  // Units of h, [h]
  
@@ -73,9 +75,9 @@ int formPkCube(){
                 k_y = kIntervaly*j;
                 k_z = kIntervalz*k;
 
-                if(k_x>NyquistWaveNumber)  k_x    -= n2*kIntervalx;
-                if(k_y>NyquistWaveNumber)  k_y    -= n1*kIntervaly;
-                if(k_z>NyquistWaveNumber)  k_z    -= n0*kIntervalz;
+                if(k_x>xNyquistWaveNumber)  k_x   -= n2*kIntervalx;
+                if(k_y>yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
+                if(k_z>zNyquistWaveNumber)  k_z   -= n0*kIntervalz;
 
                 Index                              = k*n1*n2 + j*n2 + i;
 
@@ -85,21 +87,23 @@ int formPkCube(){
                 if(kmodulus == 0.0)          mu    = 0.0;  
 
 		        PkCube[Index]                      = (*pt2Pk)(kmodulus); // Convert from CAMB units for P(k), [P_CAMB] = Volume, to [P(k)] dimensionless.
-                
-                PkCube[Index]                     /= TotalVolume; 
                  
                 // Impose spherical filter to calculate sigma_8.
                 
-                // y                                  = kmodulus*8.;  
+                // y                               = kmodulus*8.;  
 
                 //if(kmodulus != 0.0){                
-                //    PkCube[Index]                 *= 3.*pow(y, -3.)*(sin(y) - y*cos(y));
-                //    PkCube[Index]                 *= 3.*pow(y, -3.)*(sin(y) - y*cos(y));
+                //    PkCube[Index]               *= 3.*pow(y, -3.)*(sin(y) - y*cos(y));
+                //    PkCube[Index]               *= 3.*pow(y, -3.)*(sin(y) - y*cos(y));
                 //}    
                 
-                PkCube[Index]                     *= 1. + 0.5*pow(mu, 2.);
+                // PkCube[Index]                  *= 1. + 0.5*pow(mu, 2.);
                 
-                // PkCube[Index]                  *= pow(1. + beta*mu*mu, 2.);
+                PkCube[Index]                     *= pow(app_sigma8, -2.); 
+                
+                PkCube[Index]                     *= pow(   bsigma8,  2.);
+                
+                // PkCube[Index]                     *= pow(1. + (fsigma8/bsigma8)*mu*mu, 2.);
                 
                 // Lorentzian factor for non-linear redshift space distortions. 
                 // PkCube[Index]                  /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
@@ -129,7 +133,7 @@ int formPkCube(){
     PkCube[0] = 0.0;
 
     return 0;
-}*/
+}
 
 /*
 int clipCorrfn(){

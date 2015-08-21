@@ -43,12 +43,16 @@ double outmask[2];
   
 int Npolygons, Nagoya_N;
   
-double *ra,*dec,*rax, *decx;
+int* idx;
+double *ra,*dec,*rax, *decx, *zx;
   
 int *id;
+int  NN;
   
-double* spoc_weights;
-double* spoc_counts;
+double* spoc_weights_spec;
+double* spoc_weights_photo;
+int*    spoc_counts;
+int**   quad_gal_ids;
   
 int  n, nw, nx;
 

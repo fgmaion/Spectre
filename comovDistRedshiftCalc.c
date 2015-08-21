@@ -5,12 +5,12 @@ double HubbleCnst(double z){
 
 
 double zChi_Integrand(double x){
-    return pow(Om_v + Om_m*pow(1.+x, 3.) + Om_r*pow(1.+x, 4.) - (Om_tot-1.)*pow(1.+x, 2.), -0.5);
+    return pow(Om_v + Om_m*pow(1.+ x, 3.) + Om_r*pow(1.+x, 4.) - (Om_tot-1.)*pow(1.+x, 2.), -0.5);
 }
 
 
 int comovDistReshiftCalc(){
-    sprintf(filepath, "%s/Data/zComovingDistance/500s_hodmocks_params.dat", root_dir);
+    sprintf(filepath, "%s/Data/zComovingDistance/500s_hodmocks_params_%.2lf_%.2lf_%.2lf.dat", root_dir, Om_m, Om_v, Om_b);
     
     inputfile = fopen(filepath, "rb");
   
@@ -18,16 +18,20 @@ int comovDistReshiftCalc(){
         printf("\nCreating new z - Comoving distance interpolation file.");
       
         pt2zChiIntegrand = &zChi_Integrand;
-
+        
         // R_0*r = integral (c/H_0)*pow(Om_Lambda + Om_m*(1+z)^3 + Om_r*(1+z)^4 - (Om_tot -1)*(1+z)^2, -0.5) dz 
         for(i=1000; i>0; i--)  z_Array[1000-i]            =  2.0 + pow(1000.0, -1.0)*i*(0.0 - (2.0));
-        for(i=1000; i>0; i--)  ComovingDistance_z[1000-i] =  pow(100.0/lightSpeed_kmpersec, -1.0)*qromb(pt2zChiIntegrand, 0.0, z_Array[1000-i]);            
-    
+        
+        // redshift 0.
+        ComovingDistance_z[0] = 0.0;
+        
+        for(i=999; i>0; i--)  ComovingDistance_z[1000-i] =  pow(100.0/lightSpeed_kmpersec, -1.0)*qromb(pt2zChiIntegrand, 0.0, z_Array[1000-i]);            
+        
         // Test. 
         // qromb(pt2zChiIntegrand, 0.0, UpperIntegralLimit[i]) in units of [H_0*R_0/c] converted to [h^-1 Mpc] by pow(100.0/lightSpeed_kmpersec, -1.0) factor.
 
         printf("\nComoving distance to redshift 1.5: %e Mpc\n\n", pow(100.0*h/lightSpeed_kmpersec, -1.0)*qromb(pt2zChiIntegrand, 0.0, 1.5));
-
+        
         output       = fopen(filepath, "wb");
 
         fwrite(z_Array,            sizeof(z_Array[0]),            sizeof(z_Array)/sizeof(z_Array[0]),                       output);

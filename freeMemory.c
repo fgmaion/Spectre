@@ -110,22 +110,15 @@ int free_linear(){
     return 0;
 }
 
-/*
-int free2dPk(){
-    for(j=0; j<n0*n1*n2; j++) free(TwoDpkArray[j]);
-    free(TwoDpkArray);
+
+int free_rand(){
+    free(rand_ra); 
+    free(rand_dec); 
+    free(rand_chi);
     
-    for(j=0; j<(kBinNumb-1); j++){
-        free(zSpaceBinnedPk[j]);
-        free(zSpacemodesPerBin[j]);
-        free(mean_perpk[j]);
-        free(mean_losk[j]);
-    }
-    
-    free(zSpaceBinnedPk);
-    free(zSpacemodesPerBin);
-    free(mean_losk);
-    free(mean_perpk);
-    
+    free(rand_x); 
+    free(rand_y); 
+    free(rand_z);
+
     return 0;
-}*/
+}

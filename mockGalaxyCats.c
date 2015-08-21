@@ -508,18 +508,18 @@ int randomiseCatalogue(int objectNumber, double xvals[], double yvals[], double 
     
     shuffle(zvals,   shuffle_rows, objectNumber);
     
-    shuffle(disp,    shuffle_rows, objectNumber);
+    // shuffle(disp,    shuffle_rows, objectNumber);
     
     // printf("\n\n");
 
     // for(j=0; j<Vipers_Num; j++)  printf("\n%e \t %e \t %e", xCoor[j], yCoor[j], zCoor[j]);
-
+    /*
     output = fopen(filepath, "w");
     
     for(j=0; j<objectNumber; j++)  fprintf(output, "%e \t %e \t %e \t %e \n", xvals[j], yvals[j], zvals[j], disp[j]);
     
     fclose(output);
-
+    */
     return 0;
 }
 

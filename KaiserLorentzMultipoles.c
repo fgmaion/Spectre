@@ -1,9 +1,8 @@
 /* Integrals of the form 
 
-    int_0^1 mu^n * (1. + 0.5*pow(k*mu*sigma, 2.))^-1 dmu
+    int_0^1 mu^n * (1. + 0.5*pow(k*mu*sigma_pair, 2.))^-1 dmu
 
     where n is the "order".
-
 */
 
 double muOrderZero(double ks){
@@ -52,7 +51,6 @@ double muOrderEight(double ks){
 
 
 // Multipoles for the Kaiser-Lorentz redshift space distortion model.
-
 double kaiserLorentz_Monofactor(double ks, double beta){
     return muOrderZero(ks) + 2.*beta*muOrderTwo(ks) + beta*beta*muOrderFour(ks);
 }

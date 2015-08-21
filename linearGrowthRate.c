@@ -88,7 +88,7 @@ int linearGrowthRate(){
     
     approx_growthfactor_today = exp(qromb(&f_Om_545, -9.5, 0.0));
     
-    printf("\n\nLinear growth factor. \n");
+    // printf("\n\nLinear growth factor. \n");
     
     for(k=151; k<linearGrowth_nPoints; k++){ 
         // for(j=1; j<=nVar; j++) yFinalArray[j] = yStartArray[j];
@@ -101,7 +101,7 @@ int linearGrowthRate(){
         
         approx2linear_growthfactor[k]         = exp(approx2linear_growthfactor[k])/approx_growthfactor_today;
         
-        // printf("%d \t %.4e \t %.4e \t %.4e\n", kk, exp(lnAarray[kk]), f_Om_545(lnAarray[kk]), approx2linear_growthfactor[kk]);
+        // printf("%d \t %.4e \t %.4e \t %.4e\n", k, exp(lnAarray[k]), f_Om_545(lnAarray[k]), approx2linear_growthfactor[k]);
         
         // printf("%.4e \t %.4e \t %.4e \t %.4e \n", lnAarray[k], AgeInterp(lnAarray[k]), linear_growthfactor[k], approx2linear_growthfactor[k]);
     }

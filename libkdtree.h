@@ -21,7 +21,7 @@ int   bruteforceCount = 0;
 
 double pairCount = 0.0;
 
-int   Nmin   =  200;      // Minimum number of particles which a Node can contain, should be > 1.
+int   Nmin   =  100;      // Minimum number of particles which a Node can contain, should be > 1.
 
 int   sortDim, treelevel;
 int   NLeft, NRight;
@@ -125,6 +125,8 @@ int    sortby_position_alongDim_splitDim(const void *a, const void *b);
 int    findSuitableNodePairs_bruteforcePairCount(double **C0, double **C2,  double **C4, double **r, double **mu, Node *node1, Node *node2, int sameTree);
 
 int    bruteforceCountpairs_betweenChildren(double **C0, double **C2, double **C4, double **r, double **mu, Node *node1, Node *node2, int sameTree);
+
+int bruteforce_nonodes(double **C0, double **C2, double **C4, double **r, double **mu, Particle* cat, Particle* cat2, int N, int N2, int sameTree);
 
 double pair_zmu(Particle a, Particle b);
 

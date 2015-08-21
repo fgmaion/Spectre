@@ -9,14 +9,21 @@ int EvaluateGridParameters(){
     // if(n1%2 == 1)  n1    += 1;
     // if(n2%2 == 1)  n2    += 1;
 
+    // greatest resolution in ra. 
+    // n0 =             256;
+    // n1 =             512;
+    // n2 =             256;
+
     n0 = n1 = n2 = fft_size;
 
     printf("\n\nDimensions:  %d \t %d \t %d", n0, n1, n2);
 
     // assumes cubic cells. 
-    CellSize              = (AxisLimsArray[1][2] - AxisLimsArray[0][2])/fft_size;
+    xCellSize             = (AxisLimsArray[1][2] - AxisLimsArray[0][2])/n2;
+    yCellSize             = (AxisLimsArray[1][1] - AxisLimsArray[0][1])/n1;
+    zCellSize             = (AxisLimsArray[1][0] - AxisLimsArray[0][0])/n0;
 
-    CellVolume            = pow(CellSize, 3);                                         // h^-3 Mpc^3
+    CellVolume            = xCellSize*yCellSize*zCellSize;                            // h^-3 Mpc^3
     
     TotalVolume           = n0*n1*n2*CellVolume;                                      // h^-3 Mpc^3
     
@@ -32,11 +39,13 @@ int EvaluateGridParameters(){
     yNyquistIndex         = n1/2 + 1;
     zNyquistIndex         = n0/2 + 1;
 
-    NyquistWaveNumber     = pi/CellSize;                                               // k = 2*pi x Nyquist frequency       
+    xNyquistWaveNumber    = pi/xCellSize;                                               // k = 2*pi x Nyquist frequency       
+    yNyquistWaveNumber    = pi/yCellSize;                                               // k = 2*pi x Nyquist frequency       
+    zNyquistWaveNumber    = pi/zCellSize;                                               // k = 2*pi x Nyquist frequency       
         
-    kIntervalx            = 2.*pi*pow(n2, -1)*pow(CellSize, -1);
-    kIntervaly            = 2.*pi*pow(n1, -1)*pow(CellSize, -1);
-    kIntervalz            = 2.*pi*pow(n0, -1)*pow(CellSize, -1);
+    kIntervalx            = 2.*pi*pow(n2, -1.)*pow(xCellSize, -1.);
+    kIntervaly            = 2.*pi*pow(n1, -1.)*pow(yCellSize, -1.);
+    kIntervalz            = 2.*pi*pow(n0, -1.)*pow(zCellSize, -1.);
     
     return 0;
 }

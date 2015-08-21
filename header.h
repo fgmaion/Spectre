@@ -97,10 +97,10 @@ double       (*pt2interp_inverseComovingDistance)(double)  = &interp_inverseComo
 
 char         vipersHOD_dir[200];
 
-
+/*
 // VIPERS HOD mock parameters.              
 // 500s mocks. Big multidark, http://www.multidark.org/MultiDark/Help?page=simulations corresponding to planck 1: http:arxiv.org/abs/1303.5076
-double  Om_v      =    0.69;          // 0.73; value added mocks. obsolete. 
+double  Om_v      =    0.69;          // 0.73; value added mocks + HOD Cube. outdated unless using one of these. 
 double  Om_r      =    0.00;          // 0.0;
 
 // total matter, cdm+baryons. 
@@ -114,8 +114,9 @@ double  ns        =    0.96;          // 0.95;
 double  p_index   =     1.0;
 double  pk_gamma  =     0.0;          // Bond Efstathiou shape parameter.
 double  hz        =     0.0;
+*/
 
-fftw_complex *overdensity, *H_k;
+fftw_complex *overdensity, *smooth_overdensity, *H_k, *H2_k;
 
 double        H_0;
 double        H_0inPerSec;
@@ -135,7 +136,9 @@ double        hi_MBlim;
 // Array to hold the coordinate limits of the VIPERS survey. 
 double        AxisLimsArray[2][3];
          
-double        CellSize;                                                     // Cell size, comoving distance, h^-1 Mpc
+double        xCellSize;                                                     // Cell size, comoving distance, h^-1 Mpc
+double        yCellSize;                                                     // Cell size, comoving distance, h^-1 Mpc
+double        zCellSize;                                                     // Cell size, comoving distance, h^-1 Mpc
 
 double        MinChi3;                                                      // h^-1 Mpc, Approximately, fig. 14, Guzzo et al.  2013
 double        MaxChi3;                                                      // Redshift limited sample, 0.7 < z < 0.9
@@ -160,9 +163,10 @@ double*      meanCellRedshift    = NULL;
 double       TotalVolume         = 0.0;
 double       TotalSurveyedVolume = 0.0;
 
-double       fkpWeightedVolume   = 0.0;
-double       fkpSqWeightsVolume  = 0.0;
-double       fkpShotNoiseCorr    = 0.0;
+double               fkpWeightedVolume   = 0.0;
+double               fkpSqWeightsVolume  = 0.0;
+double               fkpShotNoiseCorr    = 0.0;
+double       analyticfkpWeightedVolume   = 0.0;
 
 // Dimensions of the padded volume (TotalVolume) in units of CellSize. 
 int          n0, n1, n2;      
@@ -182,34 +186,39 @@ double       ComovingDistance_z_2derivatives[1001];
 
 int                ch;
 int        Vipers_Num;
+int         fieldFlag;
 
-int*               id  = NULL;
+int*                id  = NULL;
 double*             ra  = NULL;
 double*            dec  = NULL;
 double*           zobs  = NULL;
 double*           zcos  = NULL;
 double*            M_B  = NULL;
-int*             type  = NULL;
+double*          zflag  = NULL;
+int*              type  = NULL;
+int*          photoMask = NULL;
 
 
 // Value added catalogue parameters. 
-double*           zpec  = NULL;
-double*          zphot  = NULL;
+double*           zpec   = NULL;
+double*          zphot   = NULL;
 
-double*	         gal_z  = NULL;
-double*            csr  = NULL;
-double*       sampling  = NULL;  
-double*     sampling35  = NULL;
-char**       pointing  = NULL;
-char**       quadrant  = NULL;
-int*      flag_Nagoya  = NULL;
-int*       flag_SSPOC  = NULL;
-int*     flag_SSPOC35  = NULL;
-double*       rand_sel  = NULL;
+double*	         gal_z   = NULL;
+double*            csr   = NULL;
+double*       sampling   = NULL;  
+double*     sampling35   = NULL;
+char**       pointing    = NULL;
+char**       quadrant    = NULL;
+int*      flag_Nagoya    = NULL;
+int*       flag_SSPOC    = NULL;
+int*     flag_SSPOC35    = NULL;
+double*       rand_sel   = NULL;
+double*   fkp_galweight  = NULL;
+double*   clip_galweight = NULL;
 
 
 // derived parameters
-bool*   Acceptanceflag = NULL;
+bool*    Acceptanceflag = NULL;
 double*     polarAngle  = NULL;
 double*          rDist  = NULL;
 double*          xCoor  = NULL;
@@ -232,6 +241,7 @@ double*      rand_chi    = NULL;
 double*      rand_x      = NULL;
 double*      rand_y      = NULL;
 double*      rand_z      = NULL;
+double*      rand_weight = NULL;
 bool*        rand_accept = NULL;
 
 // TotalWeight is the sum of ZADE weight for the ZADE catalogue = Number of spec z + Number of used Photometric galaxies used (including compensation for sampling).
@@ -263,11 +273,13 @@ double        k_x, k_y, k_z;
 double        H_kReal;          
 double        H_kImag;           
 
-double        NyquistWaveNumber;
+double        xNyquistWaveNumber;
+double        yNyquistWaveNumber;
+double        zNyquistWaveNumber;
 
 // First column is mod k, second Pk.
 // double**     PkArray            = NULL;
-double**     TwoDpkArray        = NULL;
+double**     twodim_pk        = NULL;
 
 double**     muIntervalPk       = NULL;
 
@@ -297,7 +309,7 @@ int          NuRandoms    = 0;
 int          NuQuadrants  = 0;
 
 // Jenkins scaling trick. 
-double       JenkinsScalefactor;
+double       Jenkins_foldfactor;
 
 double*      sdltk               = NULL;
 double*      sdltPk              = NULL;
@@ -342,7 +354,7 @@ double*     PkCube              = NULL;
 int**        zSpacemodesPerBin  = NULL;
 double**     mean_perpk         = NULL;
 double**     mean_losk          = NULL;
-double**     zSpaceBinnedPk     = NULL;
+double**     d2_binnedpk     = NULL;
 
 // Comoving number density calculation.
 // double       zBinWidth;
@@ -442,14 +454,6 @@ double  apodisedVolume;
 
 double  lightconeShot();
 double  CubeShot();
-
-double* loskBinLimits;
-double* perpkBinLimits;
-
-int     loskBinNumb;
-int     perpkBinNumb;
-
-double  perpkInterval;
 
 int     muBinNumb;
 int     modkBinNumb;
@@ -618,6 +622,7 @@ gsl_vector* col;
 double*   MeanMultipoles;
 
 double    A11Sq;
+
 double    linearBias;
 double    ChiSqEval();
 
@@ -865,6 +870,23 @@ double mask_monopolenorm_hi;
 
 double loRes_highRes_join;
 
+int     VIPERS_mask_lineNo_hihi;
+double* VIPERS_maskr_hihi;
+double* VIPERS_maskMono_hihi;
+double* VIPERS_maskQuad_hihi;
+double* VIPERS_maskHex_hihi;
+
+double* VIPERS_maskMono2D_hihi;
+double* VIPERS_maskQuad2D_hihi;
+double* VIPERS_maskHex2D_hihi;
+
+double mask_monopolenorm_hihi;
+
+double loRes_highRes_join;
+double hiRes_hihiRes_join;
+
+
+
 double splint_VIPERS_maskMono(double r);
 double splint_VIPERS_maskQuad(double r);
 double splint_VIPERS_maskHex(double r);
@@ -907,3 +929,50 @@ double pk_hin;
 double pk_lon;
 double pk_hiA;
 double pk_loA;
+
+double modeCorrections(int k, int j, int i);
+
+double* Rr;
+double* Ir;
+double* PkCube;
+
+double AcceptedMax(double a[], bool b[], int n);
+double AcceptedMin(double a[], bool b[], int n);
+
+double chi_invertedStefanoBasis(double* xval, double* yval, double* zval);
+
+double* expected_foldedRandCounts;
+double calc_volavg_fkpweights();
+
+double calc_fsigma8Posterior();
+
+double* gal_clippingweights;
+
+double clipping_fSq;
+
+double calc_bsigma8Posterior();
+double calc_velDispPosterior();
+
+double spherical_tophat(double k, double R);
+
+double fraction_clipped;
+
+double underlyingGaussian_sigma;
+
+double GaussianFilter_radius;
+double depletion_factor;
+
+double clipping_smoothing_radius;
+
+int    data_mock_flag;
+
+double* spline_lnk;
+double* dlnPR_dlnk;
+double* dlnPR_dlnk_2D;
+
+double        cumulative_nbar[100];
+double     cumulative_nbar_2d[100];
+double    chi_cumulative_nbar[100];
+
+double inverse_cumulative_nbar(double arg);
+double nz_smoothRadius;

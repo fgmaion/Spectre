@@ -37,6 +37,10 @@ int FFTlog_memory(int FFTlogRes, double beta, double velDispersion){
     
     FFTLog_setInput( hex_config,      beta, velDispersion);
     
+    
+    FFTLog_zeroInput(zero_config, 0.0, 0.0);
+    
+    
     // FFTLog_setInput(octupole_config, fftlogk, fftlogr, beta, velDispersion);
     
     FFTLog_setInput(clipmono_config,  beta, velDispersion);
@@ -81,19 +85,33 @@ int FFTLog_setInput(FFTLog_config *fc, double beta, double velDispersion){
     
     fc->krvals[i][1]    = exp(logrc + ((double)i-nc)*dlogr);
     
+    
     // purely real.  Set P(k) to obtain xi(r) by inverse Hankel transform.     
     fc->pk[i][0]        = 
-                          // spherical_tophat_pk(fc->krvals[i][0]);
+                          //** MUST TURN ON NO RSD, OTHERWISE QUAD is SET TO MONO ETC. **
+
                           // haloModel_pk(fc->krvals[i][0], 0.7, transformOrder);
-                          (*pt2Pk)(fc->krvals[i][0])* 
-                          // toyRSD_OnePlusOneHalfMuSq(transformOrder);
-                          noRSD(fc->krvals[i][0]*velDispersion, beta, (int) transformOrder);
-                          // kaiserGauss_multipole(fc->krvals[i][0]*velDispersion, beta, (int) transformOrder); 
+                          (*pt2Pk)(fc->krvals[i][0])
+                          
+                          // *spherical_tophat(fc->krvals[i][0], 8.)*spherical_tophat(fc->krvals[i][0], 8.)
+                          
+                          // *exp(-1.*pow(fc->krvals[i][0]*clipping_smoothing_radius, 2.))
+                          
+                          *pow(app_sigma8, -2.) 
+                          
+                          // value at redshift z_eff.
+                          *pow(   bsigma8,  2.) 
+                          
+                          // *toyRSD_OnePlusOneHalfMuSq(transformOrder);
+                          // *noRSD(fc->krvals[i][0]*velDispersion, beta, (int) transformOrder);
+                          // *kaiser_multipole(fc->krvals[i][0]*velDispersion, beta, (int) transformOrder);
+                          
+                          *kaiserLorentz_multipole(fc->krvals[i][0]*velDispersion, beta, (int) transformOrder);  // beta should be passed as fsigma_8/bsigma_8. 
                           //*(*pt2RSD_k)(fc->krvals[i][0]*velDispersion, beta, transformOrder);
     fc->pk[i][1]        = 0.0;
     
     // purely real.  Set xi(r) to obtain P(k) by Hankel transform.  
-    fc->xi[i][0]        = splint_VIPERS_maskMultipoles(fc->krvals[i][1], transformOrder); // (*pt2Xi)(fc->krvals[i][1]);
+    fc->xi[i][0]        = 0.0; // splint_VIPERS_maskMultipoles(fc->krvals[i][1], transformOrder); // (*pt2Xi)(fc->krvals[i][1]);
     fc->xi[i][1]        = 0.0;
   }
   
@@ -183,7 +201,7 @@ int pk_mu(FFTLog_config* fc){
 }
 
 
-int varCalc(FFTLog_config* fc, double* sigmaSq, double* u0){
+int varCalc(FFTLog_config* fc, double* sigmaSq){
     // Assumes only the monopole contributes to the variance. Certainly quad and hex appear not to.  corr fn. seems to have converged/unaliased between [10**-3, 10**-2.]. Could 'trust'
     // anywhere in this interval.  Variance appears to asymptote as r->0. take variance as value of monopole at ~10**-2.
     
@@ -212,8 +230,8 @@ int clipmono(FFTLog_config* clip, FFTLog_config* mono, FFTLog_config* quad, FFTL
     // Clipped monopole calculation to 2nd order.   
     for(i=0; i<clip->N; i++){
       clip->xi[i][0]   = 0.25*pow(1. + gsl_sf_erf(u0), 2.)*mono->xi[i][0];
-             
-      clip->xi[i][0]  += (C_n(u0, 1)/var)*(pow(8.*mono->xi[i][0] - 4.*quad->xi[i][0] + 3.*hex->xi[i][0], 2.)/64. - pow(quad->xi[i][0], 2.)/20. + mono->xi[i][0]*(quad->xi[i][0] - 3.*hex->xi[i][0]/4.) + 3.*quad->xi[i][0]*hex->xi[i][0]/8. - (17./576.)*hex->xi[i][0]*hex->xi[i][0]);
+         
+      clip->xi[i][0]  += (C_n(u0, 1)/var)*(pow(mono->xi[i][0], 2.) + pow(quad->xi[i][0], 2.)/5. + pow(hex->xi[i][0], 2.)/9.);
     }
 
     return 0;
@@ -224,8 +242,8 @@ int clipquad(FFTLog_config* clip, FFTLog_config* mono, FFTLog_config* quad, FFTL
     // Clipped monopole calculation to 2nd order.   
     for(i=0; i<clip->N; i++){
       clip->xi[i][0]   = 0.25*pow(1. + gsl_sf_erf(u0), 2.)*quad->xi[i][0];
-             
-      clip->xi[i][0]  += (C_n(u0, 1)/var)*(2./693.)*(693.*mono->xi[i][0]*quad->xi[i][0] + 99.*pow(quad->xi[i][0], 2.) + 198.*quad->xi[i][0]*hex->xi[i][0] + 50.*pow(hex->xi[i][0], 2.));
+       
+      clip->xi[i][0]  += (C_n(u0, 1)/var)*(2.*mono->xi[i][0]*quad->xi[i][0] + (2./7.)*pow(quad->xi[i][0], 2.) + (4./7.)*quad->xi[i][0]*hex->xi[i][0] + (100./693.)*pow(hex->xi[i][0], 2.));
     }
 
     return 0;
@@ -244,6 +262,63 @@ int lnnorm(FFTLog_config* lnnorm, FFTLog_config* mono){
 }
 
 
+int invert_lnnorm(FFTLog_config* mono, FFTLog_config* mono2){
+    // inversion of the correlation fn. in the log-normal model, when the Gaussian field is **isotropic**   
+    for(i=0; i<mono->N; i++){  
+        if((mono->krvals[i][1] > 0.0001) && (mono->krvals[i][1] < 10000.)){ 
+              mono->xi[i][0]   = log(1. + mono2->xi[i][0]);
+        }
+    }
+    
+    return 0;
+}
+
+
+int clip_lnnorm(FFTLog_config* clip_lnnorm, FFTLog_config* mono, FFTLog_config* quad, FFTLog_config* hex, double u0, double var, int order){
+    double sigma = sqrt(var);
+    
+    double Jn[15];
+    
+    printf("\n\nclipped ln norm, sigma: %.3lf, u0: %.3lf", sigma, u0);
+    
+    //J_0
+    Jn[0]  =               J0_calc(u0, sigma);
+    
+    Jn[1]  = recursion(Jn[0],   1, u0, sigma);
+    Jn[2]  = recursion(Jn[1],   2, u0, sigma);
+    Jn[3]  = recursion(Jn[2],   3, u0, sigma);
+    Jn[4]  = recursion(Jn[3],   4, u0, sigma);
+    Jn[5]  = recursion(Jn[4],   5, u0, sigma);
+    Jn[6]  = recursion(Jn[5],   6, u0, sigma);
+    Jn[7]  = recursion(Jn[6],   7, u0, sigma);
+    Jn[8]  = recursion(Jn[7],   8, u0, sigma);
+    Jn[9]  = recursion(Jn[8],   9, u0, sigma);
+    Jn[10] = recursion(Jn[9],  10, u0, sigma);
+    Jn[11] = recursion(Jn[10], 11, u0, sigma);
+    Jn[12] = recursion(Jn[11], 12, u0, sigma);
+    Jn[13] = recursion(Jn[12], 13, u0, sigma);
+    Jn[14] = recursion(Jn[13], 14, u0, sigma);
+            
+    printf("\n\nJn*Jn/(n+1)!: %.5lf \t %.5lf \t %.5lf \t %.5lf \t %.5lf", Jn[0]*Jn[0]/gsl_sf_fact(1), Jn[1]*Jn[1]/gsl_sf_fact(2), Jn[2]*Jn[2]/gsl_sf_fact(3), 
+                                                                          Jn[3]*Jn[3]/gsl_sf_fact(4), Jn[4]*Jn[4]/gsl_sf_fact(5));
+            
+    // Clipped ln norm. assumes isotropic correlation fn. 
+    for(i=0; i<clip_lnnorm->N; i++){
+      clip_lnnorm->xi[i][0]   = mono->xi[i][0]; 
+      
+      if((mono->krvals[i][1] > 0.001) && (mono->krvals[i][1] < 2000.)){
+        clip_lnnorm->xi[i][0] = 0.0;
+      
+        for(k=0; k<order; k++)  clip_lnnorm->xi[i][0]  += series_term(mono->xi[i][0], Jn[k], k);
+      }
+    }
+    
+    // printf("\n\nu0: %.3lf, 2.*J_0^2/J_1^2: %.3lf", u0, 2.*Jn[0]*Jn[0]/Jn[1]/Jn[1]);
+
+    return 0;
+}
+
+
 int add_fogRSD(FFTLog_config *multipole, int Order){
     for(j=0; j<multipole->N; j++){
         if((multipole->krvals[j][0] > 0.0001) && (multipole->krvals[j][0] < 2000.)){
@@ -256,13 +331,13 @@ int add_fogRSD(FFTLog_config *multipole, int Order){
 
 
 int cnvldmonoCorr(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad, FFTLog_config* hex){
-    // Convolved monopole calculation to 2nd order.   
+    // Convolved monopole calculation to 2nd order. updated via bailey.c   
     for(i=0; i<mono->N; i++){
-      cnvld->xi[i][0]   =     mono->xi[i][0]*splint_VIPERS_maskMono(mono->krvals[i][1]);     // splint_windfn_rSpaceMono(mono->krvals[i][1]);
+      cnvld->xi[i][0]   =         mono->xi[i][0]*splint_VIPERS_maskMono(mono->krvals[i][1]);     // splint_windfn_rSpaceMono(mono->krvals[i][1]);
       
-      cnvld->xi[i][0]  += 0.2*quad->xi[i][0]*splint_VIPERS_maskQuad(mono->krvals[i][1]);     //splint_windfn_rSpaceQuad(mono->krvals[i][1]);    
+      cnvld->xi[i][0]  +=     0.2*quad->xi[i][0]*splint_VIPERS_maskQuad(mono->krvals[i][1]);     //splint_windfn_rSpaceQuad(mono->krvals[i][1]);    
     
-      // cnvld->xi[i][0]  += 0.2*hex->xi[i][0]*splint_VIPERS_maskHex;
+      cnvld->xi[i][0]  +=  (1./9.)*hex->xi[i][0]*splint_VIPERS_maskHex(mono->krvals[i][1]);
     }
 
     return 0;
@@ -270,112 +345,83 @@ int cnvldmonoCorr(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad
 
 
 int cnvldquadCorr(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad, FFTLog_config* hex){
-    // Convolved quadrupole calculation to 2nd order.   
+    // Convolved quadrupole calculation to 2nd order. updated via bailey.c   
     for(i=0; i<mono->N; i++){      
-      cnvld->xi[i][0]   = mono->xi[i][0]*splint_VIPERS_maskQuad(mono->krvals[i][1]); //splint_windfn_rSpaceQuad(mono->krvals[i][1]);
+      cnvld->xi[i][0]   = mono->xi[i][0]*splint_VIPERS_maskQuad(mono->krvals[i][1]);
       
       cnvld->xi[i][0]  += quad->xi[i][0]*(splint_VIPERS_maskMono(mono->krvals[i][1])  + (2./7.)*splint_VIPERS_maskQuad(mono->krvals[i][1]) + (2./7.)*splint_VIPERS_maskHex(mono->krvals[i][1]));  
-                       // quad->xi[i][0]*(splint_windfn_rSpaceMono(mono->krvals[i][1]) + (2./7.)*splint_windfn_rSpaceQuad(mono->krvals[i][1]) + (2./7.)*splint_windfn_rSpaceHex(mono->krvals[i][1]));    
+      
+      cnvld->xi[i][0]  +=  hex->xi[i][0]*((2./7.)*splint_VIPERS_maskQuad(mono->krvals[i][1]) + (100./693.)*splint_VIPERS_maskHex(mono->krvals[i][1])); // + Order(W^2_6)  
     }
-
+    
     return 0;
 }
 
 
-int cnvldpk_norm(FFTLog_config* fc){    
-    for(i=0; i<fc->N;   i++){ 
-        if((fc->krvals[i][0]) >= 0.25){
-            return i;
+int clipped_lnnorm_pkCalc(){
+    FFTlogRes     =               4096;
+    
+    fsigma8       =                0.0;  
+    bsigma8       =        0.557*1.495;
+    velDispersion =               0.00;
+    
+    
+    FFTlog_memory(FFTlogRes, fsigma8/bsigma8, velDispersion);
      
-            // probably never evaluated.        
-            break;
-        }   
-    }
-}
-
-
-int convolvedPkCalc(){
-    FFTlogRes        = 4096;
-    
-    FFTlog_memory(FFTlogRes, beta, velDispersion);
-        
-    xi_mu(mono_config);
-
-    // xi_mu(quad_config);
-    
-    // Currently evaluated at second order. 
-    cnvldmonoCorr(convlmonoCorr, mono_config, quad_config, hex_config);
-    
-    cnvldquadCorr(convlquadCorr, mono_config, quad_config, hex_config);
-    
-    // Power spectra given input correlation functions. 
-    pk_mu(mono_config);
-    
-    pk_mu(convlmonoCorr);
-    
-    pk_mu(convlquadCorr);
-
-    return 0;
-}
-
-
-int clippedPkCalc(){
-    FFTlogRes        = 4096;
-    
-    FFTlog_memory(FFTlogRes, beta, velDispersion);
-
-    xi_mu(mono_config);
-
-    // xi_mu(quad_config);
-
-    varCalc(mono_config, &variance, &u0);
-        
-    // Currently evaluated at second order. 
-    // clipmono(clipmono_config, mono_config, quad_config, hex_config, u0, variance);
-    
-    clipmono(clipmono_config, mono_config, zero_config, zero_config, u0, variance);
-    
-    // clipquad(clipquad_config, mono_config, quad_config, hex_config, u0, variance);
-    
-    // pk_mu(mono_config);
-    
-    pk_mu(clipmono_config);
-    
-    // pk_mu(clipquad_config);
-    
-    // pk_mu(clipquad_config);
-    
-    // pk_mu(lnnorm_config);
-
-    return 0;
-}
-
-
-int lnnormPkCalc(){
-    FFTlogRes        = 4096;
-    
-    FFTlog_memory(FFTlogRes, beta, velDispersion);
-    
     xi_mu(mono_config);
     
-    xi_mu(quad_config);
+    // non-linear halofit p(k) to p(k) of the underlying Gaussian field in the lognormal model.  
+    invert_lnnorm(mono_config, mono_config);
+
+    // variance of the underlying Gaussian. 
+    varCalc(mono_config, &variance);
+    
+    
+    double f = 0.66;
+    
+    // u0 calc. in the absence of the value of \delta_0.
+    u0 = inverse_erf(2.*f - 1.)  + sqrt(variance)/sqrt(2.);
+      
+    printf("\n\nvariance: %.3lf, \t u0: %.3lf", variance, u0);
         
-    lnnorm(lnnorm_mono_config, mono_config);
+    // lnnorm(lnnorm_mono_config, mono_config);    
+
+    // correlation fn. in the clipped ln normal model. 
+    clip_lnnorm(clipmono_config, mono_config, quad_config, zero_config, u0, variance, 14);
     
-    pk_mu(lnnorm_mono_config);
-    
-    add_fogRSD(lnnorm_mono_config, 0);
-    
-    xi_mu(lnnorm_mono_config);
-    
-    sprintf(filepath, "%s/Data/lnnorm_anisotropic/fftlog_multipoles_xi_fogRSD.dat", root_dir);
+    /*
+    sprintf(filepath, "%s/W1_Nagoya_v6_mocks_work/clipped_lnnormal/fftlog_multipoles_clipped_lnnormal_hodcube_%.2lf.dat", root_dir, f);
     
     output = fopen(filepath, "w");
     
-    for(j=0; j<mono_config->N; j++)  fprintf(output, "%e \t %e \t %e \n", mono_config->krvals[j][1], lnnorm_mono_config->xi[j][0], lnnorm_quad_config->xi[j][0]);
+    for(j=0; j<mono_config->N; j++){
+      if((mono_config->krvals[j][1] > 1.) && (mono_config->krvals[j][1] < 250.)){
+        fprintf(output, "%e \t %e \t %e \t %e \n", mono_config->krvals[j][1], mono_config->xi[j][0], lnnorm_mono_config->xi[j][0], clipmono_config->xi[j][0]);
+      }
+    }
     
     fclose(output); 
-
+    */
+    
+    pk_mu(mono_config);
+    
+    // pk_mu(lnnorm_mono_config);
+    
+    pk_mu(clipmono_config);
+    
+    
+    sprintf(filepath, "%s/W1_Nagoya_v6_mocks_work/clipped_lnnormal/fftlog_multipoles_clipped_lnnormal_hodcube_f_%.2lf_pk.dat", root_dir, f);
+    
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<mono_config->N; j++){
+      if((mono_config->krvals[j][0] > 0.01) && (mono_config->krvals[j][0] < 1.)){
+        fprintf(output, "%e \t %e \t %e \n", mono_config->krvals[j][0], mono_config->pk[j][0], clipmono_config->pk[j][0]);
+      }
+    }
+    
+    fclose(output); 
+    
     return 0;
 }
 
@@ -409,34 +455,7 @@ int fog_xiCalc(){
     return 0;
 }
 
-
-int hodmodel_xi(){
-    FFTlogRes        = 4096;
-    
-    // Currently beta is set by hand in the input P(k) function. 
-    FFTlog_memory(FFTlogRes, beta, velDispersion);
-    
-    xi_mu(mono_config);
-
-    xi_mu(quad_config);
-
-    
-    sprintf(filepath, "%s/Data/stacpolly/NFW_profile_monoxi.dat", root_dir);
-    
-    output = fopen(filepath, "w");
-    
-    for(j=0; j<mono_config->N; j++){  
-        if((mono_config->krvals[j][1] > 1.) && (mono_config->krvals[j][1] < 300.)){
-            fprintf(output, "%e \t %e \t %e \n", mono_config->krvals[j][1], mono_config->xi[j][0], quad_config->xi[j][0]);
-        }
-    }
-    
-    fclose(output); 
-
-    return 0; 
-}
-
-
+/*
 int spherical_randDistribution(){
     int cnvldpknorm;
 
@@ -502,37 +521,110 @@ int spherical_randDistribution(){
 
     return 0; 
 }
+*/
+
+int VIPERS_mask_clippedpk(){
+    FFTlogRes     =     4096;
+    // best fit unclipped, kmax 0.7. fsig8 set to truth
+    // fsigma8       =    0.491;  
+    // bsigma8       =    0.825;
+    // velDispersion =      5.6;
+    
+    fsigma8       =      0.35;  
+    bsigma8       =      0.825;
+    velDispersion =      3.0;
+    
+    // Currently beta is set by hand in the input P(k) function. 
+    FFTlog_memory(FFTlogRes, 1., velDispersion);
+        
+    FFTLog_setInput(mono_config, fsigma8/bsigma8, velDispersion);
+    
+    FFTLog_setInput(quad_config, fsigma8/bsigma8, velDispersion);
+    
+
+    // Transform to correlation functions, mono and quad. 
+    xi_mu(mono_config);
+    xi_mu(quad_config);
+    // xi_mu( hex_config);
+    
+    varCalc(mono_config, &variance);
+    
+    // u0 calc. in the absence of the value of \delta_0.
+    u0 = inverse_erf(2.*sqrt(A11Sq) - 1.);
+    // u0  = appliedClippingThreshold/sqrt(2.*variance);
+    
+    printf("\nu0: %e, variance: %e", u0, variance);
+        
+    // cnvldmonoCorr(convlmonoCorr, mono_config, quad_config, zero_config);
+    // cnvldquadCorr(convlquadCorr, mono_config, quad_config, zero_config);
+    
+    // Currently evaluated at second order. 
+    clipmono(clipmono_config, mono_config, quad_config, zero_config, u0, variance);
+    clipquad(clipquad_config, mono_config, quad_config, zero_config, u0, variance);
+    
+    // could include hex terms of correlation fn. 
+    cnvldmonoCorr(convlmonoCorr, clipmono_config, clipquad_config, zero_config);
+    cnvldquadCorr(convlquadCorr, clipmono_config, clipquad_config, zero_config);
+    
+    pk_mu(convlmonoCorr);
+    pk_mu(convlquadCorr);
+
+    
+    sprintf(filepath, "%s/W1_Nagoya_v6_mocks_work/cnvldpk/clipped_d0_6_BA_cnvldpk_W1_Nagoya_v6_Samhain_incmock_specweight_nbar_xi_0.6_0.9_hex_linear_matterpk.dat", root_dir);
+    
+    output = fopen(filepath, "w");
+    
+    for(j=0; j<mono_config->N; j++){  
+        if((mono_config->krvals[j][0] > 0.0001) && (mono_config->krvals[j][0] < 10.)){
+            fprintf(output, "%e \t %e \t %e \n", mono_config->krvals[j][0], convlmonoCorr->pk[j][0], convlquadCorr->pk[j][0]);
+        }
+    }
+    
+    fclose(output); 
+    
+    return 0; 
+}
 
 
 int VIPERS_mask_cnvldpk(){
-    int cnvldpknorm;
+    FFTlogRes     =     4096;
     
-    FFTlogRes = 4096;
+    // non-linear p(k) & non-linear rsd.
+    // fsigma8       =    0.491;  
+    // bsigma8       =    0.825;
+    // velDispersion =      5.6;
+    
+    // non-linear p(k) & non-linear rsd.
+    fsigma8       =        0.3;  
+    bsigma8       =        0.8;
+    velDispersion =    0.00000;
     
     // Currently beta is set by hand in the input P(k) function. 
-    FFTlog_memory(FFTlogRes, beta, velDispersion);
+    FFTlog_memory(FFTlogRes, fsigma8/bsigma8, velDispersion);
     
     // printf("\n\nStarting fft log clock.");
     // clock_t start = clock(), diff;
     // for(ii=0; ii<1000; ii++){
-    
-    FFTLog_setInput(mono_config, beta, velDispersion);
-    FFTLog_setInput(quad_config, beta, velDispersion);
-    
+        
     xi_mu(mono_config);
     xi_mu(quad_config);
+    // xi_mu(hex_config);
     
     // for(j=0; j<mono_config->N; j++)   convlmonoCorr->xi[j][0] = mono_config->xi[j][0]; //*splint_VIPERS_maskMono(mono_config->krvals[j][1]);
     // for(j=0; j<mono_config->N; j++)   convlquadCorr->xi[j][0] = mono_config->xi[j][0]; // *splint_VIPERS_maskQuad(mono_config->krvals[j][1]);
     // for(j=0; j<mono_config->N; j++)   convlhexCorr->xi[j][0]  = mono_config->xi[j][0]*splint_VIPERS_maskHex(mono_config->krvals[j][1]);
     
-    cnvldmonoCorr(convlmonoCorr, mono_config, quad_config, hex_config);
-    cnvldquadCorr(convlquadCorr, mono_config, quad_config, hex_config);
+    cnvldmonoCorr(convlmonoCorr, mono_config, quad_config, zero_config);
+    cnvldquadCorr(convlquadCorr, mono_config, quad_config, zero_config);
     
     pk_mu(convlmonoCorr);
     pk_mu(convlquadCorr);
     // pk_mu(convlhexCorr);
 
+    // pk_mu(mono_config);
+    // pk_mu(quad_config);
+
+    /*
     double cnvldpk_zero;
 
     // convolved pk zero point. 
@@ -544,7 +636,7 @@ int VIPERS_mask_cnvldpk(){
             
             break;
         }   
-    }
+    }*/
     
     for(j=0; j<mono_config->N; j++)   convlmonoCorr->pk[j][0] = convlmonoCorr->pk[j][0]; // - cnvldpk_zero*splint_VIPERS_kSpaceMono(convlmonoCorr->krvals[j][0]);
     for(j=0; j<mono_config->N; j++)   convlquadCorr->pk[j][0] = convlquadCorr->pk[j][0]; // - cnvldpk_zero*splint_VIPERS_kSpaceQuad(convlmonoCorr->krvals[j][0]);
@@ -557,13 +649,14 @@ int VIPERS_mask_cnvldpk(){
     // int msec = diff*1000/CLOCKS_PER_SEC;
     // printf("\n\nFFT log approach to convolution, for 1000 models: %d seconds %d milliseconds", msec/1000, msec%1000);
     
-    sprintf(filepath, "%s/Data/500s/500s_cnvldpk.dat", root_dir);
+    
+    sprintf(filepath, "%s/W1_Nagoya_v6_mocks_work/cnvldpk/cnvldpk_W1_Nagoya_v6_Samhain_incmock_specweight_nbar_xi_0.6_0.9_hex_linearRSD.dat", root_dir);
     
     output = fopen(filepath, "w");
     
     for(j=0; j<mono_config->N; j++){  
-        if((mono_config->krvals[j][0] > 0.0001) && (mono_config->krvals[j][0] < 100.)){
-            fprintf(output, "%e \t %e \t %e \n", mono_config->krvals[j][0], convlmonoCorr->pk[j][0], convlquadCorr->pk[j][0]);
+        if((mono_config->krvals[j][0] > 0.0001) && (mono_config->krvals[j][0] < 10.)){
+            fprintf(output, "%e \t %e \t %e \t %e \t %e \n", mono_config->krvals[j][0], convlmonoCorr->pk[j][0], convlquadCorr->pk[j][0], mono_config->pk[j][0], quad_config->pk[j][0]);
         }
     }
     
@@ -604,10 +697,7 @@ int VIPERS_mask_intCnsrt(){
 }
 
 
-/*----------------------------------------------------------------*
- *FFTLog                                                          *
- *----------------------------------------------------------------*/
- 
+/* FFTLog */                                                        
 void FFTLog(FFTLog_config *fc, fftw_plan p_forward, fftw_plan p_backward){
   /* Hamilton 2000. http://casa.colorado.edu/~ajsh/FFTLog/
 

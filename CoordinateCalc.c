@@ -1,7 +1,178 @@
-int CatalogueInput(char filepath[]){
+int CatalogueInput_500s(char filepath[]){
     printf("\n\nOpening catalogue: %s", filepath);
     
     inputfile     = fopen(filepath, "r");  
+    
+    if(inputfile == NULL){  
+        printf("\nError opening %s\n", filepath); 
+        return 1;
+    }
+
+    // Column  0: id                                                                                                         
+    // Column  1: ra                                                                                           
+    // Column  2: dec                                                                                                                                                                
+    // Column  3: zobs presumably.                                                                           
+    // Column  4: MB, abs mag from the parent HOD. 
+    // Column  5: apparent mags. 
+    
+    ch         = 0;
+    Vipers_Num = 0;
+    
+    do{
+        ch = fgetc(inputfile);        
+        if(ch == '\n')
+       	  Vipers_Num += 1;
+    } while (ch != EOF);
+
+    rewind(inputfile);
+    
+    id             =  (int   *)   realloc(id, Vipers_Num*sizeof(*id));
+    ra             =  (double *)  realloc(ra, Vipers_Num*sizeof(*ra));
+    dec            =  (double *)  realloc(dec, Vipers_Num*sizeof(*dec));
+    zobs           =  (double *)  realloc(zobs, Vipers_Num*sizeof(*zobs)); 
+    M_B            =  (double *)  realloc(M_B, Vipers_Num*sizeof(*M_B));
+
+    // derived parameters. 
+    Acceptanceflag =  (bool  *)   realloc(Acceptanceflag, Vipers_Num*sizeof(*Acceptanceflag));
+    polarAngle     =  (double *)  realloc(polarAngle,     Vipers_Num*sizeof(*polarAngle));
+    rDist          =  (double *)  realloc(rDist,          Vipers_Num*sizeof(*rDist));
+    xCoor          =  (double *)  realloc(xCoor,          Vipers_Num*sizeof(*xCoor));
+    yCoor          =  (double *)  realloc(yCoor,          Vipers_Num*sizeof(*yCoor));
+    zCoor          =  (double *)  realloc(zCoor,          Vipers_Num*sizeof(*zCoor));
+    sampling       =  (double *)  realloc(sampling,       Vipers_Num*sizeof(*sampling));
+    fkp_galweight  =  (double *)  realloc(fkp_galweight,  Vipers_Num*sizeof(*fkp_galweight));
+    clip_galweight =  (double *)  realloc(clip_galweight, Vipers_Num*sizeof(*clip_galweight));
+    
+    // redshift range 0.7<z<0.8, as traced by randoms. magnitude cut for known linear bias. volume limited to z=0.85
+    for(j=0; j<Vipers_Num; j++){  
+        id[j] = j;
+    
+        fscanf(inputfile, "%*d \t %le \t %le \t %le \t %le \t %*le \n", &ra[j], &dec[j], &zobs[j], &M_B[j]);
+    
+        // if((-20.2<M_B[j]) && (M_B[j] < -19.8) && (0.7<zobs[j]) && (zobs[j]<0.8))  Acceptanceflag[j] = true;
+    }
+    
+    // for(j=0; j<10; j++)  printf("\n%d \t %.4lf \t %.4lf \t %.4lf \t %.4lf", id[j], ra[j], dec[j], zobs[j], M_B[j]);
+    
+    fclose(inputfile);
+    
+    printf("\nHOD 500s catalogue input successful.");
+    
+    return 0;
+}
+
+
+int spec_weights(){
+    // analysis on **mock** catalogues. 
+    if(data_mock_flag == 0){
+        // local TSR weights for mock spec cats I made, e.g. non-Poisson sampling on a per cell basis of a grid overlaid across the survey.  
+        // if(loopCount<10)        sprintf(filepath, "%s/Venice/mocks_W1_v8.0_spocWeights/mock_00%d_W1_spec_weights.dat", root_dir, loopCount);
+        // else if(loopCount<100)  sprintf(filepath, "%s/Venice/mocks_W1_v8.0_spocWeights/mock_0%d_W1_spec_weights.dat",  root_dir, loopCount);
+        // else                    sprintf(filepath, "%s/Venice/mocks_W1_v8.0_spocWeights/mock_%d_W1_spec_weights.dat",   root_dir, loopCount);
+
+        // if(loopCount<10)        sprintf(filepath, "%s/Venice/mocks_W1_v8.0_spocWeights/mock_00%d_W1_mockTSR_weights.dat", root_dir, loopCount);
+        // else if(loopCount<100)  sprintf(filepath, "%s/Venice/mocks_W1_v8.0_spocWeights/mock_0%d_W1_mockTSR_weights.dat",  root_dir, loopCount);
+        // else                    sprintf(filepath, "%s/Venice/mocks_W1_v8.0_spocWeights/mock_%d_W1_mockTSR_weights.dat",   root_dir, loopCount);
+
+        // if(loopCount<10)        sprintf(filepath, "%s/Venice/mocks_W1_v8.0_spocWeights/mock_00%d_W1_mockSpec_nonpoisson_weights.dat", root_dir, loopCount);
+        // else if(loopCount<100)  sprintf(filepath, "%s/Venice/mocks_W1_v8.0_spocWeights/mock_0%d_W1_mockSpec_nonpoisson_weights.dat",  root_dir, loopCount);
+        // else                    sprintf(filepath, "%s/Venice/mocks_W1_v8.0_spocWeights/mock_%d_W1_mockSpec_nonpoisson_weights.dat",   root_dir, loopCount);
+
+      if(loopCount<10)        sprintf(filepath, "%s/W%d_Nagoya_v6_mocks_work/spec_weights/mock_00%d_W%d_spec_weights.dat", root_dir, fieldFlag, loopCount, fieldFlag);
+      else if(loopCount<100)  sprintf(filepath, "%s/W%d_Nagoya_v6_mocks_work/spec_weights/mock_0%d_W%d_spec_weights.dat",  root_dir, fieldFlag, loopCount, fieldFlag);
+      else                    sprintf(filepath, "%s/W%d_Nagoya_v6_mocks_work/spec_weights/mock_%d_W%d_spec_weights.dat",   root_dir, fieldFlag, loopCount, fieldFlag);
+    }
+    
+    if(data_mock_flag == 1){
+        // Analysis on W1_SPECTRO_V7_0
+        sprintf(filepath, "%s/W1_Spectro_V7_0/spec_weights_W%d_Spectro_V7_0.dat",   root_dir, fieldFlag);
+    }
+    
+    inputfile     = fopen(filepath, "r");
+
+    for(j=0; j<Vipers_Num; j++){  
+      fscanf(inputfile, "%*d \t %lf \n", &sampling[j]);
+    }
+    
+    fclose(inputfile);
+
+    return 0;
+}
+
+
+int DataInput(){
+    // Acceptance criteria to be applied: 
+    //  i) Redshift cut
+    // ii) zFlag cut, 2 to 9 inclusive. 
+    sprintf(filepath, "%s/W1_Spectro_V7_0/W%d_SPECTRO_V7_0.txt", root_dir, fieldFlag);
+
+    printf("\n\nOpening catalogue: %s\n", filepath);
+    
+    inputfile     = fopen(filepath, "r"); 
+    
+    if(inputfile == NULL){  
+        printf("\n\nError opening %s\n", filepath); 
+        
+        return 1;
+    }
+    
+    // Column  0: id                                                                                                        
+    // Column  1: alpha                                                                                          
+    // Column  2: dec                                                                                            
+    // Column  3: zflg    
+    // Column  4: zspec                                                                                                    
+    // Column  5: photoMask                                                                          
+        
+    ch         = 0;
+    Vipers_Num = 0;
+    
+    do{
+        ch = fgetc(inputfile);        
+        if(ch == '\n')
+       	  Vipers_Num += 1;
+    } while (ch != EOF);
+
+    printf("\n\nNumber of galaxies in catalogue:  %d", Vipers_Num);
+    
+    rewind(inputfile);
+    
+    id             =  (int    *)  realloc(id,             Vipers_Num*sizeof(*id));
+    ra             =  (double *)  realloc(ra,             Vipers_Num*sizeof(*ra));
+    dec            =  (double *)  realloc(dec,            Vipers_Num*sizeof(*dec));
+    zobs           =  (double *)  realloc(zobs,           Vipers_Num*sizeof(*zobs)); 
+    zflag          =  (double *)  realloc(zflag,          Vipers_Num*sizeof(*zflag)); 
+    photoMask      =  (int    *)  realloc(id,             Vipers_Num*sizeof(*photoMask));
+
+    // derived parameters. 
+    Acceptanceflag =  (bool  *)   realloc(Acceptanceflag, Vipers_Num*sizeof(*Acceptanceflag));
+    polarAngle     =  (double *)  realloc(polarAngle,     Vipers_Num*sizeof(*polarAngle));
+    rDist          =  (double *)  realloc(rDist,          Vipers_Num*sizeof(*rDist));
+    xCoor          =  (double *)  realloc(xCoor,          Vipers_Num*sizeof(*xCoor));
+    yCoor          =  (double *)  realloc(yCoor,          Vipers_Num*sizeof(*yCoor));
+    zCoor          =  (double *)  realloc(zCoor,          Vipers_Num*sizeof(*zCoor));
+    sampling       =  (double *)  malloc(Vipers_Num*sizeof(*sampling));
+    fkp_galweight  =  (double *)  malloc(Vipers_Num*sizeof(*fkp_galweight));
+    clip_galweight =  (double *)  malloc(Vipers_Num*sizeof(*clip_galweight));
+    
+    // Acceptanceflag set to zflag currently.
+    for(j=0; j<Vipers_Num; j++)   fscanf(inputfile, "%d \t %le \t %le \t %le \t %le \t %d \n", &id[j], &ra[j], &dec[j], &zflag[j], &zobs[j], &photoMask[j]);
+    
+    for(j=0; j<10; j++)           printf("\n%d \t %e \t %e \t %e \t %e \t %d", id[j], ra[j], dec[j], zobs[j], zflag[j], photoMask[j]);
+    
+    printf("\n\nVipers W%d catalogue input successful.", fieldFlag);
+
+    fclose(inputfile);
+
+    return 0;
+}
+
+
+int CatalogueInput(char filepath[]){
+    //** Value added mocks input. **//
+    printf("\n\nOpening catalogue: %s", filepath);
+    
+    inputfile     = fopen(filepath, "r"); 
+     
     if(inputfile == NULL){  
         printf("Error opening %s\n", filepath); 
         return 1;
@@ -78,17 +249,6 @@ int CatalogueInput(char filepath[]){
     */
     
     for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%d \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %d \t %lf \t %lf \t %lf \t %*s \t %*s \t %d \t %d \t %d \t %lf \n", &id[j], &ra[j], &dec[j], &zcos[j], &zpec[j], &zobs[j], &zphot[j], &M_B[j], &type[j], &csr[j], &sampling[j], &sampling35[j], &flag_Nagoya[j], &flag_SSPOC[j], &flag_SSPOC35[j], &rand_sel[j]);
-    /*
-    for(j=0; j<Vipers_Num; j++){  
-      fscanf(inputfile, "%d \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %d \t %lf \t \
-%lf \t %lf \t %d \t %d \t %d \t %lf \n", &id[j], &ra[j], &dec[j], &zcos[j], &zpec[j], &zobs[j], &zphot[j], &M_B[j], &type[j], &csr[j], &sampling[j], &sampling35[j], &flag_Nagoya[j], &flag_SSPOC[j], &flag_SSPOC35[j], &rand_sel[j]);
-    
-      if(flag_Nagoya[j] == 1){
-        printf("\n %e \t %e \t %e \t %d", ra[j], dec[j], zcos[j], flag_Nagoya[j]);
-      }
-    }
-    */
-    // Note: &pointing[j] must be passed to any printf statement. 
     
     fclose(inputfile);
     
@@ -99,7 +259,7 @@ int CatalogueInput(char filepath[]){
 }
 
 
-int CatalogueInput_500s(char filepath[]){
+int CatalogueInput_mockTSR(char filepath[]){
     printf("\n\nOpening catalogue: %s", filepath);
     
     inputfile     = fopen(filepath, "r");  
@@ -109,12 +269,10 @@ int CatalogueInput_500s(char filepath[]){
         return 1;
     }
 
-    // Column  0: id                                                                                                         
-    // Column  1: ra                                                                                           
-    // Column  2: dec                                                                                                                                                                
-    // Column  3: zobs presumably.                                                                           
-    // Column  4: MB, abs mag from the parent HOD. 
-    // Column  5: apparent mags. 
+    // Column  0: ra                                                                                           
+    // Column  1: dec                                                                                                                                                                
+    // Column  2: zobs
+    // Column  3: sampling                                                                         
     
     ch         = 0;
     Vipers_Num = 0;
@@ -131,8 +289,6 @@ int CatalogueInput_500s(char filepath[]){
     ra             =  (double *)  malloc(Vipers_Num*sizeof(*ra));
     dec            =  (double *)  malloc(Vipers_Num*sizeof(*dec));
     zobs           =  (double *)  malloc(Vipers_Num*sizeof(*zobs)); 
-    // zcos           =  (double *)  malloc(Vipers_Num*sizeof(*zcos)); 
-    M_B            =  (double *)  malloc(Vipers_Num*sizeof(*M_B));
 
     // derived parameters. 
     Acceptanceflag =  (bool  *)   malloc(Vipers_Num*sizeof(*Acceptanceflag));
@@ -147,45 +303,13 @@ int CatalogueInput_500s(char filepath[]){
     for(j=0; j<Vipers_Num; j++){  
         id[j] = j;
     
-        fscanf(inputfile, "%*d \t %le \t %le \t %le \t %le \t %*le \n", &ra[j], &dec[j], &zobs[j], &M_B[j]);
-    
-        // if((-20.2<M_B[j]) && (M_B[j] < -19.8) && (0.7<zobs[j]) && (zobs[j]<0.8))  Acceptanceflag[j] = true;
+        fscanf(inputfile, "%d \t %le \t %le \t %le \t %le \n", &id[j], &ra[j], &dec[j], &zobs[j], &sampling[j]);
     }
-    
-    // for(j=0; j<10; j++)  printf("\n%d \t %.4lf \t %.4lf \t %.4lf \t %.4lf", id[j], ra[j], dec[j], zobs[j], M_B[j]);
     
     fclose(inputfile);
     
     printf("\nHOD 500s catalogue input successful.");
     
-    return 0;
-}
-
-
-int spec_weights(){
-    if(loopCount<10)        sprintf(filepath, "%s/Venice/mocks_W1_v8.0_500_spocWeights/mock_00%d_W1_spec_weights.dat", root_dir, loopCount);
-    else if(loopCount<100)  sprintf(filepath, "%s/Venice/mocks_W1_v8.0_500_spocWeights/mock_0%d_W1_spec_weights.dat",  root_dir, loopCount);
-    else                    sprintf(filepath, "%s/Venice/mocks_W1_v8.0_500_spocWeights/mock_%d_W1_spec_weights.dat",   root_dir, loopCount);
-
-    inputfile     = fopen(filepath, "r");  
-
-    for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%*d \t %*lf \t %*lf \t %lf \n", &sampling[j]);
-
-    fclose(inputfile);
-    
-    for(j=0; j<Vipers_Num; j++)  sampling[j] = 1./sampling[j];
-
-    // normalise to sum_i w_i = 1., with respect to accepted galaxies only;
-    double norm = 0.0;
-    
-   for(j=0; j<Vipers_Num; j++){
-        if(Acceptanceflag[j] == true){
-            norm += sampling[j];
-        }
-    }
-    
-    for(j=0; j<Vipers_Num; j++)  sampling[j] *= accepted_gals/norm;
-
     return 0;
 }
 
@@ -251,32 +375,26 @@ int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoo
     
     
     printf("\n\nOn input...");
-    printf("\nx max:  %.3f \t x min:  %.3f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
-    printf("\ny max:  %.3f \t y min:  %.3f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
-    printf("\nz max:  %.3f \t z min:  %.3f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
-    printf("\nr max:  %.3f \t r min:  %.3f", arrayMax(rDist, Vipers_Num), arrayMin(rDist, Vipers_Num));
+    printf("\nx min:  %.3f \t x max:  %.3f", arrayMin(xCoor, Vipers_Num), arrayMax(xCoor, Vipers_Num));
+    printf("\ny min:  %.3f \t y max:  %.3f", arrayMin(yCoor, Vipers_Num), arrayMax(yCoor, Vipers_Num));
+    printf("\nz min:  %.3f \t z max:  %.3f", arrayMin(zCoor, Vipers_Num), arrayMax(zCoor, Vipers_Num));
+    printf("\nr min:  %.3f \t r max:  %.3f", arrayMin(rDist, Vipers_Num), arrayMax(rDist, Vipers_Num));
     
-    printf("\n\nRedshift max:  %f \t Redshift min:  %f", arrayMax(gal_z, Vipers_Num), arrayMin(gal_z, Vipers_Num));
+    printf("\n\nRedshift min:  %f \t Redshift max:  %f", arrayMin(gal_z, Vipers_Num), arrayMax(gal_z, Vipers_Num));
 
-    printf("\n\nAbs. mag. max:  %f \t Abs. mag. min:  %f", arrayMax(M_B, Vipers_Num), arrayMin(M_B, Vipers_Num));
-    
+    // printf("\n\nAbs. mag. max:  %f \t Abs. mag. min:  %f", arrayMax(M_B, Vipers_Num), arrayMin(M_B, Vipers_Num));
     
     StefanoReflection(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
     
     // Rotate the input co-ordinates such that the ra direction is aligned more or less with the y axis, dec direction with x, and redshift along z. 
     StefanoRotated(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
     
-    printf("\n\ninverted, rotated & translated");                                                                                                                                   
-    printf("\nx max:  %.3f \t x min:  %.3f", arrayMax(xCoor, Vipers_Num), arrayMin(xCoor, Vipers_Num));
-    printf("\ny max:  %.3f \t y min:  %.3f", arrayMax(yCoor, Vipers_Num), arrayMin(yCoor, Vipers_Num));
-    printf("\nz max:  %.3f \t z min:  %.3f", arrayMax(zCoor, Vipers_Num), arrayMin(zCoor, Vipers_Num));
-    printf("\nr max:  %.3f \t r min:  %.3f", arrayMax(rDist, Vipers_Num), arrayMin(rDist, Vipers_Num));
-                                                                                                                                                                                 
-    printf("\n\naccepted. inverted, rotated & translated");                                                                  
-    printf("\nx max:  %.3f \t x min:  %.3f", AcceptedMax(xCoor, Acceptanceflag, Vipers_Num), AcceptedMin(xCoor, Acceptanceflag, Vipers_Num));                       
-    printf("\ny max:  %.3f \t y min:  %.3f", AcceptedMax(yCoor, Acceptanceflag, Vipers_Num), AcceptedMin(yCoor, Acceptanceflag, Vipers_Num));         
-    printf("\nz max:  %.3f \t z min:  %.3f", AcceptedMax(zCoor, Acceptanceflag, Vipers_Num), AcceptedMin(zCoor, Acceptanceflag, Vipers_Num));                                     
-    printf("\nr max:  %.3f \t r min   %.3f", AcceptedMax(rDist, Acceptanceflag, Vipers_Num), AcceptedMin(rDist, Acceptanceflag, Vipers_Num));                         
+    printf("\n\nAccepted, inverted, rotated & translated");
+                                                                                                                                       
+    printf("\nx min:  %.3f \t x max:  %.3f", AcceptedMin(xCoor, Acceptanceflag, Vipers_Num), AcceptedMax(xCoor, Acceptanceflag, Vipers_Num));
+    printf("\ny min:  %.3f \t y max:  %.3f", AcceptedMin(yCoor, Acceptanceflag, Vipers_Num), AcceptedMax(yCoor, Acceptanceflag, Vipers_Num));
+    printf("\nz min:  %.3f \t z max:  %.3f", AcceptedMin(zCoor, Acceptanceflag, Vipers_Num), AcceptedMax(zCoor, Acceptanceflag, Vipers_Num));
+    printf("\nr min:  %.3f \t r max:  %.3f", AcceptedMin(rDist, Acceptanceflag, Vipers_Num), AcceptedMax(rDist, Acceptanceflag, Vipers_Num));
     
     return 0;
 }

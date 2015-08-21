@@ -264,6 +264,10 @@ int assignGal_xiMemory(){
 int assignMemory_xi(){
     point_rands = (Particle *) realloc(point_rands, rand_number*sizeof(Particle));
 
+    nlogbins  =  (int) ceil((maxlog - zerolog)/logbinsz);
+
+    nlinbins  =  (int) ceil((maxlin - zerolin)/linbinsz);
+
     gg          = malloc(nlogbins*sizeof(double*));
     gr          = malloc(nlogbins*sizeof(double*));
     rr          = malloc(nlogbins*sizeof(double*));
@@ -489,15 +493,14 @@ int print_W2_2D(){
 }*/
 
 
-int randWindow_pairCount(){
-    sprintf(surveyType, "maskmultipoles_W1_Nagoya_v4_xi_%.1f_%.1f_hiRes_hex", lo_zlim, hi_zlim);
-
-    assignMemory_xi();
-    
+int randWindow_pairCount(){    
     grow_randTree();
     
     printf("\n\nCounting RR pairs.");
+    
     CountPairs_rMu(rr_0, rr_2, rr_4, rr_meanr, rr_meanmu, randTree,  randTree,  1);
+    
+    // bruteforce_nonodes(rr_0, rr_2, rr_4, rr_meanr, rr_meanmu, point_rands, point_rands, rand_number, rand_number, 1);
     
     // printf("\n\nCounting DR pairs.");
     // CountPairs_rMu(gr, gr_meanr, gr_meanmu, galTree, randTree,  0);
@@ -513,19 +516,34 @@ int randWindow_pairCount(){
     // load2d(filename, gr);
     
     // landy_szalay();
-
+    
     xiMonopole(rr_0,   gg_meanmu, xi0);
 
     // monopole calc. of *weighted* pairs. 
     xiMonopole(rr_2,   gg_meanmu, xi2);
-    
+        
     xiMonopole(rr_4,   gg_meanmu, xi4);
     
     // xiQuadrupole(rr_2, gg_meanmu, xi2);
     
     print_xiMultipoles();
-
+    
     return 0;
+}
+
+
+int print_xiMultipoles(){
+  sprintf(filepath, "%s/W1_Spectro_V7_0/%s.dat", root_dir, surveyType);
+
+  output = fopen(filepath, "w");
+
+  for(j=0; j<nlogbins; j++){  
+        fprintf(output, "%e \t %e \t %e \t %e \n", logrbins[j], xi0[j], xi2[j], xi4[j]);
+  }
+  
+  fclose(output);
+
+  return 0;
 }
 
 
@@ -661,23 +679,6 @@ int load2d(char filename[], double** array){
     fclose(inputfile);
 
     return 0;
-}
-
-
-int print_xiMultipoles(){
-  sprintf(filepath, "%s/Data/500s/%s.dat", root_dir, surveyType);
-
-  output = fopen(filepath, "w");
-
-  for(j=0; j<nlogbins; j++){  
-      if(logrbins[j] > 0.1){
-        fprintf(output, "%e \t %e \t %e \t %e \n", logrbins[j], xi0[j], xi2[j], xi4[j]);
-      }
-  }
-  
-  fclose(output);
-
-  return 0;
 }
 
 

@@ -1,5 +1,4 @@
 // Multipoles for the Kaiser redshift space distortion model.
-
 double kaiser_Monofactor(double k, double beta){
     return 1. + (2./3.)*beta + 0.2*beta*beta;
 }

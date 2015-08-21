@@ -57,7 +57,14 @@ Your method uses FFT, so your complexity is O(k_bin*log(k_bin)), which looks fas
 cheers
 fl
 
+Hi again
+ 
+> Although it'd obviously be great if you were able to apply it directly to speed up your own analysis, the question I was hoping we could agree on was to whether the
+> approach is valid for wide angle surveys, not as to whether it's compatible with e.g the Taruya model.
 
+sorry I forgot to answer this question... I think you are right, this should work for a wide angle survey as well. Even if it might not help for my analysis pipeline I definitely think it is an interesting approach and worth publication. I would publish it together with the VIPERS power spectrum analysis not as a separate paper.
+best
+fl 
 
 
 // Gigi
@@ -94,27 +101,3 @@ Ah yes,
 All the best wishes,
 
 Gigi
-
-
-
-
-Hi Michael
-The complexity of calculating the window function multipoles in my method is O(N^2_ran), were N_ran is the number of random galaxies. N_ran does not need to be large though... this is eq. 33 in http://arxiv.org/pdf/1312.4611v2.pdf. I guess this is the same in your method? Or can you do this any faster?
->     Yes, for three reasons.  Firstly, you can use a kdtree or similar to count only necessary pairs.  So at no
-> point do you calculate N_ran by N_ran, only subsets.  This is for the equivalent calculation of the multipole
-> moments of the autocorrelation of the window.
->     Secondly, there's a freedom in the density of randoms, for large separations you can
-> afford e.g. 0.1 N_Ran. and therefore get a x100 speed up, again the tree allows you to
-> separate the density according to spatial scale.
->     Lastly, in your eqn. 33 for the window it's necessary to evaluate spherical Bessel functions
-> for each random pair.  In my experience evaluation of these functions are very slow, so I would
-> imagine the calculation of 33 is aswell? In essence I've moved the bessel functions into the likelihood
-> evaluation at each point in parameter space.  This may be beneficial if you have less of such points than N_ran^2
-> but is definitely advantageous when you realise the bessel fns. correspond to  Hankel transforms and can therefore
-> be calculated by 1D FFT.
->     As such, I can compute the window moments in of order 20mins for VIPERS, or on rare occasions overnight if almost
-> total suppression of statistical noise is required.
->    Finally from a purely aesthetic point, the approach also minimises the number of window fns, contrasting your figure 7. with my fig. 3,
-> as you have defined them the number of window fns. scales with the higher order of measured multipoles, e.g. if you measured a hexadecapole
-> you would have 6 subplots (as far as I can tell).  This isn't particularly physical, as you may realise from the discussion in sec. 2.1, (for a given
-> precision the number of multipoles shown in my fig. 3. is fixed no matter the number of measure     
