@@ -1,3 +1,5 @@
+
+
 int FirstColumnCompare(const void *pa, const void *pb){
     // pointer to const. int      // This is a derefernce (indirection) operator. 
     const double *a                = *(const double **) pa;

@@ -54,7 +54,7 @@ int UniverseAge(){
         // GR
         f_Om_mOfa545[i]         =   pow(Om_mOfa[i], 0.545);
     
-        // printf("\n%d \t %.4e \t %.4e \t %.4e \t %.4e \t %.4e \t %.4e", i, lnAarray[i], 1./exp(lnAarray[i]) - 1., HubbleTime*AgeOftheUniverse[i], HubbleCnstWithTime[i], Om_mOfa[i], f_Om_mOfa545[i]);
+        // printf("\n%d \t %.4e \t %.4e \t %.4e \t %.4e \t %.4e", i, 1./exp(lnAarray[i]) - 1., HubbleTime*AgeOftheUniverse[i], HubbleCnstWithTime[i], Om_mOfa[i], f_Om_mOfa545[i]);
     }
 
     spline(lnAarray, f_Om_mOfa545, linearGrowth_nPoints, 1.0e31, 1.0e31, f_Om_mOfa545_2derivs);

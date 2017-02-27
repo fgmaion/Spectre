@@ -10,30 +10,55 @@ int boxCoordinates(double xCoor[], double yCoor[], double zCoor[], int rowNumber
 
 
 int calc_overdensity(){    
-    // clean overdensity before galaxy assignment. 
-    for(j=0; j<n0*n1*n2; j++)  overdensity[j][0] = 0.0;
-    for(j=0; j<n0*n1*n2; j++)  overdensity[j][1] = 0.0;
+    // Overkill unless 1024^3:  #pragma omp parallel for private(j)
+    for(j=0; j<n0*n1*n2; j++){
+      overdensity_complex[j][0] = 0.0;  // Clean before galaxy/random assignment.
+      overdensity_complex[j][1] = 0.0;
+
+      overdensity[j] = 0.0;
+    }
     
-    // cic assign the galaxies to overdensity, weighted by sampling, fkp weights and clipping weight.
+    // Overkill: #pragma omp parallel for private(j)
     for(j=0; j<Vipers_Num; j++){
       if(Acceptanceflag[j] == true){  
-	    cic_assign(1, xCoor[j], yCoor[j],    zCoor[j], (1./sampling[j])*fkp_galweight[j]*clip_galweight[j]);
-      
-	    // printf("\n%.2lf \t %.2lf \t %.2lf", 1./sampling[j], fkp_galweight[j], clip_galweight[j]);
+	cic_assign(1, xCoor[j], yCoor[j], zCoor[j], fkp_galweight[j]*clip_galweight[j]/sampling[j]);  // cic assign, weighted by sampling, fkp wghts and clipping.
       }
     }
-       
-    for(j=0; j<n0*n1*n2; j++)  surveyMask[j] = 0.0;
-        
-    for(j=0; j<rand_number; j++){
-        // assign randoms to surveyMask weighted by fkp.
-        if(rand_accept[j] == true)     cic_assign(0, rand_x[j], rand_y[j], rand_z[j], rand_weight[j]);    
-    }
     
-    // free if not pair counting window. 
-    // free(rand_x);
-    // free(rand_y);
-    // free(rand_z); 
+    #pragma omp parallel for private(j)
+    for(j=0; j<rand_number; j++)  cic_assign(1, rand_x[j], rand_y[j], rand_z[j], -alpha*rand_weight[j]);  // assumes all randoms up to rand_number are accepted.    
     
     return 0;
 }
+
+/*
+static int rand_int(int n) {
+  int limit = RAND_MAX - RAND_MAX % n;
+  int rnd;
+
+  do {
+    rnd = rand();
+  }
+
+  while (rnd >= limit);
+
+  return rnd % n;
+}
+
+
+void shuffle(double *array, int n) {
+  int i, j;
+
+  double tmp;
+
+  for(i = n - 1; i > 0; i--){
+    j = rand_int(i + 1);
+
+    tmp = array[j];
+
+    array[j] = array[i];
+
+    array[i] = tmp;
+  }
+}
+*/

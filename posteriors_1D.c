@@ -1,25 +1,31 @@
-double calc_fsigma8Posterior(){   
+double calc_fsigma8Posterior(double* error){   
     PosteriorNorm = 0.0;
     
-    int                                       maxLikelihood_index;
+    int                                   maxLikelihood_index = 0;
     
     double     fsigma8Interval = (max_fsigma8 - min_fsigma8)/dRes;
- 
+    
+    double     result = NAN; // Gotta gamble.
+    
     for(k=0; k<Res; k++){
         fsigma8Posterior[k] = 0.0;
 
         for(j=0; j<Res; j++){
-            for(i=0; i<Res; i++)  fsigma8Posterior[k] += exp(lnLikelihoodGrid[k][j][i]);
+            for(i=0; i<Res; i++)  fsigma8Posterior[k] += exp(lnLikelihoodGrid[k][j][i][0][0]);
         }
-        
-        if(fsigma8Posterior[k] > PosteriorNorm){
+
+        if(fsigma8Posterior[k]  > PosteriorNorm){
             PosteriorNorm       = fsigma8Posterior[k];
             
             maxLikelihood_index = k;
+        
+            result              = min_fsigma8 + fsigma8Interval*maxLikelihood_index;
         }
     }
 
-    for(k=0; k<Res; k++)  fsigma8Posterior[k] /= PosteriorNorm;
+    // for(k=0; k<Res; k++)  fsigma8Posterior[k] /= PosteriorNorm;
+    
+    // for(k=0; k<Res; k++)  printf("\n%d \t %e \t %d", k, fsigma8Posterior[k], maxLikelihood_index);    
     
     // double blind_rand;
     // blind_rand = gsl_rng_uniform(gsl_ran_r) - 0.5;
@@ -39,18 +45,19 @@ double calc_fsigma8Posterior(){
     fclose(output);
     */
     
-    Calc_fsigma8_68conf(maxLikelihood_index);
+    printf("\nmax likelihood fsig8: %le", result);
     
-    return min_fsigma8 + fsigma8Interval*maxLikelihood_index;
+    Calc_fsigma8_68conf(maxLikelihood_index, error);
+    
+    return result;
 }
 
-
-int Calc_fsigma8_68conf(int maxLikeIndex){
+int Calc_fsigma8_68conf(int maxLikeIndex, double* error){
     double Prob          = 0.0;
     double totalProb     = 0.0;
     double confidence_68 = 0.0;
     
-    double     fsigma8Interval = (max_fsigma8     - min_fsigma8)/dRes;
+    double     fsigma8Interval = (max_fsigma8 - min_fsigma8)/dRes;
 
     for(i=0; i<Res; i++)  totalProb += fsigma8Posterior[i];
     
@@ -73,7 +80,9 @@ int Calc_fsigma8_68conf(int maxLikeIndex){
             
             // printf("\n\n95 limits %.4e, prob: %.4e", confidence_95, Prob);
             
-            break;
+	    *error = i*fsigma8Interval;
+
+            return 1;
         }
     }
     
@@ -84,9 +93,11 @@ int Calc_fsigma8_68conf(int maxLikeIndex){
 
 
 double calc_velDispPosterior(){   
-    PosteriorNorm = 0.0;
+    PosteriorNorm               = 0.0;
     
-    int                                             maxLikelihood_index;
+    int     maxLikelihood_index =   0;
+    
+    double  result = NAN; 
     
     double     sigmaInterval = (max_velDisperse - min_velDisperse)/dRes;
  
@@ -97,28 +108,32 @@ double calc_velDispPosterior(){
 
         // fix last index, marginalise over first two - consistent with chiSq_minimisation.c
         for(j=0; j<Res; j++){
-            for(i=0; i<Res; i++)  sigma_posterior[k] += exp(lnLikelihoodGrid[i][j][k]);
+            for(i=0; i<Res; i++)  sigma_posterior[k] += exp(lnLikelihoodGrid[i][j][k][0][0]);
         }
         
         if(sigma_posterior[k] > PosteriorNorm){
             PosteriorNorm       = sigma_posterior[k];
             
             maxLikelihood_index = k;
+        
+            result              = min_velDisperse + sigmaInterval*maxLikelihood_index;
         }
     }
 
-    for(k=0; k<Res; k++)  sigma_posterior[k] /= PosteriorNorm;
+    // for(k=0; k<Res; k++)  sigma_posterior[k] /= PosteriorNorm;
      
-    return min_velDisperse + sigmaInterval*maxLikelihood_index;
+    return result;
 }
 
 
 double calc_bsigma8Posterior(){   
     PosteriorNorm = 0.0;
     
-    int                                             maxLikelihood_index;
+    int                                           maxLikelihood_index = 0;
     
-    double     bsigma8Interval = (max_bsigma8     -     min_bsigma8)/dRes;
+    double  result = NAN; 
+    
+    double     bsigma8Interval = (max_bsigma8 - min_bsigma8)/dRes;
  
     double bsigma8_posterior[Res];
  
@@ -127,17 +142,19 @@ double calc_bsigma8Posterior(){
 
         // fix last index, marginalise over first two - consistent with chiSq_minimisation.c
         for(j=0; j<Res; j++){
-            for(i=0; i<Res; i++)  bsigma8_posterior[k] += exp(lnLikelihoodGrid[i][k][j]);
+            for(i=0; i<Res; i++)  bsigma8_posterior[k] += exp(lnLikelihoodGrid[i][k][j][0][0]);
         }
         
         if(bsigma8_posterior[k] > PosteriorNorm){
             PosteriorNorm       = bsigma8_posterior[k];
             
             maxLikelihood_index = k;
+            
+            result              = min_bsigma8 + bsigma8Interval*maxLikelihood_index;
         }
     }
 
-    for(k=0; k<Res; k++)  bsigma8_posterior[k] /= PosteriorNorm;
+    // for(k=0; k<Res; k++)  bsigma8_posterior[k] /= PosteriorNorm;
      
-    return min_bsigma8 + bsigma8Interval*maxLikelihood_index;
+    return result;
 }

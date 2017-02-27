@@ -15,7 +15,7 @@ int comovDistReshiftCalc(){
     inputfile = fopen(filepath, "rb");
   
     if(inputfile == NULL){
-        printf("\nCreating new z - Comoving distance interpolation file.");
+        printf("\nCreating new z - comoving distance interpolation file.");
       
         pt2zChiIntegrand = &zChi_Integrand;
         
@@ -43,7 +43,7 @@ int comovDistReshiftCalc(){
 
     else{
         // written as a binary file. 
-        printf("\n\nReading z - Comoving distance interpolation file.");
+        printf("\n\nReading z - comoving distance interpolation file.");
       
         fread(z_Array, sizeof(z_Array[0]), sizeof(z_Array)/sizeof(z_Array[0]), inputfile);
       
@@ -59,6 +59,10 @@ int comovDistReshiftCalc(){
     
     spline(ComovingDistance_z, z_Array, nPoints, 1.0e31, 1.0e31, ComovingDistance_z_2derivatives);
 
+    UniverseAge();
+
+    linearGrowthRate();  // Must match declaration in cosmology_planck2015.h (cosmology_valueaddedmocks.h); This is NOT automatically ensured. //  
+    
     return 0;
 }
 

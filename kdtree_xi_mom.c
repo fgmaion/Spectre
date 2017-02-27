@@ -278,6 +278,9 @@ int assignMemory_xi(){
     rr_0        = malloc(nlogbins*sizeof(double*));
     rr_2        = malloc(nlogbins*sizeof(double*));
     rr_4        = malloc(nlogbins*sizeof(double*));
+    rr_6        = malloc(nlogbins*sizeof(double*));
+    rr_8        = malloc(nlogbins*sizeof(double*));
+    rr_10       = malloc(nlogbins*sizeof(double*));
     
     dummy_gg    = malloc(nlogbins*sizeof(double*));
     
@@ -313,6 +316,9 @@ int assignMemory_xi(){
         rr_0[j]      = malloc(nlinbins*sizeof(double));
         rr_2[j]      = malloc(nlinbins*sizeof(double));
         rr_4[j]      = malloc(nlinbins*sizeof(double));
+        rr_6[j]      = malloc(nlinbins*sizeof(double));
+        rr_8[j]      = malloc(nlinbins*sizeof(double));
+        rr_10[j]     = malloc(nlinbins*sizeof(double));
         
         dummy_gg[j]  = malloc(nlinbins*sizeof(double));
         
@@ -337,6 +343,9 @@ int assignMemory_xi(){
             rr_0[j][i]      = 0.0;
             rr_2[j][i]      = 0.0;
             rr_4[j][i]      = 0.0;
+            rr_6[j][i]      = 0.0;
+            rr_8[j][i]      = 0.0;
+            rr_10[j][i]     = 0.0;
             
             mean_xi[j][i]   = 0.0; 
         }
@@ -345,6 +354,9 @@ int assignMemory_xi(){
     xi0      = malloc(nlogbins*sizeof(*xi0));
     xi2      = malloc(nlogbins*sizeof(*xi2));
     xi4      = malloc(nlogbins*sizeof(*xi4));
+    xi6      = malloc(nlogbins*sizeof(*xi6));
+    xi8      = malloc(nlogbins*sizeof(*xi8));
+    xi10     = malloc(nlogbins*sizeof(*xi10));
 
     logrbins = malloc(nlogbins*sizeof(*logrbins));
 
@@ -360,9 +372,12 @@ int assignMemory_xi(){
     meanQuad_error     = malloc(nlogbins*sizeof(*meanQuad_error));
     
     for(i=0; i<nlogbins; i++){
-        xi0[i]  = 0.0; 
-        xi2[i]  = 0.0; 
-        xi4[i]  = 0.0; 
+        xi0[i]   = 0.0; 
+        xi2[i]   = 0.0; 
+        xi4[i]   = 0.0; 
+        xi6[i]   = 0.0; 
+        xi8[i]   = 0.0; 
+        xi10[i]  = 0.0; 
         
         logrbins[i] = 0.0;
         
@@ -442,7 +457,7 @@ int NFW_profile_pairCount(){
     grow_galTree();
 
     printf("\n\nCounting DD pairs.");  //
-    CountPairs_rMu(rr_0, rr_2, rr_4, gg_meanr, gg_meanmu, galTree,  galTree,  1);
+    // CountPairs_rMu(rr_0, rr_2, rr_4, gg_meanr, gg_meanmu, galTree,  galTree,  1);
 
     // print_dd();
 
@@ -498,7 +513,7 @@ int randWindow_pairCount(){
     
     printf("\n\nCounting RR pairs.");
     
-    CountPairs_rMu(rr_0, rr_2, rr_4, rr_meanr, rr_meanmu, randTree,  randTree,  1);
+    CountPairs_rMu(rr_0, rr_2, rr_4, rr_6, rr_8, rr_10, rr_meanr, rr_meanmu, randTree,  randTree,  1);
     
     // bruteforce_nonodes(rr_0, rr_2, rr_4, rr_meanr, rr_meanmu, point_rands, point_rands, rand_number, rand_number, 1);
     
@@ -524,7 +539,11 @@ int randWindow_pairCount(){
         
     xiMonopole(rr_4,   gg_meanmu, xi4);
     
-    // xiQuadrupole(rr_2, gg_meanmu, xi2);
+    xiMonopole(rr_6,   gg_meanmu, xi6);
+    
+    // masked RSD work. 
+    xiMonopole(rr_8,   gg_meanmu, xi8);
+    // xiMonopole(rr_10,   gg_meanmu, xi10);
     
     print_xiMultipoles();
     
@@ -533,13 +552,11 @@ int randWindow_pairCount(){
 
 
 int print_xiMultipoles(){
-  sprintf(filepath, "%s/W1_Spectro_V7_0/%s.dat", root_dir, surveyType);
+  sprintf(filepath, "%s/W1_Spectro_V7_4/Qmultipoles/%s.dat", root_dir, surveyType);
 
   output = fopen(filepath, "w");
 
-  for(j=0; j<nlogbins; j++){  
-        fprintf(output, "%e \t %e \t %e \t %e \n", logrbins[j], xi0[j], xi2[j], xi4[j]);
-  }
+  for(j=0; j<nlogbins; j++)  fprintf(output, "%e \t %e \t %e \t %e \t %e \t %e \n", logrbins[j], xi0[j], xi2[j], xi4[j], xi6[j], xi8[j]);
   
   fclose(output);
 

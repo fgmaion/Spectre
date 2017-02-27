@@ -1,0 +1,42 @@
+#./kdtree_xi_mom /disk1/mjw/VIPERS_ValueAddedHOD/mocks_W1_Nagoya_0.65_0.75_v1.2/mock_W1_005_ALLINFO.cat 2 3 4 5 /disk1/mjw/VIPERS_ValueAddedHOD/randoms20_W1_Nagoya_ra_dec_z.cat 1 2 3 3
+
+# fiber 
+#./kdtree_xi_mom /disk1/mjw/VIPERS_ValueAddedHOD/mocks_W1_Nagoya_0.65_0.75_fiber_v1.2/mock_W1_005_ALLINFO.cat 2 3 4 5 /disk1/mjw/VIPERS_ValueAddedHOD/randoms20_W1_Nagoya_ra_dec_z.cat 1 2 3 3
+
+
+# 'fiber', interval in phi. 
+#./kdtree_xi_mom /disk1/mjw/VIPERS_ValueAddedHOD/randoms_W1_Nagoya_0.65_0.75_toyfiber_v1.2/mock_W1_001_ALLINFO.cat 1 2 3 3 /disk1/mjw/VIPERS_ValueAddedHOD/randoms20_W1_Nagoya_ra_dec_z.cat 1 2 3 3
+
+# are randoms really unclustered?
+# ./kdtree_xi_mom /disk1/mjw/VIPERS_ValueAddedHOD/randoms20_W1_Nagoya_ra_dec_z.cat 1 2 3 3 /disk1/mjw/VIPERS_ValueAddedHOD/randoms20_W1_Nagoya_ra_dec_z.cat 1 2 3 3
+
+# azimuthal fiber for hod mocks.
+# ./kdtree_xi_mom /disk1/mjw/VIPERS_ValueAddedHOD/mocks_W1_Nagoya_0.65_0.75_azimuthalfiber_v1.2/mock_W1_005_ALLINFO.cat 1 2 3 3 /disk1/mjw/VIPERS_ValueAddedHOD/randoms20_W1_Nagoya_ra_dec_z.cat 1 2 3 3
+#mv xil.dat mocks_W1_Nagoya_0.65_0.75_phifiber_v1.2_Ran20_005.dat
+
+
+# modr fiber for randoms.
+#./kdtree_xi_mom /disk1/mjw/VIPERS_ValueAddedHOD/mocks_W1_Nagoya_0.65_0.75_modrfiber_v1.2/Selectedrandoms_W1_001_ALLINFO.cat 1 2 3 3 /disk1/mjw/VIPERS_ValueAddedHOD/randoms20_W1_Nagoya_ra_dec_z.cat 1 2 3 3
+#mv xil.dat randoms_W1_Nagoya_0.65_0.75_modrfiber_v1.2_Ran20.dat
+
+# modr fiber for mocks.
+for i in {1..10}
+do 
+   echo $i
+   
+   ./kdtree_xi_mom /disk1/mjw/VIPERS_ValueAddedHOD/mocks_W1_Nagoya_0.65_0.75_modrfiber_v1.2/mock_W1_00"$i"_ALLINFO.cat 1 2 3 3 /disk1/mjw/VIPERS_ValueAddedHOD/randoms20_W1_Nagoya_ra_dec_z.cat 1 2 3 3
+
+    mv xil.dat mocks_W1_Nagoya_0.65_0.75_modrfiber_v1.2_Ran20_00"$i".dat   
+done
+
+# no fiber for mocks.
+#for i in {10..26}
+#do 
+#   echo $i
+   
+#   ./kdtree_xi_mom /disk1/mjw/VIPERS_ValueAddedHOD/mocks_W1_Nagoya_0.65_0.75_v1.2/mock_W1_0"$i"_ALLINFO.cat 2 3 4 5 /disk1/mjw/VIPERS_ValueAddedHOD/randoms20_W1_Nagoya_ra_dec_z.cat 1 2 3 3
+
+#    mv xil.dat mocks_W1_Nagoya_0.65_0.75_nofiber_v1.2_Ran20_0"$i".dat   
+#done
+
+

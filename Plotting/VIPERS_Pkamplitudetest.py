@@ -1,0 +1,111 @@
+import matplotlib.pylab        as plt
+import matplotlib.pyplot
+from   matplotlib.font_manager import FontProperties
+from   matplotlib.ticker       import ScalarFormatter
+from   matplotlib.ticker       import FixedFormatter
+import pylab                   as pl
+import numpy                   as np
+import math, os
+import glob, pickle
+
+formatter = ScalarFormatter(useMathText=True)
+#formatter.set_scientific(True)
+#formatter.set_powerlimits((-3,3))
+
+fig_width_pt = 246.0*2 # Get this from LaTex using \the\columnwidth
+inches_per_pt = 1.0/72.27
+golden_mean = (np.sqrt(5)-1.0)/2.0
+fig_width  = fig_width_pt*inches_per_pt # width in inches
+fig_height = fig_width*golden_mean # height in inches
+fig_size = [fig_width, fig_height]
+params = {'axes.labelsize':10,
+          'text.fontsize':8,
+          'legend.fontsize':8,
+          'xtick.labelsize':8.5,
+          'ytick.labelsize':5.5,
+          'figure.figsize':fig_size,
+          'font.family': 'serif'}
+
+pl.rcParams.update(params)
+pl.clf()
+pl.figure()
+fig = pl.figure()
+axes = pl.Axes(fig, [.2, .2, .7, .7])
+fig.add_axes(axes)
+axes.yaxis.set_major_formatter(formatter)
+
+pl.xlabel(r'$k [h^{-1} Mpc]$')
+pl.ylabel('P(k)')
+
+stef = np.loadtxt('/disk1/mjw/HOD_MockRun/Stefano/pk_06z09_H2/ps_1.txt')
+#pl.plot(stef[:,0], stef[:,1], label='Stefano, 2Mpc')
+# pl.plot(stef[:,0], stef[:,1], label='Stefano')
+
+data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Del2k/midK_Del2k_HODmocks_Mesh_4.00_CicWf_kInterval_0.01_001.dat')
+# pl.loglog(data[:,0], data[:,2], label='4 Mpc mesh')
+
+data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Del2k/midK_Del2k_HODmocks_Mesh_2.00_CicWf_kInterval_0.01_001.dat')
+# pl.loglog(data[:,0], data[:,2], label='2 Mpc mesh')
+
+'''
+MockCat      = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Multipoles/Multipoles_HODmocks_Mesh_4.00_CicWf_kbin_0.010_001.dat')
+MockCat      = MockCat[:,2]
+
+for i in xrange(2, 10, 1):
+   MockIn   = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Multipoles/Multipoles_HODmocks_Mesh_4.00_CicWf_kbin_0.010_00'+str(i)+'.dat')
+   MockCat  = np.vstack((MockIn[:,2], MockCat))
+
+
+for i in xrange(10, 27, 1):
+   MockIn   = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Multipoles/Multipoles_HODmocks_Mesh_4.00_CicWf__kbin_0.010_0'+str(i)+'.dat')
+   MockCat  = np.vstack((MockIn[:,2], MockCat))
+
+kvals        = MockIn[:,0]
+
+Mean         = np.mean(MockCat, axis=0)
+Var          = np.var(MockCat,  axis=0)
+
+pl.errorbar(kvals, Mean, np.sqrt(Var)/np.sqrt(25), label='Real space Quadrupole')
+
+
+MockCat      = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Multipoles/Multipoles_zHODmocks_Mesh_4.00_CicWf_kbin_0.010_001.dat')
+MockCat      = MockCat[:,2]
+
+for i in xrange(2, 10, 1):
+   MockIn   = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Multipoles/Multipoles_zHODmocks_Mesh_4.00_CicWf_kbin_0.010_00'+str(i)+'.dat')
+   MockCat  = np.vstack((MockIn[:,2], MockCat))
+
+for i in xrange(10, 12, 1):
+   MockIn   = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Multipoles/Multipoles_zHODmocks_Mesh_4.00_CicWf__kbin_0.010_0'+str(i)+'.dat')
+   MockCat  = np.vstack((MockIn[:,2], MockCat))
+
+kvals        = MockIn[:,0]
+
+Mean         = np.mean(MockCat, axis=0)
+Var          = np.var(MockCat,  axis=0)
+
+pl.errorbar(kvals, Mean, np.sqrt(Var)/np.sqrt(25), label='z space Quadrupole')
+
+
+data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Multipoles/Multipoles_zCube_xvel_clipThreshold_1.0e+03_fullCube_kbin_0.010_000.dat')
+pl.loglog(data[:,0], data[:,1], 'k')
+pl.loglog(data[:,0], data[:,2], 'k')
+'''
+
+data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Multipoles/Multipoles_HODmocks_RealSpace_Mesh_4.00_CicWf_kbin_0.010_001.dat')
+pl.loglog(data[:,0], data[:,1], 'k')
+pl.loglog(data[:,0], np.abs(data[:,2]), 'k', label='real space, abs(quadrupole)')
+
+data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Multipoles/Multipoles_HODmocks_RedshiftSpace_Mesh_4.00_CicWf_kbin_0.010_001.dat')
+pl.loglog(data[:,0], data[:,1], 'g')
+pl.loglog(data[:,0], data[:,2], 'g', label='redshift')
+
+pl.yscale('log')
+pl.xscale('log')
+
+pl.xlim(10**-2, 1.0)
+pl.ylim(100, 5*10**4)
+
+pl.legend(loc=1)
+
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/Pk_stefComparison_001.pdf')

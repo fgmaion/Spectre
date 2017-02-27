@@ -1,3 +1,4 @@
+/*
 int AnisoGauss(double a, double b, double c){
     for(j=0; j<n0*n1*n2; j++) Cell_SurveyLimitsMask[j] = 0.0;
     
@@ -218,7 +219,20 @@ int knownGRF_mask(){
     
     inputfile     = fopen(filepath, "r");          
 
-    for(j=0; j<n0*n1*n2; j++)  fscanf(inputfile, "%le", &Cell_SurveyLimitsMask[j]);
+    for(j=0; j<n0*n1*n2; j++)  fscanf(inputfile, "%le", &surveyMask[j]);
+
+    fclose(inputfile);
+
+    return 0;
+}
+*/
+
+int knownGRF_mask_smallCell(){
+    sprintf(filepath, "%s/Data/SpectralDistortion/GRF_mask_MonoAndQuad_CellSize_2.00_papercheck.dat", root_dir);
+    
+    inputfile     = fopen(filepath, "r");          
+
+    for(j=0; j<n0*n1*n2; j++)  fscanf(inputfile, "%le", &surveyMask[j]);
 
     fclose(inputfile);
 
@@ -226,14 +240,69 @@ int knownGRF_mask(){
 }
 
 
-int knownGRF_mask_smallCell(){
-    sprintf(filepath, "%s/Data/SpectralDistortion/GRF_mask_MonoAndQuad_CellSize_2.00.dat", root_dir);
+int randoms_Cube(int maxGals){
+    printf("\nCreating cube of randoms.");
+
+    rand_number = maxGals;
     
-    inputfile     = fopen(filepath, "r");          
+    assign_randmemory(); 
 
-    for(j=0; j<n0*n1*n2; j++)  fscanf(inputfile, "%le", &Cell_SurveyLimitsMask[j]);
+    for(j=0; j<maxGals; j++){
+      rand_x[j] = gsl_rng_uniform(gsl_ran_r)*1000.;
+      rand_y[j] = gsl_rng_uniform(gsl_ran_r)*1000.;
+      rand_z[j] = gsl_rng_uniform(gsl_ran_r)*1000.;
+    
+      // no redshift dependence to nbar. 
+      rand_chi[j]     = 500.;
+      rand_weight[j]  =   1.;
+      rand_accept[j]  = true;
+    }
+    
+    accepted_rand = rand_number;
+    
+    return 0;
+}
 
+
+int randoms_inenvironment(char filepath[]){
+    printf("\n\nOpening catalogue: %s", filepath);
+    
+    inputfile     = fopen(filepath, "r");  
+    
+    // Column 0: x co-ordinate                                                                                                     
+    // Column 1: y co-ordinate                                                                                           
+    // Column 2: z co-ordinate                                                                                             
+
+    // Calculate number of in the catalogue (line number);
+
+    ch          = 0;
+    rand_number = 0;
+    
+    do{
+        ch = fgetc(inputfile);     
+           
+        if(ch == '\n')
+       	  rand_number += 1;
+    } while(ch != EOF);
+
+    printf("\n\nNumber of randoms in catalogue:  %d", rand_number);
+
+    rewind(inputfile);
+    
+    assign_randmemory(); 
+
+    for(j=0; j<rand_number; j++){
+      fscanf(inputfile, "%lf \t %lf \t %lf \n", &rand_x[j], &rand_y[j], &rand_z[j]);
+    
+      // no redshift dependence to nbar. 
+      rand_chi[j]     = 500.;
+      rand_weight[j]  =   1.;
+      rand_accept[j]  = true;
+    }
+    
     fclose(inputfile);
 
+    accepted_rand = rand_number;
+    
     return 0;
 }

@@ -8,7 +8,7 @@ double projectedCorrfn(double sig, double r0, double gamma){
 }
 
 int SaundersDeproject(int nbins, double interval){
-  // References: google Nick Ross deprojection. Saunders 1992. 
+  // References: google Nic Ross deprojection. Saunders 1992. 
    
   double*    w;
   double* mids;

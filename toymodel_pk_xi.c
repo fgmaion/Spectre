@@ -48,6 +48,22 @@ double toyRSD_OnePlusOneHalfMuSq(int order){
 } 
 
 
+double toyRSD_unitLegendreCoefficient(int order){
+    switch(order){
+        case 0:
+            return 1.;
+        case 2:
+            return 1.; 
+        case 4:
+            return 0.;     
+        case 6:
+            return 0.;     
+        case 8:
+            return 0.;     
+    }
+} 
+
+
 double spherical_tophat(double k, double R){
     double y;
 

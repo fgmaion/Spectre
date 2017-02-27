@@ -1,0 +1,42 @@
+OPT = -g
+CFLAGS = -O2
+LIBS = -L/disk1/mjw/usr/lib/ -lgsl -lgslcblas -lm
+
+all: 
+	make call_ggb_coeff_fft
+	make call_ggb_coeff_jacobi
+	make call_ggb_inversion_fft
+	make call_ggb_inversion_no_fft
+
+call_ggb_coeff_fft: call_ggb_coeff_fft.c ggb_coeff_fft.o function.o
+	cc $(CFLAGS) call_ggb_coeff_fft.c -o call_ggb_coeff_fft ggb_coeff_fft.o function.o $(LIBS)
+
+ggb_coeff_fft: ggb_coeff_fft.c
+	cc -c $(CFLAGS) ggb_coeff_fft.c
+	make call_ggb_coeff_fft
+
+call_ggb_coeff_jacobi: call_ggb_coeff_jacobi.cpp ggb_coeff_jacobi.o function.o
+	g++ $(CFLAGS) call_ggb_coeff_jacobi.cpp -o call_ggb_coeff_jacobi ggb_coeff_jacobi.o function.o $(LIBS)
+
+ggb_coeff_jacobi: ggb_coeff_jacobi.cpp 
+	g++ -c $(CFLAGS) ggb_coeff_jacobi.cpp
+	make call_ggb_coeff_jacobi
+
+call_ggb_inversion_fft: call_ggb_inversion_fft.c ggb_inversion_fft.o
+	cc $(CFLAGS) call_ggb_inversion_fft.c -o call_ggb_inversion_fft ggb_inversion_fft.o $(LIBS)
+
+ggb_inversion_fft: ggb_inversion_fft.c
+	cc -c $(CFLAGS) ggb_inversion_fft.c
+	make call_ggb_inversion_fft
+
+call_ggb_inversion_no_fft: call_ggb_inversion_no_fft.c ggb_inversion_no_fft.o
+	cc $(CFLAGS) call_ggb_inversion_no_fft.c -o call_ggb_inversion_no_fft ggb_inversion_no_fft.o $(LIBS)
+
+ggb_inversion_no_fft: ggb_inversion_no_fft.c
+	cc -c $(CFLAGS) ggb_inversion_no_fft.c
+	make call_ggb_inversion_no_fft
+
+function: function.c
+	cc -c $(CFLAGS) function.c
+	make call_ggb_coeff_fft
+	make call_ggb_coeff_jacobi

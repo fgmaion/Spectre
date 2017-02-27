@@ -1,255 +1,330 @@
-int PkCalc(){  
-    fftw_execute(p);
-    
-    // H2_k assigned to hold fft of gals.
-    for(j=0; j<n0*n1*n2; j++){
-        H2_k[j][0] = H_k[j][0]; 
-        H2_k[j][1] = H_k[j][1]; 
-    }
+#include "qSortCompare.c"
 
-    for(j=0; j<n0*n1*n2; j++)  overdensity[j][0] = surveyMask[j];
+int PkCalc(){
+    // fftw_execute(p);
 
-    fftw_execute(p);
-    
-    // free overdensity.
-    // free_grid();
+    // for(j=0; j<n0*n1*n2; j++)  printf("\n%.4lf \t %.4lf", H_k[j][0], H_k[j][1]);
 
-    assign2DPkMemory();
+    //correct_ind_modes();
+   
+    //correct_all_modes();
     
-    PkCorrections();
+    // r2c
+    fftw_execute(plan);
     
-    observedQuadrupole(polar_pkcount);
+    // for(j=0; j<(n0/2)*n1*n2; j++)  printf("\n%.4lf \t %.4lf", H_k[j][0], H_k[j][1]);
+    
+    prep_r2c_modes();
+
+    nosort_MultipoleCalc();
+    
+    // Correct_modes();
+    
+    // observedQuadrupole();
     
     return 0;
 }
 
 
-int PkCorrections(){
-    double pk, WindowFunc;
+int prep_r2c_modes(){
+  // r2c returns half the modes on the direction in which overdensity changes first, i.e. x. 
+  // #pragma omp parallel for private(Index, k, j, i, k_x, k_y, k_z, pk, kmodulus, mu)
+  for(k=0; k<n0; k++){
+    k_z = kIntervalz*k;
 
-    double rand_shot = 0.0, gal_shot = 0.0;
+    for(j=0; j<n1; j++){
+      k_y = kIntervaly*j;
 
-    // shot noise from randoms cat. calculation.    
-    for(j=0; j<rand_number; j++){
-        if(rand_accept[j]    == true)  rand_shot += pow(rand_weight[j], 2.);
-    } 
-                    
-    rand_shot *= alpha*alpha;
+      if(k_y > yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
+      
+      for(i=0; i<(n2/2+1); i++){
+        k_x = kIntervalx*i;
 
-    // shot noise from galaxies cat. calculation, including angular sampling. 
-    for(j=0; j<Vipers_Num; j++){
-        if(Acceptanceflag[j] == true)  gal_shot  += pow(fkp_galweight[j]/sampling[j], 2.);
+        Index                                  = k*n1*(n2/2+1) + j*(n2/2+1) + i;
+
+        kSq                                    = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
+
+        kmodulus                               = pow(kSq, 0.5);
+
+        mu                                     = k_z/kmodulus; // Assume mean is not passed.
+
+        mode_Li[Index]                         = gsl_sf_legendre_P2(mu);  // L_2 = 0.5*(3.*mu**2 -1.) 
+
+        mass_assign_corr[Index]                = gsl_sf_sinc(k_x*0.5/xNyquistWaveNumber); // Computes \sinc(x) = \sin(\pi x) / (\pi x).
+        mass_assign_corr[Index]               *= gsl_sf_sinc(k_y*0.5/yNyquistWaveNumber);
+        mass_assign_corr[Index]               *= gsl_sf_sinc(k_z*0.5/zNyquistWaveNumber);
+
+        mass_assign_corr[Index]                = pow(mass_assign_corr[Index], 2.0);  // Correct mass assignment of randoms; cic = 2, ngp = 1.
+        
+        // %% NEEDS FIXED FOR KMODULUS < LOGK_MIN %%//
+        mode_pkbin_index[Index]                = (int)  floor((log10(kmodulus) - logk_min)/logk_interval) > 0 ? (int)  floor((log10(kmodulus) - logk_min)/logk_interval) : 0;
+
+        // Each available mode has an index in the binning array. 
+        Sum_Li[mode_pkbin_index[Index]]       += mode_Li[Index];
+        Sum_Li2[mode_pkbin_index[Index]]      += mode_Li[Index]*mode_Li[Index];
+
+        modes_perbin[mode_pkbin_index[Index]] += 1;
+
+        mean_modk[mode_pkbin_index[Index]]    += kmodulus;        
+      }
     }
+  }
 
-    printf("\n\nShot noise contributions: Randoms %.4lf, Galaxies %.4lf", rand_shot, gal_shot);
+  for(j=0; j<kbin_no; j++){
+    mean_modk[j]  /= modes_perbin[j];
 
-    //** NOTE:  Clipping is assumed to not alter the galaxy shot noise 
-    // as (a)   The volume affected is very small (~ 1 %) 
-    //    (b)   Galaxies removed account for linear fluctuations to be 
-    //          smaller, as opposed to a change in number density. 
+    detA[j]        = modes_perbin[j]*Sum_Li2[j] - Sum_Li[j]*Sum_Li[j];
+  }
+  
+  return 0;
+}
+
+
+int correct_all_modes(){
+  int start;
+  double pk;
+  double rand_shot = 0.0, gal_shot = 0.0;
+
+  for(j=0; j<rand_number; j++)  rand_shot += pow(rand_weight[j], 2.);  // shot noise from randoms.
+
+  rand_shot *= alpha*alpha;
+
+  for(j=0; j<Vipers_Num; j++){
+    if(Acceptanceflag[j] == true)  gal_shot  += pow(fkp_galweight[j]/sampling[j], 2.);  // galaxy shot noise, inc. sampling.
+  }
+
+  printf("\n\nShot noise: randoms %.4lf, galaxies %.4lf", rand_shot, gal_shot);
+  
+  for(k=0; k<n0; k++){  // k_z > 0.0; no restriction on k_x or k_y.
+    k_z = kIntervalz*k;
+
+    for(j=0; j<n1; j++){
+      k_y = kIntervaly*j;
+
+      for(i=0; i<n2; i++){
+	k_x = kIntervalx*i;
+
+	if(k_x>xNyquistWaveNumber)  k_x   -= n2*kIntervalx;  // Way to remove this?
+	if(k_y>yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
+	if(k_z>zNyquistWaveNumber)  k_z   -= n0*kIntervalz;
+	
+	Index                              = k*n1*n2 + j*n2 + i;
+
+	// PkCorrections(Index, k_x, k_y, k_z, rand_shot, gal_shot, &pk, &kmodulus, &mu);
+      }
+    }
+  }
+
+  return 0;
+}
+
+
+int correct_ind_modes(){
+  int start;
+  double pk;
+  double rand_shot = 0.0, gal_shot = 0.0;
+
+  for(j=0; j<rand_number; j++)  rand_shot += pow(rand_weight[j], 2.);  // shot noise from randoms.
+
+  rand_shot *= alpha*alpha;
+
+  for(j=0; j<Vipers_Num; j++){
+    if(Acceptanceflag[j] == true)  gal_shot  += pow(fkp_galweight[j]/sampling[j], 2.);  // galaxy shot noise, inc. sampling.
+  }
+
+  printf("\n\nShot noise: randoms %.4lf, galaxies %.4lf", rand_shot, gal_shot);
+
+  //** NOTE:  Clipping is assumed to not alter the galaxy shot noise
+  // as (a)   The volume affected is very small (~ 1 %)
+  //    (b)   Galaxies removed account for linear fluctuations to be
+  //          smaller, as opposed to a change in number density.
+  
+
+  for(i=1; i<n2/2+1; i++){
+    k_x = kIntervalx*i;  // k_z = 0.0 && k_y = 0.0 && k_x > 0.0; drop the mean (k=0) mode. 
+
+    // PkCorrections(i, k_x, 0.0, 0.0, rand_shot, gal_shot, &pk, &kmodulus, &mu);
     
+    polar_pk[i-1][0] = kmodulus;         // One hemi-sphere is independent, e.g. i) k_z >= 0.0
+    polar_pk[i-1][1] = fabs(mu);         // ii) in the k_z=0 plane one semi-circle is independent, k_y>0.
+    polar_pk[i-1][2] =       pk;         // iii) on the line k_z=k_y=0, one half is independent, k_x>=0.
+  }
+  
+  start = -n2/2;
+  
+  for(j=1; j<n1/2+1; j++){  // k_z = 0.0; k_y > 0.0;
+    k_y = kIntervaly*j;
+    for(i=0; i<n2; i++){
+      k_x = kIntervalx*i;
+
+      if(k_x>xNyquistWaveNumber)  k_x   -= n2*kIntervalx;
+
+      Index                              = j*n2 + i;   // k=0 by assumption;   
+
+      // PkCorrections(Index, k_x, k_y, 0.0, rand_shot, gal_shot, &pk, &kmodulus, &mu);
+
+      // Starts at n2/2 from first loop, but k_y starts at 1. 
+      polar_pk[start + Index][0]         = kmodulus;   // One hemi-sphere is independent, e.g. i) k_z >= 0.0
+      polar_pk[start + Index][1]         = fabs(mu);   // ii) in the k_z=0 plane one semi-circle is independent, k_y>0.
+      polar_pk[start + Index][2]         = pk;         // iii) on the line k_z=k_y=0, one half is independent, k_x>=0.
+    }
+  }
+  
+  start = -n1*n2/2 + n2/2;
+  
+  #pragma omp parallel for private(Index, k, j, i, k_x, k_y, k_z, pk, kmodulus, mu)
+  for(k=1; k<=n0/2; k++){  // k_z > 0.0; no restriction on k_x or k_y. 
+     k_z = kIntervalz*k;
+
+     for(j=0; j<n1; j++){
+       k_y = kIntervaly*j;
+
+       for(i=0; i<n2; i++){
+	 k_x = kIntervalx*i;
+
+	 if(k_x>xNyquistWaveNumber)  k_x   -= n2*kIntervalx;  // Way to remove this?
+	 if(k_y>yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
+
+	 Index                              = k*n1*n2 + j*n2 + i;
+
+	 // PkCorrections(Index, k_x, k_y, k_z, rand_shot, gal_shot, &pk, &kmodulus, &mu);
+	 
+	 polar_pk[start + Index][0] = kmodulus;   // One hemi-sphere is independent, e.g. i) k_z >= 0.0
+	 polar_pk[start + Index][1] = fabs(mu);   // ii) in the k_z=0 plane one semi-circle is independent, k_y>0.
+	 polar_pk[start + Index][2] = pk;         // iii) on the line k_z=k_y=0, one half is independent, k_x>=0.
+	                                          // in the k_z=0 plane one semi-circle is independent, k_y>0.
+       }
+     }
+  }
+  
+  polar_pkcount = n0*n1*n2/2 + n1*n2/2 +n2/2;  // Number of modes, Index is (polar_pkcount -1).
+  
+  return 0;
+}
+
+
+int observedQuadrupole(){
+  if(data_mock_flag == 0){
+    // sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/pk/d0_%d/W%d/mock_%d_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, (int) appliedClippingThreshold, fieldFlag, loopCount, lo_zlim, hi_zlim, (int) Jenkins_foldfactor);  // Clipping. 10 June 2016
+
+    sprintf(filepath, "%s/W1_Spectro_V7_4/pk.dat", root_dir); 
+  }
+
+  else if(data_mock_flag == 1){
+    sprintf(filepath, "%s/John/data_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, lo_zlim, hi_zlim, (int) Jenkins_foldfactor);
+  }
+
+  nosort_MultipoleCalc(filepath, 0);
+  
+  return 0;
+}
+
+
+int MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], double Quadrupole[], double** Array, int modeCount, char filepath[], double mu_lolimit, double mu_hilimit, int fileOutput){
+    // P(k, mu_i) = P_0(k) + P_2(k)*(3.*mu_i*mu_i - 1.)/2
+    // Least squares fit between theory prediction, P(k, mu_i) and measured.  (Linear regression).
+
+    int          loIndex;
+    int          hiIndex;
+    int     modes_perbin;
+
+    printf("\n\nPerforming multipole calculation. (to Quadrupole order)");
     
-    polar_pkcount = 0;
+    // assign log(k) binning for P(k) and assign memory for binning. (logk_min, logk_max, # bins).
+    // prep_pkbinning(-2., log10(modkMax), kbin_no);
     
-    for(k=0; k<n0; k++){
-        for(j=0; j<n1; j++){
-            for(i=0; i<n2; i++){
-                k_x = kIntervalx*i;
-                k_y = kIntervaly*j;
-                k_z = kIntervalz*k;
-                
-                if(k_x>xNyquistWaveNumber)  k_x   -= n2*kIntervalx;
-                if(k_y>yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
-                if(k_z>zNyquistWaveNumber)  k_z   -= n0*kIntervalz;
+    // Order by mod k to ensure binning is the mean between LowerBinIndex and UpperBinIndex.
+    qsort(Array, modeCount, sizeof(Array[0]), FirstColumnCompare);
+        
+    loIndex      = 0;
+    hiIndex      = 0;
 
-                Index                              = k*n1*n2 + j*n2 + i;
-
-                kSq                                = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
-                
-                kmodulus                           = pow(kSq, 0.5);
-                
-                mu                                 = k_z/kmodulus;
-                if(kmodulus < 0.000001)       mu   = 0.0;     
-
-                WindowFunc                         = 1.;
-
-                if(k_x != 0.)  WindowFunc         *= sin(pi*k_x*0.5/xNyquistWaveNumber)/(pi*k_x*0.5/xNyquistWaveNumber);
-
-                if(k_y != 0.)  WindowFunc         *= sin(pi*k_y*0.5/yNyquistWaveNumber)/(pi*k_y*0.5/yNyquistWaveNumber);
+    for(k=0; k<modBinNumb-1; k++){
+        mean_modBin[k]    = 0.0;
+        Monopole[k]       = 0.0;
+        Quadrupole[k]     = 0.0;
+    }
     
-                if(k_z != 0.)  WindowFunc         *= sin(pi*k_z*0.5/zNyquistWaveNumber)/(pi*k_z*0.5/zNyquistWaveNumber);
-                
-                // Correct for mass assignment of randoms.
-                // Cloud in cell. NGP corresponds to WindowFunc rather than WindowFunc^2. 
-                H_k[Index][0]                     /= pow(WindowFunc, 2.);
-                H_k[Index][1]                     /= pow(WindowFunc, 2.);
-
-                // If smoothing the field, do not correct for mass assignment.  Obvious in hindsight.    
-                // Cloud in cell. NGP corresponds to WindowFunc rather than WindowFunc^2. 
-                H2_k[Index][0]                    /= pow(WindowFunc, 2.);
-                H2_k[Index][1]                    /= pow(WindowFunc, 2.);
-                
-                                                     // gals          // normalised rands. 
-                H_k[Index][0]                      = H2_k[Index][0] - alpha*H_k[Index][0]; 
-		        H_k[Index][1]                      = H2_k[Index][1] - alpha*H_k[Index][1]; 
-            
-                pk                                 = pow(H_k[Index][0], 2.) + pow(H_k[Index][1], 2.);
-
-                pk                                -= rand_shot;
-
-                pk                                -=  gal_shot;
-                
-	            if(kmodulus > 0.000001){
-	                //// Only half the modes are independent. ////
-	            	if(k_z>0.){
-	            	    // One hemi-sphere is independent, e.g. k_z >= 0.
-		                polar_pk[polar_pkcount][0]   = kmodulus;
-		                polar_pk[polar_pkcount][1]   = fabs(mu);
-		                polar_pk[polar_pkcount][2]   = pk;		            	   
-		            	            		            		            
-		                twodim_pk[polar_pkcount][0]  = fabs(k_z);                       
-	                    twodim_pk[polar_pkcount][1]  = pow(k_y*k_y + k_x*k_x, 0.5);    
-                        twodim_pk[polar_pkcount][2]  = pk;
-		            
-		                polar_pkcount               += 1;
-		            }
-		            
-		            else if((k_z == 0.0) && (k_y > 0.0)){
-                        // in the k_z=0 plane one semi-circle is independent, k_y>0.
-		                polar_pk[polar_pkcount][0]   = kmodulus;
-		                polar_pk[polar_pkcount][1]   = fabs(mu);
-		                polar_pk[polar_pkcount][2]   = pk;
-
-		                twodim_pk[polar_pkcount][0]  = fabs(k_z);                       
-	                    twodim_pk[polar_pkcount][1]  = pow(k_y*k_y + k_x*k_x, 0.5);    
-                        twodim_pk[polar_pkcount][2]  = pk;
-		            
-		                polar_pkcount                += 1;
-		            }
-		            
-		            else if((k_z == 0.0) && (k_y == 0.0) && (k_x > 0.0)){
-		                // on the line k_z=k_y=0, one half is independent, k_x>=0.
-		                                        // in the k_z=0 plane one semi-circle is independent, k_y>0.
-		                polar_pk[polar_pkcount][0]    = kmodulus;
-		                polar_pk[polar_pkcount][1]    = fabs(mu);
-		                polar_pk[polar_pkcount][2]    = pk;
-		                
-		                twodim_pk[polar_pkcount][0]   = fabs(k_z);                       
-	                    twodim_pk[polar_pkcount][1]   = pow(k_y*k_y + k_x*k_x, 0.5);    
-                        twodim_pk[polar_pkcount][2]   = pk;
-		            
-		                polar_pkcount                += 1;
-		            }
-		            
-		            // if((0.01923825<kmodulus) && (kmodulus<0.02407176))  printf("\n%e \t %e \t %e", kmodulus, mu, pk);
-	            }
-	        }
+    for(i=0; i<modeCount; i++){
+        if(Array[i][0] >= logk_limits[0]){
+            loIndex = i; 
+            break;
         }
     }
     
-    // free_HOD();
+    if(fileOutput==1)  output = fopen(filepath, "w");
     
-    return 0;
-}
-
-
-int observedQuadrupole(int modeCount){
-    // polar2DpkBinning(modeCount);
-
-    // sprintf(filepath,"%s/Data/500s/spoc_zobs_allgals/HOD_mock_512_spec_%d.dat", root_dir, loopCount);
-    // sprintf(filepath,"%s/Data/500s/spoc_zobs_allgals/HOD_mock_512_specmask_%d.dat", root_dir, loopCount); 
-
-    // sprintf(filepath,"%s/Data/500s/spec/HOD_mock_256_specmask_nbarweight_%d.dat", root_dir, loopCount);
-    // sprintf(filepath,"%s/Data/500s/slowDFT/HOD_mocks_slowDFT_invnbar_weight_monteCarlo_%d.dat", root_dir, loopCount);
+    for(j=0; j<modBinNumb-1; j++){
+        //  Linear regression against P_i(k, \mu_i)  
+        //  L_i  = 0.5*(3.*\mu_i**2 -1.)
+        //  P_i  = P_i(k, \mu_i)
     
-    // sprintf(filepath,"%s/Venice/mocks_W1_v8.0_Nagoya_v4_mockTSR/Pk_ell/HOD_mock_256_subSample_localweighted_%d.dat", root_dir, loopCount);
-
-    // sprintf(filepath,"%s/Venice/mocks_W1_v8.0_Nagoya_v4_mockSpec/Pk_ell/HOD_mock_256_subSample_nonpoisson_Granettweighted_%d.dat", root_dir, loopCount);
-
-    // sprintf(filepath,"%s/Data/500s/Nagoyav4_GaussianFields/nagoya_v4_%d.dat", root_dir, loopCount);
+        double Li          = 0.0;
+        double Pi          = 0.0;
     
-    // sprintf(filepath,"%s/Data/500s/spec/HOD_mock_256_specmask_clipped_%d.dat", root_dir, loopCount);
+        double Sum_Li      = 0.0;
+        double Sum_Li2     = 0.0;
     
-    // sprintf(filepath,"%s/Data/Jenkins_fold/HOD_cube_256_nofold_exprands_counts_sphere.dat", root_dir);
-    
-    // sprintf(filepath,"%s/W1_Nagoya_v6_mocks_work/clipped_lnnormal/HOD_cube_256_pk_galweights_depletionfactor_%.2lf_foldfactor_%.1lf_d0_%.1lf_R_%.1lf.dat", 
-    //                                                                                                                             root_dir, depletion_factor, 
-    //                                                                                                                             Jenkins_foldfactor, appliedClippingThreshold, clipping_smoothing_radius);
-    
-    // if(loopCount<10)        sprintf(filepath, "%s/W1_Nagoya_v6_mocks_work/pk/clipped_d0_6/mocks_W1_v8.0_500_00%d_Nagoya_v6_Samhain_specweight_fkpweight_multipoles.dat", root_dir, loopCount);
-    // else if(loopCount<100)  sprintf(filepath, "%s/W1_Nagoya_v6_mocks_work/pk/clipped_d0_6/mocks_W1_v8.0_500_0%d_Nagoya_v6_Samhain_specweight_fkpweight_multipoles.dat",  root_dir, loopCount);
-    // else                    sprintf(filepath, "%s/W1_Nagoya_v6_mocks_work/pk/clipped_d0_6/mocks_W1_v8.0_500_%d_Nagoya_v6_Samhain_specweight_fkpweight_multipoles.dat",   root_dir, loopCount);
+        double Sum_Pi      = 0.0;
+        double Sum_PiLi    = 0.0;
+        
+        modes_perbin = 0;
+        
+        for(i=loIndex; i<modeCount; i++){
+            if(Array[i][0] > logk_limits[j+1]){
+  	        hiIndex = i;  // Find the range of indices corresponding to the modes in a given k interval.
 
-    // sprintf(filepath, "%s/W1_Nagoya_v6_mocks_work/clipped_lnnormal/clipped_lnnormal_0.2_mock_001.dat", root_dir, loopCount);
-
-    // sprintf(filepath,"%s/W1_Nagoya_v6_mocks_work/new_pk_15_06_15/clipped_d0_5/mock_%d_256_pk_d0_%.2lf.dat", root_dir, loopCount, appliedClippingThreshold);
-
-    if(data_mock_flag == 1){
-        sprintf(filepath,"%s/W1_Spectro_V7_0/W%d_Spectro_v7_smoothed_%.1lf_nbar_pk.dat", root_dir, fieldFlag, nz_smoothRadius);
-    }
-    
-    else if(data_mock_flag ==0){    
-        sprintf(filepath, "%s/W%d_Nagoya_v6_mocks_work/pk_smoothed_%.1lf_reflected_2field_nbar/mock_%d_256_pk.dat", root_dir, fieldFlag, nz_smoothRadius, loopCount); 
-    }
-
-    // MonopoleCalc(kbin_no, mean_modk, kMonopole, polar_pk, modeCount, filepath, 0.0, 1.0, 1);
-
-    MultipoleCalc(kbin_no, mean_modk, kMonopole, kQuadrupole, polar_pk, modeCount, filepath, 0.0, 1.0, 1);
-    
-    // HexadecapoleCalc(kBinNumb, meanKBin, kMonopole, kQuadrupole, kHexadecapole, polar2Dpk, modeCount, filepath, kbinInterval, 0.0, 1.0, 1);
-
-    if(data_mock_flag == 1) Cartesian2Dpk(modeCount);
-
-    return 0;
-}
-
-
-int Cartesian2Dpk(int modeCount){    
-    // for(j=0; j<modeCount; j++)  printf("\n%.3lf \t %.3lf \t %.3lf", twodim_pk[j][0], twodim_pk[j][1], twodim_pk[j][2]);
-    
-    DualBinning(modeCount, twodim_pk, d2_binnedpk);
-
-    sprintf(filepath,"%s/W1_Spectro_V7_0/W%d_pk_2D.dat", root_dir, fieldFlag);
-    
-    output = fopen(filepath, "w");
-    
-    // corresponds to k=0.5 for **current** binning.
-    for(k=0; k<25; k++){
-        for(j=0; j<25; j++){
-            fprintf(output, "%e \t", d2_binnedpk[k][j]);
+		break;
+            } 
         }
         
-        fprintf(output, "\n");
-    }
+        for(i=loIndex; i<hiIndex; i++){
+             mean_modBin[j] += Array[i][0];
+             modes_perbin   += 1;
+            
+             Li              = 0.5*(3.*pow(Array[i][1], 2.) - 1.);  // L_i = 0.5*(3.*mu**2 -1.)     
+             Pi              = Array[i][2];
+            
+             Sum_Li         += Li; 
+             Sum_Li2        += Li*Li;
+            
+             Sum_Pi         += Pi;
+             Sum_PiLi       += Pi*Li;
+         }
     
-    fclose(output);
+         mean_modBin[j]        /= modes_perbin;
+        	    
+         // For a matrix A, paramater vector, (P_0, P_2)^T, P and vector B
+         // Required to invert AP  = B. 2x2 matrix inversion.
+         	
+         // A reads as (a b) for a = sum_Modes 1, b = sum_Modes L_i, c = sum_Modes L_i, d = sum_Modes L_i**2.
+         //            (c d)        
+
+         // and B = (b1, b2)^T for b1 = sum_Modes measured Pi, b2 = sum_Modes (measured Pi)*Li
+     
+         double detA;  // det = ad - bc.
+     
+         detA                       = modes_perbin*Sum_Li2 - Sum_Li*Sum_Li;
+     
+           Monopole[j]              = (1./detA)*( Sum_Li2*Sum_Pi - Sum_Li*Sum_PiLi);
+         Quadrupole[j]              = (1./detA)*(-Sum_Li*Sum_Pi  + modes_perbin*Sum_PiLi);
+                            
+         loIndex   = hiIndex;
+         
+         if((fileOutput==1) && (detA>pow(10., -6.))){  	   
+	   printf("\n%le \t %le \t %le \t %d", mean_modBin[j], Monopole[j], Quadrupole[j], modes_perbin);
+
+	   fprintf(output, "%e \t %e \t %e \t %d \n", mean_modBin[j], Monopole[j], Quadrupole[j], modes_perbin);
+	 }
+     } 
     
-    return 0;
+     if(fileOutput==1) fclose(output);
+       
+     // free logk_limits, mean_modk, binnedPk, modes_perbin
+     // free_pkRegression();
+     
+     return 0;
 }
-
-/*
-int polar2DpkBinning(int modeCount){
-    for(j=0; j<kBinNumb;  j++)        kBinLimits[j]  =                     kbinInterval*(j+1);
-    for(j=0; j<muBinNumb; j++)       muBinLimits[j]  =   (1.0/(double) (muBinNumb - 1))*(j+1);
-
-    DualBinning(modeCount, muBinNumb, muBinLimits, kBinNumb, kBinLimits, polar2Dpk, polar2DBinnedPk, mean_mu, mean_modk, polar_modesPerBin);
-
-    sprintf(filepath, "%s/Data/SpectralDistortion/VipersMask_2Dpk_W2k.dat", root_dir);
-    
-    output = fopen(filepath, "w");
-
-    printf("\nNumber of mu bins: %d", muBinNumb);
-
-    for(j=0; j<muBinNumb-1; j++){
-        for(k=0; k<kBinNumb-1; k++){
-                    fprintf(output, "%e \t %e \t %e \t %e \n", mean_mu[j][k], mean_modk[j][k], TotalVolume*polar2DBinnedPk[j][k], (*pt2Pk)(mean_modk[j][k])*pow(1. + beta*pow(mean_mu[j][k], 2.), 2.)/(1. + 0.5*pow(mean_modk[j][k]*mean_mu[j][k]*velDispersion, 2.)));
-        }
-    }
-
-    fclose(output);
-    
-    return 0;
-}*/
 
 
 int MonopoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], double** Array, int modeCount, char filepath[], double mu_lolimit, double mu_hilimit, int fileOutput){
@@ -278,10 +353,8 @@ int MonopoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], double
         }
     }
     
-    
     if(fileOutput==1)  output = fopen(filepath, "w");
-    
-    
+        
     for(j=0; j<modBinNumb-1; j++){
         modes_perbin = 0;
     
@@ -320,175 +393,39 @@ int MonopoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], double
 }
 
 
-int MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], double Quadrupole[], double** Array, int modeCount, char filepath[], double mu_lolimit, double mu_hilimit, int fileOutput){
-    // P(k, mu_i) = P_0(k) + P_2(k)*(3.*mu_i*mu_i - 1.)/2
+int HexadecapoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], double Quadrupole[], double Hexadecapole[], double** Array, int modeCount, char filepath[], double mu_lolimit, double mu_hilimit, int fileOutput){
+    // P(k, mu_i) = P_0(k) + P_2(k)*(3.*mu_i*mu_i - 1.)/2 + P_4(k)*(35x^4 -30x^2 +3)/8.
     // Least squares fit between theory prediction, P(k, mu_i) and measured.  (Linear regression).
 
+    printf("\n\nPerforming multipole calculation to Hexadecapole order.");
+    
     int          loIndex;
     int          hiIndex;
     int     modes_perbin;
 
-    printf("\n\nPerforming multipole calculation. (to Quadrupole order)");
-    
-    // assign log k binning for pk and assign memory for binning. (logk_min, logk_max, # bins).
-    // prep_pkbinning(-2., log10(modkMax), kbin_no);
-    
-    // Order by mod k to ensure binning is the mean between LowerBinIndex and UpperBinIndex.
-    qsort(Array, modeCount, sizeof(Array[0]), FirstColumnCompare);
-    
-    loIndex      = 0;
-    hiIndex      = 0;
-
-    for(k=0; k<modBinNumb-1; k++){
-        mean_modBin[k]    = 0.0;
-        Monopole[k]       = 0.0;
-        Quadrupole[k]     = 0.0;
-    }
-    
-    for(i=0; i<modeCount; i++){
-        if(Array[i][0] >= logk_limits[0]){
-            loIndex = i; 
-            break;
-        }
-    }
-    
-    if(fileOutput==1)  output = fopen(filepath, "w");
-    
-    for(j=0; j<modBinNumb-1; j++){
-        //  Linear regression against P_i(k, \mu_i)  
-        //  L_i  = 0.5*(3.*\mu_i**2 -1.)
-        //  P_i  = P_i(k, \mu_i)
-    
-        double Li          = 0.0;
-        double Pi          = 0.0;
-    
-        double Sum_Li      = 0.0;
-        double Sum_Li2     = 0.0;
-    
-        double Sum_Pi      = 0.0;
-        double Sum_PiLi    = 0.0;
-        
-        modes_perbin = 0;
-        
-        // Find the range of indices corresponding to the modes in a given k interval. 
-        for(i=loIndex; i<modeCount; i++){
-            if(Array[i][0] > logk_limits[j+1]){
-                hiIndex = i;
-                break;
-            } 
-        }
-        
-        for(i=loIndex; i<hiIndex; i++){
-            if((mu_lolimit<Array[i][1]) && (Array[i][1]<mu_hilimit)){        
-                mean_modBin[j] += Array[i][0];
-                modes_perbin   += 1;
-            
-                         // L_i = 0.5*(3.*mu**2 -1.)
-                     
-                Li              = 0.5*(3.*pow(Array[i][1], 2.) - 1.);     
-                Pi              = Array[i][2];
-            
-                if(j==2)  printf("\n%e \t %e \t %e \t %e", Array[i][0], Array[i][1], Array[i][2], Li);
-            
-                Sum_Li         += Li; 
-                Sum_Li2        += Li*Li;
-            
-                Sum_Pi         += Pi;
-                Sum_PiLi       += Pi*Li;
-            }
-         }
-    
-         mean_modBin[j]        /= modes_perbin;
-        	    
-         // For a matrix A, paramater vector, (P_0, P_2)^T, P and vector B
-         // Required to invert AP  = B. 2x2 matrix inversion.
-         	
-         // A reads as (a b) for a = sum_Modes 1, b = sum_Modes L_i, c = sum_Modes L_i, d = sum_Modes L_i**2.
-         //            (c d)        
-
-         // and B = (b1, b2)^T for b1 = sum_Modes measured Pi, b2 = sum_Modes (measured Pi)*Li
-     
-         double detA;
-         // det = ad - bc.
-     
-         detA                       = modes_perbin*Sum_Li2 - Sum_Li*Sum_Li;
-     
-         if(detA<pow(10., -10.))      printf("\n\nCannot decompose into monopole and quadrupole, detA = 0.0");
-     
-         if(j==2)  printf("\n\ndet A: %e", detA); 
-     
-         // (P_0, P_2)^T = (A^-1)B  = (1./detA)*(d*b1 - b*b2, -c*b1 + a*b2)^T.
-     
-                     Monopole[j]    = (1./detA)*( Sum_Li2*Sum_Pi - Sum_Li*Sum_PiLi);
-                   Quadrupole[j]    = (1./detA)*(-Sum_Li*Sum_Pi  + modes_perbin*Sum_PiLi);
-                   
-         // for(jj=0; jj<= j; jj++)  printf("\n%d \t %e \t %e \t %e \t %d", j, mean_modBin[jj], Monopole[jj], Quadrupole[jj], modesperbin[jj]);
-         
-         // printf("\n\n");
-         
-         
-         //for(k=LowerBinIndex; k<UpperBinIndex; k++){
-           //if((mu_lolimit<Array[k][1]) && (Array[k][1]<mu_hilimit)){
-             //Li                       = 0.5*(3.*pow(Array[k][1], 2.) - 1.);
-         
-             //kMonopole_expError[j]   += pow((*pt2Pk)(meanKBin[j])*pow(1. + beta*pow(Array[k][1], 2.), 2.)*pow(1. + 0.5*pow(meanKBin[j]*velDispersion*Array[k][1], 2.), -1.)*(Sum_Li2 - Li*Sum_Li), 2.);
-           
-             //kQuadrupole_expError[j] += pow((*pt2Pk)(meanKBin[j])*pow(1. + beta*pow(Array[k][1], 2.), 2.)*pow(1. + 0.5*pow(meanKBin[j]*velDispersion*Array[k][1], 2.), -1.)*(-1.*Sum_Li + + modesperbin[j]*Li), 2.);
-           //}
-         //}
-
-           //kMonopole_expError[j]   *= pow(detA, -2.); 
-         //kQuadrupole_expError[j]   *= pow(detA, -2.);
-         
-         loIndex   = hiIndex;
-         
-         if((fileOutput==1) && (detA>pow(10., -6.)))  fprintf(output, "%e \t %e \t %e \t %d \n", mean_modBin[j], Monopole[j], Quadrupole[j], modes_perbin);
-     } 
-    
-     if(fileOutput==1) fclose(output);
-       
-     // free logk_limits, mean_modk, binnedPk, modes_perbin
-     // free_pkRegression();
-     
-     return 0;
-}
-
-/*
-int HexadecapoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], double Quadrupole[], double Hexadecapole[], double** Array, int modeCount, char filepath[], double Interval, double mu_lolimit, double mu_hilimit, int fileOutput){
-    // P(k, mu_i) = P_0(k) + P_2(k)*(3.*mu_i*mu_i - 1.)/2 + P_4(k)*(35x^4 -30x^2 +3)/8.
-    // Least squares fit between theory prediction, P(k, mu_i) and measured.  (Linear regression).
-
-    printf("\n\nPerforming Monopole calculation (to Hexadecapole order).");
-    
-    double midBin[modBinNumb];
-    double BinLimits[modBinNumb];
-    int    modesperbin[modBinNumb];
-    
-    for(j=0; j<modBinNumb;     j++)  BinLimits[j]  = (j + 1)*Interval;
-    
-    for(j=0; j<(modBinNumb-1); j++)  midBin[j]     = (j + 1.5)*Interval;
-
     // Order by mod k to ensure binning is the mean between LowerBinIndex and UpperBinIndex.
     qsort(Array, modeCount, sizeof(Array[0]), FirstColumnCompare);
 
-    LowerBinIndex = 0;
-    UpperBinIndex = 0;
+    loIndex = 0;
+    hiIndex = 0;
     
     for(k=0; k<modBinNumb-1; k++){
         mean_modBin[k]      = 0.0;
         Monopole[k]         = 0.0;
         Quadrupole[k]       = 0.0;
         Hexadecapole[k]     = 0.0;
-        modesperbin[k]      =   0;
     }
     
     for(i=0; i<modeCount; i++){
-        if(Array[i][0] >= BinLimits[0]){
-            LowerBinIndex = i; 
-            break;
+        if(Array[i][0] >= logk_limits[0]){
+            loIndex = i; 
+            
+	    break;
         }
     }
     
+    if(fileOutput==1)  output = fopen(filepath, "w");
+
     for(j=0; j<modBinNumb-1; j++){
         //  Linear regression against P_i(k, \mu_i)  
         //  L_i  = 0.5*(3.*\mu_i**2 -1.)
@@ -508,18 +445,20 @@ int HexadecapoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], do
         double Sum_PiJi    = 0.0;
         double Sum_LiJi    = 0.0;
         
+	modes_perbin       =   0;
+
         // Find the range of indices corresponding to the modes in a given k interval. 
-        for(i=LowerBinIndex; i<modeCount; i++){
-            if(Array[i][0] > BinLimits[j+1]){
-                UpperBinIndex = i;
+        for(i=loIndex; i<modeCount; i++){
+            if(Array[i][0] > logk_limits[j+1]){
+                hiIndex = i;
                 break;
             } 
         }
         
-        for(i=LowerBinIndex; i<UpperBinIndex; i++){
+        for(i=loIndex; i<hiIndex; i++){
             if((mu_lolimit<Array[i][1]) && (Array[i][1]<mu_hilimit)){        
                 mean_modBin[j]    += Array[i][0];
-                modesperbin[j]    += 1;
+                modes_perbin      += 1;
                     
                 Pi                 = Array[i][2];
                 Li                 = 0.5*(3.*pow(Array[i][1], 2.) - 1.);    
@@ -537,7 +476,7 @@ int HexadecapoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], do
             }
         }
     
-        mean_modBin[j]            /= modesperbin[j];
+        mean_modBin[j]            /= modes_perbin;
         	    
         // For a matrix A, paramater vector, (P_0, P_2, P_4)^T, P and vector B
         // Required to invert AP  = B. 3x3 matrix inversion.
@@ -551,393 +490,23 @@ int HexadecapoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], do
         double detA;
         // det = ad - bc.
      
-        detA = modesperbin[j]*(Sum_Li2*Sum_Ji2 - Sum_LiJi*Sum_LiJi) - Sum_Li*(Sum_Li*Sum_Ji2 - Sum_LiJi*Sum_Ji) + Sum_Ji*(Sum_Li*Sum_LiJi - Sum_Li2*Sum_Ji);
+        detA = modes_perbin*(Sum_Li2*Sum_Ji2 - Sum_LiJi*Sum_LiJi) - Sum_Li*(Sum_Li*Sum_Ji2 - Sum_LiJi*Sum_Ji) + Sum_Ji*(Sum_Li*Sum_LiJi - Sum_Li2*Sum_Ji);
      
         // (P _0, P_2)^T = (A^-1)B = (1./detA)*(d*b1 - b*b2, -c*b1 + a*b2)^T.
-     
             Monopole[j]  = (1./detA)*(     (Sum_Li2*Sum_Ji2 - Sum_LiJi*Sum_LiJi)*Sum_Pi - (Sum_Li*Sum_Ji2          - Sum_Ji*Sum_LiJi)*Sum_PiLi + (Sum_Li*Sum_LiJi         - Sum_Ji*Sum_Li2)*Sum_PiJi);
-          Quadrupole[j]  = (1./detA)*( -1.*(Sum_Li*Sum_Ji2  - Sum_LiJi*Sum_Ji  )*Sum_Pi + (modesperbin[j]*Sum_Ji2  - Sum_Ji*Sum_Ji  )*Sum_PiLi - (modesperbin[j]*Sum_LiJi - Sum_Ji*Sum_Li )*Sum_PiJi);
-        Hexadecapole[j]  = (1./detA)*(     (Sum_Li*Sum_LiJi - Sum_Li2*Sum_Ji   )*Sum_Pi - (modesperbin[j]*Sum_LiJi - Sum_Li*Sum_Ji  )*Sum_PiLi + (modesperbin[j]*Sum_Li2  - Sum_Li*Sum_Li )*Sum_PiJi);
+          Quadrupole[j]  = (1./detA)*( -1.*(Sum_Li*Sum_Ji2  - Sum_LiJi*Sum_Ji  )*Sum_Pi + (modes_perbin*Sum_Ji2  - Sum_Ji*Sum_Ji  )*Sum_PiLi - (modes_perbin*Sum_LiJi - Sum_Ji*Sum_Li )*Sum_PiJi);
+        Hexadecapole[j]  = (1./detA)*(     (Sum_Li*Sum_LiJi - Sum_Li2*Sum_Ji   )*Sum_Pi - (modes_perbin*Sum_LiJi - Sum_Li*Sum_Ji  )*Sum_PiLi + (modes_perbin*Sum_Li2  - Sum_Li*Sum_Li )*Sum_PiJi);
     
-        LowerBinIndex = UpperBinIndex;
+        loIndex = hiIndex;
+ 
+	if((fileOutput == 1) && (detA>pow(10., -6.)))  fprintf(output, "%e \t %e \t %e \t %e \t %d \n", mean_modBin[j], Monopole[j], Quadrupole[j], Hexadecapole[j], modes_perbin);
     } 
     
-    if(fileOutput == 1){
-        output = fopen(filepath, "w");
-    
-        for(j=0; j<modBinNumb-1; j++){    
-            fprintf(output, "%e \t %e \t %e \t %e \t %d \t %e \n", mean_modBin[j], Monopole[j], Quadrupole[j], Hexadecapole[j], modesperbin[j], (*pt2Pk)(mean_modBin[j]));   
-        }
-    
-        fclose(output);
-    }
-    
-    return 0;
-}*/
-
-
-double invnbar_chisq(double chi){
-    return chi*chi/interp_nz(chi);
-}
-
-double chisq(double chi){
-    return chi*chi;
-}
-
-double chicubed(double chi){
-    return chi*chi*chi;
-}
-
-double chicubed_nbar(double chi){
-    return chi*chi*chi*interp_nz(chi);
-}
-
-double chisq_nbar(double chi){
-    return chi*chi*interp_nz(chi);
-}
-
-double calc_volavg_invnbar(){
-    // Shot noise correction for a varying background number density.  
-    // P(k) is the volume avg. therefore so must be the shot noise correction. 
-
-    double vol            =  qromb(&chisq, loChi, hiChi);
-    
-    double volavg_invnbar =  qromb(&invnbar_chisq, loChi, hiChi);
-    
-    // solid angle drops out if nbar is independent of direction. 
-    return volavg_invnbar/vol;
-}
-
-
-double calc_volavg_chi(){
-    double vol            =  qromb(&chisq, loChi, hiChi);
-    
-    double volavg_chi     =  qromb(&chicubed, loChi, hiChi);
-    
-    return volavg_chi/vol;
-}
-
-
-double calc_galavg_chi(){
-    double vol            =  qromb(&chisq_nbar, loChi, hiChi);
-    
-    double volavg_chi     =  qromb(&chicubed_nbar, loChi, hiChi);
-    
-    return volavg_chi/vol;
-}
-
-
-double chiSq_fkpweight(double chi){
-    return chi*chi*pow(interp_nz(chi)*fkpPk/(1. + interp_nz(chi)*fkpPk), 2.);
-}
-
-
-double calc_volavg_fkpweights(){
-    double volavg_fkpweights     =  qromb(&chiSq_fkpweight, loChi, hiChi);
-    
-    return volavg_fkpweights;
-}
-
-
-int Gaussian_filter(double GaussianFilter_radius, int zero_mean){
-    // Gaussian filter the array overdensity, filter radius set by global variable GaussianFilter_radius.
-    prep_fftw();
-    
-    fftw_execute(p);
-    
-    // Gaussian smooth the counts. 
-    double GaussianFilter;
-    
-    for(k=0; k<n0; k++){
-        for(j=0; j<n1; j++){
-            for(i=0; i<n2; i++){
-                k_x = kIntervalx*i;
-                k_y = kIntervaly*j;
-                k_z = kIntervalz*k;
-                
-                if(k_x>xNyquistWaveNumber)  k_x   -= n2*kIntervalx;
-                if(k_y>yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
-                if(k_z>zNyquistWaveNumber)  k_z   -= n0*kIntervalz;
-
-                Index                              = k*n1*n2 + j*n2 + i;
-
-                kSq                                = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
-                
-                kmodulus                           = pow(kSq, 0.5);
-                
-                mu                                 = k_z/kmodulus;
-                if(kmodulus < 0.000001)       mu   = 0.0;      
-       
-                // Radius 1.         
-                GaussianFilter                     = exp(-1.*kSq*0.5*pow(GaussianFilter_radius, 2.));
-            
-                H_k[Index][0]                     *= GaussianFilter;
-                H_k[Index][1]                     *= GaussianFilter;
-                
-                H_k[Index][0]                     /= n0*n1*n2;
-                H_k[Index][1]                     /= n0*n1*n2;
-            }
-        }
-    }
-    
-    if(zero_mean == 1){
-      // Return a zero mean field.
-      H_k[0][0] = 0.0;
-      H_k[0][1] = 0.0;
-    }
-    
-    int negkIndex;
-    
-    // Hermitian condition. One hemi-sphere is independent, e.g. k_z >= 0.
-    for(k=n0-1; k>=n0/2; k--){
-        for(j=0; j<n1; j++){
-            for(i=0; i<n2; i++){
-                negkIndex          = k*n1*n2 + j*n2 + i;
-                       
-                Index              = 0;
-                
-                // zero maps to zero on reflection through the origin.
-                if(i!=0)  Index   += (n2 - i);
-                if(j!=0)  Index   += (n1 - j)*n2;
-                          Index   += (n0 - k)*n1*n2;
-
-                H_k[negkIndex][0]  =     H_k[Index][0];
-                H_k[negkIndex][1]  = -1.*H_k[Index][1];
-                
-                if(negkIndex == Index)   H_k[Index][1] = 0.0; // purely real
-            }
-        }
-    } 
-    
-    // in the k_z=0 plane one semi-circle is independent, k_y>0.         
-    for(j=n1-1; j>=n1/2; j--){
-        for(i=0; i<n2; i++){
-            negkIndex          = j*n2 + i;
-                       
-            Index              = 0;
-                
-            // zero maps to zero on reflection through the origin.
-            if(i!=0)  Index   += (n2 - i);
-                      Index   += (n1 - j)*n2;
-
-            H_k[negkIndex][0]  =     H_k[Index][0];
-            H_k[negkIndex][1]  = -1.*H_k[Index][1];
-            
-            if(negkIndex == Index)   H_k[Index][1] = 0.0;
-        }
-    }
-    
-    // on the line k_z=k_y=0, one half is independent, k_x>=0.
-    for(i=n2-1; i>=n2/2; i--){
-        negkIndex          = i;
-                       
-        Index              = 0;
-                
-        // zero maps to zero on reflection through the origin.
-        Index             += (n2 - i);
-
-        H_k[negkIndex][0]  =      H_k[Index][0];
-        H_k[negkIndex][1]  =  -1.*H_k[Index][1];
-            
-        if(negkIndex == Index)    H_k[Index][1] = 0.0;
-    }
-
-    iplan              = fftw_plan_dft_3d(n0, n1, n2, H_k, smooth_overdensity, FFTW_BACKWARD, FFTW_ESTIMATE);
-
-    fftw_execute(iplan);
-
-    // should be unnecessary.
-    for(j=0; j<n0*n2*n1; j++)  smooth_overdensity[j][1] = 0.0;
-
-    return 0;
-}
-
-
-int Gaussianfield(){
-    int m0, m1, m2;
-    
-    double Power, amplitude, phase, expectation; 
-    
-    overdensity        = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);
-    H_k                = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(fftw_complex)); 
-    
-    iplan              = fftw_plan_dft_3d(n0, n1, n2, H_k, overdensity, FFTW_BACKWARD, FFTW_ESTIMATE);
-    
-    
-    bsigma8            =        1.0;
-    
-    for(k=0; k<n0; k++){
-        for(j=0; j<n1; j++){
-            for(i=0; i<n2; i++){
-                m0 = k;
-                m1 = j;
-                m2 = i;
-
-                if(m2>n2/2)  m2                   -= n2;
-                if(m1>n1/2)  m1                   -= n1;
-                if(m0>n0/2)  m0                   -= n0;
-                
-                k_x                                = kIntervalx*m2;
-                k_y                                = kIntervaly*m1;
-                k_z                                = kIntervalz*m0;
-                
-                Index                              = k*n1*n2 + j*n2 + i;
-                
-                kSq                                = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
-                
-                kmodulus                           = pow(kSq, 0.5);
-
-                mu                                 = k_z/kmodulus;
-                if(kmodulus < 0.000001)       mu   = 0.0;
-                                                                                     // shot noise contribution. 
-                // expectation                     = (*pt2Pk)(kmodulus)/TotalVolume; //  + (1./TotalVolume)*(*pt2shot)(1.);
-
-                // Monopole and Quadrupole components, with z taken as the line of sight direction. 
-                // expectation                     = (kaiser_multipole(kmodulus, beta, 0) + kaiser_multipole(kmodulus, beta, 2)*0.5*(3.*mu*mu -1.))*Pk_powerlaw(kmodulus, 5., 1.8)/TotalVolume;
-
-                expectation                        = (*pt2Pk)(kmodulus)/TotalVolume;
-                
-                // expectation                    *= 1. + 0.5*pow(mu, 2.);
-            
-                // expectation                    *= pow(1. + beta*pow(mu, 2.), 2.);
-                
-                // fingers of God RSD.
-                // expectation                    /= 1. + 0.5*pow(k_z*velDispersion, 2.);
-
-                expectation                       *= spherical_tophat(kmodulus, 8.)*spherical_tophat(kmodulus, 8.)*pow(app_sigma8, -2.)*pow(   bsigma8,  2.);
-
-
-                Power                              = -log(gsl_rng_uniform(gsl_ran_r))*expectation;
-                
-                // Note AMPLITUDE IS NOT the expectation. 
-                // amplitude                          = sqrt(Power);
-                amplitude                          = sqrt(expectation);
-                                
-                phase                              = 2.*pi*gsl_rng_uniform(gsl_ran_r);
-                
-                // Assuming Cic assignment scheme
-                H_k[Index][0]                      = amplitude*cos(phase);
-                H_k[Index][1]                      = amplitude*sin(phase);
-                
-                // WindowFunc                         = 1.;
-
-                //if(k_x != 0.){
-		          //  WindowFunc                    *= sin(pi*k_x*0.5/NyquistWaveNumber)/(pi*k_x*0.5/NyquistWaveNumber);}
-                
-                //if(k_y != 0.){
-		          //  WindowFunc                    *= sin(pi*k_y*0.5/NyquistWaveNumber)/(pi*k_y*0.5/NyquistWaveNumber);}
-                
-                //if(k_z != 0.){
-		          //  WindowFunc                    *= sin(pi*k_z*0.5/NyquistWaveNumber)/(pi*k_z*0.5/NyquistWaveNumber);}		      
-	            
-	            // H_k[Index][0]                  *= pow(WindowFunc, 2.);
-	        	// H_k[Index][1]                  *= pow(WindowFunc, 2.);
-	        }
-        }
-    }
-    
-    // Zero mean. Mean is always real for a real input fn.
-    H_k[0][0] = 0.0;
-    H_k[0][1] = 0.0;
-    
-    int negkIndex;
-    
-    // Hermitian condition. One hemi-sphere is independent, e.g. k_z >= 0.
-    for(k=n0-1; k>=n0/2; k--){
-        for(j=0; j<n1; j++){
-            for(i=0; i<n2; i++){
-                negkIndex          = k*n1*n2 + j*n2 + i;
-                       
-                Index              = 0;
-                
-                // zero maps to zero on reflection through the origin.
-                if(i!=0)  Index   += (n2 - i);
-                if(j!=0)  Index   += (n1 - j)*n2;
-                          Index   += (n0 - k)*n1*n2;
-
-                H_k[negkIndex][0]  =     H_k[Index][0];
-                H_k[negkIndex][1]  = -1.*H_k[Index][1];
-                
-                if(negkIndex == Index)   H_k[Index][1] = 0.0; // purely real
-            }
-        }
-    } 
-    
-    // in the k_z=0 plane one semi-circle is independent, k_y>0.         
-    for(j=n1-1; j>=n1/2; j--){
-        for(i=0; i<n2; i++){
-            negkIndex          = j*n2 + i;
-                       
-            Index              = 0;
-                
-            // zero maps to zero on reflection through the origin.
-            if(i!=0)  Index   += (n2 - i);
-                      Index   += (n1 - j)*n2;
-
-            H_k[negkIndex][0]  =     H_k[Index][0];
-            H_k[negkIndex][1]  = -1.*H_k[Index][1];
-            
-            if(negkIndex == Index)   H_k[Index][1] = 0.0;
-        }
-    }
-    
-    // on the line k_z=k_y=0, one half is independent, k_x>=0.
-    for(i=n2-1; i>=n2/2; i--){
-        negkIndex          = i;
-                       
-        Index              = 0;
-                
-        // zero maps to zero on reflection through the origin.
-        Index             += (n2 - i);
-
-        H_k[negkIndex][0]  =      H_k[Index][0];
-        H_k[negkIndex][1]  =  -1.*H_k[Index][1];
-            
-        if(negkIndex == Index)    H_k[Index][1] = 0.0;
-    }
-
-    fftw_execute(iplan);
-
-    // should be unnecessary.
-    for(j=0; j<n0*n2*n1; j++)  overdensity[j][1] = 0.0;
-    
-    fftw_free(H_k);
-    
-    fftw_destroy_plan(iplan);
+    if(fileOutput == 1) fclose(output);
     
     return 0;
 }
 
-
-int lnNormfield(){
-    Gaussianfield();
-            
-    double GRF_var = 0.0;
-            
-    // Already a zero mean field. 
-    // for(j=0; j<n0*n1*n2; j++) GRF_var         += pow(overdensity[j][0], 2.);
-
-    // GRF_var                                   /= n0*n1*n2;
-
-    GRF_var = 1.011;
-
-    for(j=0; j<n0*n2*n1; j++)  overdensity[j][0] = exp(overdensity[j][0] - 0.5*GRF_var) - 1.;
-
-    return 0; 
-}
-
-/*
-int printGaussianfield(){
-    sprintf(filepath, "%s/Data/SpectralDistortion/GRF_mask_MonoAndQuad_CellSize_%.2f.dat", root_dir, CellSize);
-
-    output = fopen(filepath, "w");
-    
-    for(j=0; j<n0*n1*n2; j++)  fprintf(output, "%e \n", densityArray[j]);
-    
-    fclose(output);
-
-    return 0;
-}*/
 
 /*
 int BinnedPkForMuInterval(double lowerMuLimit, double upperMuLimit, char filepath[], int modeCount){
@@ -968,7 +537,6 @@ int BinnedPkForMuInterval(double lowerMuLimit, double upperMuLimit, char filepat
 }*/
 
 
-
 int DualBinning(int NumberModes, double** DualParamArray, double** BinnedDualParamArray){
     int m;
 
@@ -993,7 +561,6 @@ int DualBinning(int NumberModes, double** DualParamArray, double** BinnedDualPar
     
     for(j=0; j<bin_no; j++) firstBinLimits[j] = 0.01 + j*1./bin_no;
     for(j=0; j<bin_no; j++) secndBinLimits[j] = 0.01 + j*1./bin_no;
-
 
     // for(j=0; j<20; j++)  printf("\n%.3lf \t %.3lf \t %.3lf", DualParamArray[j][0], DualParamArray[j][1], DualParamArray[j][2]);
     
@@ -1063,3 +630,49 @@ int DualBinning(int NumberModes, double** DualParamArray, double** BinnedDualPar
     
     return 0;
 }
+
+
+int Cartesian2Dpk(int modeCount){
+  // for(j=0; j<modeCount; j++)  printf("\n%.3lf \t %.3lf \t %.3lf", twodim_pk[j][0], twodim_pk[j][1], twodim_pk[j][2]);
+  DualBinning(modeCount, twodim_pk, d2_binnedpk);
+
+  printf("\n\nWriting 2D pk.");
+
+  sprintf(filepath,"%s/W1_Spectro_V7_2/data_v1.7/pk_2d/pk_2d_W%d_%.1lf_%.1lf_Jf_%d.dat", root_dir, fieldFlag, lo_zlim, hi_zlim, (int) Jenkins_foldfactor);
+
+  output = fopen(filepath, "w");
+
+  // corresponds to k=0.5 for **current** binning.
+  for(k=0; k<kbin_no; k++){
+    for(j=0; j<kbin_no; j++){
+      fprintf(output, "%e \t", d2_binnedpk[k][j]);
+    }
+
+    fprintf(output, "\n");
+  }
+
+  fclose(output);
+
+  return 0;
+}
+
+
+/*                                                                                                                                                                                           
+int polar2DpkBinning(int modeCount){                                                                                                                                                        
+    for(j=0; j<kBinNumb;  j++)        kBinLimits[j]  =                     kbinInterval*(j+1);                                                                                               
+    for(j=0; j<muBinNumb; j++)       muBinLimits[j]  =   (1.0/(double) (muBinNumb - 1))*(j+1);                                                                                                                                                                                                                                                                                           
+    DualBinning(modeCount, muBinNumb, muBinLimits, kBinNumb, kBinLimits, polar2Dpk, polar2DBinnedPk, mean_mu, mean_modk, polar_modesPerBin);                                                                                                                                                                                                                                              
+    sprintf(filepath, "%s/Data/SpectralDistortion/VipersMask_2Dpk_W2k.dat", root_dir);                                                                                                                                                                                                                                                                                                   
+    output = fopen(filepath, "w");                                                                                                                                                               
+    printf("\nNumber of mu bins: %d", muBinNumb);                                                                                                                                                
+    for(j=0; j<muBinNumb-1; j++){                                                                                                                                                            
+      for(k=0; k<kBinNumb-1; k++){                                                                                                                                                          
+        fprintf(output, "%e \t %e \t %e \t %e \n", mean_mu[j][k], mean_modk[j][k], TotalVolume*polar2DBinnedPk[j][k], (*pt2Pk)(mean_modk[j][k])*pow(1. + beta*pow(mean_mu[j][k], \
+    2.), 2.)/(1. + 0.5*pow(mean_modk[j][k]*mean_mu[j][k]*velDispersion, 2.)));                                                                                                               
+      }                                                                                                                                                                                     
+    }                                                                                                                                                                                                                                                                                                                                                                                     
+    fclose(output);                                                                                                                                                                          
+                                                                                                                                                                                             
+    return 0;                                                                                                                                                                                 
+    }
+*/

@@ -1,0 +1,46 @@
+# import copy
+# import scipy.interpolate
+
+# from   matplotlib.colors import LogNorm
+
+# cmap = copy.copy(matplotlib.cm.jet)
+
+'''
+data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Posteriors/test_betaSigmaPosterior.dat')
+plt.imshow(data, origin='lower', interpolation='nearest')
+plt.colorbar()
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/betaSigmaPosterior.pdf')
+
+pl.clf()
+
+data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Posteriors/test_betaPosterior.dat')
+pl.plot(data[:,0], data[:,1])
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/betaPosterior.pdf')
+
+pl.clf()
+
+data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Posteriors/test_sigmaPosterior.dat')
+pl.plot(data[:,0], data[:,1])
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/sigmaPosterior.pdf')
+'''
+pl.clf()
+
+data   = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Multipoles/Realisation.dat')
+pl.loglog(data[:19,0], data[:19,1], '^')
+pl.loglog(data[:19,0], data[:19,2])
+
+pl.loglog(data[19:,0], data[19:,1], '^')
+pl.loglog(data[19:,0], data[19:,2])
+
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/Realisation.pdf')
+
+pl.clf()
+
+# Low resolution.
+'''
+data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Posteriors/test_betaSigmaPosterior_lowRes.dat')
+plt.imshow(data, origin='lower', interpolation='nearest', extent=[1.6, 1.8, 0.3, 0.5])
+plt.colorbar()
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/betaSigmaPosterior_lowRes.pdf')
+'''
+

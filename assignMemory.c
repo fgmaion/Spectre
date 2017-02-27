@@ -1,172 +1,187 @@
-int prep_mask(){
-    surveyMask      =  (double *)  malloc(n0*n1*n2*sizeof(*surveyMask));
-    
-    for(j=0; j<n0*n1*n2; j++)      surveyMask[j] = 0.0;
+int prep_c2c(){
+  overdensity         = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(fftw_complex));
+  smooth_overdensity  = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(fftw_complex)); // 1d: N input elements -> N/2 + 1 output elements.
 
-    return 0;
+  H_k                 = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(fftw_complex));
+
+  plan                = fftw_plan_dft_3d(n0, n1, n2, overdensity_complex, H_k, FFTW_FORWARD, FFTW_ESTIMATE); // FFTW_ESTIMATE, FFTW_MEASURE, FFTW_PATIENT, //FFTW_EXHAUSTIVE.
+  
+  return 0;
 }
 
 
-int prep_grid(){    
-    overdensity                = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);
-    
-    smooth_overdensity         = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);
-    
-    // initialise overdensity[0]
-    for(j=0; j<n0*n1*n2;   j++) overdensity[j][0] = 0.;
-    for(j=0; j<n0*n1*n2;   j++) overdensity[j][1] = 0.;
-    
-    return 0;
+int prep_r2c(){
+  overdensity         = (double*)       fftw_malloc(n0*n1*n2*sizeof(double));
+  smooth_overdensity  = (double*)       fftw_malloc(n0*n1*n2*sizeof(double));
+
+  H_k                 = (fftw_complex*) fftw_malloc((n2/2 + 1)*n1*n0*sizeof(fftw_complex)); // returns half the array, along the fastest memory change direction: x.
+
+  plan     = fftw_plan_dft_r2c_3d(n0, n1, n2, overdensity, H_k, FFTW_ESTIMATE); // r2c is always forward. // FFTW_ESTIMATE, FFTW_MEASURE, FFTW_PATIENT, FFTW_EXHAUSTIVE.
+  
+  return 0;
 }
 
 
-int prep_fftw(){    
-    H_k                = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(fftw_complex)); 
-    
-    H2_k               = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(fftw_complex)); 
-    
-    p                  = fftw_plan_dft_3d(n0, n1, n2, overdensity, H_k, FFTW_FORWARD,  FFTW_ESTIMATE);
+int prep_x2c(){    
+    fftw_import_wisdom_from_filename("/home/mjw/HOD_MockRun/wisdom/wisdom.dat");
 
-    /*
-    PkArray            = (double **)     malloc(n0*n1*n2*sizeof(double*));             // rows
+    prep_c2c();
+    // prep_r2c();
     
-    // muIntervalPk    = (double **)     malloc(n0*n1*n2*sizeof(*muIntervalPk));
+    fftw_export_wisdom_to_filename("/home/mjw/HOD_MockRun/wisdom/wisdom.dat");
     
-    for(j=0; j<n0*n1*n2; j++){  
-        PkArray[j]     = (double *)      malloc(2*sizeof(double));                     // columns 
-        
-        PkArray[j][0]  = 0.0;
-        PkArray[j][1]  = 0.0;
-    
-        // muIntervalPk[j]    = (double *)     malloc(2*sizeof(double));
-        
-        // muIntervalPk[j][0] = 0.0;
-        // muIntervalPk[j][1] = 0.0; 
+    for(j=0; j<n0*n1*n2; j++){
+      overdensity[j][0] = 0.0;  // initialise overdensity 
+      overdensity[j][1] = 0.0;
+
+      // overdensity[j] = 0.0;
     }
-    */
-    // iplan              = fftw_plan_dft_3d(n0, n1, n2, H_k, overdensity, FFTW_BACKWARD, FFTW_ESTIMATE);
+      
+    return 0;
+}
 
-    // W2_veck            = malloc(n0*n1*n2*sizeof(double));  
-    // W2_vecr            = malloc(n0*n1*n2*sizeof(double));
+
+int set_kbins_logkspacing(){
+  logk_interval        = (logk_max - logk_min)/kbin_no;
+
+  logk_limits          = (double *) malloc(kbin_no*sizeof(*logk_limits));
+
+  for(j=0; j<kbin_no; j++)  logk_limits[j] = pow(10., logk_min + j*logk_interval);
+
+  return 0;
+}
+
+
+int set_kbins_linearkspacing(){
+  logk_limits          = (double *) malloc(kbin_no*sizeof(*logk_limits));
+
+  double kmedia;
+
+  kmedia               = 2.*pi/800.;
+
+  for(j=0; j<kbin_no; j++)  logk_limits[j] = j*kmedia; // needs 800 bins. 
+
+  return 0;
+}
+
+
+int prep_pkRegression(int log_linear){    
+    if(log_linear == 0)     set_kbins_logkspacing();
+    if(log_linear == 1)  set_kbins_linearkspacing();
     
-    // FFTW2_vecr_re      = malloc(n0*n1*n2*sizeof(double));
-    // FFTW2_vecr_im      = malloc(n0*n1*n2*sizeof(double));
+    modes_perbin         = (int  *)    malloc(kbin_no*sizeof(*modes_perbin));
+    
+    mean_modk            = (double  *) malloc(kbin_no*sizeof(*mean_modk));
+    binnedPk             = (double  *) malloc(kbin_no*sizeof(*binnedPk));
+    Monopole             = (double  *) malloc(kbin_no*sizeof(*Monopole));
+    Quadrupole           = (double  *) malloc(kbin_no*sizeof(*Quadrupole));
+    Hexadecapole         = (double  *) malloc(kbin_no*sizeof(*Hexadecapole));
+    // linearErrors      = (double  *) malloc(kbin_no*sizeof(*linearErrors));     
+
+    Sum_Li               = malloc(kbin_no*sizeof(double));  // Precompute coefficients for Legendre decomposition.
+    Sum_Li2              = malloc(kbin_no*sizeof(double));
+
+    Sum_Pi               = malloc(kbin_no*sizeof(double));
+    Sum_PiLi             = malloc(kbin_no*sizeof(double));
+
+    detA                 = malloc(kbin_no*sizeof(double));
+
+    // index where fftw mode sits in pk binning array. 
+    bin_index            = malloc((n2/n2 + 1)*n1*n0*sizeof(double));
+    kLi                  = malloc((n2/2  + 1)*n1*n0*sizeof(double));
+    M2                   = malloc((n2/2  + 1)*n1*n0*sizeof(double));  // NGP/CIC square correction.  
 
     return 0;
 }
 
 
-int prep_pkRegression(double logk_min, double logk_max, double bin_no){    
-    double logk_interval;
+int assign_LikelihoodMemory(){
+  int kk, ll;
 
-    polar_pk             = (double **) malloc(n0*n1*n2*sizeof(double*));
+    xdata             = malloc(order*sizeof(double));
+    ydata             = malloc(order*sizeof(double));  // Decorrelated data.
+    kdata             = malloc(order*sizeof(double));  // (kVals, kVals) 
+    dkdata            = malloc(order*sizeof(double));  // 'Decorrelated k'
     
-    // cols of mod k, mu, pk.
-    for(j=0; j<n0*n1*n2; j++)  polar_pk[j]    = (double *)  malloc(3*sizeof(double)); 
-
-    logk_interval        = (logk_max - logk_min)/bin_no;
- 
-    logk_limits          = (double *) malloc(bin_no*sizeof(*logk_limits));
-    
-    for(j=0; j<bin_no; j++)  logk_limits[j] = pow(10., logk_min + j*logk_interval);
-
-    mean_modk            = (double *) malloc((bin_no-1)*sizeof(*mean_modk));
-    
-    modes_perbin         = (int *)    malloc((bin_no-1)*sizeof(*modes_perbin));
-    
-    binnedPk             = (double *) malloc((bin_no-1)*sizeof(*binnedPk));
-    
-    // linearErrors      = (double *) malloc((kBinNumb-1)*sizeof(*linearErrors));
-    
-    kMonopole            = (double  *) malloc((bin_no-1)*sizeof(*kMonopole));
-    kQuadrupole          = (double  *) malloc((bin_no-1)*sizeof(*kQuadrupole));
-    kHexadecapole        = (double  *) malloc((bin_no-1)*sizeof(*kHexadecapole));
-    
-    return 0;
-}
-
-
-int assign2DPkMemory(){
-    twodim_pk           = (double **) realloc(twodim_pk, n0*n1*n2*sizeof(double*));                         
- 
-    for(j=0; j<n0*n1*n2; j++)  twodim_pk[j]    = (double *)  malloc(3*sizeof(double));
-    
-    d2_binnedpk         = (double **) realloc(d2_binnedpk, 50*sizeof(double* ));
-    
-    for(j=0; j<50; j++) d2_binnedpk[j] = (double *) malloc(50*sizeof(double));
-    
-    for(k=0; k<50; k++) for(j=0; j<50; j++)  d2_binnedpk[k][j] = 0.0;
-    
-    return 0;
-}
-
-
-int LikelihoodMemory(){
-    // Parameter grid of evaluated Chi sq values. 
-    ChiSqGrid  = (double ***) malloc(Res*sizeof(*ChiSqGrid));
-  
-    for(j=0; j<Res; j++)  ChiSqGrid[j] = (double **) malloc(Res*sizeof(**ChiSqGrid));
-  
+    xtheory           = (double ******) malloc(Res*sizeof(*xtheory));
+    ytheory           = (double ******) malloc(Res*sizeof(*ytheory));    
+    ChiSqGrid         = (double *****) malloc(Res*sizeof(*ChiSqGrid));  // Parameter grid of evaluated Chi sq. values.
+   
     for(j=0; j<Res; j++){
+               xtheory[j] = (double *****) malloc(Res*sizeof(**xtheory));
+	       ytheory[j] = (double *****) malloc(Res*sizeof(**ytheory));
+	       
+             ChiSqGrid[j] = (double ****) malloc(Res*sizeof(**ChiSqGrid));
+        
         for(k=0; k<Res; k++){
-            ChiSqGrid[j][k]    = (double *) malloc(Res*sizeof(***ChiSqGrid));
-        }
+	             xtheory[j][k] = (double ****) malloc(Res*sizeof(***xtheory));
+	             ytheory[j][k] = (double ****) malloc(Res*sizeof(***ytheory));
+
+	           ChiSqGrid[j][k] = (double ***) malloc(Res*sizeof(***ChiSqGrid));
+	    
+	    for(i=0; i<Res; i++){
+	               xtheory[j][k][i]  = (double ***) malloc(Res_ap*sizeof(****xtheory));
+	               ytheory[j][k][i]  = (double ***) malloc(Res_ap*sizeof(****ytheory));
+
+	             ChiSqGrid[j][k][i]  = (double **) malloc(Res_ap*sizeof(****ChiSqGrid));
+	      
+	      for(ii=0; ii<Res_ap; ii++){
+		         xtheory[j][k][i][ii] = (double **) malloc(Res_ap*sizeof(*****xtheory));
+		         ytheory[j][k][i][ii] = (double **) malloc(Res_ap*sizeof(*****ytheory));
+		
+		       ChiSqGrid[j][k][i][ii] = (double *) malloc(Res_ap*sizeof(*****ChiSqGrid));
+
+		for(jj=0; jj<Res_ap; jj++){
+		  xtheory[j][k][i][ii][jj] = (double *) malloc(order*sizeof(******xtheory));
+		  ytheory[j][k][i][ii][jj] = (double *) malloc(order*sizeof(******ytheory));
+		  
+		         ChiSqGrid[j][k][i][ii][jj] = 0.0;
+		  
+		  for(kk=0; kk<order; kk++){
+		    xtheory[j][k][i][ii][jj][kk] = 0.0;
+		    ytheory[j][k][i][ii][jj][kk] = 0.0;
+		  }
+		}
+	      }
+	    }  
+	}
     }
 
-    // Likelihood values. 
-    lnLikelihoodGrid  = (double ***) malloc(Res*sizeof(*lnLikelihoodGrid));
-  
-    for(j=0; j<Res; j++)  lnLikelihoodGrid[j] = (double **) malloc(Res*sizeof(**lnLikelihoodGrid));
-  
-    for(j=0; j<Res; j++){
-        for(k=0; k<Res; k++){
-            lnLikelihoodGrid[j][k]    = (double *) malloc(Res*sizeof(***lnLikelihoodGrid));
-        }
-    }
-
-
+    
     fsigma8Posterior = (double *)  malloc(Res*sizeof(*fsigma8Posterior));    
-    
-    for(i=0; i<Res; i++)  fsigma8Posterior[i] = 0.0;
-    
-    sigmaPosterior = (double *)  malloc(Res*sizeof(*sigmaPosterior));    
-
-    for(i=0; i<Res; i++)  sigmaPosterior[i] = 0.0;
-    
-    /*
-    betaSigmaPosterior = (double **) malloc(Res*sizeof(*betaSigmaPosterior));
-    
-    for(j=0; j<Res; j++)  betaSigmaPosterior[j] = malloc(Res*sizeof(**betaSigmaPosterior));
+    sigmaPosterior   = (double *)  malloc(Res*sizeof(*sigmaPosterior));
     
     for(i=0; i<Res; i++){
-        for(j=0; j<Res; j++){
-            betaSigmaPosterior[i][j] = 0.0;
-        }
-    }*/
+      fsigma8Posterior[i] = 0.0;
+        sigmaPosterior[i] = 0.0;
+    }
     
     return 0;
 }
 
 
 int assignCovMat(int mocks){
-    // Multipoles is a [CatalogNumber][hiMultipoleOrder][kBinNumb] object, where [x][][] corresponds to mock number, [][x][] corresponds to x e [Mono, Quad, Hex], [][][x] mid or mean k bin. 
-    Multipoles                                             = (double **) malloc(mocks*sizeof(*Multipoles));
-    
-    // Decorrelated multipole moments measurements
-    dMultipoles                                            = (double **) malloc(mocks*sizeof(*dMultipoles));
+    // Multipoles is a [CatalogNumber][hiMultipoleOrder][kBinNumb] object, where [x][][] corresponds to mock number, [][x][] corresponds to x e [Mono, Quad, Hex], [][][x] mid or mean k bin.
+     Multipoles                                            = (double **) malloc(mocks*sizeof(*Multipoles));
+    dMultipoles                                            = (double **) malloc(mocks*sizeof(*dMultipoles));  // Decorrelated multipole moments measurements
         
     for(j=0; j<mocks; j++){ 
          Multipoles[j]                                     = (double  *) malloc(order*sizeof( *Multipoles));
         dMultipoles[j]                                     = (double  *) malloc(order*sizeof(*dMultipoles));
+
+	for(i=0; i<order; i++){
+	   Multipoles[j][i]  = 0.0;
+	  dMultipoles[j][i]  = 0.0;
+	}
     }
-    
+    /*
     for(i=0; i<mocks; i++){
         for(j=0; j<order; j++){
              Multipoles[i][j]  = 0.0;
             dMultipoles[i][j]  = 0.0;
         }
     }
-    
+    */
     kVals                                                  = (double  *) malloc(mono_order*sizeof(*kVals));
 
     MeanMultipoles                                         = (double  *) malloc(order*sizeof(*MeanMultipoles));    
@@ -188,20 +203,51 @@ int assignCovMat(int mocks){
 }
 
 
-int windowfn_rspaceMultipoles(int rbinNumb){
-    windfn_rvals           = realloc(windfn_rvals,           rbinNumb*sizeof(double));
+int assign2DPkMemory(){
+  twodim_pk           = (double **) realloc(twodim_pk, n0*n1*n2*sizeof(double*));
 
-    windfn_rMonopole       = realloc(windfn_rMonopole,       rbinNumb*sizeof(double));
-    
-    windfn_rQuadrupole     = realloc(windfn_rQuadrupole,     rbinNumb*sizeof(double));
-    
-    windfn_rHexadecapole   = realloc(windfn_rHexadecapole,   rbinNumb*sizeof(double));
-    
-    windfn_rMonopole2d     = realloc(windfn_rMonopole2d,     rbinNumb*sizeof(double));
-    
-    windfn_rQuadrupole2d   = realloc(windfn_rQuadrupole2d,   rbinNumb*sizeof(double));
-    
-    windfn_rHexadecapole2d = realloc(windfn_rHexadecapole2d, rbinNumb*sizeof(double));
-            
-    return 0;
+  for(j=0; j<n0*n1*n2; j++)  twodim_pk[j]    = (double *)  malloc(3*sizeof(double));
+
+  d2_binnedpk         = (double **) realloc(d2_binnedpk, 50*sizeof(double* ));
+
+  for(j=0; j<50; j++) d2_binnedpk[j] = (double *) malloc(50*sizeof(double));
+
+  for(k=0; k<50; k++) for(j=0; j<50; j++)  d2_binnedpk[k][j] = 0.0;
+
+  return 0;
+}
+
+
+int prep_fftw(){
+  // Mostly obsolete.
+  H_k                = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(fftw_complex));
+  // H2_k               = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(fftw_complex));
+
+  p                  = fftw_plan_dft_3d(n0, n1, n2, overdensity, H_k, FFTW_FORWARD,  FFTW_ESTIMATE);
+
+  return 0;
+}
+
+
+int assign_prep_FFTlog_memory(){
+  xi_mu_prefactor  = malloc(FFTlogRes*sizeof(double));  // Pre and Post factors for xi_mu FFT_log transform.
+  xi_mu_postfactor = malloc(FFTlogRes*sizeof(double));  // Dropping e.g. transformOrder dependent terms.
+  pk_mu_prefactor  = malloc(FFTlogRes*sizeof(double));
+  pk_mu_postfactor = malloc(FFTlogRes*sizeof(double));
+
+  FFTlog_Pk  = malloc(FFTlogRes*sizeof(double)); // Input P(k) interpolated to k's used by FFTlog calc.
+  FFTlog_W0  = malloc(FFTlogRes*sizeof(double)); // W_0(r) evaluated at FFTlog rvals.
+  FFTlog_W2  = malloc(FFTlogRes*sizeof(double));
+  FFTlog_W4  = malloc(FFTlogRes*sizeof(double));
+  FFTlog_W6  = malloc(FFTlogRes*sizeof(double));
+
+  FFTlog_W0_joint = malloc(FFTlogRes*sizeof(double)); // Joint W_0(r) evaluated at FFTlog rvals.
+  FFTlog_W2_joint = malloc(FFTlogRes*sizeof(double));
+  FFTlog_W4_joint = malloc(FFTlogRes*sizeof(double));
+  FFTlog_W6_joint = malloc(FFTlogRes*sizeof(double));
+
+  FFTlog_Wk0 = malloc(FFTlogRes*sizeof(double)); // \tilde W_0(k) evaluated at FFTlog rvals.
+  FFTlog_Wk2 = malloc(FFTlogRes*sizeof(double)); // \tilde W_2(k) evaluated at FFTlog rvals.
+  
+  return 0;
 }

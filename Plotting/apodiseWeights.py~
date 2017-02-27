@@ -1,0 +1,29 @@
+'''
+import matplotlib.pyplot as plt
+from   mpl_toolkits.mplot3d import Axes3D
+
+fig    = plt.figure()
+
+ax     = fig.add_subplot(111, projection='3d')
+'''
+data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/ra_decCells/xyz_aposideWeights.dat')
+
+# Axes3D.scatter(ax, data[:,0], data[:,1], data[:,2], zdir='z', s=10, c=data[:,3])
+
+pl.scatter(data[:,0], data[:,1], s=1)
+pl.xlabel('x')
+pl.ylabel('y')
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/VIPERS_Windowfn_RealSpace_xy.jpg')
+
+
+pl.clf()
+pl.scatter(data[:,0], data[:,2], s=1)
+pl.xlabel('x')
+pl.ylabel('z')
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/VIPERS_Windowfn_RealSpace_xz.jpg')
+
+pl.clf()
+pl.scatter(data[:,1], data[:,2], s=1)
+pl.xlabel('y')
+pl.ylabel('z')
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/VIPERS_Windowfn_RealSpace_yz.jpg')

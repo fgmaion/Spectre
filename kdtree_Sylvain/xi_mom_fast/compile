@@ -1,0 +1,8 @@
+#!/bin/bash
+
+rm kdtree_xi_mom
+gcc -Wall -O3 -c -o mfunct.o mfunct.c
+gcc -Wall -O3 -c -o libkdtree.o libkdtree.c
+gcc -Wall -O3 -c -o kdtree_xi_mom.o kdtree_xi_mom.c
+gcc -Wall -O3 -o kdtree_xi_mom kdtree_xi_mom.o libkdtree.o mfunct.o -lm
+rm *.o

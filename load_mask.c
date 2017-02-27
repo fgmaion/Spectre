@@ -1,43 +1,201 @@
-int load_homogeneous_rands_window(int load, double sampling, int flag_data_mock){
-    // -- randoms follow solely the geometry -- //
-    // sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/500s/randoms_W1_500s_parent_xyz_%.1f_%.1f.cat", lo_zlim, hi_zlim);
-    // sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/500s/randoms_W1_500s_Nagoya_v4_xyz_%.1f_%.1f.cat", lo_zlim, hi_zlim);
-    // sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/500s/randoms_W1_500s_Nagoya_v4_gridded_3.12_xyz_%.1f_%.1f.cat", lo_zlim, hi_zlim); 
+int load_rands_radec(double sampling){
+    rand_number = accepted_rand = (int) ceil(1382582*sampling);  // Hard coded catalogue row number.
     
+    assign_randmemory();
     
-    // -- randoms follow the number density, specific nbar implies distinction of mask between mocks and data -- //
-    if(flag_data_mock == 0){
-        // analysis on **mock** catalogues. 
+    // load_ascii_randomCats(sampling);    
+    load_fastread_randomCats(rand_number);
+
+    return 0;
+}
+
+
+int rand_newchi_newbasis(){
+  // With nbar specified according to interp_nz(chi), assign chi for randoms such that they satisfy this bar.
+  // Achieved with the transformation method, see pg. 287 of NR and smooth_nbar.c
+
+  printf("\n\nNew basis for randoms.");
+
+  double F, cos_dec;
+
+  double x1,  y1, z1;
+  double x2,  y2, z2;
+  double c_ra, c_dec;
+
+  c_ra    =  CentreRA*(pi/180.);
+  c_dec   = CentreDec*(pi/180.);
+  
+  // #pragma omp parallel
+  //{ // \{ must be on a new line
+    gsl_rng*  gsl_ran_thread_r;
+
+    gsl_ran_thread_r = gsl_rng_alloc(gsl_rng_taus); // new instance of taus generator. 
+
+    gsl_rng_set(gsl_ran_thread_r, 1 + omp_get_thread_num()); // seed with thread id; 0 is default so start at one.  
     
-        // sprintf(filepath, "/disk1/mjw/HOD_MockRun/Data/500s/randoms_W1_500s_Nagoya_v4_incnbar_xyz_0.6_0.9.cat");
-        // sprintf(filepath, "%s/W1_Spectro_V5_0/randoms_W1_Nagoya_v5_Samhain_realdata_incnbar_xyz_%.1lf_%.1lf.cat", root_dir, lo_zlim, hi_zlim);
-        // sprintf(filepath, "%s/W1_Spectro_V5_0/randoms_W1_Nagoya_v5_Samhain_incmocknbar_xyz_0.6_0.9.cat", root_dir, lo_zlim, hi_zlim);
+    // #pragma omp for private(j, x1, y1, z1, x2, y2, z2, c_ra, c_dec, F, cos_dec)
+    for(j=0; j<rand_number; j++){
+      F             = gsl_rng_uniform(gsl_ran_thread_r);  // Chi limits Satisfied by construction.
     
-        // sprintf(filepath, "%s/W1_Nagoya_v6_mocks_work/randoms/randoms_W1_Nagoya_v6_samhain_incmock_specweight_nbar_xyz_%.1lf_%.1lf.cat", root_dir, lo_zlim, hi_zlim);
+      rand_chi[j]   = inverse_cumulative_nbar(F);
+      
+      rand_ra[j]   *= (pi/180.0);                  // Converted to radians.  No need to convert back. 
+      rand_dec[j]  *= (pi/180.0);                  
+
+      cos_dec       = cos(rand_dec[j]);
     
-        // Angular coverage of mocks and data should be identical.
-        sprintf(filepath, "%s/W1_Spectro_V7_0/randoms_W%d_Nagoya_V7_Samhain_incmock_specweight_nbar_xyz_%.1lf_%.1lf.cat", root_dir, fieldFlag, lo_zlim, hi_zlim);
+      rand_x[j]     =  rand_chi[j]*cos(rand_ra[j])*cos_dec;
+      rand_y[j]     =  rand_chi[j]*sin(rand_ra[j])*cos_dec;
+      rand_z[j]     = -rand_chi[j]*sin(rand_dec[j]);            // Stefano reflection included. 
+      
+      rand_weight[j] = 1./(1. + interp_nz(rand_chi[j])*fkpPk);  // rand fkp weights.
+
+      /*
+      // basis formed by: normal spherical co-ordinates subject to inversion through xy plane, then R1 and finally R2.
+      // R1: rotation about z such that in the new basis, (x',y',z'), x' hat lies in x-y plane at an angle centreRA to x.
+      x1  =     cos(c_ra)*rand_x[j] + sin(c_ra)*rand_y[j];
+      y1  =    -sin(c_ra)*rand_x[j] + cos(c_ra)*rand_y[j];
+      z1  =               rand_z[j];
+
+      // R2: rotation about y such that in the new basis, (x'', y'', z''), z'' hat lies in (x', z') plane at an angle -CentreDec to x' hat.
+      x2  = -sin(c_dec)*x1  - cos(c_dec)*z1;
+      y2  =  y1;
+      z2  =  cos(c_dec)*x1  - sin(c_dec)*z1;
+
+      rand_x[j] = x2 + stefano_trans_x;  // Translate to fit in the box. P(k) unaffected.
+      rand_y[j] = y2 + stefano_trans_y;
+      rand_z[j] = z2 + stefano_trans_z;*/
     }
-    
-    if(flag_data_mock == 1){
-        // analysis on **VIPERS DATA** catalogues. 
-        
-        // Nagoya v7., Samhain, local TSR weighted nbar.         
-        sprintf(filepath, "%s/W1_Spectro_V7_0/randoms_W%d_Nagoya_V7_Samhain_incmock_specweight_nbar_xyz_%.1lf_%.1lf.cat", root_dir, fieldFlag, lo_zlim, hi_zlim);
-    
-        printf("\n\nMask file: %s", filepath);
+    //}
+
+  StefanoRotated(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);  // Why doesn't commented code above work!?
+  
+  if(Jenkins_foldfactor > 1.0){
+    // #pragma omp parallel for private(j)
+    for(j=0; j<rand_number; j++){
+      rand_x[j] = fmod(rand_x[j], (AxisLimsArray[1][2] - AxisLimsArray[0][2]));
+      rand_y[j] = fmod(rand_y[j], (AxisLimsArray[1][1] - AxisLimsArray[0][1]));
+      rand_z[j] = fmod(rand_z[j], (AxisLimsArray[1][0] - AxisLimsArray[0][0]));
     }
-    
-    
-    if(flag_data_mock == 2){
-        // analysis on **VIPERS DATA** catalogues, combined W1 and W4.
-        
-        // Nagoya v7., Samhain, local TSR weighted nbar.         
-        sprintf(filepath, "%s/W1_Spectro_V7_0/randoms_W1W4_Nagoya_V7_Samhain_incmock_specweight_nbar_xyz_%.1lf_%.1lf.cat", root_dir, lo_zlim, hi_zlim);
-    
-        printf("\n\nMask file: %s", filepath);
-    }
-    
+  }
+  
+  printf("\n\nStefano basis, randoms co-ordinates.");                                                                                                      
+  printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));                                                     
+  printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));                                                     
+  printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));                                                     
+  
+  return 0;
+}
+
+
+int lowerSampling_randomisedCatalogue(double sampling){
+  rand_number = (int) ceil(rand_number*sampling);
+
+  return 0;
+}
+
+
+int make_fastread_randomCats(){
+  //  Output ra and dec only, in binary. assumes loaded already. 
+  sprintf(filepath, "%s/W1_Spectro_V7_4/randoms/randoms_W%d_xyz_%.1lf_%.1lf_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag, 0.6, 0.9);
+  
+  output = fopen(filepath, "wb");
+
+  fwrite(rand_ra,   sizeof(double),  rand_number,   output);
+  fwrite(rand_dec,  sizeof(double),  rand_number,   output);
+  
+  fclose(output);
+
+  load_fastread_randomCats();
+  
+  return 0;
+}
+
+
+int load_fastread_randomCats(int rand_number){  
+  sprintf(filepath, "%s/W1_Spectro_V7_4/randoms/randoms_W%d_xyz_%.1lf_%.1lf_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag, 0.6, 0.9);
+
+  inputfile = fopen(filepath, "rb");
+
+  fread(rand_ra,  sizeof(double), rand_number, inputfile);
+  fread(rand_dec, sizeof(double), rand_number, inputfile);
+
+  fclose(inputfile);
+  
+  return 0;
+}
+
+
+double cmpfunc(const void* a, const void* b){
+  return ( *(double*) a - *(double*) b);
+}
+
+
+int cut_rand_bydec(){
+  // Sorting only needs to be done once, ever.
+  gsl_sort2(rand_dec, 1, rand_ra, 1, rand_number);
+
+  double store_ra, store_dec;
+  
+  for(j=0; j<rand_number/2; j++){ // reverse order. 
+    store_ra                      = rand_ra[j]; 
+    rand_ra[j]                    = rand_ra[rand_number - (j+1)];
+    rand_ra[rand_number - (j+1)]  = store_ra;
+
+    store_dec                     = rand_dec[j];
+    rand_dec[j]                   = rand_dec[rand_number - (j+1)];
+    rand_dec[rand_number - (j+1)] = store_dec;
+  }
+
+  assignAcceptance_rand();
+  
+  // Sort by dec to ensure easy application of dec flag. 
+  make_fastread_randomCats();  // Create binary for faster reading.                                                                                                                           
+  return 0;
+}
+
+
+int load_ascii_randomCats(double sampling){
+  sprintf(filepath, "%s/W1_Spectro_V7_2/randoms/randoms_W%d_xyz_%.1lf_%.1lf_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag, 0.6, 0.9);  // redshifts reassigned below.                 
+                                                                                                                                                                                            
+  printf("\n\nMask file: %s", filepath);                                                                                                                                                    
+                                                                                                                                                                                             
+  inputfile   = fopen(filepath, "r");                                                                                                                                                       
+                                                                                                                                                                                            
+  line_count(inputfile, &rand_number);          // Provide line count to save time.                                                                                                                                                                                                                                                                                                
+  lowerSampling_randomisedCatalogue(sampling);  // assumes catalogue order is random.                                                                                                       
+                                                                                                                                                                                             
+  for(j=0; j<rand_number; j++)   fscanf(inputfile, "%le \t %le \t %*le \t %*le \t %*le \t %*le \n", &rand_ra[j], &rand_dec[j]);                                                                                                                                                                                                                                                       
+  fclose(inputfile);                                                                                                                                                                     
+
+  // cut_rand_bydec();
+  
+  return 0;
+}
+
+
+int del_lockfile(){
+  // Delete lockfile if necessary, e.g. for AP MCMC.                                                                                                        
+  char*       lockfile_path;                                                                                                                               
+  char delete_lockfile[200];                                                                                                                              
+
+  lockfile_path = malloc(200*sizeof(*lockfile_path));                                                                                                        
+                                                                                                                                                            
+  lockfile_path = getenv("LOCKFILEDIR");                                                                                                                    
+  
+  sprintf(delete_lockfile, "rm -rf %s", lockfile_path);                                                                                                      
+  
+  system(delete_lockfile);                                                                                                                                  
+
+  system("echo 'lockfile destroyed.'");                                                                                                                      
+
+  return 0;
+}
+
+
+int load_maskedRSDpaper_mask(double sampling){
+    sprintf(filepath, "%s/Data/maskedRSD_draftwork/randoms_W1_Nagoya_xyz_0.7_0.8_gridded.cat", root_dir);
+
     inputfile   = fopen(filepath, "r");
 
     ch          = 0;
@@ -49,78 +207,35 @@ int load_homogeneous_rands_window(int load, double sampling, int flag_data_mock)
         if(ch == '\n')
             rand_number += 1;
     } while(ch != EOF);
-    
-    // assumes catalogue is in a random order.
+
+    printf("\n\n%d randoms number", rand_number);
+
+    rewind(inputfile);
+
     lowerSampling_randomisedCatalogue(sampling);
 
-    printf("\n\nsampling %.2e, %d randoms number", sampling, rand_number);
+    assign_randmemory();
 
-    if(load == 1){
-        rewind(inputfile);
-
-        assign_randmemory();
-
-        for(j=0; j<rand_number; j++)   fscanf(inputfile, "%le \t %le \t %le \t %le \t %le \t %le \n", &rand_ra[j], &rand_dec[j], &rand_chi[j], &rand_x[j], &rand_y[j], &rand_z[j]);
-    }
-
+    for(j=0; j<rand_number; j++)   fscanf(inputfile, "%le \t %le \t %le \n", &rand_x[j], &rand_y[j], &rand_z[j]);
+    
     fclose(inputfile);
-    
-    // With nbar specified according to interp_nz(chi), assign chi for randoms such that they satisfy this n bar.
-    rand_chiReassignment();
-    
-    // randoms_nbar_calc();
-    
-    // add a random component to the position vector of the random, on the scale of the grid size. account for FFT gridding in window calc. 
-    // randoms_maskGen_GriddingError();
-    
-    // rand fkp weights. 
-    // for(j=0; j<rand_number; j++)  rand_weight[j] = 1.;
-    for(j=0; j<rand_number; j++)  rand_weight[j] = 1./(1. + interp_nz(rand_chi[j])*fkpPk);
-    
-    StefanoReflection(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);
-    
-    StefanoRotated(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);
-    
-    printf("\n\nStefano basis, randoms co-ordinates.");
     
     printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));
     printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));
     printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));
+    /*
+    for(j=0; j<n0*n1*n2; j++)  surveyMask[j] = 0.0;
     
-    // mean_CellChi();
+    for(j=0; j<rand_number; j++){
+        boxlabel = boxCoordinates(rand_x, rand_y, rand_z, j);
     
-    // redshift limit cuts. 
-    assignAcceptance_rand();
-    
-    return 0;
-}
-
-
-int rand_chiReassignment(){
-    // With nbar specified according to interp_nz(chi), assign chi for randoms such that they satisfy this bar.
-    // Achieved with the transformation method, see pg. 287 of NR and smooth_nbar.c
-
-    double F; 
-
-    for(j=0; j<rand_number; j++){ 
-        rand_chi[j]   = 0.0;
-           
-        while((rand_chi[j]<loChi) || (hiChi<rand_chi[j])){
-          F           = gsl_rng_uniform(gsl_ran_r);
-          
-          rand_chi[j] = inverse_cumulative_nbar(F);
-        }
-            
-        rand_ra[j]   *= (pi/180.0);                                 // Converted to radians.
-        rand_dec[j]  *= (pi/180.0);                                 // Converted to radians.
-    
-        rand_x[j]     = rand_chi[j]*cos(rand_dec[j])*cos(rand_ra[j]);        
-        rand_y[j]     = rand_chi[j]*cos(rand_dec[j])*sin(rand_ra[j]);
-        rand_z[j]     = rand_chi[j]*sin(rand_dec[j]);
-      
-        rand_ra[j]   /= (pi/180.0);                                 // Converted to radians.
-        rand_dec[j]  /= (pi/180.0);                                 // Converted to radians.
+        surveyMask[boxlabel] = 1.;
     }
+    */
+    for(j=0; j<rand_number; j++)  rand_weight[j] = 1.;
+
+
+    sprintf(filepath, "");
 
     return 0;
 }
@@ -151,6 +266,7 @@ int zeff_calc(){
 int mean_CellChi(){
     // assign memory for grid representation of mask, Cell_SurveyLimitsMask. 
     double* meanchi;
+    double*surveyMask;
     
     double  x, y, z, chi;
     
@@ -232,9 +348,3 @@ int load_randStefanoCoordinates(int load, double sampling){
     return 0;
 }
 
-
-int lowerSampling_randomisedCatalogue(double sampling){
-    rand_number = (int) ceil(rand_number*sampling);
-
-    return 0;
-}

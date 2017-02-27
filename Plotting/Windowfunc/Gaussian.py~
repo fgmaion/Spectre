@@ -1,0 +1,24 @@
+def printWindowFuncSlice(axis):
+    WindowFunc_Slice = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/Gaussian_' + axis + 'Slice.dat')
+    
+    pl.clf()
+    pl.loglog(WindowFunc_Slice[:,1], WindowFunc_Slice[:,2], 'k--')
+    pl.xlabel('k_'+ axis)
+    pl.ylabel(r'$W^2$ slice along k_' + axis)
+    pl.savefig('/disk1/mjw/HOD_MockRun/Plots/Windowfunc/Gaussian/' + axis + 'Slice.eps')
+
+
+def printWindowFuncSphericalAverage():
+    WindowFunc = np.loadtxt("/disk1/mjw/HOD_MockRun/Data/WindowfuncSpherical/midK_W2k_Gaussian.dat")
+    
+    pl.clf()
+    pl.xlabel('k')
+    pl.ylabel(r'$W^2_{sph}$(k)')
+    pl.loglog(WindowFunc[:,0], WindowFunc[:,1], 'k')
+    pl.savefig("/disk1/mjw/HOD_MockRun/Plots/Windowfunc/Gaussian/Spherical.eps")
+
+printWindowFuncSlice('x')
+printWindowFuncSlice('y')
+printWindowFuncSlice('z')
+
+printWindowFuncSphericalAverage()

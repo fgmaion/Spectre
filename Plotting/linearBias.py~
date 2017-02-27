@@ -1,0 +1,23 @@
+data       = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/HODTheoryPk/Pk_hod_20.0.dat')
+pl.loglog(data[:,0], data[:,1], 'r')
+
+# Linear     = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/HODTheoryPk/EisensteinHu_Pk.dat')
+# pl.loglog(Linear[:,0], 10**6*Linear[:,1]**2, 'c')
+
+Camb       = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/HODTheoryPk/camb_matterPk.dat')
+pl.loglog(Camb[:,0], 1.495903*1.495903*Camb[:,1], 'g')
+
+bias       =  1.495903
+
+Camb[:,1] *= bias*bias
+
+joined     = np.concatenate((Camb[:293,:], data[23:,:]))
+
+pl.loglog(joined[:,0], joined[:,1], 'k')
+
+np.savetxt('/disk1/mjw/HOD_MockRun/Data/HODTheoryPk/cambExtendedPk_hod_20.00.dat', joined)
+
+pl.ylim(3*10**2, 10.**5)
+pl.xlim(10**-2, 3*10**-1)
+
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/linear.pdf')

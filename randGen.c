@@ -9,16 +9,14 @@ int assign_randmemory(){
     
     rand_weight   = (double *) realloc(rand_weight, rand_number*sizeof(*rand_weight));
     
-    rand_accept   = (bool *)   realloc(rand_accept, rand_number*sizeof(*rand_accept));
-
-    // rand_redshift = (double *) malloc(rand_number*sizeof(*rand_redshift));
+    // rand_accept   = (bool *)   realloc(rand_accept, rand_number*sizeof(*rand_accept));
     
     return 0;
 }
 
 
 int randoms_maskGen(){   
-    rand_number = 40000000;
+    rand_number = 600000;
                   
     assign_randmemory();
     
@@ -60,8 +58,7 @@ int randoms_maskGen(){
     // smoothed, upweighted nbar of W1_Spectro_V7_0.
     // max_nz = interp_nz(1656.);
     
-    
-    sprintf(filepath, "%s/W1_Spectro_V7_0/randoms_W4_parent_incmock_specweight_nbar_xyz_%.1lf_%.1lf.cat", root_dir, lo_zlim, hi_zlim);
+    sprintf(filepath, "%s/W1_Spectro_V7_2/randoms/randoms_W%d_parent_xyz_%.1lf_%.1lf_%d.cat", root_dir, fieldFlag, lo_zlim, hi_zlim, rand_number);
 
     output = fopen(filepath, "w");
     

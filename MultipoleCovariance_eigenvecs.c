@@ -25,27 +25,29 @@ int Covariance_eigenVecs(int mocks){
     // initialiseCovariance(mocks);
     
     // prewhiten(mocks);
-    /*
+    
     // get first eigenvector from evec matrix. eigenvectors are normalised. 
     gsl_matrix_get_col(col, evec, 2);
     
     // first eigenvalue. 
     double eval_0 = gsl_vector_get(eval, 2);
-    
+    /*
     // Covariance x eigenvector_0 = lambda_0 eigenvector_0.
+    printf("\n\nEigenvector check.");
+    
     for(j=0; j<order; j++){
         Interim = 0.0;
       
         for(k=0; k<order; k++)  Interim += gsl_matrix_get(Covariance, j, k)*gsl_vector_get(col, k);  
         
-        // printf("\n%e \t %e", Interim, gsl_vector_get(col, j)*eval_0);
-    }*/
-    
+        printf("\n%e \t %e", Interim, gsl_vector_get(col, j)*eval_0);
+    }
+    */
     /*
     double eval_j;
     
     for(j=0; j<order; j++){      
-        // jth component of eval which is a vector of the eigenvalues. 
+        // jth component of eval, which is a vector of the eigenvalues. 
         eval_j = gsl_vector_get(eval, j);
     
         if((smallestEigenvalue >= eval_j) && (eval_j >= 0.5)){

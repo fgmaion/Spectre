@@ -1,0 +1,180 @@
+double       splintWindowfunc(double EvalPoint);
+double       AnalyticSpherical(double k);
+int          EvaluateConvolution(char type[]);
+
+double 		 (*pt2AnisoWf)(double, double, double)  = NULL;
+double       (*pt2Windowfn)(double)                 = NULL;
+
+int          printWindowfuncSlices();
+int          WindowfuncSlice(double kintervali, int ni, int x0, int y0, int z0, char filepath[]);
+
+int          inputWindowfnBinNumb;
+
+int          padwfPkCalc(int sidepad);
+int          assignPaddedWindowfn(int padfactor);
+
+// Convolution with anisotropic window fn.
+int          AnisoGauss(double x, double y, double z);
+int          AnisoConvolution();
+
+int          SetWfKernel();
+double       ConvolveCell(int x, int y, int z);
+int 		 convolve3DInputPk();
+
+double       anisokGauss(double x, double y, double z);
+
+int          MeasureAnisoWfKernel();
+int          setMeasuredWfKernel();
+
+// directories
+char         WindowfuncSlices_dir[200];
+
+
+// filepaths
+char         Windowfunc_xSlice[200];
+char         Windowfunc_ySlice[200];
+char         Windowfunc_zSlice[200];
+
+double       SumOverStates_W2k   = 0.0;
+
+
+// Window fn. convolution, spherical symmetry.
+int          InterpK_binNumber;
+double*       kVals;                            // changed from float to double. 
+float*       interpolatedPk;
+
+int*         midKmodesperbin;
+float*       midKBinNR;
+float*       WindowFuncNR;
+float*       WindowFunc2d;
+
+double*      ConvolvedPk;
+double*      ConvolvedPk2d;
+
+float        inputPkEval         = 0.0;
+float        WindowFuncEval      = 0.0;
+float        PkEvalPoint         = 0.0;
+float        muVal;
+float        muInterval;
+
+int          MuIntegralPrecision;
+
+
+double       Analytic2powerlaw(double k);
+double       AnalyticGaussian(double k);
+
+// Integral constraint correction.
+float        WindowfnZeroPointEval;
+
+
+// padded window fn. calculation
+int          sidepad;
+int          padfactor;
+int          padcellsNumber;
+int          padIndex;
+
+// Anisotropic convolution
+// int 		 xwfKernelsize;
+// int          ywfKernelsize;
+// int          zwfKernelsize;
+
+
+
+double 		 PkCubeEntry;
+double 		 ConvNorm;
+
+
+double*		 windowFunc3D; 
+double*		 convolvedPk3d;
+
+double**     flattenedConvolvedPk3D;
+
+double*      AnisoWfKernel;
+int*         AnisoWfKernel_ModeNumb;
+
+
+int xminKernelshift;
+int xmaxKernelshift;
+
+int yminKernelshift;
+int ymaxKernelshift;
+
+int zminKernelshift;
+int zmaxKernelshift;
+
+int   iishift, kkshift, jjshift;
+
+double KernelMaxk;
+
+int   filterIndex;
+int   convIndex;
+int   PkIndex;
+
+double ZeroPointNorm();
+
+
+// Convolution calc. spherical symmetry. 
+
+int          splineInputWindowfn(char filepath[]);
+
+float        kConvScope;
+float       muConvScope;
+float        qConvScope;
+
+double  NormKernel(double q);
+float  fNormKernel(float);
+
+double SphericalW2NormEval();
+
+int EvaluateSphericalConv(char Convtype[]);
+
+double SphConvPk(double kval);
+float fqConvKernel(float q);
+double qConvKernel(double q);
+float fmuConvKernel(float q);
+double muConvKernel(double mu);
+double SphConvZeroPoint();
+double ZeroPoint;
+double ConvPkZeroPoint;
+
+int    IntegralConstraintCorrection();
+
+double ConvolutionNorm(double array[]);
+
+
+float* stepArray;
+float* nz_startParams;
+float* NewParams;
+
+int mc_jump(float paramsArray[], float* minChi2, int paramNumber, float fracPrecision);
+
+int mc_loopCount;
+
+// float   nbarChi2(float Chi);
+// float   Chi2(float Chi);
+
+float*  fkBinLimits;
+
+float*  convMono;
+float*  convQuad;
+
+float*  convMono2d;
+float*  convQuad2d;
+
+
+float* tophat;
+
+
+int**  wfKernel_minAmpIndices;
+int    largeAmpIndices = 0;
+double minAmp_ConvolutionNorm(double array[]);
+
+
+
+double wfKernel_minAmp;
+
+double Wfzeropoint;
+double convolution_modkmax;
+int    subVol1, subVol2, subVol3, subVolCount;
+
+double* flatCov;

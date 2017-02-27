@@ -85,9 +85,22 @@ int linearGrowthRate(){
     // arbitrary normalisation for growth factor. 
     growthfactor_today        = yFinalArray[1];
     */
-    
-    approx_growthfactor_today = exp(qromb(&f_Om_545, -9.5, 0.0));
-    
+
+    gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
+
+    double error, result;
+
+    double alpha = 1.0;
+
+    gsl_function F;
+
+    F.function = &f_Om_545;
+
+    gsl_integration_qags(&F, -9.5, 0.0, 0, 1e-7, 1000, w, &result, &error);
+
+    // approx_growthfactor_today = exp(qromb(&f_Om_545, -9.5, 0.0));
+    approx_growthfactor_today = exp(result);    
+
     // printf("\n\nLinear growth factor. \n");
     
     for(k=151; k<linearGrowth_nPoints; k++){ 
@@ -97,17 +110,23 @@ int linearGrowthRate(){
     
         // linear_growthfactor[k]             = yFinalArray[1]/growthfactor_today;
         
-        approx2linear_growthfactor[k]         = qromb(&f_Om_545, -9.5, lnAarray[k]);
+        // approx2linear_growthfactor[k]         = qromb(&f_Om_545, -9.5, lnAarray[k]);
+        // approx2linear_growthfactor[k]         = exp(approx2linear_growthfactor[k])/approx_growthfactor_today;
         
-        approx2linear_growthfactor[k]         = exp(approx2linear_growthfactor[k])/approx_growthfactor_today;
-        
-        // printf("%d \t %.4e \t %.4e \t %.4e\n", k, exp(lnAarray[k]), f_Om_545(lnAarray[k]), approx2linear_growthfactor[k]);
-        
+	gsl_integration_qags(&F, -9.5, lnAarray[k], 0, 1e-7, 1000, w, &result, &error);
+
+        approx2linear_growthfactor[k]         = exp(result)/approx_growthfactor_today;
+
+        // printf("%d \t %.4e \t %.4e \t %.4e\n", k, 1./exp(lnAarray[k]) - 1., f_Om_545(lnAarray[k]), approx2linear_growthfactor[k]);        
         // printf("%.4e \t %.4e \t %.4e \t %.4e \n", lnAarray[k], AgeInterp(lnAarray[k]), linear_growthfactor[k], approx2linear_growthfactor[k]);
     }
     
     spline(lnAarray, approx2linear_growthfactor, linearGrowth_nPoints, 1.0e31, 1.0e31, SplineParams_ofgrowthfactor);
     
+    // gsl_integration_qags(&F, -9.5, -log(1.325), 0, 1e-7, 1000, w, &result, &error);
+
+    // printf("\n\n%.4e \t %.4e \n", 0.325, exp(result)/approx_growthfactor_today);
+
     // Runge-Kutta driver with adaptive stepsize control.  Integrate starting values ystart[1..nvar] from x1 to x2 with accuracy eps, storing intermediate
     // results in global variables.  h1 should be set as a guessed first stepsize, hmin as the minimum allowed stepsize(can be zero). On output nok and nbad
     // are the number of good and bad(but retried and fixed) steps taken, and ystart is replaced by values at the end of the integration interval. derivs is 

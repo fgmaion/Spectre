@@ -97,16 +97,25 @@ int formPkCube(){
                 //    PkCube[Index]               *= 3.*pow(y, -3.)*(sin(y) - y*cos(y));
                 //}    
                 
-                // PkCube[Index]                  *= 1. + 0.5*pow(mu, 2.);
+                // PkCube[Index]                     *= 1. + 0.5*pow(mu, 2.);
                 
-                PkCube[Index]                     *= pow(app_sigma8, -2.); 
+                // COMMENTED: 19 Nov  PkCube[Index]                     *= pow(app_sigma8, -2.); 
                 
-                PkCube[Index]                     *= pow(   bsigma8,  2.);
+                // COMMENTED: 19 Nov  PkCube[Index]                     *= pow(   bsigma8,  2.);
                 
                 // PkCube[Index]                     *= pow(1. + (fsigma8/bsigma8)*mu*mu, 2.);
                 
+                
+                // ADDED: 19 Nov
+                // PkCube[Index]                     *= pow(1. + 0.5*mu*mu, 2.);
+                
+                // ADDED: 19 Nov
+                // PkCube[Index]                     /= 1. + 0.5*pow(kmodulus*mu*2., 2.);
+                
+                PkCube[Index]                       *= (1. + LegendrePolynomials(mu, 2));
+                
                 // Lorentzian factor for non-linear redshift space distortions. 
-                // PkCube[Index]                  /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
+                // PkCube[Index]                     /= 1. + 0.5*pow(kmodulus*mu*velDispersion, 2.);
                 
                 
                 // WindowFunc                         = 1.;
@@ -120,8 +129,8 @@ int formPkCube(){
                 // if(k_z != 0.){
 		        //    WindowFunc                    *= sin(pi*k_z*0.5/NyquistWaveNumber)/(pi*k_z*0.5/NyquistWaveNumber);}		      
 	        
-	            // PkCube[Index]                     *= pow(WindowFunc, 2.);
-	        	// PkCube[Index]                     *= pow(WindowFunc, 2.);
+	            // PkCube[Index]                    *= pow(WindowFunc, 2.);
+	        	// PkCube[Index]                    *= pow(WindowFunc, 2.);
                 
                 // Gaussian factor for non-linear redshift space distortion.
                 // PkCube[Index]                  *= exp(-kmodulus*kmodulus*mu*mu*velDispersion*velDispersion);
@@ -299,3 +308,4 @@ int ClippedMultipole(){
 
     return 0;
 }*/
+

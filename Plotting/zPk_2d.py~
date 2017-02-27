@@ -1,0 +1,22 @@
+import scipy.interpolate
+from   matplotlib.colors import LogNorm
+
+data   = np.loadtxt("/disk1/mjw/HOD_MockRun/Data/ClippedPk/zSpace/2Dpk/2D_zSpacePk.dat")
+
+perpk  = data[:,0]
+losk   = data[:,1] 
+z2Pk   = data[:,2]
+
+perpinterp, losinterp = np.linspace(perpk.min(), perpk.max(), 100), np.linspace(losk.min(), losk.max(), 100)
+
+perpinterp, losinterp = np.meshgrid(perpinterp, losinterp)
+
+rbf                   = scipy.interpolate.Rbf(perpk, losk, z2Pk, function='linear')
+
+interpz2Pk            = rbf(perpinterp, losinterp)
+
+plt.imshow(interpz2Pk, vmin=interpz2Pk.min(), vmax=interpz2Pk.max(), origin='lower', extent=[pepk.min(), perpk.max(), losk.min(), losk.max()])
+
+plt.colorbar()
+
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/z2Pk/kaiserModel.pdf')

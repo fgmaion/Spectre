@@ -1,18 +1,18 @@
 int Gaussianfilter(double array[], int len, double Interval, double sigma){
-    int       newlen;
-    int   kernelSize;
+    int        newlen;
+    int    kernelSize;
   
     double        Sum;
     double Norm = 0.0;
 
     double* NewArray;
 
-    kernelSize = (int) ceil(len/8);
+    kernelSize  = (int) ceil(4.*sigma/Interval); // (int) ceil(len/8);
 
-    newlen     = len + 2*kernelSize;
+    newlen      = len + 2*kernelSize;
 
 
-    NewArray   =  (double *) malloc(newlen*sizeof(*NewArray));
+    NewArray    =  (double *) malloc(newlen*sizeof(*NewArray));
 
 
     for(j=0; j<newlen; j++) NewArray[j] = 0.0;
@@ -35,90 +35,101 @@ int Gaussianfilter(double array[], int len, double Interval, double sigma){
     return 0;
 }
 
-/*
-int NormedGaussianfilter(float (*transformArray)(float, int), float (*inversetransform)(float, int), float array[], float xarray[], int len, double Interval, float sigma, double externNorm, float output[]){
 
-    float Interim[len];
-  
-    double InterimNorm = 0.0;
-    
-    for(j=0; j<len; j++)  Interim[j]   = (*transformArray)(array[j], j);
-    
-    Gaussianfilter(Interim, xarray, len,  Interval, sigma);
-    
-    for(j=0; j<len; j++)  Interim[j]   = (*inversetransform)(Interim[j], j);
-      
-    for(j=0; j<len; j++)  InterimNorm += (double) Interim[j];
-    
-    for(j=0; j<len; j++)  output[j]    = (externNorm/InterimNorm)*Interim[j];
+int test_Gaussianfilter(){
+  double test[100]; 
 
-    return 0;
-}*/
+  prep_nbar();
+
+  printf("\n\nChecking divisible by 8, len(chibins): %d", chibin_no);
+
+  for(j=0; j<100; j++)  test[j] = 0.0;
+
+  // Dirac delta. 
+  test[50] = 1.0;
+
+  Gaussianfilter(test, 100, 1., 10.);
+
+  sprintf(filepath, "%s/W1_Spectro_V7_2/Gaussian_filterCheck.dat", root_dir);
+
+  output = fopen(filepath, "w");
+
+  for(j=0; j<100; j++)  fprintf(output, "\n%.4lf \t %.4lf", j*1., test[j]);
+
+  return 0;
+}
 
 
-int reflect_up(double chi, int j, int Index){
+int reflect_up(double maxr, int j, int Index){
     double dist, reflected_chi, vol_factor; 
     
     int rIndex;
     
-    dist            = hiChi - chi;
+    dist            = maxr - rDist[j];
 
-    reflected_chi   = chi + 2.*dist;
+    reflected_chi   = rDist[j] + 2.*dist;
     
-    vol_factor      = pow(chi/reflected_chi, 2.);
+    vol_factor      = pow(reflected_chi/rDist[j], 2.);
 
     Index           = (int) floor(reflected_chi/chi_interval);
             
-    chibins[Index] += vol_factor*reflected_chi/sampling[j];
+    // chibins[Index] += vol_factor*reflected_chi/sampling[j];
             
-    Nchi[Index]    += vol_factor*1./sampling[j]; 
+    Nchi[Index]    += vol_factor*clip_galweight[j]/sampling[j]; 
 
     return 0;
 }
 
-
-int reflect_down(double chi, int j, int Index){
+int reflect_down(double minr, int j, int Index){
     double dist, reflected_chi, vol_factor; 
     
     int rIndex;
-    
-    dist            = chi - loChi;
 
-    reflected_chi   = chi - 2.*dist;
+    dist            = rDist[j] - minr;
 
-    vol_factor      = pow(reflected_chi/chi, 2.);
+    reflected_chi   = rDist[j] - 2.*dist;
+
+    // Expected number of galaxies scales with volume. 
+    vol_factor      = pow(reflected_chi/rDist[j], 2.);
 
     rIndex          = (int) floor(reflected_chi/chi_interval);
             
-    chibins[rIndex] += vol_factor*reflected_chi/sampling[j];
+    // chibins[rIndex] += vol_factor*reflected_chi/sampling[j];
             
-    Nchi[rIndex]    += vol_factor*1./sampling[j]; 
+    Nchi[rIndex]    += vol_factor*clip_galweight[j]/sampling[j]; 
 
     return 0;
 }
 
 
 int smoothed_nbar_calc(double kernel_width, int reflect){    
-    // Equal intervals in comoving distance, for both W1 and W4 fields.  
+    // equal intervals in comoving distance, for both W1 and W4 fields.  
     prep_nbar();
     
-    double chi;
+    double  chi, norm = 0.0;
+
+    double minr;
+    double maxr;
 
     int global_fieldFlag;
 
     // Store initial fieldFlag. 
     global_fieldFlag = fieldFlag;
-
+    
     // Two field average.
-    for(ii=1; ii<5; ii=ii+3){
+    for(ii=1; ii<5; ii=ii+10){ // fix to 3 for joint-field
       fieldFlag = ii;
 
       // analysis on **mock** catalogues.                                                                            
       if(data_mock_flag == 0){
-	    //** Nagoya v6. (v7.) mocks **//                                                                      
-	    if(loopCount<10)       sprintf(filepath, "%s/mocks_W%d_v8.0_500/mock_00%d_spec_Nagoya_v6_Samhain.dat", vipersHOD_dir, fieldFlag, loopCount);
-	    else if(loopCount<100) sprintf(filepath, "%s/mocks_W%d_v8.0_500/mock_0%d_spec_Nagoya_v6_Samhain.dat",  vipersHOD_dir, fieldFlag, loopCount);
-	    else                   sprintf(filepath, "%s/mocks_W%d_v8.0_500/mock_%d_spec_Nagoya_v6_Samhain.dat",   vipersHOD_dir, fieldFlag, loopCount);
+	    // Nagoya v6. (v7.) mocks //                                                                      
+	    // if(loopCount<10)       sprintf(filepath, "%s/mocks_W%d_v8.0_500/mock_00%d_spec_Nagoya_v6_Samhain.dat", vipersHOD_dir, fieldFlag, loopCount);
+	    // else if(loopCount<100) sprintf(filepath, "%s/mocks_W%d_v8.0_500/mock_0%d_spec_Nagoya_v6_Samhain.dat",  vipersHOD_dir, fieldFlag, loopCount);
+	    // else                   sprintf(filepath, "%s/mocks_W%d_v8.0_500/mock_%d_spec_Nagoya_v6_Samhain.dat",   vipersHOD_dir, fieldFlag, loopCount);
+
+            if(loopCount<10)        sprintf(filepath, "%s/mocks_v1.7/W%d/mock_00%d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, fieldFlag, loopCount);
+	    else if(loopCount<100)  sprintf(filepath, "%s/mocks_v1.7/W%d/mock_0%d_VAC_Nagoya_v6_Samhain.dat",   vipersHOD_dir, fieldFlag, loopCount);
+	    else                    sprintf(filepath, "%s/mocks_v1.7/W%d/mock_%d_VAC_Nagoya_v6_Samhain.dat",    vipersHOD_dir, fieldFlag, loopCount);
     
 	    CatalogueInput_500s(filepath);
       
@@ -128,56 +139,100 @@ int smoothed_nbar_calc(double kernel_width, int reflect){
 	    // load sampling according to local TSR.                                                                       
 	    spec_weights();
 
-        assignAcceptance();
-      }
+	    // clipping weights.
+	    if(appliedClippingThreshold < 1000.)  load_clippingweights();
 
-      // analysis on **data** catalogues.                                                                                   
-      if(data_mock_flag == 1){
-  	    // W1 catalogue.
-	    sprintf(filepath, "%s/W1_Spectro_V7_0/W%d_SPECTRO_V7_0.txt", root_dir, fieldFlag);
-    
-  	    DataInput(filepath);
-    
-	    spec_weights();
-	
-	    // Acceptance criteria to be applied: 
-	    //   i) Redshift cut
-	    //  ii) zFlag cut, 2 to 9 inclusive. 
-	    // iii) photoMask == 1 
-	    assignAcceptance_WX_SPECTRO_V7();
+            // nbar over full redshift range, no z cut. 
+            assignAcceptance();
+      
+	    // cut at z boundaries, with reflection. 
+	    // if(reflect==1) assignAcceptance();
       }
       
+      // analysis on **data** catalogues.                                                                                   
+      if(data_mock_flag == 1){
+	    // Also assigns sampling: ESR = TSR x SSR.
+  	    DataInput();
+
+	    // Choice of redshift from zcos, zpec, zphot, zobs.                                                                                                                                                   
+            gal_z = &zobs[0];
+
+	    // do not impose redshift cuts just yet, obtain full n(z). Some redshifts >2, remove these objects.
+	    for(j=0; j<Vipers_Num; j++){  
+	      if((0.1<zobs[j]) && (zobs[j]<1.7)) Acceptanceflag[j] = true;	    
+	      
+	      else{Acceptanceflag[j] = false;}
+	    }
+      }
+      
+      for(j=0; j<Vipers_Num; j++)  rDist[j] = interp_comovingDistance(zobs[j]);
+
+      minr = AcceptedMin(rDist, Acceptanceflag, Vipers_Num);
+      maxr = AcceptedMax(rDist, Acceptanceflag, Vipers_Num);
+      
+      printf("\nStationary distances accepted: %le \t %le", minr, maxr);
+
       for(j=0; j<Vipers_Num; j++){
         if(Acceptanceflag[j] == true){
-            chi               = interp_comovingDistance(zobs[j]);
-	    
-            Index             = (int) floor(chi/chi_interval);
+            Index             = (int) floor(rDist[j]/chi_interval);
             
-            chibins[Index]   += chi/sampling[j];
+            Nchi[Index]      +=  clip_galweight[j]/sampling[j]; 
             
-            Nchi[Index]      +=  1./sampling[j]; 
-            
-            if((reflect==1) &&  (chi-loChi< 2.*kernel_width))   reflect_down(chi, j, Index);
-            
-            if((reflect==1) &&  (hiChi-chi< 2.*kernel_width))     reflect_up(chi, j, Index);
-	    }  
-	  }
+	    if((loChi <= rDist[j]) && (rDist[j] <= hiChi))  norm +=  clip_galweight[j]/sampling[j];
+
+            if((reflect == 1) &&  ((rDist[j] - minr) < kernel_width))  reflect_down(minr, j, Index);
+            if((reflect == 1) &&  ((maxr - rDist[j]) < kernel_width))    reflect_up(maxr, j, Index);
+	}  
+      }
     }
-    
-    for(j=0; j<chibin_no; j++){  
-        chibins[j]  /= Nchi[j];
-    
-        if(Nchi[j] == 0) chibins[j] = (j + 0.5)*chi_interval;
-    }
-    
+
+    // Filter counts. 
+    Gaussianfilter(Nchi, chibin_no, chi_interval, kernel_width);
+
     for(j=0; j<chibin_no; j++)  comovVol[j] = sqdegs2steradians(TotalW1W4area)*(pow((j+1)*chi_interval, 3.) - pow(j*chi_interval, 3.))/3.;
     
     for(j=0; j<chibin_no; j++)     nbar[j]  = Nchi[j]/comovVol[j]; 
 
-    Gaussianfilter(nbar, chibin_no, chi_interval, kernel_width);
+    // or filter <n>
+    // Gaussianfilter(nbar, chibin_no, chi_interval, kernel_width);
     
-    if(data_mock_flag == 0)  sprintf(filepath, "%s/W1_Nagoya_v6_mocks_work/smoothed_nbar/nbar_smoothed_reflected_%.1lf_Nagoya_v7_Samhain_mock_%d_twofield_avg.dat", root_dir, kernel_width, loopCount);
-    if(data_mock_flag == 1)  sprintf(filepath, "%s/W1_Spectro_V7_0/nbar_smoothed_reflected_%.1lf_%.2lf_%.2lf_Nagoya_v7_WX_SPECTRO_V7_twofield_avg.dat", root_dir, kernel_width, lo_MBlim, hi_MBlim);
+    // Remove reflected galaxies. 
+    for(j=0; j<chibin_no; j++){
+      if((reflect == 1) && (chibins[j] > maxr) || (chibins[j] < minr)){  
+	nbar[j] = 0.0;
+	
+	Nchi[j] = 0.0;
+      }
+    }
+
+    // assuming the surveyed volume is a fair sample -> \sum_g 1/ESR in the volume should be \int <n> d3x. Rescale <n> such that this is the case,                                                                                          
+    // this imposes the integral constraint. Calculate renormalisation, \int <n> dV = N_W1 + N_W4, ESR corrected.  1% correction. 
+    double result = 0.0;
+
+    for(j=0; j<chibin_no; j++){
+      // redshift limits.                                                                                                                                                                                                                   
+      if((chibins[j] >= loChi) && (chibins[j] <= hiChi)){
+        result += pow(chibins[j], 2.)*chi_interval*nbar[j];
+      }
+    }
+
+    result *= sqdegs2steradians(TotalW1W4area);
+
+    printf("\n\n<n> normalisation ratio: %.4lf", norm/result);
+
+    // renormalise.                                                                                                                                                                                                                         
+    for(j=0; j<chibin_no; j++)     nbar[j] *= norm/result;
+    
+    // if(data_mock_flag == 0)  sprintf(filepath, "%s/W1_Nagoya_v6_mocks_work/smoothed_nbar/nbar_smoothed_reflected_%.1lf_Nagoya_v7_Samhain_mock_%d_twofield_avg.dat", root_dir, kernel_width, loopCount);
+    // if(data_mock_flag == 1)  sprintf(filepath, "%s/W1_Spectro_V7_0/nbar_smoothed_reflected_%.1lf_%.2lf_%.2lf_Nagoya_v7_WX_SPECTRO_V7_twofield_avg.dat", root_dir, kernel_width, lo_MBlim, hi_MBlim);
+    
+    // if(data_mock_flag == 0)  sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/nbar_100_smoothedCounts/nbar_smooth_%.1lf_Nagoya_v7_Samhain_mock_%d_twofield_avg_v2.dat", root_dir, kernel_width, loopCount);
+    // if(data_mock_flag == 1)  sprintf(filepath, "%s/W1_Spectro_V7_2/data_v1.7/nbar_100_smoothedCounts/nbar_smooth_%.1lf_Nagoya_v7_Samhain_twofield_avg.dat", root_dir, kernel_width);
+    
+    if(data_mock_flag == 0)  sprintf(filepath, "%s/W1_Spectro_V7_3/mocks_v1.7/nbar_100_smoothedCounts/nbar_smooth_%.1lf_Nagoya_v7_Samhain_mock_%d_twofield_avg_clippedWeights.dat", root_dir, kernel_width, loopCount);
+    // if(data_mock_flag == 1)  sprintf(filepath, "%s/W1_Spectro_V7_3/data_v1.7/nbar_100_smoothedCounts/nbar_smooth_%.1lf_Nagoya_v7_Samhain_twofield_avg.dat", root_dir, kernel_width);
+
+    // printf("\n\n%s", filepath);
     
     output = fopen(filepath, "w");
     
@@ -187,47 +242,6 @@ int smoothed_nbar_calc(double kernel_width, int reflect){
 
     // Restore global field Flag.
     fieldFlag = global_fieldFlag;
-     
-    return 0;
-}
-
-
-double nbar_dV(double chi){
-    return pow(chi, 2.)*interp_nz(chi);
-}
-
-
-int prep_inverseCumulative_nbar(){
-    // Calculate cumulative distribution of nbar and splint it's inverse.
-    double                           norm;
-    
-    norm = qromb(&nbar_dV, 700., 2500.);
-    
-    for(i=0; i<100; i++){
-        chi_cumulative_nbar[i] = 1250. + i*(2500. - 700.)/100.;
-        
-        cumulative_nbar[i]     = qromb(&nbar_dV, 700., chi_cumulative_nbar[i]);
-        
-        cumulative_nbar[i]    /= norm;
-    }
-    
-    // for(i=0; i<58; i++)  printf("\n%e \t %e", chi_cumulative_nbar[i], cumulative_nbar[i]);
-    
-    spline(cumulative_nbar, chi_cumulative_nbar, 58, 1.0e31, 1.0e31, cumulative_nbar_2d);
-    
-    // printf("\n\n%e", inverse_cumulative_nbar(0.4));
     
     return 0;
-}
-
-
-double inverse_cumulative_nbar(double arg){
-    // if F is the cumulative distribution of nbar.
-    // return the inverse of F, for random generation.
-    
-    double result;
-
-    splint(cumulative_nbar, chi_cumulative_nbar, cumulative_nbar_2d,  58, arg, &result);
-
-    return result;
 }

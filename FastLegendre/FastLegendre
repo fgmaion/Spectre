@@ -1,0 +1,14 @@
+cc -c -O2 function.c -L/disk1/mjw/usr/lib/ -lgsl -lgslcblas -lm
+
+cc -c -O2 ggb_coeff_fft.c -L/disk1/mjw/usr/lib/ -lgsl -lgslcblas -lm
+cc -O2 call_ggb_inversion_fft.c -o call_ggb_inversion_fft ggb_inversion_fft.o -L/disk1/mjw/usr/lib/ -lgsl -lgslcblas -lm
+cc -c -O2 ggb_inversion_fft.c -L/disk1/mjw/usr/lib/ -lgsl -lgslcblas -lm
+cc -O2 call_ggb_inversion_no_fft.c -o call_ggb_inversion_no_fft ggb_inversion_no_fft.o -L/disk1/mjw/usr/lib/ -lgsl -lgslcblas -lm
+cc -c -O2 ggb_inversion_no_fft.c -L/disk1/mjw/usr/lib/ -lgsl -lgslcblas -lm
+
+g++ -O2 call_ggb_coeff_jacobi.cpp -o call_ggb_coeff_jacobi ggb_coeff_jacobi.o function.o -L/disk1/mjw/usr/lib/ -lgsl -lgslcblas -lm
+g++ -c -O2 ggb_coeff_jacobi.cpp -L/disk1/mjw/usr/lib/ -lgsl -lgslcblas -lm
+
+cc -O2 -o call_ggb_coeff_fft ggb_coeff_fft.o function.o -L/disk1/mjw/usr/lib/ -lgsl -lgslcblas -lm
+
+./call_ggb_coeff_fft

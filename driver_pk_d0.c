@@ -1,0 +1,156 @@
+#include "/home/mjw/Aux_functions/header.h"
+#include "/home/mjw/Aux_functions/Aux_functions.c"
+
+#include "header.h"
+#include "RngStream.h"
+#include "cosmology_planck2015.h"
+#include "comovDistRedshiftCalc.c"
+#include "AgeOftheUniverse.c"
+#include "linearGrowthRate.c"
+#include "Initialise.c"
+#include "stefanoBasis.c"
+#include "CoordinateCalc.c"
+#include "MultipoleCalc.c"
+#include "randGen.c"
+#include "load_mask.c"
+#include "Jenkins_fold.c"
+#include "max_gal.c"
+#include "assignAcceptance.c"
+#include "nbar.c"
+#include "invert_nbar.c"
+// #include "nbar_smooth.c"
+#include "fkp_weights.c"
+// #include "clipping_weights.c"
+#include "overdensity_calc.c"
+#include "CloudInCell.c"
+#include "FFTw.c"
+#include "GaussianFilter.c"
+#include "assignMemory.c"
+#include "freeMemory.c"
+
+
+int main(int argc, char **argv){  
+  data_mock_flag            =                   0;          // analysis of VIPERS data or mock catalogues.       
+  
+  fieldFlag                 =       atoi(argv[1]);
+  appliedClippingThreshold  =       atof(argv[2]);
+  lo_zlim                   =       atof(argv[3]);          // previously 0.6<z<0.9, 0.9<z<1.2
+  hi_zlim                   =       atof(argv[4]);
+  Jenkins_foldfactor        =       atof(argv[5]);          // Apply Jenkins folding to increase spatial resolution of mesh.  
+
+  clipping_smoothing_radius =                 2.0;
+
+  sprintf(root_dir,      "/home/mjw/HOD_MockRun");
+  sprintf(vipersHOD_dir, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2/mocks_v1.7/W%d", fieldFlag);
+  
+  if(fieldFlag == 1){
+    LowerRAlimit            =     30.175;                 // W1 catalogue. Nagoya v6 spectroscopic mask (& Samhain).   
+    UpperRAlimit            =     38.797;
+    CentreRA                =     34.492;                 // Stefano:  CentreRA                =    34.4519;
+
+    LowerDecLimit           =     -5.970;     
+    UpperDecLimit           =     -4.171;     
+    CentreDec               =     -5.091;                 // Stefano:  CentreDec               =     -5.07;
+  }
+    
+  else if(fieldFlag == 4){
+    LowerRAlimit            =    330.046;                 // W4 catalogue. Nagoya v6 & Samhain mask. parent boundary limits.     
+    UpperRAlimit            =    335.389;
+    CentreRA                =    332.638;
+  
+    LowerDecLimit           =      0.862;     
+    UpperDecLimit           =     2.3696;     
+    CentreDec               =      1.583; 
+  }
+  
+  W1area                    =     10.692;                 // (Nagoya v7 - overlapping Samhain area). Coverage of v7 & v6 identical.       
+  W4area                    =      5.155;                 // dec cut at -5.97 in the mocks.
+
+  TotalW1W4area             = W1area + W4area;       // Required for <n(z)> calculation.
+  
+  stefano_trans_x           =      +100.;
+  stefano_trans_y           =      +300.;
+  stefano_trans_z           =     -1500.;
+
+  if(1.0 < hi_zlim){  //%% Changed from 0.8 %%
+    stefano_trans_z -= 600.;     // Previously 600. Mpc for 0.9 < z < 1.2;
+  }
+  
+  chi_interval              =     16.00;                 // Comoving number density, n(z), measurement.
+  
+  if(lo_zlim > 0.8){                                    // Change for new 0.6 < z < 0.8 and 0.8 < z < 1.0 limits
+    nz_smoothRadius         =      50.0;
+  }
+
+  else{
+    nz_smoothRadius         =      100.; 
+  }
+
+  fkpPk                     =    8000.0;                 // [h^-1 Mpc]^3.
+  fft_size                  =       256;                 // Worker 46 works up to 1024. 
+  
+  modkMax                   =      4.00;                 // binned p(k) variables. 
+  muBinNumb                 =       100;
+  kbin_no                   =        40;                 // kbin_no = 129; // Stefano comparison. 
+
+  logk_min                  =      -2.0;
+  logk_max                  =      0.60;                 // k = 4 hMpc^{-1}.
+  
+  CatalogNumber             =       306;                 // Total number of HOD mocks.
+
+
+  double begin  = getRealTime();
+  
+  // fftw_init_threads();
+  
+  // fftw_plan_with_nthreads(omp_get_max_threads());     // Maximum number of threads to be used; use all openmp threads available.  
+  
+  // Main code. //  
+  Initialise();                                          // Initialise grid, fft params and random generation. 
+      
+  prep_x2c();                                            // Memory for overdensity, smooth_overdensity and H_k; either double or fftw_complex.  
+  
+  prep_pkRegression(0);                                  // last arg: ln k spacing is 0, linear is 1.  129 bins for linear + Stef. comp.
+
+  prep_CatalogueInput_500s();                            // Requires max. number of gals of ALL mocks analysed simultaneously to be hard coded in.  
+
+  prep_nbar();
+  
+  load_rands_radec(1.0);
+
+  prep_nosortMultipoleCalc();
+  
+  prep_r2c_modes();
+  /*
+  for(loopCount=1; loopCount<6; loopCount++){            
+    sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
+    
+    CatalogueInput_500s(); // mocks 1 to 153 are independent. 
+    
+    assignAcceptance();  
+    
+    spline_nbar(0);  // new <n(z)> for each mock. arg 1: bool for smoothed + reflected 2-field avg., arg 2: 'truth' i.e. mock avg.
+    
+    StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
+    
+    rand_newchi_newbasis();
+    
+    // set_clippingweights();
+    
+    alpha_calc();
+    
+    calc_fkpweights();  // normalisation of FKP weights set by random catalogue.
+    
+    calc_overdensity(); // Cloud-in-Cell is a bottleneck. 
+    
+    PkCalc(); 
+  }
+  */
+  double   end = getRealTime();
+  
+  printf("\n\nWall time: %.6lf", end - begin);
+  
+  printf("\n\n");
+  
+  return 0; 
+}

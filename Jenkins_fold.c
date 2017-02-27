@@ -36,14 +36,13 @@ int Jenkins_foldCat(){
     JenkinsFold(zCoor, Vipers_Num, 0);
     JenkinsFold(yCoor, Vipers_Num, 1);
     JenkinsFold(xCoor, Vipers_Num, 2);  
-    
-    /*
+        
     printf("\n\nJenkins folded, Stefano basis, galaxy co-ordinates.");
     
     printf("\nx: %.1lf \t %.1lf h^-1 Mpc", AcceptedMin(xCoor, Acceptanceflag, Vipers_Num), AcceptedMax(xCoor, Acceptanceflag, Vipers_Num));
     printf("\ny: %.1lf \t %.1lf h^-1 Mpc", AcceptedMin(yCoor, Acceptanceflag, Vipers_Num), AcceptedMax(yCoor, Acceptanceflag, Vipers_Num));
     printf("\nz: %.1lf \t %.1lf h^-1 Mpc", AcceptedMin(zCoor, Acceptanceflag, Vipers_Num), AcceptedMax(zCoor, Acceptanceflag, Vipers_Num));
-    */    
+        
     return 0;
 }
 

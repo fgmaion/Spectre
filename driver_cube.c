@@ -71,7 +71,7 @@
 #include "Scripts/matter_pk.c"
 #include "Scripts/Clipped_zSpace.c"
 
-// #include "Scripts/ArtificialWf.c"
+#include "Scripts/ArtificialWf.c"
 // #include "Scripts/BootStrap.c"
 
 // #include "Scripts/correlation_fns.c"
@@ -116,8 +116,9 @@
 #include "Scripts/libkdpoly.h"
 #include "Scripts/libkdpoly.c"
 #include "Scripts/spec_weights.c"
-#include "Scripts/fkp.c"
-
+#include "Scripts/clipping_weights.c"
+#include "Scripts/fkp_weights.c"
+#include "Scripts/tidal_tensor.c"
 // #include "tinker.c"
 
 #include "Scripts/freeMemory.c"
@@ -125,7 +126,6 @@
 int main(int argc, char **argv){
   // char* s = getenv("ROOTDIR");
   sprintf(root_dir,      "/disk1/mjw/HOD_MockRun");
-
   sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_HOD_Mocks");
   // sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_ValueAddedHOD");
 
@@ -243,7 +243,7 @@ int main(int argc, char **argv){
   chi_interval          =     16.00;
 
   // Apply Jenkins folding to increase spatial resolution of mesh. 
-  Jenkins_foldfactor    =       1.0;
+  Jenkins_foldfactor    =       2.0;
 
   // FKP P(k) of interest.
   fkpPk                 =    3000.0;            // [h^-1 Mpc]^3.
@@ -260,8 +260,8 @@ int main(int argc, char **argv){
   //  Apodise the window fn. to supress ringing of the window ("Gibb's phenomenon").
   GibbsSkinDepth            =         5.0;
     
-  // Remember to smooth.
-  appliedClippingThreshold  =         3.0;    
+  // remember to smooth.
+  appliedClippingThreshold  =      1000.0;    
   
   clipping_smoothing_radius =         2.0;
 
@@ -294,6 +294,8 @@ int main(int argc, char **argv){
   gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
 
   
+  double fkp_norm;
+  
   comovDistReshiftCalc();
   
   Jenkins_foldEmbeddingVol();
@@ -301,34 +303,59 @@ int main(int argc, char **argv){
   EvaluateGridParameters();
   
   
-  cube_rands();
+  // assigns memory for overdensity grid.
+  prep_grid();
   
-  Jenkins_foldRand();
+  prep_mask(); 
+  
+  prep_fftw();
+  
+  prep_pkRegression(-2., log10(modkMax), kbin_no);
     
-
-  CoordinateCalcCube("/disk1/mjw/HOD_MockRun/Data/HODCube/cube_gal_-20.0.dat");
-
+  
+  // CoordinateCalcCube("/disk1/mjw/HOD_MockRun/Data/HODCube/cube_gal_shuf_-20.0.dat");
+  // CoordinateCalcCube("/disk1/mjw/HOD_MockRun/Data/HODCube/zcube_zvel_gal_-20.0.dat");
+  
+  // calculated in real space
+  CoordinateCalcCube("/disk1/mjw/HOD_MockRun/Data/500s/hod_cube/galaxies_infilament.dat");
+  
+  // randoms_Cube(Vipers_Num*10);
+  randoms_inenvironment("/disk1/mjw/HOD_MockRun/Data/500s/hod_cube/randoms_infilament.dat");
+  
   assignAcceptanceCube();
   
+  Jenkins_foldRand();
+  
   Jenkins_foldCat();
+  
+  pt2nz = &cube_nbar;
   
   // clipped lognormal model investigation.
   // Gauss_varlognormal();
   
+  // calc_clippingweights();
   
-  calc_clippingweights();
+  // load_clippingweights();
   
-  load_clippingweights();
+  for(j=0; j<Vipers_Num; j++) clip_galweight[j] = 1.;
   
-  calcCube_overdensity();
+  // normalisation of FKP weights set by random catalogue. 
+  fkp_norm = calc_fkpweights();
   
-  gridup_randsmask();
+  // Apply this normalisation to gal. weights. 
+  set_cube_fkpweights(fkp_norm);
+  
+  // calc_delta();
+  
+  // tidal_tensor();
+  
+  calc_overdensity();
   
   // Calculate the galaxy contribution to the shotnoise, galaxies
   // are weighted by gal_weights.  assumes weights are density independent.  
   // weighted_shotnoise();
   
-  cube_PkCalc();
+  PkCalc();
   
   /*
   // AgeOftheUniverse.c

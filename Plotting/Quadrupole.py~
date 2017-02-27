@@ -1,0 +1,1 @@
+Quadrupole = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/ClippedPk/zSpace/2Dpk/Observed_2Multipole_VIPERSparent_Mock001_GaussSmoothNz_100.0_SkinDepth_5.0_001.dat')

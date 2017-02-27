@@ -31,9 +31,11 @@ int CoordinateCalcCube(char filepath[]){
     yCoor          =  (double *)  realloc(yCoor,          Vipers_Num*sizeof(*yCoor));
     zCoor          =  (double *)  realloc(zCoor,          Vipers_Num*sizeof(*zCoor));
     
-    sampling       =  (double *)  realloc(sampling, Vipers_Num*sizeof(*sampling));
+    sampling       =  (double *)  realloc(sampling,       Vipers_Num*sizeof(*sampling));
     
     Acceptanceflag =  (bool  *)   realloc(Acceptanceflag, Vipers_Num*sizeof(*Acceptanceflag));
+    fkp_galweight  =  (double *)  realloc(fkp_galweight,  Vipers_Num*sizeof(*fkp_galweight));
+    clip_galweight =  (double *)  realloc(clip_galweight, Vipers_Num*sizeof(*clip_galweight));
     
     for(j=0; j<Vipers_Num; j++)   fscanf(inputfile, "%lf \t %lf \t %lf \n", &xCoor[j], &yCoor[j], &zCoor[j]);
     
@@ -55,6 +57,9 @@ int CoordinateCalcCube(char filepath[]){
     accepted_gals = 0;
     
     for(j=0; j<Vipers_Num; j++){
+             sampling[j] = 1.;
+        fkp_galweight[j] = 1.;
+        
         if(Acceptanceflag[j] == true){
             accepted_gals += 1;
         }

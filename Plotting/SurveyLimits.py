@@ -1,0 +1,60 @@
+'''
+import matplotlib.pyplot as plt
+from   mpl_toolkits.mplot3d import Axes3D
+
+fig    = plt.figure()
+
+ax     = fig.add_subplot(111, projection='3d')
+'''
+# data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/ra_decCells/VIPERSsurvey_xyz_pad.dat')
+# accepted = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/ra_decCells/VIPERSparent_GaussSmoothNz_100.0_SkinDepth_5.0_VolLim_22.00_xyz_accepted.dat')
+# Axes3D.scatter(ax, data[:,0], data[:,1], data[:,2], zdir='z', s=10, c=data[:,3])
+
+'''
+pl.scatter(data[:,0], data[:,1], s=1, color='g')
+
+pl.scatter(accepted[:,0], accepted[:,1], s=1, color='b')
+pl.xlabel('x')
+pl.ylabel('y')
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/VIPERS_Windowfn_RealSpace_xy.jpg')
+
+pl.clf()
+pl.scatter(data[:,0], data[:,2], s=1, color='g')
+pl.scatter(accepted[:,0], accepted[:,2], s=1, color='b')
+pl.xlabel('x')
+pl.ylabel('z')
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/VIPERS_Windowfn_RealSpace_xz.jpg')
+
+pl.clf()
+pl.scatter(data[:,1], data[:,2], s=1, color='g')
+pl.scatter(accepted[:,1], accepted[:,2], s=1, color='b')
+pl.xlabel('y')
+pl.ylabel('z')
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/VIPERS_Windowfn_RealSpace_yz.jpg')
+'''
+pl.clf()
+
+data     = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/ra_decCells/VIPERSparent_StefanoBasis_Cic_GaussSmoothNz_50.0_SkinDepth_5.0_VolLim_22.00_Mesh_3.00_xyz_accepted.dat')
+# original = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/ra_decCells/OriginalCoordinates.dat')
+
+# pl.scatter(original[::10, 0], original[::10,1], c='r')
+pl.scatter(data[::10,0], data[::10,1], c='b')
+pl.xlabel('x')
+pl.ylabel('y')
+pl.xlim(0, 800)
+pl.ylim(0, 800)
+
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/StefanoCoordinates_xy.pdf')
+
+pl.clf()
+
+pl.scatter(data[::10,1], data[::10,2], c='b')
+pl.xlabel('y')
+pl.ylabel('z')
+pl.xlim(0, 800)
+pl.ylim(0, 800)
+
+pl.xlabel('y')
+pl.ylabel('z')
+
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/StefanoCoordinates_yz.pdf')

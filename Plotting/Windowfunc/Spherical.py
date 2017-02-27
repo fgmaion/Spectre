@@ -1,5 +1,3 @@
-data         = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSpherical/midK_W2k_VIPERSparent.dat')
-
 xSlice       = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/VIPERSparent_xSlice.dat')
 ySlice       = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/VIPERSparent_ySlice.dat')
 zSlice       = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSlices/VIPERSparent_zSlice.dat')

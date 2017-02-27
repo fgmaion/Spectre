@@ -192,7 +192,7 @@ int main(int argc, char **argv){
   // UpperDecLimit         =      -4.17;     
   // CentreDec             =      -4.77;     
 
-  fieldFlag             =          1;
+  fieldFlag             =          4;
   
   // W1 catalogue. new 500s v8. mocks. Nagoya v6 spectroscopic mask (& Samhain).
   LowerRAlimit          =      30.17; 
@@ -337,12 +337,12 @@ int main(int argc, char **argv){
   // randoms_nbar_calc();
   
   // In side loop over loop count when using nbar as estimated for each mock. 
-  spline_nbar(data_mock_flag, 0);
+  spline_nbar(data_mock_flag, 1, 0);
   
   // sampling: 0.001 for hi res measurement, ? for lo res, 1.00 for creating mask for P(k), free rands for P(k).
   load_homogeneous_rands_window(1,  1.0, data_mock_flag);
   // load_randStefanoCoordinates(1, 1.0);
-  
+  /*
   // calculate multipole moments of the window. 
   // randWindow_pairCount();
   
@@ -430,7 +430,7 @@ int main(int argc, char **argv){
   // printf("\n %d", atoi(argv[1]));
   
   // clipped_lnnorm_pkCalc();
-  
+  /*
   // assigns memory for overdensity grid.
   prep_grid();
   
@@ -441,7 +441,7 @@ int main(int argc, char **argv){
   prep_pkRegression(-2., log10(modkMax), kbin_no);
   
   int start = 295;
-  
+  */
   for(loopCount=start; loopCount<start+307; loopCount++){
     double fkp_norm;
   

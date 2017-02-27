@@ -4,7 +4,7 @@ int grow_randTree(){
     randTree = buildTree(point_rands,  rand_number);
 
     randTree->label = 0;
-
+    
     return 0;
 }
 
@@ -24,42 +24,40 @@ int grow_galTree(){
 }
 
 
-int CountPairs_rMu(double **C0, double **C2, double **C4, double **r, double **mu, Node* firstTree, Node* secndTree, int sameTree){
-  findSuitableNodePairs_bruteforcePairCount(C0, C2, C4, r, mu, firstTree, secndTree, sameTree);
+int CountPairs_rMu(double **C0, double **C2, double **C4, double **C6, double **C8, double **C10, double **r, double **mu, Node* firstTree, Node* secndTree, int sameTree){
+  findSuitableNodePairs_bruteforcePairCount(C0, C2, C4, C6, C8, C10, r, mu, firstTree, secndTree, sameTree);
   
-  double mu0weighted_paircount, mu2weighted_paircount, mu4weighted_paircount;
+  double mu0weighted_paircount, mu2weighted_paircount, mu4weighted_paircount, mu6weighted_paircount, mu8weighted_paircount, mu10weighted_paircount;
   
   for(i=0; i<nlogbins; i++){
     for(j=0; j<nlinbins; j++){
         if(C0[i][j] > 0.){
-            mu0weighted_paircount   = C0[i][j];
-            mu2weighted_paircount   = C2[i][j];
-            mu4weighted_paircount   = C4[i][j];
+            mu0weighted_paircount   =  C0[i][j];
+            mu2weighted_paircount   =  C2[i][j];
+            mu4weighted_paircount   =  C4[i][j];
+            mu6weighted_paircount   =  C6[i][j];
+            mu8weighted_paircount   =  C8[i][j];
+            mu10weighted_paircount  = C10[i][j];
     
-            C2[i][j]  =  3.*mu2weighted_paircount - mu0weighted_paircount;
-            C4[i][j]  = 35.*mu4weighted_paircount - 30.*mu2weighted_paircount + 3.*mu0weighted_paircount;
-            
+            C2[i][j]  =                                                                                               3.*mu2weighted_paircount -      mu0weighted_paircount;
+            C4[i][j]  =                                                                35.*mu4weighted_paircount -   30.*mu2weighted_paircount +   3.*mu0weighted_paircount;
+            C6[i][j]  =                                 231.*mu6weighted_paircount -  315.*mu4weighted_paircount +  105.*mu2weighted_paircount -   5.*mu0weighted_paircount;
+            C8[i][j]  = 6435.*mu8weighted_paircount - 12012.*mu6weighted_paircount + 6930.*mu4weighted_paircount - 1260.*mu2weighted_paircount +  35.*mu0weighted_paircount;
+                                    
             // l=2, (2l+1) L_2
-            C2[i][j] *=   5.*0.5;
+            C2[i][j] *= 5.*0.5;
             
             // l=4, (2l+1) L_4
             C4[i][j] *= 9.*0.125;
             
-            // printf("\n%e \t %e", C2[i][j], C4[i][j]);
+            // l=6, (2l+1) L_6
+            C6[i][j] *= 13./16.;
+            
+            // l=8, (2l+1) L_8
+            C8[i][j] *= 17./128.;
         }
-        
-       //  r[i][j] /= C0[i][j];
-        
-       // mu[i][j] /= C0[i][j];
     }
   }
-  
-  // sumPairs(C0);
-
-  // printf("\n\nDistinct pair count: %d", Distinct_pairCount);
-    
-  // printf("\n\nSeparations, min: %e, max: %e", pow(10., min_pairSeparation), pow(10., max_pairSeparation)); 
-  // printf("\nmu,          min: %e, max: %e",   min_mu,  max_mu); 
 
   return 0;
 }
@@ -164,7 +162,7 @@ int print_nodeLimits(Node *node){
 }
 
 
-int findSuitableNodePairs_bruteforcePairCount(double **C0, double** C2, double** C4, double **r, double **mu, Node *node1, Node *node2, int sameTree){
+int findSuitableNodePairs_bruteforcePairCount(double **C0, double** C2, double** C4, double **C6, double **C8, double **C10, double **r, double **mu, Node *node1, Node *node2, int sameTree){
     if((node1->label%50 == 0) && (node2->label%250 == 0))  printf("\n%d \t %d", node1->label, node2->label);
     
     // Given two nodes, is their maximum displacement smaller than the smallest bin? is their minimum displacement larger than the largest bin -> don't bother counting pairs. 
@@ -178,21 +176,21 @@ int findSuitableNodePairs_bruteforcePairCount(double **C0, double** C2, double**
     if((sameTree == 1) && (node1->Children == 0) && (node2->Children == 0) && (node1->label<node2->label)) return 0;
     
     // Both node 1 and node 2 are leaves, their sub-divisons contain less than 200 particles. Brute force count pairs between node 1 and node 2.        
-    if((node1->Children == 0) && (node2->Children == 0))  return bruteforceCountpairs_betweenChildren(C0, C2, C4, r, mu, node1, node2, sameTree);
+    if((node1->Children == 0) && (node2->Children == 0))  return bruteforceCountpairs_betweenChildren(C0, C2, C4, C6, C8, C10, r, mu, node1, node2, sameTree);
     
     else{
 	    if((node1->Children == 0)){
 	      // node 1 is a leaf, node 2 is not. Sub-divide node 2 and reevaluate for its children. 
-	      findSuitableNodePairs_bruteforcePairCount(C0, C2, C4, r, mu, node1,  node2->Left,  sameTree);
-	      findSuitableNodePairs_bruteforcePairCount(C0, C2, C4, r, mu, node1,  node2->Right, sameTree);
+	      findSuitableNodePairs_bruteforcePairCount(C0, C2, C4, C6, C8, C10, r, mu, node1,  node2->Left,  sameTree);
+	      findSuitableNodePairs_bruteforcePairCount(C0, C2, C4, C6, C8, C10, r, mu, node1,  node2->Right, sameTree);
 	        
 	      return 0;
 	    } 
 	
 	    else{
 	      // last scenario.. node 2 might still be a leaf, node 1 is not. Sub-divide node 1 and reevaluate for its children. 
-	      findSuitableNodePairs_bruteforcePairCount(C0, C2, C4, r, mu, node1->Left,  node2, sameTree);
-	      findSuitableNodePairs_bruteforcePairCount(C0, C2, C4, r, mu, node1->Right, node2, sameTree);
+	      findSuitableNodePairs_bruteforcePairCount(C0, C2, C4, C6, C8, C10, r, mu, node1->Left,  node2, sameTree);
+	      findSuitableNodePairs_bruteforcePairCount(C0, C2, C4, C6, C8, C10, r, mu, node1->Right, node2, sameTree);
 	    
 	      return 0;
 	    }
@@ -202,11 +200,12 @@ int findSuitableNodePairs_bruteforcePairCount(double **C0, double** C2, double**
 }
 
 
-int bruteforceCountpairs_betweenChildren(double **C0, double **C2, double **C4, double **r, double **mu, Node *node1, Node *node2, int sameTree){   
-    double log10_r;
-    double  weight;
-    double pair_mu;
+int bruteforceCountpairs_betweenChildren(double **C0, double **C2, double **C4, double **C6, double **C8, double **C10, double **r, double **mu, Node *node1, Node *node2, int sameTree){   
+    double  log10_r;
+    double   weight;
+    double  pair_mu;
     double pair_mu2;
+    double pair_mu4;
  
     // Only called for children.      
     if((sameTree == 1) && (node1->label == node2->label)){
@@ -234,24 +233,29 @@ int bruteforceCountpairs_betweenChildren(double **C0, double **C2, double **C4, 
        
                     if((indi<nlogbins) && (indj<nlinbins) && (indi>=0) && (indj >=0)){                      
                         pair_mu2         = pair_mu*pair_mu;
+                        pair_mu4         = pair_mu2*pair_mu2;
                     
                     	weight           = node1->particle[ii].weight*node2->particle[jj].weight;
                     
                         // C0[indi][indj]  += 1.0;
-                        C0[indi][indj] += weight;
+                        C0[indi][indj]  += weight;
                         
                         //----------------------------------------------------------------------//
                         
                         // l=2, (2l+1) L_2
                         // C2[indi][indj]  += (3.*pair_mu2 - 1.);
                         // C2[indi][indj]  += pair_mu2;
-                        C2[indi][indj] += pair_mu2*weight;
+                        C2[indi][indj]  += pair_mu2*weight;
                     
                         //----------------------------------------------------------------------//
                                            // l=4, (2l+1) L_4
                         // C4[indi][indj]  += (35.*pair_mu2*pair_mu2 - 30.*pair_mu2 + 3.);
                         // C4[indi][indj]  += pair_mu2*pair_mu2;
-                        C4[indi][indj] += pair_mu2*pair_mu2*weight;
+                        C4[indi][indj]  += pair_mu4*weight;
+                    
+                        C6[indi][indj]  += pair_mu4*pair_mu2*weight;
+                                            
+                        C8[indi][indj]  += pair_mu4*pair_mu4*weight;
                     
                         // r[indi][indj]   += log10_r; 
     	            
@@ -299,6 +303,7 @@ int bruteforceCountpairs_betweenChildren(double **C0, double **C2, double **C4, 
        
                     if((indi<nlogbins) && (indj<nlinbins) && (indi>=0) && (indj >=0)){                      
                         pair_mu2        = pair_mu*pair_mu;
+                        pair_mu4        = pair_mu2*pair_mu2;
                                         
                         weight          = node1->particle[ii].weight*node2->particle[jj].weight;
                                         
@@ -318,6 +323,10 @@ int bruteforceCountpairs_betweenChildren(double **C0, double **C2, double **C4, 
                         // C4[indi][indj] += (35.*pair_mu2*pair_mu2 - 30.*pair_mu2  + 3.);
                         // C4[indi][indj]  += pair_mu2*pair_mu2;
                         C4[indi][indj] += pair_mu2*pair_mu2*weight;
+                    
+                        C6[indi][indj] += pair_mu4*pair_mu2*weight;
+                                            
+                        C8[indi][indj] += pair_mu4*pair_mu4*weight;
                     
                         // r[indi][indj]  += log10_r; 
     	            
@@ -344,7 +353,7 @@ int bruteforceCountpairs_betweenChildren(double **C0, double **C2, double **C4, 
 }
 
 
-int bruteforce_nonodes(double **C0, double **C2, double **C4, double **r, double **mu, Particle* cat, Particle* cat2, int N, int N2, int sameTree){    
+int bruteforce_nonodes(double **C0, double **C2, double **C4, double **C6, double **C8, double **C10, double **r, double **mu, Particle* cat, Particle* cat2, int N, int N2, int sameTree){    
     double log10_r;
     double pair_mu;
         

@@ -1,0 +1,26 @@
+data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Multipoles/zCube_clipThreshold_1.0e+03_subVols_Realisation.dat')
+
+pl.loglog(data[:,0], data[:,1], 'r^')
+pl.loglog(data[:,0], data[:,2], 'k^')
+
+pl.loglog(data[:,0], data[:,3], 'r')
+pl.loglog(data[:,0], data[:,4], 'k', label=r'$k_{max} = 0.4$, $\sigma=3.40$')
+
+pl.loglog(data[:,0], data[:,5], 'r--')
+pl.loglog(data[:,0], data[:,6], 'k--')
+
+
+data = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Multipoles/zCube_clipThreshold_1.0e+03_subVols_Realisation_beta_0.56_sigma_3.93.dat')
+
+#pl.loglog(data[:,0], data[:,1], 'r^')
+#pl.loglog(data[:,0], data[:,2], 'k^')
+
+pl.loglog(data[:,0], data[:,3], 'g')
+pl.loglog(data[:,0], data[:,4], 'y', label=r'$k_{max} = 0.1$, $\sigma=3.93$, $\beta=0.56$')
+
+pl.loglog(data[:,0], data[:,5], 'g--')
+pl.loglog(data[:,0], data[:,6], 'y--')
+
+pl.legend(loc=3)
+
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/zCube_clipThreshold_1.0e+03_subVols_MultipolesRealisation.pdf')

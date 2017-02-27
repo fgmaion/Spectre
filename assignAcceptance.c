@@ -1,3 +1,75 @@
+int assignAcceptance(){
+  for(j=0; j<Vipers_Num; j++){
+    Acceptanceflag[j]  = false;
+    
+    if((lo_zlim<=gal_z[j]) && (gal_z[j]<=hi_zlim)){
+      if(data_mock_flag == 1){
+	if(dec[j] >= -5.97)  Acceptanceflag[j]  = true;  // dec problem in mocks; cut data to have the same boundary. 
+      }
+
+      else{
+	Acceptanceflag[j]  = true;
+      }
+    }
+  }
+  
+  return 0;
+}
+
+
+int assignAcceptance_rand(){
+  //** randoms bool flag is obsolete. 
+  //** Assumes random catalogue is sorted by dec, most negative last.  
+  if(data_mock_flag == 0){ // dec problem in mocks. 
+    for(j=0; j<rand_number; j++){
+      // randoms satisfy chi limits by construction.
+      if(rand_dec[j] >= -5.97){
+	rand_number = j;  // dec problem in mocks.
+
+	break;
+	// fkp_accepted_rand += pow(1. + (*pt2nz)(rand_chi[j])*fkpPk, -1.);
+      }
+    }
+
+    accepted_rand = rand_number; // Superfluous. 
+  }
+
+  else{
+    // assumes randoms have same boundary as (cut) data. (beyond dec = -5.97)
+    accepted_rand = rand_number;
+  }
+
+  printf("\n\nTotal number of randoms %d, accepted %d", rand_number, accepted_rand);
+
+  return 0;
+}
+
+
+int alpha_calc(){
+  accepted = 0;
+
+  daccepted_gals = 0.0;
+
+  for(j=0; j<Vipers_Num; j++){
+    if(Acceptanceflag[j] == true){
+      accepted         += 1;
+
+      // daccepted_gals   += 1./sampling[j];
+
+      daccepted_gals   += clip_galweight[j]/sampling[j]; //  13/05/16.
+    }
+  }
+
+  printf("\n\nTotal number of galaxies on input: %d, accepted: %d, accepted (weighted) %.2lf", Vipers_Num, accepted, daccepted_gals);
+
+  alpha = 1.*daccepted_gals/accepted_rand;
+
+  printf("\n\n(1/alpha) = %.3lf", 1./alpha);
+  
+  return 0;
+}
+
+
 double AcceptedMax(double a[], bool b[], int n){
   double max = -99.;
 
@@ -38,93 +110,45 @@ double AcceptedMin(double a[], bool b[], int n){
 }
 
 
-int assignAcceptance_rand(){
-    for(j=0; j<rand_number; j++)                        rand_accept[j]  = false;
-    
-    for(j=0; j<rand_number; j++){
-        if((loChi<rand_chi[j]) && (rand_chi[j]<hiChi))  rand_accept[j]  = true;
-    }
-        
-    accepted_rand = 0;
-    
-    for(j=0; j<rand_number; j++){
-        if(rand_accept[j] == true)  accepted_rand += 1;
-    }
+int assignAcceptance_true(){
+    for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j]  = true;
 
-    printf("\n\nTotal number of randoms %d, accepted %d", rand_number, accepted_rand);
-    
     return 0;
 }
 
 
-int assignAcceptance_WX_SPECTRO_V7(){
-    for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j]  = false;
-    
-    int accepted_count = 0;
-    
-    for(j=0; j<Vipers_Num; j++){
-        if((lo_zlim<=zobs[j]) && (zobs[j]<=hi_zlim)){
-            if((2<=zflag[j]) && (zflag[j]<=9)){
-                if(photoMask[j] == 1){
-                    // Inclusive limits. 
-                    Acceptanceflag[j]  = true;
-                    
-                    accepted_count    +=    1;
-                }
-            }
-        }
+double assignAcceptance_parent(){
+  int accepted = 0;
+
+  for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j]  = false;
+
+  for(j=0; j<Vipers_Num; j++){
+    if((lo_zlim<=gal_z[j]) && (gal_z[j]<=hi_zlim) && (ra[j] > LowerRAlimit) && (ra[j] < UpperRAlimit) && (LowerDecLimit < dec[j]) && (dec[j] < UpperDecLimit)){
+      if(data_mock_flag ==0){
+	// dec problem in mocks.                                                                                                                                                                                                         
+	if(dec[j] >= -5.97)  Acceptanceflag[j]  = true;
+      }
+
+      else{
+	Acceptanceflag[j]  = true;
+      }
     }
-        
-    printf("\n\nNumber of accepted galaxies: %d", accepted_count);
+  }
 
+  double daccepted_gals     = 0.0;
 
-    double daccepted_gals     = 0.0;
-
-    for(j=0; j<Vipers_Num; j++){
-      if(Acceptanceflag[j] == true)  daccepted_gals   += 1./sampling[j];
+  for(j=0; j<Vipers_Num; j++){
+    if(Acceptanceflag[j] == true){
+      accepted             += 1;
+    
+      daccepted_gals       += 1.;
     }
+  }
 
-    accepted_gals = (int) round(daccepted_gals);
+  printf("\n\nTotal number of galaxies on input: %d, accepted: %.2lf", Vipers_Num, daccepted_gals);
 
-    printf("\n\nTotal number of galaxies %d, accepted (weighted) %.2lf", Vipers_Num, daccepted_gals);
-
-    alpha = 1.*daccepted_gals/accepted_rand;
-
-    printf("\n\nalpha %.4f", alpha);
-
-    printf("\n\naccepted. inverted, rotated & translated");
-        
-    return 0;
-}
-
-
-int assignAcceptance(){
-    for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j]  = false;
-    
-    for(j=0; j<Vipers_Num; j++){
-        if((lo_zlim<gal_z[j]) && (gal_z[j]<hi_zlim)){
-            if((lo_MBlim<M_B[j]) && (M_B[j]<hi_MBlim)){
-                Acceptanceflag[j]  = true;
-            }
-        }
-    }
-        
-    double daccepted_gals     = 0.0;
-    
-    for(j=0; j<Vipers_Num; j++){
-        if(Acceptanceflag[j] == true)  daccepted_gals   += 1./sampling[j];
-    }
-
-    printf("\n\nTotal number of galaxies %d, accepted (weighted) %.2lf", Vipers_Num, daccepted_gals);
-    
-    alpha = 1.*daccepted_gals/accepted_rand;
-    
-    printf("\n\nalpha %.4f", alpha);
-                                                                                                                                                                              
-    printf("\n\naccepted. inverted, rotated & translated");  
-                     
-    return 0;
-}
+  return daccepted_gals;
+} 
 
 
 int assignAcceptanceCube(){

@@ -37,13 +37,17 @@ typedef struct FFTLog_config{
 
 } FFTLog_config;
 
+int     FFTlogRes;
+
 double FFTLog_TMP;
 
 void FFTLog(FFTLog_config *fc, fftw_plan p_forward, fftw_plan p_backward);
-int FFTLog_free(FFTLog_config *fc);
+int  FFTLog_free(FFTLog_config *fc);
 
 FFTLog_complex FFTLog_U_mu(double mu, FFTLog_complex z);
 FFTLog_config *FFTLog_init(int N, double min, double max, double q, double mu);
+
+int FastLegendre_setInput(FFTLog_config *fc_mono, FFTLog_config *fc_quad, FFTLog_config *fc_hex, FFTLog_config *fc_oct, double beta, double velDispersion);
 
 // FFTLog_config *fc;
 
@@ -52,6 +56,11 @@ FFTLog_config*      mono_config;
 FFTLog_config*      quad_config;
 FFTLog_config*      zero_config;
 FFTLog_config*       hex_config;
+FFTLog_config*       oct_config;
+FFTLog_config*       dec_config;
+
+FFTLog_config*   mono_config_ap;
+FFTLog_config*   quad_config_ap;
 
 FFTLog_config*   limmono_config;
 
@@ -65,4 +74,9 @@ FFTLog_config*    convlmonoCorr;
 FFTLog_config*    convlquadCorr;
 FFTLog_config*    convlhexCorr;
 
-FFTLog_config*    W2_config;
+// Arrays of pre and post factors for xi to pk, pk to xi transforms. 
+double* xi_mu_prefactor;
+double* xi_mu_postfactor;
+double* pk_mu_prefactor;
+double* pk_mu_postfactor;
+

@@ -1,0 +1,44 @@
+File list:
+********************************************************************************
+
+README 
+Makefile  
+
+********************************************************************************
+** Computation of the Gegenbauer coefficients by using the first
+** algorithm making use of FFT of the Abel-type transform of the
+** input function.
+
+ggb_coeff_fft.c 	Contains the main routine
+call_ggb_coeff_fft.c   	Interface calling the main routine for testing
+
+********************************************************************************
+** Computation of the Gegenbauer coefficients by the using the 
+** second algorithm making use of Gauss-Jacobi quadrature.
+
+ggb_coeff_jacobi.cpp   contains the main routine
+call_ggb_coeff_jacobi.cpp interface calling the main routine for testing
+
+********************************************************************************
+** Computation of the \sum f(cos u) (or f(x)) of a Gegenbauer expansion from 
+** the Gegenbauer coefficients by computing the Abel-type integral of a 
+** suitable (inverse) FFT of the Gegenbauer coefficients. 
+
+ggb_inversion_no_fft.c        Computation of the sum of the Gegenbauer expansion
+call_ggb_inversion_fft.c      Interface for testing 
+
+********************************************************************************
+** Computation of the \sum f(cos u) (or f(x)) of a Gegenbauer expansion from 
+** the Gegenbauer coefficients by computing the Abel-type integral of a 
+** suitable (inverse) cosine-transform of the Gegenbauer coefficients, 
+** implemented without using the FFT.
+
+call_ggb_inversion_no_fft.c Interface for testing
+ggb_inversion_fft.c	    Computation of the sum of the Gegenbauer expansion
+
+********************************************************************************
+** This file contains the function whose Gegenbauer coefficients are computed
+
+function.c   
+
+********************************************************************************

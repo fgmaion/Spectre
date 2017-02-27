@@ -1,0 +1,68 @@
+pl.clf()
+
+ShotNoise = 131.605
+
+MockCat = np.loadtxt('/disk1/mjw/HOD_MockRun/Steffano/ps_1.txt')
+
+MockCat = MockCat[:,1]
+
+for i in xrange(2, 27, 1):
+    MockIn   = np.loadtxt('/disk1/mjw/HOD_MockRun/Steffano/ps_'+str(i)+'.txt')
+    MockCat  = np.vstack((MockIn[:,1], MockCat))
+
+kvals      = MockIn[:,0]  
+
+Mean       = np.mean(MockCat, axis=0)
+Var        = np.var(MockCat, axis=0)
+
+pl.errorbar(kvals, Mean, np.sqrt(Var)/np.sqrt(25), fmt='--', label='Steffano, $0.6<z<0.9$')
+
+parent = np.loadtxt('/disk1/mjw/HOD_MockRun/Steffano/parent.txt')
+pl.loglog(parent[:,0], parent[:,1], 'g', label='parent.txt')
+
+
+pl.yscale('log')
+pl.xscale('log')
+
+theory         = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/HODTheoryPk/cambExtendedPk_hod_20.0.dat')
+pl.loglog(theory[:,0], theory[:,1], 'y', label='vol. limited: $M_B$< -20.0')
+
+#conv           = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/Del2k/midK_Pk_Convolved_ICCUncorrectedVIPERSparent_Mock001_GaussSmoothNz_100.0_SkinDepth_5.0.dat')
+#pl.loglog(conv[:,0], 1.15*conv[:,2], 'k')
+
+#SphWf  = np.loadtxt('/disk1/mjw/HOD_MockRun/Data/WindowfuncSpherical/midK_W2q_VIPERSparent_Mock001_GaussSmoothNz_100.0_SkinDepth_5.0.dat')
+
+#ConvPkZeroPoint = 1.256845e+04
+#WfZeroPoint     = 0.018440
+
+#IccCorrected    = conv[:,2] - (ConvPkZeroPoint/WfZeroPoint)*SphWf[:,1]
+#pl.plot(conv[:,0], 1.15*IccCorrected , 'r')
+
+pl.xlim([0.01, 0.6])
+pl.ylim([5.*10**2, 3.2*10**4])
+
+xx, locs = plt.xticks()
+ll = ['%.3f' % a for a in xx]
+plt.gca().xaxis.set_major_formatter(FixedFormatter(ll))
+
+leg = pl.legend(loc=1, ncol=1, prop = FontProperties(size = '10'))
+leg.draw_frame(False)
+
+pl.ylabel(r'$P(k)$', fontsize = '10')
+pl.xlabel(r'$k \ [h \ Mpc^{-1}]$', fontsize = '10')
+
+#pl.title('All parent mocks, $0.7<z<0.9$, shot noise corr. ($P_{Shot} \ = \ 131.$)')
+
+theory         = np.loadtxt('/disk1/mjw/VIPERS_HOD_Mocks/pk_hod_vipers_SdlT/Pk_hod_20.0.dat')
+pl.loglog(theory[:,0], theory[:,1], 'y')
+
+theory         = np.loadtxt('/disk1/mjw/VIPERS_HOD_Mocks/pk_hod_vipers_SdlT/Pk_hod_20.5.dat')
+pl.loglog(theory[:,0], theory[:,1], 'c', label='vol. limited: $M_B$< -20.5')
+
+theory         = np.loadtxt('/disk1/mjw/VIPERS_HOD_Mocks/pk_hod_vipers_SdlT/Pk_hod_21.0.dat')
+pl.loglog(theory[:,0], theory[:,1], 'm', label='vol. limited: $M_B$< -21.0')
+
+leg = pl.legend(loc=1, ncol=1, prop = FontProperties(size = '10'))
+leg.draw_frame(False)
+
+pl.savefig('/disk1/mjw/HOD_MockRun/Plots/SteffanoPk.pdf')

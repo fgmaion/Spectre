@@ -1,0 +1,15 @@
+/*
+int freeConvolutionMemory(){
+    free(kVals);
+    free(interpolatedPk);
+    
+    free(midKmodesperbin);
+    free(midKBinNR);
+    free(WindowFuncNR);
+    free(WindowFunc2d);
+    
+    free(ConvolvedPk);
+    free(ConvolvedPk2d);
+    
+    return 0;
+}*/

@@ -26,7 +26,7 @@ int zeldovich_eta_para(FFTLog_config* fc, FFTLog_config* perp){
     for(i=0; i<fc->N; i++)  fc->input[i][0]    = pow(fc->krvals[i][0], -0.5)*pow(2.*pi, -3./2.)*fc->pk[i][0];
     for(i=0; i<fc->N; i++)  fc->input[i][1]    = 0.0;
    
-    // power law bias maybe required.                                                                                                                        
+    // power law bias may be required.                                                                                                                        
     for(i=0; i<fc->N; i++)   fc->input[i][0]  *= pow(fc->krvals[i][0], -fc->q);            
                                                                      
     FFTLog(fc, fc->forwardplan, fc->backwardplan);

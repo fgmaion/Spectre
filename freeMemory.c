@@ -59,9 +59,9 @@ int free_pkRegression(){
   free(binnedPk);
   free(modes_perbin);
   
-  free(kMonopole);
-  free(kQuadrupole);
-  free(kHexadecapole);
+  free(Monopole);
+  free(Quadrupole);
+  free(Hexadecapole);
   
   return 0;
 }

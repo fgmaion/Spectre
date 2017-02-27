@@ -13,8 +13,8 @@ int wfPkCalc(){
     FFTW2_vecr_re      = malloc(n0*n1*n2*sizeof(double));
     FFTW2_vecr_im      = malloc(n0*n1*n2*sizeof(double));
     
-    PkCube             =  malloc(n0*n1*n2*sizeof(*PkCube));
-    Corrfn             =  malloc(n0*n1*n2*sizeof(*Corrfn));
+    PkCube             = malloc(n0*n1*n2*sizeof(*PkCube));
+    Corrfn             = malloc(n0*n1*n2*sizeof(*Corrfn));
     
     in                 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*n0*n1*n2);
     out                = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(fftw_complex)); 
@@ -44,9 +44,9 @@ int wfPkCalc(){
     fftw_execute(iplan);
     
     for(j=0; j<n0*n1*n2; j++) FFTW2_vecr_re[j] =  in[j][0]/in[0][0];
-    for(j=0; j<n0*n1*n2; j++) FFTW2_vecr_im[j] =           in[j][1];  // correlation fn. is purely real, in[j][1] = 0.0 for all j. 
+    for(j=0; j<n0*n1*n2; j++) FFTW2_vecr_im[j] =                0.0;  // correlation fn. is purely real, in[j][1] = 0.0 for all j. 
     
-    for(j=0; j<n0*n1*n2; j++) W2_vecr[j] = pow(FFTW2_vecr_re[j], 2.) + pow(FFTW2_vecr_im[j], 2.);
+    for(j=0; j<n0*n1*n2; j++) W2_vecr[j]       = pow(FFTW2_vecr_re[j], 2.) + pow(FFTW2_vecr_im[j], 2.);
     
     int iii;
     
@@ -59,23 +59,26 @@ int wfPkCalc(){
     
         formPkCube();
         
-        for(j=0; j<n0*n1*n2; j++) in[j][0] = PkCube[j];
-        for(j=0; j<n0*n1*n2; j++) in[j][1] =       0.0;
-   
+        // in -> out
+        for(j=0; j<n0*n1*n2; j++) out[j][0] = PkCube[j];
+        for(j=0; j<n0*n1*n2; j++) out[j][1] =       0.0;
+        
         printf("\nPerforming FFT.");
     
-        fftw_execute(p);
+        // plan -> iplan
+        fftw_execute(iplan);
     
-        for(j=0; j<n0*n1*n2; j++) Corrfn[j] = out[j][0];
+        for(j=0; j<n0*n1*n2; j++) Corrfn[j] = in[j][0];
         
         // Carry out the convolution by inverse FFT of the correlation fn. x FFT of W^2(k).
         for(j=0; j<n0*n1*n2; j++){ 
             // Cannot use kMonopole values due to aliased measurement. 
             in[j][0]        =  Corrfn[j]*FFTW2_vecr_re[j];
-            in[j][1]        =  Corrfn[j]*FFTW2_vecr_im[j];
+            in[j][1]        =                         0.0; // Corrfn[j]*FFTW2_vecr_im[j];
         }
     
         fftw_execute(p);
+        
         
         printf("\nWindow fn. convolution complete.");
 
@@ -115,7 +118,7 @@ int wfPkCalc(){
             }
         }
         
-        sprintf(filepath, "%s/W1_Spectro_V5_0/convolvedpk_multipoles_128.dat", root_dir);
+        sprintf(filepath, "%s/Data/maskedRSD_draftwork/kaiserLorentz_Convergence_convolvedpk_256.dat", root_dir);
 
         MultipoleCalc(kbin_no, mean_modk, kMonopole, kQuadrupole, polar_pk, polarPk_modeCount, filepath, 0.0, 1.0, 1);
     }
