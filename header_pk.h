@@ -29,7 +29,35 @@ double        LowerRAlimit;
 double        UpperDecLimit;
 double        LowerDecLimit;
 
+
+double*             ra   = NULL;
+double*            dec   = NULL;
+double*           zobs   = NULL;
+double*           zcos   = NULL;
+double*            M_B   = NULL;
+double*          zflag   = NULL;
+int*              type   = NULL;
+int*          photoMask  = NULL;
+
+double*           zpec   = NULL;  // Value added catalogue parameters.
+double*          zphot   = NULL;
+double*          gal_z   = NULL;
+double*         sampling = NULL;
+double*    fkp_galweight = NULL;
+double*   clip_galweight = NULL;
+
+// derived parameters
+bool*    Acceptanceflag = NULL;
+double*          rDist  = NULL;
+double*          xCoor  = NULL;
+double*          yCoor  = NULL;
+double*          zCoor  = NULL;
+
+
 // -- Randoms --//
+int          rand_number   = 0;
+int          accepted_rand = 0;
+
 double*      rand_ra     = NULL;
 double*      rand_dec    = NULL;
 double*      rand_chi    = NULL;
@@ -64,9 +92,17 @@ double        cumulative_nbar[400];
 double     cumulative_nbar_2d[400];
 double    chi_cumulative_nbar[400];
 
+// -- FFT units --//
+double        kIntervalx; // fund_kx.
+double        kIntervaly;
+double        kIntervalz;
+
+double        xNyquistWaveNumber; // Ny_kx.
+double        yNyquistWaveNumber;
+double        zNyquistWaveNumber;
 
 
-// -- //
+// -- Binned modes -- //
 double logk_min;
 double logk_max;
 double logk_interval;
