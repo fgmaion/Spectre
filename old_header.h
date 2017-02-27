@@ -4,7 +4,6 @@ int          PkCalc();
 
 double       (*pt2Pk)(double k)                 	= NULL;
 double       (*pt2Xi)(double)       				= NULL;
-
 double       (*pt2RSD_k)(double, double, int)       = NULL;
 double       (*pt2RSD_r)(double, double, int)       = NULL;
 
@@ -63,9 +62,6 @@ double        MinChi3;                                                      // h
 double        MaxChi3;                                                      // Redshift limited sample, 0.7 < z < 0.9
 double        IntervalChi3;
 
-double       TotalVolume         = 0.0;
-double       TotalSurveyedVolume = 0.0;
-
 int          loopCount;
 
 double*     sampling35   = NULL;
@@ -95,19 +91,7 @@ double        k_x, k_y, k_z;
 // First column is mod k, second Pk.
 double**     PkArray            = NULL;
 double**     twodim_pk          = NULL;
-
 double**     muIntervalPk       = NULL;
-
-
-// Binned Pk parameters.
-int          kbin_no;
-int*         modes_perbin        = NULL;
-
-double       modkMax;
-
-double*      mean_modk          = NULL;
-double*      binnedPk           = NULL;
-double*      logk_limits        = NULL;
 
 // Randoms generation
 int          NuRandoms    = 0; 
@@ -139,23 +123,7 @@ double*     PkCube              = NULL;
 // Binning a 2D, redshift space P(k).
 double**     d2_binnedpk     = NULL;
 
-// Comoving number density calculation.
-double*      zbins    = NULL;
-double*      chibins  = NULL;
-double*      Nchi     = NULL;
-double*      nbar     = NULL;
-double*      nbar_2d  = NULL;
-
-double*      comovVol = NULL;
-
-double chi_interval;
-int    chibin_no;
-
-// FKP weights. 
-double       fkpPk;
-
 // VIPERS ra and dec of cell co-ordinates.
-
 int CatalogueInput(char filepath[]);
 
 double sdltNz(double z);
@@ -348,18 +316,9 @@ double* zDisplacement;
 int startint = -99;
 int endint =-99;
 
-double dummy;
 double* kVals;
 
 double** invA;
-
-double zel_r;
-double zel_xi;
-double zel_err;
-double zel_scale;
-
-double splint_sigma2perp(double r);
-double splint_sigma2para(double r);
 
 double ukm_nfw_profile(double k);
 
@@ -384,7 +343,6 @@ double* hod_disp;
 fftw_complex *outx, *outy, *outz;
 
 fftw_plan    iplan_x, iplan_y, iplan_z;
-fftw_plan    plan;
 
 int*     shuffle_rows;
 
@@ -408,15 +366,6 @@ double*  sig2_2D;
 double*  lnm_jenkins;
 double*  ln_invSig_jenkins;
 double*  ln_invSig_jenkins_2D;
-
-int      pk_lineNo;
-
-double dummy;
-
-double pk_hin;
-double pk_lon;
-double pk_hiA;
-double pk_loA;
 
 double modeCorrections(int k, int j, int i);
 

@@ -1,3 +1,8 @@
+double zel_r;
+double zel_xi;
+double zel_err;
+double zel_scale;
+
 double* sigma2rvals;
 
 double* sigma2perp;
@@ -15,3 +20,6 @@ double zel_qmax[3];
 
 // -- Functions -- //
 int   DisplacementCalc();
+
+double splint_sigma2perp(double r);
+double splint_sigma2para(double r);

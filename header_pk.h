@@ -15,9 +15,17 @@ double* smooth_overdensity;
 fftw_complex* H_k;
 
 //-- embedding volume --// 
+double    TotalVolume         = 0.0;
+double    TotalSurveyedVolume = 0.0;
+
+
+
+
 double    stefano_trans_x;  // translation parameters for Stefano's co-ordinates.
 double    stefano_trans_y;
 double    stefano_trans_z;
+
+
 
 //-- VIPERS --//
 int               max_gals;  // max. number of galaxies (lines) in any mock in covariance calc, i.e. in files in mocks directory.
@@ -74,7 +82,9 @@ double*      rand_weight = NULL;
 
 // -- FKP weighting/normalisation --//
 int    accepted_gals;
+double       fkpPk;
 double fkp_norm, daccepted_gals;
+
 
 // Embedding volume for mock.
 int          n0, n1, n2; // (z == 0), (x == 2).
@@ -97,7 +107,16 @@ int          xlabel, ylabel, zlabel;
 
 
 // -- n(z) calc. -- //
-double nz_smoothRadius; // smoothing length. 
+int          chibin_no;
+double       chi_interval;
+double       nz_smoothRadius; // smoothing length. 
+
+double*      zbins    = NULL;
+double*      chibins  = NULL;
+double*      Nchi     = NULL;
+double*      nbar     = NULL;
+double*      nbar_2d  = NULL;
+double*      comovVol = NULL;
 
 double        cumulative_nbar[400];
 double     cumulative_nbar_2d[400];
@@ -114,10 +133,17 @@ double        zNyquistWaveNumber;
 
 
 // -- Binned modes -- //
-double logk_min;
-double logk_max;
-double logk_interval;
+int     kbin_no;
 
+double  logk_min;
+double  logk_max;
+double  logk_interval;
+
+int*    modes_perbin       = NULL;
+
+double* mean_modk          = NULL;
+double* binnedPk           = NULL;
+double* logk_limits        = NULL;
 
 // -- Multipole decomposition -- //
 int     hiMultipoleOrder; // 0: use monopole only, 2: use quadrupole.

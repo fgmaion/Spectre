@@ -17,6 +17,8 @@ double*   dkdata = NULL;
 double**     Multipoles;
 double**    dMultipoles;
 
+//-- binned pk. --//
+int          kbin_no;
 
 //-- Likelihood grid --//
 int        Res;
@@ -143,6 +145,7 @@ double kaiserGauss_Hexfactor(double ks, double beta);
 double AP_P0(double kprime, double beta, double sigma, double epsilon, double local_alpha);
 double AP_P2(double kprime, double beta, double sigma, double epsilon, double local_alpha);
 double AP_P4(double kprime, double beta, double sigma, double epsilon, double local_alpha);
+
 
 // -- Posteriors -- //
 double calc_fsigma8Posterior();
