@@ -1,3 +1,17 @@
+int header(){
+  // was defined in header.h
+  double       xcentre;
+  double       ycentre;
+  double       zcentre;
+
+  double       xroll;
+  double       yroll;
+  double       zroll;
+  
+  return 0;
+}
+
+
 int sphereCentre(){
     const gsl_rng_type* T;
     gsl_rng*            r;

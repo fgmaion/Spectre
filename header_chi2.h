@@ -27,6 +27,14 @@ double dRes_ap;
 
 double    paramNumber; // why double?
 
+double               A11Sq;
+double             fsigma8; // fsig8.
+double             bsigma8;
+double           alpha_pad;
+double          linearBias;
+double         epsilon_pad;
+double       velDispersion;
+
 double      fsigma8Interval; // fsig8_interval.
 double      bsigma8Interval;
 double        sigmaInterval;
@@ -128,6 +136,9 @@ double*   sigmaPosterior; // velocity dispersion posterior.
 // -- Functions -- //
 double splintMatterPk(double EvalPoint);
 
+double kaiserGauss_Monofactor(double ks, double beta);
+double kaiserGauss_Quadfactor(double ks, double beta);
+double kaiserGauss_Hexfactor(double ks, double beta);
 
 double AP_P0(double kprime, double beta, double sigma, double epsilon, double local_alpha);
 double AP_P2(double kprime, double beta, double sigma, double epsilon, double local_alpha);

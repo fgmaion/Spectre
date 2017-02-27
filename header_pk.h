@@ -14,6 +14,10 @@ double* smooth_overdensity;
 
 fftw_complex* H_k;
 
+//-- embedding volume --// 
+double    stefano_trans_x;  // translation parameters for Stefano's co-ordinates.
+double    stefano_trans_y;
+double    stefano_trans_z;
 
 //-- VIPERS --//
 int               max_gals;  // max. number of galaxies (lines) in any mock in covariance calc, i.e. in files in mocks directory.
@@ -55,6 +59,8 @@ double*          zCoor  = NULL;
 
 
 // -- Randoms --//
+double                   alpha; // ratio of N_rand to N_gal pretty much. 
+
 int          rand_number   = 0;
 int          accepted_rand = 0;
 
@@ -67,6 +73,7 @@ double*      rand_z      = NULL;
 double*      rand_weight = NULL;
 
 // -- FKP weighting/normalisation --//
+int    accepted_gals;
 double fkp_norm, daccepted_gals;
 
 // Embedding volume for mock.
@@ -84,6 +91,10 @@ double        lo_zlim;              // Selection parameters. Volume limited samp
 double        hi_zlim;
 double          z_eff;
 double           aexp;
+
+int       boxlabel;
+int          xlabel, ylabel, zlabel;
+
 
 // -- n(z) calc. -- //
 double nz_smoothRadius; // smoothing length. 
@@ -143,7 +154,10 @@ double       invert_StefanoBasis(double centreRA, double centreDec, double* xval
 int          prep_inverseCumulative_nbar();
 double       inverse_cumulative_nbar(double arg);
 
+int          CoordinateCalc();
+
 int          JenkinsCoordinates();
 int          JenkinsFold(double original[], int lenArray, int axis);
 int          ApplyJenkins();
+
 

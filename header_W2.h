@@ -1,5 +1,5 @@
 char   logfilepath[200]; // filepath to log file for pair counting.
-
+char    surveyType[200];
 
 int VIPERS_kSpace_multipoles_lineNo;
 
@@ -143,3 +143,5 @@ double splint_VIPERS_jmaskMultipoles(double r, int transformOrder);
 
 double splint_VIPERS_kSpaceMono(double k);
 double splint_VIPERS_kSpaceQuad(double k);
+
+double (*pt2maskMultipoles)(double r, int transformOrder) = NULL;
