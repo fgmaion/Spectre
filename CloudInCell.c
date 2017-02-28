@@ -69,23 +69,14 @@ int cic_assign(int rand_ordelta, double x, double y, double z, double p){
   overdensity[indx +n2*indy +n1*n2*indz ][0] += hx0*hy0*hz0*p;
   */
 
-  overdensity[iindx + n2*iindy + n1*n2*iindz] += hx1*hy1*hz1*p;
-  overdensity[indx  + n2*iindy + n1*n2*iindz] += hx0*hy1*hz1*p;
-  overdensity[iindx + n2*indy  + n1*n2*iindz] += hx1*hy0*hz1*p;
-  overdensity[indx  + n2*indy  + n1*n2*iindz] += hx0*hy0*hz1*p;
-  overdensity[iindx + n2*iindy + n1*n2*indz ] += hx1*hy1*hz0*p;
-  overdensity[indx  + n2*iindy + n1*n2*indz ] += hx0*hy1*hz0*p;
-  overdensity[iindx + n2*indy  + n1*n2*indz ] += hx1*hy0*hz0*p;
-  overdensity[indx  + n2*indy  + n1*n2*indz ] += hx0*hy0*hz0*p;
-
-  overdensity_complex[iindx + n2*iindy + n1*n2*iindz][0] += hx1*hy1*hz1*p;
-  overdensity_complex[indx  + n2*iindy + n1*n2*iindz][0] += hx0*hy1*hz1*p;
-  overdensity_complex[iindx + n2*indy  + n1*n2*iindz][0] += hx1*hy0*hz1*p;
-  overdensity_complex[indx  + n2*indy  + n1*n2*iindz][0] += hx0*hy0*hz1*p;
-  overdensity_complex[iindx + n2*iindy + n1*n2*indz ][0] += hx1*hy1*hz0*p;
-  overdensity_complex[indx  + n2*iindy + n1*n2*indz ][0] += hx0*hy1*hz0*p;
-  overdensity_complex[iindx + n2*indy  + n1*n2*indz ][0] += hx1*hy0*hz0*p;
-  overdensity_complex[indx  + n2*indy  + n1*n2*indz ][0] += hx0*hy0*hz0*p;
+  overdensity[iindx + n2*iindy + n1*n2*iindz][0] += hx1*hy1*hz1*p;
+  overdensity[indx  + n2*iindy + n1*n2*iindz][0] += hx0*hy1*hz1*p;
+  overdensity[iindx + n2*indy  + n1*n2*iindz][0] += hx1*hy0*hz1*p;
+  overdensity[indx  + n2*indy  + n1*n2*iindz][0] += hx0*hy0*hz1*p;
+  overdensity[iindx + n2*iindy + n1*n2*indz ][0] += hx1*hy1*hz0*p;
+  overdensity[indx  + n2*iindy + n1*n2*indz ][0] += hx0*hy1*hz0*p;
+  overdensity[iindx + n2*indy  + n1*n2*indz ][0] += hx1*hy0*hz0*p;
+  overdensity[indx  + n2*indy  + n1*n2*indz ][0] += hx0*hy0*hz0*p;
   
   return 0;
 }

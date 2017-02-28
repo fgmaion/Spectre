@@ -48,24 +48,24 @@ int prep_r2c_modes(){
 
         mu                                     = k_z/kmodulus; // Assume mean is not passed.
 
-        mode_Li[Index]                         = gsl_sf_legendre_P2(mu);  // L_2 = 0.5*(3.*mu**2 -1.) 
+        kLi[Index]                             = gsl_sf_legendre_P2(mu);  // L_2 = 0.5*(3.*mu**2 -1.) 
 
-        mass_assign_corr[Index]                = gsl_sf_sinc(k_x*0.5/xNyquistWaveNumber); // Computes \sinc(x) = \sin(\pi x) / (\pi x).
-        mass_assign_corr[Index]               *= gsl_sf_sinc(k_y*0.5/yNyquistWaveNumber);
-        mass_assign_corr[Index]               *= gsl_sf_sinc(k_z*0.5/zNyquistWaveNumber);
+        kM2[Index]                             = gsl_sf_sinc(k_x*0.5/xNyquistWaveNumber); // Computes \sinc(x) = \sin(\pi x) / (\pi x).
+        kM2[Index]                            *= gsl_sf_sinc(k_y*0.5/yNyquistWaveNumber);
+        kM2[Index]                            *= gsl_sf_sinc(k_z*0.5/zNyquistWaveNumber);
 
-        mass_assign_corr[Index]                = pow(mass_assign_corr[Index], 2.0);  // Correct mass assignment of randoms; cic = 2, ngp = 1.
+        kM2[Index]                             = pow(kM2[Index], 2.0);  // Correct mass assignment of randoms; cic = 2, ngp = 1.
         
         // %% NEEDS FIXED FOR KMODULUS < LOGK_MIN %%//
-        mode_pkbin_index[Index]                = (int)  floor((log10(kmodulus) - logk_min)/logk_interval) > 0 ? (int)  floor((log10(kmodulus) - logk_min)/logk_interval) : 0;
+        kind[Index]                            = (int)  floor((log10(kmodulus) - logk_min)/logk_interval) > 0 ? (int)  floor((log10(kmodulus) - logk_min)/logk_interval) : 0;
 
         // Each available mode has an index in the binning array. 
-        Sum_Li[mode_pkbin_index[Index]]       += mode_Li[Index];
-        Sum_Li2[mode_pkbin_index[Index]]      += mode_Li[Index]*mode_Li[Index];
+        Sum_Li[kind[Index]]                   += kLi[Index];
+        Sum_Li2[kind[Index]]                  += kLi[Index]*kLi[Index];
 
-        modes_perbin[mode_pkbin_index[Index]] += 1;
+        modes_perbin[kind[Index]]             += 1;
 
-        mean_modk[mode_pkbin_index[Index]]    += kmodulus;        
+        mean_modk[kind[Index]]                += kmodulus;        
       }
     }
   }
@@ -139,7 +139,7 @@ int correct_ind_modes(){
   //    (b)   Galaxies removed account for linear fluctuations to be
   //          smaller, as opposed to a change in number density.
   
-
+  /*
   for(i=1; i<n2/2+1; i++){
     k_x = kIntervalx*i;  // k_z = 0.0 && k_y = 0.0 && k_x > 0.0; drop the mean (k=0) mode. 
 
@@ -198,7 +198,7 @@ int correct_ind_modes(){
   }
   
   polar_pkcount = n0*n1*n2/2 + n1*n2/2 +n2/2;  // Number of modes, Index is (polar_pkcount -1).
-  
+  */
   return 0;
 }
 
@@ -634,7 +634,7 @@ int DualBinning(int NumberModes, double** DualParamArray, double** BinnedDualPar
 
 int Cartesian2Dpk(int modeCount){
   // for(j=0; j<modeCount; j++)  printf("\n%.3lf \t %.3lf \t %.3lf", twodim_pk[j][0], twodim_pk[j][1], twodim_pk[j][2]);
-  DualBinning(modeCount, twodim_pk, d2_binnedpk);
+  // DualBinning(modeCount, twodim_pk, d2_binnedpk);
 
   printf("\n\nWriting 2D pk.");
 
@@ -645,7 +645,7 @@ int Cartesian2Dpk(int modeCount){
   // corresponds to k=0.5 for **current** binning.
   for(k=0; k<kbin_no; k++){
     for(j=0; j<kbin_no; j++){
-      fprintf(output, "%e \t", d2_binnedpk[k][j]);
+      // fprintf(output, "%e \t", d2_binnedpk[k][j]);
     }
 
     fprintf(output, "\n");

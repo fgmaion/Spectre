@@ -33,8 +33,6 @@ int init_cell_info(){
   CellVolume            = xCellSize*yCellSize*zCellSize;                            // h^-3 Mpc^3
 
   TotalVolume           = n0*n1*n2*CellVolume;   
-
-  clippedVolume         = 0.0;
   
   return 0;
 }
@@ -54,10 +52,6 @@ int initi_dist_z(){
 
 int init_fftgrid(){
   // FFTw calc assignment.
-  xNyquistIndex         = n2/2 + 1;
-  yNyquistIndex         = n1/2 + 1;
-  zNyquistIndex         = n0/2 + 1;
-
   xNyquistWaveNumber    = pi/xCellSize;                                               // k = 2*pi x Nyquist frequency
   yNyquistWaveNumber    = pi/yCellSize;                                               // k = 2*pi x Nyquist frequency
   zNyquistWaveNumber    = pi/zCellSize;                                               // k = 2*pi x Nyquist frequency

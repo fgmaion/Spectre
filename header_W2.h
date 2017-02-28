@@ -1,3 +1,5 @@
+int    len;
+
 char   logfilepath[200]; // filepath to log file for pair counting.
 char    surveyType[200];
 

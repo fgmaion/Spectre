@@ -18,7 +18,15 @@ double**     Multipoles;
 double**    dMultipoles;
 
 //-- binned pk. --//
-int          kbin_no;
+int     kbin_no;
+double* kVals;
+
+int*   fftlog_indices;
+
+// -- Jenkins -- //
+int     jenkins_foldIndex_foldedfile;
+int     jenkins_foldIndex_unfoldedfile;
+double  jenkins_fold_kjoin;
 
 //-- Likelihood grid --//
 int        Res;
@@ -126,6 +134,33 @@ int cnvldpk_zeropoint_index;
 double         clipmono_amp;
 double       clip_distcoeff;
 
+// -- Likelihood -- //
+double  app_sigma8;
+
+double  ChiSq_kmax;
+double  ChiSq_kmin;
+
+gsl_matrix* Covariance;
+gsl_matrix* sigma_norm;
+
+gsl_vector* eval;
+gsl_matrix* evec;
+
+gsl_eigen_symmv_workspace* w;
+
+gsl_vector* col;
+
+double*   MeanMultipoles;
+
+double*  eigenVals;
+double** eigenVecs;
+
+double  smallestEigenvalue;
+
+int     chiSq_kmaxIndex;
+int     chiSq_kminIndex;
+
+
 // -- Posteriors -- //
 double  PosteriorNorm = 0.0; // variable to normalise posteriros. 
 
@@ -136,7 +171,10 @@ double*   sigmaPosterior; // velocity dispersion posterior.
 
 
 // -- Functions -- //
+double splintLinearPk(double k);
 double splintMatterPk(double EvalPoint);
+
+double (*pt2Pk)(double k) = NULL;
 
 double kaiserGauss_Monofactor(double ks, double beta);
 double kaiserGauss_Quadfactor(double ks, double beta);
@@ -145,6 +183,9 @@ double kaiserGauss_Hexfactor(double ks, double beta);
 double AP_P0(double kprime, double beta, double sigma, double epsilon, double local_alpha);
 double AP_P2(double kprime, double beta, double sigma, double epsilon, double local_alpha);
 double AP_P4(double kprime, double beta, double sigma, double epsilon, double local_alpha);
+
+double ChiSqEval();
+double ChiSqEval_ap();
 
 
 // -- Posteriors -- //

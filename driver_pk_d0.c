@@ -2,31 +2,30 @@
 #include "/home/mjw/Aux_functions/Aux_functions.c"
 
 #include "header.h"
-#include "RngStream.h"
-#include "cosmology_planck2015.h"
+#include "header_pk.h"
+#include "cosmology_planck2015.h" // Defines cosmology. 
 #include "comovDistRedshiftCalc.c"
 #include "AgeOftheUniverse.c"
 #include "linearGrowthRate.c"
+#include "assignAcceptance.c"
+#include "Jenkins_fold.c"
 #include "Initialise.c"
 #include "stefanoBasis.c"
+#include "max_gal.c"
 #include "CoordinateCalc.c"
 #include "MultipoleCalc.c"
 #include "randGen.c"
-#include "load_mask.c"
-#include "Jenkins_fold.c"
-#include "max_gal.c"
-#include "assignAcceptance.c"
-#include "nbar.c"
 #include "invert_nbar.c"
-// #include "nbar_smooth.c"
+#include "nbar.c"
+#include "load_mask.c"
+//// #include "nbar_smooth.c"
 #include "fkp_weights.c"
-// #include "clipping_weights.c"
+//// #include "clipping_weights.c"
+#include "CloudInCell.c" 
 #include "overdensity_calc.c"
-#include "CloudInCell.c"
 #include "FFTw.c"
 #include "GaussianFilter.c"
-#include "assignMemory.c"
-#include "freeMemory.c"
+#include "assign_pkmemory.c"
 
 
 int main(int argc, char **argv){  
@@ -89,10 +88,7 @@ int main(int argc, char **argv){
   fkpPk                     =    8000.0;                 // [h^-1 Mpc]^3.
   fft_size                  =       256;                 // Worker 46 works up to 1024. 
   
-  modkMax                   =      4.00;                 // binned p(k) variables. 
-  muBinNumb                 =       100;
   kbin_no                   =        40;                 // kbin_no = 129; // Stefano comparison. 
-
   logk_min                  =      -2.0;
   logk_max                  =      0.60;                 // k = 4 hMpc^{-1}.
   
@@ -111,7 +107,7 @@ int main(int argc, char **argv){
   prep_x2c();                                            // Memory for overdensity, smooth_overdensity and H_k; either double or fftw_complex.  
   
   prep_pkRegression(0);                                  // last arg: ln k spacing is 0, linear is 1.  129 bins for linear + Stef. comp.
-
+  
   prep_CatalogueInput_500s();                            // Requires max. number of gals of ALL mocks analysed simultaneously to be hard coded in.  
 
   prep_nbar();
@@ -121,8 +117,8 @@ int main(int argc, char **argv){
   prep_nosortMultipoleCalc();
   
   prep_r2c_modes();
-  /*
-  for(loopCount=1; loopCount<6; loopCount++){            
+  
+  for(loopCount=1; loopCount<2; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
     
     CatalogueInput_500s(); // mocks 1 to 153 are independent. 
@@ -145,7 +141,7 @@ int main(int argc, char **argv){
     
     PkCalc(); 
   }
-  */
+  
   double   end = getRealTime();
   
   printf("\n\nWall time: %.6lf", end - begin);

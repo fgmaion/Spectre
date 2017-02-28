@@ -1,8 +1,8 @@
 int Gaussian_filter(double GaussianFilter_radius, int zero_mean){
   // Gaussian filter the array overdensity, filter radius set by global variable GaussianFilter_radius.
-  prep_fftw();
+  // prep_fftw();
 
-  fftw_execute(p);
+  fftw_execute(plan);
 
   // Gaussian smooth the counts.
   double GaussianFilter;

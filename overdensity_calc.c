@@ -12,16 +12,14 @@ int boxCoordinates(double xCoor[], double yCoor[], double zCoor[], int rowNumber
 int calc_overdensity(){    
     // Overkill unless 1024^3:  #pragma omp parallel for private(j)
     for(j=0; j<n0*n1*n2; j++){
-      overdensity_complex[j][0] = 0.0;  // Clean before galaxy/random assignment.
-      overdensity_complex[j][1] = 0.0;
-
-      overdensity[j] = 0.0;
+      overdensity[j][0] = 0.0;  // Clean before galaxy/random assignment.
+      overdensity[j][1] = 0.0;
     }
     
     // Overkill: #pragma omp parallel for private(j)
     for(j=0; j<Vipers_Num; j++){
       if(Acceptanceflag[j] == true){  
-	cic_assign(1, xCoor[j], yCoor[j], zCoor[j], fkp_galweight[j]*clip_galweight[j]/sampling[j]);  // cic assign, weighted by sampling, fkp wghts and clipping.
+        cic_assign(1, xCoor[j], yCoor[j], zCoor[j], fkp_galweight[j]*clip_galweight[j]/sampling[j]);  // cic assign, weighted by sampling, fkp wghts and clipping.
       }
     }
     

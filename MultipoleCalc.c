@@ -16,9 +16,9 @@ int prep_nosortMultipoleCalc(){
   }
 
   // index where fftw mode sits in pk binning array.
-  mode_pkbin_index     = malloc((n2/n2 + 1)*n1*n0*sizeof(double));
-  mode_Li              = malloc((n2/2  + 1)*n1*n0*sizeof(double));
-  mass_assign_corr     = malloc((n2/2  + 1)*n1*n0*sizeof(double));  // W^2 factors. 
+  kind    = malloc((n2/n2 + 1)*n1*n0*sizeof(double));
+  kLi     = malloc((n2/2  + 1)*n1*n0*sizeof(double));
+  kM2     = malloc((n2/2  + 1)*n1*n0*sizeof(double));  // W^2 factors. 
   
   return 0;
 }
@@ -58,16 +58,16 @@ int nosort_MultipoleCalc(){
       for(i=0; i<(n2/2+1); i++){
         Index                        = k*n1*(n2/2+1) + j*(n2/2+1) + i;
         
-        H_k[Index][0]               /= mass_assign_corr[Index];  // Correct mass assignment of randoms; cic = 2, ngp = 1.
-        H_k[Index][1]               /= mass_assign_corr[Index];
+        H_k[Index][0]               /= kM2[Index];  // Correct mass assignment of randoms; cic = 2, ngp = 1.
+        H_k[Index][1]               /= kM2[Index];
 
         pk                           = pow(H_k[Index][0], 2.) + pow(H_k[Index][1], 2.);
 
         // pk                       -= rand_shot;
         // pk                       -=  gal_shot;  // Fit for constant shotnoise of galaxies when clipping
 
-        Sum_Pi[mode_pkbin_index[Index]]   += pk;
-        Sum_PiLi[mode_pkbin_index[Index]] += pk*mode_Li[Index];
+        Sum_Pi[kind[Index]]         += pk;
+        Sum_PiLi[kind[Index]]       += pk*kLi[Index];
       }
     }
   }

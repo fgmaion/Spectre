@@ -9,23 +9,20 @@ int    data_mock_flag;
 // r2c or c2c arrays/ 
 int     fft_size;
 
-double* overdensity;
+// double* overdensity;
 double* smooth_overdensity;
 
+
+fftw_complex* overdensity;
 fftw_complex* H_k;
 
 //-- embedding volume --// 
 double    TotalVolume         = 0.0;
 double    TotalSurveyedVolume = 0.0;
 
-
-
-
 double    stefano_trans_x;  // translation parameters for Stefano's co-ordinates.
 double    stefano_trans_y;
 double    stefano_trans_z;
-
-
 
 //-- VIPERS --//
 int               max_gals;  // max. number of galaxies (lines) in any mock in covariance calc, i.e. in files in mocks directory.
@@ -41,7 +38,7 @@ double        LowerRAlimit;
 double        UpperDecLimit;
 double        LowerDecLimit;
 
-
+int*                id   = NULL;
 double*             ra   = NULL;
 double*            dec   = NULL;
 double*           zobs   = NULL;
@@ -72,6 +69,8 @@ double                   alpha; // ratio of N_rand to N_gal pretty much.
 int          rand_number   = 0;
 int          accepted_rand = 0;
 
+double       fkp_accepted_rand = 0.0;
+
 double*      rand_ra     = NULL;
 double*      rand_dec    = NULL;
 double*      rand_chi    = NULL;
@@ -86,7 +85,7 @@ double       fkpPk;
 double fkp_norm, daccepted_gals;
 
 
-// Embedding volume for mock.
+//-- Embedding volume for mock. --//
 int          n0, n1, n2; // (z == 0), (x == 2).
 
 double  AxisLimsArray[2][3];  // Array to hold the coordinate limits of the VIPERS survey.
@@ -106,6 +105,9 @@ int       boxlabel;
 int          xlabel, ylabel, zlabel;
 
 
+//-- Jenkins's folding --//
+double       Jenkins_foldfactor;
+
 // -- n(z) calc. -- //
 int          chibin_no;
 double       chi_interval;
@@ -123,6 +125,11 @@ double     cumulative_nbar_2d[400];
 double    chi_cumulative_nbar[400];
 
 // -- FFT units --//
+double k_x, k_y, k_z;
+
+double kSq, kmodulus, mu; // necessary for these to be global?
+double kbinInterval;
+
 double        kIntervalx; // fund_kx.
 double        kIntervaly;
 double        kIntervalz;
@@ -150,7 +157,7 @@ int     hiMultipoleOrder; // 0: use monopole only, 2: use quadrupole.
 
 double* kLi; // L_2 evaluated for each individual mode. 
 double* kM2; // Square NGP/CIC correction for each available mode.  
-int*    mode_pkbin_index;  // index in which mode falls in binned p(k) array.
+int*    kind;  // index in which mode falls in binned p(k) array.
 
 double* detA; //
 double* Sum_Pi;
@@ -177,7 +184,9 @@ double       SolidAngleCalc(double decLowerBound, double decUpperBound, double r
 
 double       invert_StefanoBasis(double centreRA, double centreDec, double* xval, double* yval, double* zval);
 
+double       nbar_dV(double chi);
 int          prep_inverseCumulative_nbar();
+double       interp_nz(double chi);
 double       inverse_cumulative_nbar(double arg);
 
 int          CoordinateCalc();
@@ -186,4 +195,5 @@ int          JenkinsCoordinates();
 int          JenkinsFold(double original[], int lenArray, int axis);
 int          ApplyJenkins();
 
+int          PkCalc();
 

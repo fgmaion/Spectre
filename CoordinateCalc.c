@@ -80,7 +80,6 @@ int DataInput(){
     
     // derived parameters. 
     Acceptanceflag =  (bool  *)   realloc(Acceptanceflag, Vipers_Num*sizeof(*Acceptanceflag));
-    polarAngle     =  (double *)  realloc(polarAngle,     Vipers_Num*sizeof(*polarAngle));
     rDist          =  (double *)  realloc(rDist,          Vipers_Num*sizeof(*rDist));
     xCoor          =  (double *)  realloc(xCoor,          Vipers_Num*sizeof(*xCoor));
     yCoor          =  (double *)  realloc(yCoor,          Vipers_Num*sizeof(*yCoor));
@@ -139,7 +138,6 @@ int ParentInput_500s(char filepath[]){
 
   // derived parameters.                                                                                                                                                                                                                   
   Acceptanceflag =  (bool  *)   realloc(Acceptanceflag, Vipers_Num*sizeof(*Acceptanceflag));
-  polarAngle     =  (double *)  realloc(polarAngle,     Vipers_Num*sizeof(*polarAngle));
   rDist          =  (double *)  realloc(rDist,          Vipers_Num*sizeof(*rDist));
   xCoor          =  (double *)  realloc(xCoor,          Vipers_Num*sizeof(*xCoor));
   yCoor          =  (double *)  realloc(yCoor,          Vipers_Num*sizeof(*yCoor));
@@ -169,9 +167,9 @@ int ParentInput_500s(char filepath[]){
   return 0;
 }
 
-
+/*
 int CatalogueInput(char filepath[]){
-    //** Value added mocks input. **//
+    // Value added mocks input. //
     printf("\n\nOpening catalogue: %s", filepath);
     
     inputfile     = fopen(filepath, "r"); 
@@ -238,18 +236,17 @@ int CatalogueInput(char filepath[]){
      
     // derived parameters. 
     Acceptanceflag =  (bool  *)   realloc(Acceptanceflag, Vipers_Num*sizeof(*Acceptanceflag));
-    polarAngle     =  (double *)  realloc(polarAngle,     Vipers_Num*sizeof(*polarAngle));
     rDist          =  (double *)  realloc(rDist,          Vipers_Num*sizeof(*rDist));
     xCoor          =  (double *)  realloc(xCoor,          Vipers_Num*sizeof(*xCoor));
     yCoor          =  (double *)  realloc(yCoor,          Vipers_Num*sizeof(*yCoor));
     zCoor          =  (double *)  realloc(zCoor,          Vipers_Num*sizeof(*zCoor));
     
-    /*
+    
     for(j=0; j<1000; j++){
        pointing[j] =  (char *)    realloc(pointing[j], 20*sizeof(char));
        quadrant[j] =  (char *)    realloc(quadrant[j], 20*sizeof(char));
     }
-    */
+    
     
     for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%d \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %lf \t %d \t %lf \t %lf \t %lf \t %*s \t %*s \t %d \t %d \t %d \t %lf \n", &id[j], &ra[j], &dec[j], &zcos[j], &zpec[j], &zobs[j], &zphot[j], &M_B[j], &type[j], &csr[j], &sampling[j], &sampling35[j], &flag_Nagoya[j], &flag_SSPOC[j], &flag_SSPOC35[j], &rand_sel[j]);
     
@@ -260,3 +257,4 @@ int CatalogueInput(char filepath[]){
 
     return 0;
 }
+*/
