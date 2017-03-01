@@ -27,15 +27,15 @@ int rand_newchi_newbasis(){
   
   // #pragma omp parallel
   //{ // \{ must be on a new line
-    gsl_rng*  gsl_ran_thread_r;
+    // gsl_rng*  gsl_ran_thread_r;
 
-    gsl_ran_thread_r = gsl_rng_alloc(gsl_rng_taus); // new instance of taus generator. 
+    // gsl_ran_thread_r = gsl_rng_alloc(gsl_rng_taus); // new instance of taus generator. 
 
-    gsl_rng_set(gsl_ran_thread_r, 1 + omp_get_thread_num()); // seed with thread id; 0 is default so start at one.  
+    // gsl_rng_set(gsl_ran_thread_r, 1 + omp_get_thread_num()); // seed with thread id; 0 is default so start at one.  
     
     // #pragma omp for private(j, x1, y1, z1, x2, y2, z2, c_ra, c_dec, F, cos_dec)
     for(j=0; j<rand_number; j++){
-      F             = gsl_rng_uniform(gsl_ran_thread_r);  // Chi limits Satisfied by construction.
+      F             = gsl_rng_uniform(gsl_ran_r);  // Chi limits Satisfied by construction.
     
       rand_chi[j]   = inverse_cumulative_nbar(F);
       

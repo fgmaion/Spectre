@@ -1,47 +1,53 @@
 #include "qSortCompare.c"
 
 int PkCalc(){
-    // fftw_execute(p);
-
-    // for(j=0; j<n0*n1*n2; j++)  printf("\n%.4lf \t %.4lf", H_k[j][0], H_k[j][1]);
-
-    //correct_ind_modes();
-   
-    //correct_all_modes();
-    
-    // r2c
     fftw_execute(plan);
+
+    oldprep_pkRegression();
+    
+    correct_ind_modes();
+    // correct_all_modes();
     
     // for(j=0; j<(n0/2)*n1*n2; j++)  printf("\n%.4lf \t %.4lf", H_k[j][0], H_k[j][1]);
-    
-    prep_r2c_modes();
 
-    nosort_MultipoleCalc();
+    // nosort_MultipoleCalc();
     
     // Correct_modes();
     
     // observedQuadrupole();
+
+    // MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 1);
+
+    oldnosort_MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 1);
     
     return 0;
 }
 
 
 int prep_r2c_modes(){
+  int dummy;
+  
   // r2c returns half the modes on the direction in which overdensity changes first, i.e. x. 
   // #pragma omp parallel for private(Index, k, j, i, k_x, k_y, k_z, pk, kmodulus, mu)
   for(k=0; k<n0; k++){
     k_z = kIntervalz*k;
 
+    if(k_z > zNyquistWaveNumber)  k_z   -= n0*kIntervalz;
+    
     for(j=0; j<n1; j++){
       k_y = kIntervaly*j;
 
       if(k_y > yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
-      
-      for(i=0; i<(n2/2+1); i++){
+
+      // for(i=0; i<(n2/2 + 1); i++){
+      for(i=0; i<n2; i++){ // limit is (n2/2 + 1)*n1*n0 for r2c.
         k_x = kIntervalx*i;
 
-        Index                                  = k*n1*(n2/2+1) + j*(n2/2+1) + i;
-
+        if(k_x > xNyquistWaveNumber)  k_x   -= n2*kIntervalx; //  Remove for r2c. int rather than double condition.  
+        
+        // Index                                  = k*n1*(n2/2+1) + j*(n2/2+1) + i;
+        Index                                  = k*n1*n2 + j*n2 + i;
+        
         kSq                                    = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
 
         kmodulus                               = pow(kSq, 0.5);
@@ -55,17 +61,20 @@ int prep_r2c_modes(){
         kM2[Index]                            *= gsl_sf_sinc(k_z*0.5/zNyquistWaveNumber);
 
         kM2[Index]                             = pow(kM2[Index], 2.0);  // Correct mass assignment of randoms; cic = 2, ngp = 1.
-        
-        // %% NEEDS FIXED FOR KMODULUS < LOGK_MIN %%//
-        kind[Index]                            = (int)  floor((log10(kmodulus) - logk_min)/logk_interval) > 0 ? (int)  floor((log10(kmodulus) - logk_min)/logk_interval) : 0;
 
+        dummy                                  = (int)  floor((log10(kmodulus) - logk_min)/logk_interval);
+        
+        // Needs properly fixed.  Discarding zero index info.
+        //                                     if                                            then    else
+        kind[Index]                            = ((dummy >= 0) && (dummy < kbin_no)) ? dummy : 0;
+        
         // Each available mode has an index in the binning array. 
         Sum_Li[kind[Index]]                   += kLi[Index];
         Sum_Li2[kind[Index]]                  += kLi[Index]*kLi[Index];
 
         modes_perbin[kind[Index]]             += 1;
 
-        mean_modk[kind[Index]]                += kmodulus;        
+        mean_modk[kind[Index]]                += kmodulus;
       }
     }
   }
@@ -139,11 +148,10 @@ int correct_ind_modes(){
   //    (b)   Galaxies removed account for linear fluctuations to be
   //          smaller, as opposed to a change in number density.
   
-  /*
   for(i=1; i<n2/2+1; i++){
     k_x = kIntervalx*i;  // k_z = 0.0 && k_y = 0.0 && k_x > 0.0; drop the mean (k=0) mode. 
 
-    // PkCorrections(i, k_x, 0.0, 0.0, rand_shot, gal_shot, &pk, &kmodulus, &mu);
+    PkCorrections(i, k_x, 0.0, 0.0, rand_shot, gal_shot, &pk, &kmodulus, &mu);
     
     polar_pk[i-1][0] = kmodulus;         // One hemi-sphere is independent, e.g. i) k_z >= 0.0
     polar_pk[i-1][1] = fabs(mu);         // ii) in the k_z=0 plane one semi-circle is independent, k_y>0.
@@ -161,7 +169,7 @@ int correct_ind_modes(){
 
       Index                              = j*n2 + i;   // k=0 by assumption;   
 
-      // PkCorrections(Index, k_x, k_y, 0.0, rand_shot, gal_shot, &pk, &kmodulus, &mu);
+      PkCorrections(Index, k_x, k_y, 0.0, rand_shot, gal_shot, &pk, &kmodulus, &mu);
 
       // Starts at n2/2 from first loop, but k_y starts at 1. 
       polar_pk[start + Index][0]         = kmodulus;   // One hemi-sphere is independent, e.g. i) k_z >= 0.0
@@ -172,7 +180,7 @@ int correct_ind_modes(){
   
   start = -n1*n2/2 + n2/2;
   
-  #pragma omp parallel for private(Index, k, j, i, k_x, k_y, k_z, pk, kmodulus, mu)
+  // #pragma omp parallel for private(Index, k, j, i, k_x, k_y, k_z, pk, kmodulus, mu)
   for(k=1; k<=n0/2; k++){  // k_z > 0.0; no restriction on k_x or k_y. 
      k_z = kIntervalz*k;
 
@@ -180,25 +188,25 @@ int correct_ind_modes(){
        k_y = kIntervaly*j;
 
        for(i=0; i<n2; i++){
-	 k_x = kIntervalx*i;
+   	     k_x = kIntervalx*i;
 
-	 if(k_x>xNyquistWaveNumber)  k_x   -= n2*kIntervalx;  // Way to remove this?
-	 if(k_y>yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
+         if(k_x>xNyquistWaveNumber)  k_x   -= n2*kIntervalx;  // Way to remove this?
+         if(k_y>yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
 
-	 Index                              = k*n1*n2 + j*n2 + i;
+         Index                              = k*n1*n2 + j*n2 + i;
 
-	 // PkCorrections(Index, k_x, k_y, k_z, rand_shot, gal_shot, &pk, &kmodulus, &mu);
+         PkCorrections(Index, k_x, k_y, k_z, rand_shot, gal_shot, &pk, &kmodulus, &mu);
 	 
-	 polar_pk[start + Index][0] = kmodulus;   // One hemi-sphere is independent, e.g. i) k_z >= 0.0
-	 polar_pk[start + Index][1] = fabs(mu);   // ii) in the k_z=0 plane one semi-circle is independent, k_y>0.
-	 polar_pk[start + Index][2] = pk;         // iii) on the line k_z=k_y=0, one half is independent, k_x>=0.
-	                                          // in the k_z=0 plane one semi-circle is independent, k_y>0.
+         polar_pk[start + Index][0] = kmodulus;   // One hemi-sphere is independent, e.g. i) k_z >= 0.0
+         polar_pk[start + Index][1] = fabs(mu);   // ii) in the k_z=0 plane one semi-circle is independent, k_y>0.
+         polar_pk[start + Index][2] = pk;         // iii) on the line k_z=k_y=0, one half is independent, k_x>=0.
+	                                              // in the k_z=0 plane one semi-circle is independent, k_y>0.
        }
      }
   }
   
-  polar_pkcount = n0*n1*n2/2 + n1*n2/2 +n2/2;  // Number of modes, Index is (polar_pkcount -1).
-  */
+  polar_pkcount = n0*n1*n2/2 + n1*n2/2 + n2/2;  // Number of modes, Index is (polar_pkcount -1).
+  
   return 0;
 }
 
@@ -248,6 +256,7 @@ int MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], doubl
     for(i=0; i<modeCount; i++){
         if(Array[i][0] >= logk_limits[0]){
             loIndex = i; 
+
             break;
         }
     }
@@ -272,9 +281,9 @@ int MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], doubl
         
         for(i=loIndex; i<modeCount; i++){
             if(Array[i][0] > logk_limits[j+1]){
-  	        hiIndex = i;  // Find the range of indices corresponding to the modes in a given k interval.
+              hiIndex = i;  // Find the range of indices corresponding to the modes in a given k interval.
 
-		break;
+              break;
             } 
         }
         
@@ -312,10 +321,10 @@ int MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], doubl
          loIndex   = hiIndex;
          
          if((fileOutput==1) && (detA>pow(10., -6.))){  	   
-	   printf("\n%le \t %le \t %le \t %d", mean_modBin[j], Monopole[j], Quadrupole[j], modes_perbin);
+           printf("\n%le \t %le \t %le \t %d", mean_modBin[j], Monopole[j], Quadrupole[j], modes_perbin);
 
-	   fprintf(output, "%e \t %e \t %e \t %d \n", mean_modBin[j], Monopole[j], Quadrupole[j], modes_perbin);
-	 }
+           fprintf(output, "%e \t %e \t %e \t %d \n", mean_modBin[j], Monopole[j], Quadrupole[j], modes_perbin);
+         }
      } 
     
      if(fileOutput==1) fclose(output);

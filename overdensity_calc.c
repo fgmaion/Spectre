@@ -14,6 +14,8 @@ int calc_overdensity(){
     for(j=0; j<n0*n1*n2; j++){
       overdensity[j][0] = 0.0;  // Clean before galaxy/random assignment.
       overdensity[j][1] = 0.0;
+
+      // overdensity[j] = 0.0;
     }
     
     // Overkill: #pragma omp parallel for private(j)

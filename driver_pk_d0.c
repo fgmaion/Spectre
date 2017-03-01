@@ -23,7 +23,8 @@
 //// #include "clipping_weights.c"
 #include "CloudInCell.c" 
 #include "overdensity_calc.c"
-#include "FFTw.c"
+//#include "FFTw.c"
+//#include "old_FFTw.c"
 #include "GaussianFilter.c"
 #include "assign_pkmemory.c"
 
@@ -71,7 +72,7 @@ int main(int argc, char **argv){
   stefano_trans_y           =      +300.;
   stefano_trans_z           =     -1500.;
 
-  if(1.0 < hi_zlim){  //%% Changed from 0.8 %%
+  if(1.0 < hi_zlim){             //%% Changed from 0.8 %%
     stefano_trans_z -= 600.;     // Previously 600. Mpc for 0.9 < z < 1.2;
   }
   
@@ -109,14 +110,12 @@ int main(int argc, char **argv){
   prep_pkRegression(0);                                  // last arg: ln k spacing is 0, linear is 1.  129 bins for linear + Stef. comp.
   
   prep_CatalogueInput_500s();                            // Requires max. number of gals of ALL mocks analysed simultaneously to be hard coded in.  
-
+  
   prep_nbar();
   
   load_rands_radec(1.0);
-
-  prep_nosortMultipoleCalc();
   
-  prep_r2c_modes();
+  // prep_r2c_modes();
   
   for(loopCount=1; loopCount<2; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
@@ -139,7 +138,7 @@ int main(int argc, char **argv){
     
     calc_overdensity(); // Cloud-in-Cell is a bottleneck. 
     
-    PkCalc(); 
+    // PkCalc(); 
   }
   
   double   end = getRealTime();

@@ -8,10 +8,10 @@ int    data_mock_flag;
 
 // r2c or c2c arrays/ 
 int     fft_size;
+int     num_modes; // c2c: n0*n1*n2, r2c: (n2/2 + 1)*n1*n0
 
-// double* overdensity;
+//double* overdensity;
 double* smooth_overdensity;
-
 
 fftw_complex* overdensity;
 fftw_complex* H_k;
@@ -153,6 +153,10 @@ double* binnedPk           = NULL;
 double* logk_limits        = NULL;
 
 // -- Multipole decomposition -- //
+int      polar_pkcount; // REDUNDANT
+double** polar_pk;      // REDUNDANT.
+
+
 int     hiMultipoleOrder; // 0: use monopole only, 2: use quadrupole.
 
 double* kLi; // L_2 evaluated for each individual mode. 

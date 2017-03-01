@@ -6,7 +6,7 @@ int prep_nbar(){
   Nchi      =  (double *)  realloc(Nchi,     chibin_no*sizeof(*Nchi));
   nbar      =  (double *)  realloc(nbar,     chibin_no*sizeof(*nbar));
   comovVol  =  (double *)  realloc(comovVol, chibin_no*sizeof(*comovVol));
-  nbar_2d   =  (double *)  realloc(nbar_2d,  chibin_no*sizeof(*nbar_2d));  // Second derivatives.
+  nbar_2d   =  (double *)  realloc(nbar_2d,  chibin_no*sizeof(*nbar_2d));
 
   for(j=0; j<chibin_no; j++){ 
       Nchi[j]     = 0.0;

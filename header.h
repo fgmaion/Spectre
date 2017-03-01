@@ -110,7 +110,6 @@ int   CatalogNumber;
 double u0, variance;
 
 
-
 //-- Functions --//
 double LegendrePolynomials(double x, int n);
 

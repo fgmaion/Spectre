@@ -11,6 +11,9 @@ int init_gsl_randgen(){
 int init_padding(){
   n0 = n1 = n2 = fft_size;
 
+  num_modes                 =           n0*n1*n2; // c2c: n0*n1*n2, r2c: (n2/1 + 1)*n1*n0.
+  // num_modes                 =   (n2/1 + 1)*n1*n0;
+  
   AxisLimsArray[0][0]       =        0.0;      // Embedding volume for P(k) measurement. Stefano basis.
   AxisLimsArray[1][0]       =      800.0;
 
@@ -39,7 +42,7 @@ int init_cell_info(){
 
 
 int initi_dist_z(){
-  comovDistReshiftCalc();                // Cosmology determined by inclusion of cosmology_planck2015.h or cosmology_valueaddedmocks.h
+  comovDistReshiftCalc(); // Cosmology determined by inclusion of cosmology_planck2015.h or cosmology_valueaddedmocks.h
 
   loChi                 = interp_comovingDistance(lo_zlim);
   hiChi                 = interp_comovingDistance(hi_zlim);

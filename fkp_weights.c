@@ -7,6 +7,8 @@ int calc_fkpweights(){
       nbar       =    interp_nz(rand_chi[j]);      // assumes randoms up to rand_number are all accepted.
       fkp_norm  += nbar*pow(rand_weight[j], 2.);   // FKP weights for randoms sets the normalisation
     }
+
+    printf("\n\nFKP norm: %.4lf", fkp_norm);
     
     fkp_norm    *= alpha;   // alpha includes clipping weights.
     fkp_norm     = sqrt(fkp_norm);

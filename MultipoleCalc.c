@@ -1,29 +1,3 @@
-int prep_nosortMultipoleCalc(){
-  printf("\n\nPerforming multipole calculation to quadrupole order:");
-
-  for(k=0; k<kbin_no; k++){
-    mean_modk[k]      = 0.0;
-
-    Monopole[k]       = 0.0;
-    Quadrupole[k]     = 0.0;
-    modes_perbin[k]   =   0;
-
-    Sum_Li[k]         = 0.0;
-    Sum_Li2[k]        = 0.0;
-
-    Sum_Pi[k]         = 0.0;
-    Sum_PiLi[k]       = 0.0;
-  }
-
-  // index where fftw mode sits in pk binning array.
-  kind    = malloc((n2/n2 + 1)*n1*n0*sizeof(double));
-  kLi     = malloc((n2/2  + 1)*n1*n0*sizeof(double));
-  kM2     = malloc((n2/2  + 1)*n1*n0*sizeof(double));  // W^2 factors. 
-  
-  return 0;
-}
-
-
 int nosort_MultipoleCalc(){
   // P(k, mu_i) = P_0(k) + P_2(k)*(3.*mu_i*mu_i - 1.)/2
   // Least squares fit between theory prediction, P(k, mu_i) and measured.  (Linear regression).
@@ -45,6 +19,8 @@ int nosort_MultipoleCalc(){
     if(Acceptanceflag[j] == true)  gal_shot  += pow(fkp_galweight[j]/sampling[j], 2.);  // galaxy shot noise, inc. sampling.
   }
 
+  printf("\n\nShot noise: randoms %.4lf, galaxies %.4lf", rand_shot, gal_shot);
+  
   // clear arrays. 
   for(k=0; k<kbin_no; k++){
     Monopole[k]       = 0.0;
@@ -52,11 +28,15 @@ int nosort_MultipoleCalc(){
     Sum_Pi[k]         = 0.0;
     Sum_PiLi[k]       = 0.0;
   }
+
+  printf("\n\nPerforming multipole calculation to Quadrupole order:");
   
   for(k=0; k<n0; k++){
     for(j=0; j<n1; j++){
-      for(i=0; i<(n2/2+1); i++){
-        Index                        = k*n1*(n2/2+1) + j*(n2/2+1) + i;
+      // for(i=0; i<(n2/2+1); i++){
+      for(i=0; i<n2; i++){
+        // Index                        = k*n1*(n2/2+1) + j*(n2/2+1) + i;
+        Index                        = k*n1*n2 + j*n2 + i;
         
         H_k[Index][0]               /= kM2[Index];  // Correct mass assignment of randoms; cic = 2, ngp = 1.
         H_k[Index][1]               /= kM2[Index];
@@ -84,8 +64,7 @@ int nosort_MultipoleCalc(){
     Monopole[j]    = (1./detA[j])*( Sum_Li2[j]*Sum_Pi[j] - Sum_Li[j]*Sum_PiLi[j]);
     Quadrupole[j]  = (1./detA[j])*( -Sum_Li[j]*Sum_Pi[j] + modes_perbin[j]*Sum_PiLi[j]);
   
-    // if(log10(detA[j]) > -6.0)
-    printf("\n%le \t %le \t %le \t %d", mean_modk[j], Monopole[j], Quadrupole[j], modes_perbin[j]);
+    if(log10(detA[j]) > -6.0)  printf("\n%le \t %le \t %le \t %d", mean_modk[j], Monopole[j], Quadrupole[j], modes_perbin[j]);
   }
     
   return 0;
