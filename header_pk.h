@@ -188,10 +188,10 @@ double       SolidAngleCalc(double decLowerBound, double decUpperBound, double r
 
 double       invert_StefanoBasis(double centreRA, double centreDec, double* xval, double* yval, double* zval);
 
-double       nbar_dV(double chi);
+//double       nbar_dV(double chi);
 int          prep_inverseCumulative_nbar();
-double       interp_nz(double chi);
-double       inverse_cumulative_nbar(double arg);
+//double       interp_nz(double chi);
+//double       inverse_cumulative_nbar(double arg);
 
 int          CoordinateCalc();
 

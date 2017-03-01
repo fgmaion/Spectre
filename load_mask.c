@@ -69,7 +69,7 @@ int rand_newchi_newbasis(){
     //}
 
   StefanoRotated(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);  // Why doesn't commented code above work!?
-  
+  /*
   if(Jenkins_foldfactor > 1.0){
     // #pragma omp parallel for private(j)
     for(j=0; j<rand_number; j++){
@@ -78,7 +78,7 @@ int rand_newchi_newbasis(){
       rand_z[j] = fmod(rand_z[j], (AxisLimsArray[1][0] - AxisLimsArray[0][0]));
     }
   }
-  
+  */
   printf("\n\nStefano basis, randoms co-ordinates.");                                                                                                      
   printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));                                                     
   printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));                                                     

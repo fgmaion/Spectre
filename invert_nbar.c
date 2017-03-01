@@ -5,18 +5,16 @@ double nbar_dV(double chi){
 
 int prep_inverseCumulative_nbar(){
   // Calculate cumulative nbar and splint its inverse.
-  double  norm;
-
   gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
 
-  double error, result;
+  double norm, error, result;
 
   double alpha = 1.0;
 
   gsl_function F;
 
   F.function = &nbar_dV;
-
+  
   gsl_integration_qags(&F, loChi - 1., hiChi + 1., 0, 1e-7, 1000, w, &norm, &error);
 
   for(ii=0; ii<400; ii++){
@@ -29,6 +27,8 @@ int prep_inverseCumulative_nbar(){
     cumulative_nbar[ii]     = result;
 
     cumulative_nbar[ii]    /= norm;
+
+    printf("\n%.4lf \t %.4lf", chi_cumulative_nbar[ii], cumulative_nbar[ii]);
   }
 
   spline(cumulative_nbar, chi_cumulative_nbar, 400, 1.0e31, 1.0e31, cumulative_nbar_2d);
