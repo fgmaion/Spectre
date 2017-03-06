@@ -40,7 +40,7 @@ int prep_r2c_modes(){
         // for(i=0; i<n2; i++){ // limit is (n2/2 + 1)*n1*n0 for r2c.
         k_x = kIntervalx*i;
 
-        if(k_x > xNyquistWaveNumber)  k_x   -= n2*kIntervalx; //  Remove for r2c. int rather than double condition.  
+        // if(k_x > xNyquistWaveNumber)  k_x   -= n2*kIntervalx; //  Remove for r2c. int rather than double condition.  
         
         Index                                  = k*n1*(n2/2+1) + j*(n2/2+1) + i;
         // Index                                  = k*n1*n2 + j*n2 + i;
