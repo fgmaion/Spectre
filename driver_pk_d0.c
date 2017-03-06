@@ -66,11 +66,11 @@ int main(int argc, char **argv){
   W1area                    =     10.692;                 // (Nagoya v7 - overlapping Samhain area). Coverage of v7 & v6 identical.       
   W4area                    =      5.155;                 // dec cut at -5.97 in the mocks.
 
-  TotalW1W4area             = W1area + W4area;       // Required for <n(z)> calculation.
+  TotalW1W4area             = W1area + W4area;            // Required for <n(z)> calculation.
   
   stefano_trans_x           =      +100.;
-  stefano_trans_y           =      +300.;
-  stefano_trans_z           =     -1500.;
+  stefano_trans_y           =      +300.; 
+  stefano_trans_z           =     -1700.;                 // Changed from 1500. on 06/03/2017; as dealing with 0.8 < z < 1.0        
 
   if(1.0 < hi_zlim){             //%% Changed from 0.8 %%
     stefano_trans_z -= 600.;     // Previously 600. Mpc for 0.9 < z < 1.2;
@@ -87,7 +87,7 @@ int main(int argc, char **argv){
   }
 
   fkpPk                     =    8000.0;                 // [h^-1 Mpc]^3.
-  fft_size                  =       256;                 // Worker 46 works up to 1024. 
+  fft_size                  =       512;                 // Worker 46 works up to 1024. 
   
   kbin_no                   =        40;                 // kbin_no = 129; // Stefano comparison. 
   logk_min                  =      -2.0;
@@ -95,8 +95,7 @@ int main(int argc, char **argv){
   
   CatalogNumber             =       306;                 // Total number of HOD mocks.
 
-
-  double begin  = getRealTime();
+  start_walltime();
   
   fftw_init_threads();
   
@@ -116,6 +115,8 @@ int main(int argc, char **argv){
   load_rands_radec(1.0);
   
   prep_r2c_modes();
+
+  walltime("Wall time after prep:");
   
   for(loopCount=1; loopCount<2; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
@@ -126,10 +127,10 @@ int main(int argc, char **argv){
     
     spline_nbar(0);  // new <n(z)> for each mock. arg 1: bool for smoothed + reflected 2-field avg., arg 2: 'truth' i.e. mock avg.
     
-    // StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
+    StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
     
     rand_newchi_newbasis();
-    /*
+    
     // set_clippingweights();
     
     alpha_calc();
@@ -138,13 +139,11 @@ int main(int argc, char **argv){
     
     calc_overdensity(); // Cloud-in-Cell is a bottleneck. 
     
-    PkCalc(); */
+    PkCalc();
   }
   
-  double   end = getRealTime();
-  
-  printf("\n\nWall time: %.6lf", end - begin);
-  
+  walltime("Wall time at end:");
+
   printf("\n\n");
   
   return 0; 

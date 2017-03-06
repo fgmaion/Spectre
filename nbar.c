@@ -11,11 +11,12 @@ int prep_nbar(){
   for(j=0; j<chibin_no; j++){ 
       Nchi[j]     = 0.0;
       nbar[j]     = 0.0;  
+
       comovVol[j] = 0.0;
   
-      chibins[j] = (j + 0.5)*chi_interval;  // initialise chi vals.
+      chibins[j]  = (j + 0.5)*chi_interval;  // initialise chi vals.
     
-      zbins[j] = interp_inverseComovingDistance(chibins[j]);
+      zbins[j]    = interp_inverseComovingDistance(chibins[j]);
   }
 
   return 0;
@@ -23,8 +24,6 @@ int prep_nbar(){
 
 
 int spline_nbar(int truth){
-    prep_nbar();
-
     if(data_mock_flag == 0){	 // analysis on mocks.   
       if(truth==0){
         // smoothed counts, 1% renormalisation to \sum E^-1 (sum over W1 and W4).

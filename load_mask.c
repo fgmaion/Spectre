@@ -6,6 +6,12 @@ int load_rands_radec(double sampling){
     // load_ascii_randomCats(sampling);    
     load_fastread_randomCats(rand_number);
 
+    // To do: save randoms in radians.
+    for(j=0; j< rand_number; j++){
+      rand_ra[j]    *= (pi/180.0);                  // Converted to radians.  No need to convert back.
+      rand_dec[j]   *= (pi/180.0);
+    }
+    
     return 0;
 }
 
@@ -54,9 +60,6 @@ int rand_newchi_newbasis(){
       
       rand_chi[j]    = inverse_cumulative_nbar(F);
       
-      rand_ra[j]    *= (pi/180.0);                  // Converted to radians.  No need to convert back. 
-      rand_dec[j]   *= (pi/180.0);                  
-
       cos_dec        = cos(rand_dec[j]);
     
       rand_x[j]      =  rand_chi[j]*cos(rand_ra[j])*cos_dec;

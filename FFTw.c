@@ -23,11 +23,27 @@ int PkCalc(){
 
 int prep_r2c_modes(){
   int dummy;
+
+  int nx = n2/2 + 1;
+
+  double sinc_prefactor = 0.5/xNyquistWaveNumber;
   
-  // r2c returns half the modes on the direction in which overdensity changes first, i.e. x. 
-  // #pragma omp parallel for private(Index, k, j, i, k_x, k_y, k_z, pk, kmodulus, mu)
+  double* sinc_factors;
+
+  sinc_factors = malloc(n0*sizeof(double));
+
   for(k=0; k<n0; k++){
     k_z = kIntervalz*k;
+
+    if(k_z > zNyquistWaveNumber)  k_z   -= n0*kIntervalz;
+    
+    sinc_factors[k] = gsl_sf_sinc(sinc_prefactor*k_z);
+  }
+  
+  // r2c returns half the modes on the direction in which overdensity changes first, i.e. x. 
+  #pragma omp parallel for private(Index, dummy, k, j, i, k_x, k_y, k_z, kSq, kmodulus, mu)  shared(kbin_no, logk_min, logk_interval, n0, n1, n2, nx, kIntervalx, kIntervaly, kIntervalz, yNyquistWaveNumber, zNyquistWaveNumber)  // collapse(3)
+  for(k=0; k<n0; k++){
+    k_z = kIntervalz*k; // isn't perfectly nested. 
 
     if(k_z > zNyquistWaveNumber)  k_z   -= n0*kIntervalz;
     
@@ -36,13 +52,13 @@ int prep_r2c_modes(){
 
       if(k_y > yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
 
-      for(i=0; i<(n2/2 + 1); i++){
+      for(i=0; i<nx; i++){
         // for(i=0; i<n2; i++){ // limit is (n2/2 + 1)*n1*n0 for r2c.
         k_x = kIntervalx*i;
 
         // if(k_x > xNyquistWaveNumber)  k_x   -= n2*kIntervalx; //  Remove for r2c. int rather than double condition.  
         
-        Index                                  = k*n1*(n2/2+1) + j*(n2/2+1) + i;
+        Index                                  = k*n1*nx + j*nx + i;
         // Index                                  = k*n1*n2 + j*n2 + i;
         
         kSq                                    = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
@@ -53,10 +69,14 @@ int prep_r2c_modes(){
 
         kLi[Index]                             = gsl_sf_legendre_P2(mu);  // L_2 = 0.5*(3.*mu**2 -1.) 
 
-        kM2[Index]                             = gsl_sf_sinc(k_x*0.5/xNyquistWaveNumber); // Computes \sinc(x) = \sin(\pi x) / (\pi x).
-        kM2[Index]                            *= gsl_sf_sinc(k_y*0.5/yNyquistWaveNumber);
-        kM2[Index]                            *= gsl_sf_sinc(k_z*0.5/zNyquistWaveNumber);
-
+        // kM2[Index]                          = gsl_sf_sinc(sinc_prefactor*k_x); // Computes \sinc(x) = \sin(\pi x) / (\pi x).
+        // kM2[Index]                         *= gsl_sf_sinc(sinc_prefactor*k_y);
+        // kM2[Index]                         *= gsl_sf_sinc(sinc_prefactor*k_z);
+        
+        kM2[Index]                             = sinc_factors[k]; // Computes \sinc(x) = \sin(\pi x) / (\pi x).
+        kM2[Index]                            *= sinc_factors[j];
+        kM2[Index]                            *= sinc_factors[i];
+        
         kM2[Index]                             = pow(kM2[Index], 2.0);  // Correct mass assignment of randoms; cic = 2, ngp = 1.
 
         dummy                                  = (int)  floor((log10(kmodulus) - logk_min)/logk_interval);
@@ -66,7 +86,7 @@ int prep_r2c_modes(){
         kind[Index]                            = ((dummy >= 0) && (dummy < kbin_no)) ? dummy : (kbin_no - 1);
         
         // Each available mode has an index in the binning array. 
-        Sum_Li[kind[Index]]                   += kLi[Index];
+        Sum_Li[kind[Index]]                   += kLi[Index];  // Seems to add up to zero numerically.  
         Sum_Li2[kind[Index]]                  += kLi[Index]*kLi[Index];
 
         modes_perbin[kind[Index]]             += 1;

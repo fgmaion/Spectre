@@ -2,7 +2,6 @@
 double       Interim, dummy;
 int          Index, local_Index, loopCount, lineNo;
 
-
 //-- Cosmology -- //
 double   H_0;
 double   H_0inPerSec;
