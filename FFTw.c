@@ -2,19 +2,20 @@
 
 int PkCalc(){
     fftw_execute(plan);
-    
+    /*
     oldprep_pkRegression();
     
     // correct_ind_modes();
-    correct_all_modes();
+    correct_r2c_modes();
+    // correct_all_modes();
 
     MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 0);
-    
+    */
     // oldnosort_MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 0);
     
     // observedQuadrupole();
 
-    // nosort_MultipoleCalc();
+    nosort_MultipoleCalc();
     
     return 0;
 }
@@ -224,6 +225,58 @@ int correct_ind_modes(){
   }
   
   polar_pkcount = n0*n1*n2/2 + n1*n2/2 + n2/2;  // Number of modes, Index is (polar_pkcount -1).
+  
+  return 0;
+}
+
+
+int correct_r2c_modes(){
+  // FFTw r2c returns kx >= 0 only. Correct these modes and place into polar pk. 
+
+  int start;
+
+  double pk;
+  double rand_shot = 0.0, gal_shot = 0.0;
+
+  for(j=0; j<rand_number; j++)  rand_shot += pow(rand_weight[j], 2.);  // shot noise from randoms.
+
+  rand_shot *= alpha*alpha;
+
+  for(j=0; j<Vipers_Num; j++){
+    if(Acceptanceflag[j] == true)  gal_shot  += pow(fkp_galweight[j]/sampling[j], 2.);  // galaxy shot noise, inc. sampling.
+  }
+
+  printf("\n\nShot noise: randoms %.4lf, galaxies %.4lf", rand_shot, gal_shot);
+
+  polar_pkcount = 0;
+  
+  for(k=0; k<n0; k++){
+     k_z = kIntervalz*k;
+
+     for(j=0; j<n1; j++){
+       k_y = kIntervaly*j;
+
+       for(i=0; i<n2; i++){
+   	     k_x = kIntervalx*i;
+
+         if(k_x>xNyquistWaveNumber)  k_x   -= n2*kIntervalx;  // Way to remove this?
+         if(k_y>yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
+         if(k_z>zNyquistWaveNumber)  k_z   -= n0*kIntervalz;
+         
+         Index                              = k*n1*n2 + j*n2 + i;
+
+         PkCorrections(Index, k_x, k_y, k_z, rand_shot, gal_shot, &pk, &kmodulus, &mu);
+
+         if(k_x >= 0.){
+           polar_pk[polar_pkcount][0] = kmodulus;
+           polar_pk[polar_pkcount][1] = fabs(mu);   
+           polar_pk[polar_pkcount][2] = pk;         
+
+           polar_pkcount             += 1;
+         }
+       }
+     }
+  }
   
   return 0;
 }

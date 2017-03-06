@@ -11,8 +11,8 @@ int init_gsl_randgen(){
 int init_padding(){
   n0 = n1 = n2 = fft_size;
 
-  num_modes                 =           n0*n1*n2; // c2c.
-  // num_modes                 =   (n2/1 + 1)*n1*n0; // r2c.
+  // num_modes                 =           n0*n1*n2; // c2c.
+  num_modes                 =   (n2/1 + 1)*n1*n0; // r2c.
   
   AxisLimsArray[0][0]       =        0.0;      // Embedding volume for P(k) measurement. Stefano basis.
   AxisLimsArray[1][0]       =      800.0;
