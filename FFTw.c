@@ -36,14 +36,14 @@ int prep_r2c_modes(){
 
       if(k_y > yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
 
-      // for(i=0; i<(n2/2 + 1); i++){
-      for(i=0; i<n2; i++){ // limit is (n2/2 + 1)*n1*n0 for r2c.
+      for(i=0; i<(n2/2 + 1); i++){
+        // for(i=0; i<n2; i++){ // limit is (n2/2 + 1)*n1*n0 for r2c.
         k_x = kIntervalx*i;
 
         if(k_x > xNyquistWaveNumber)  k_x   -= n2*kIntervalx; //  Remove for r2c. int rather than double condition.  
         
-        // Index                                  = k*n1*(n2/2+1) + j*(n2/2+1) + i;
-        Index                                  = k*n1*n2 + j*n2 + i;
+        Index                                  = k*n1*(n2/2+1) + j*(n2/2+1) + i;
+        // Index                                  = k*n1*n2 + j*n2 + i;
         
         kSq                                    = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
 
@@ -94,7 +94,7 @@ int prep_r2c_modes(){
   mean_modk[kbin_no - 1] /= 0;
        detA[kbin_no - 1] /= 0;
   
-  printf("\n%d \t %d", sum_modes, n0*n1*n2);
+  printf("\n%d \t %d", sum_modes, num_modes);
   
   return 0;
 }
