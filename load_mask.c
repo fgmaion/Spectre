@@ -64,7 +64,7 @@ int rand_newchi_newbasis(){
       rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);            // Stefano reflection included. 
       
       rand_weight[j] = 1./(1. + interp_nz(rand_chi[j])*fkpPk);  // rand fkp weights.
-      
+      /*
       // basis formed by: normal spherical co-ordinates subject to inversion through xy plane, then R1 and finally R2.
       // R1: rotation about z such that in the new basis, (x',y',z'), x' hat lies in x-y plane at an angle centreRA to x.
       x1  =     cos(c_ra)*rand_x[j] + sin(c_ra)*rand_y[j];
@@ -82,10 +82,12 @@ int rand_newchi_newbasis(){
 
       // rand_x[j] = fmod(rand_x[j], 800./Jenkins_foldfactor);
       // rand_y[j] = fmod(rand_y[j], 800./Jenkins_foldfactor);
-      // rand_z[j] = fmod(rand_z[j], 800./Jenkins_foldfactor);
+      // rand_z[j] = fmod(rand_z[j], 800./Jenkins_foldfactor); */
     }
   }
 
+  StefanoRotated(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);
+  
   printf("\n\nStefano basis, randoms co-ordinates.");                                                                                                      
 
   printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));                                                     
