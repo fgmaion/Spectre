@@ -2,23 +2,21 @@
 
 int PkCalc(){
     fftw_execute(plan);
-
+    /*
     oldprep_pkRegression();
     
-    correct_ind_modes();
-    // correct_all_modes();
-    
-    // for(j=0; j<(n0/2)*n1*n2; j++)  printf("\n%.4lf \t %.4lf", H_k[j][0], H_k[j][1]);
+    // correct_ind_modes();
+    correct_all_modes();
 
-    // nosort_MultipoleCalc();
-    
+    oldnosort_MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 0);
+    */
     // Correct_modes();
     
     // observedQuadrupole();
 
-    // MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 1);
-
-    oldnosort_MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 1);
+    nosort_MultipoleCalc();
+    
+    // MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 0);
     
     return 0;
 }
@@ -75,15 +73,25 @@ int prep_r2c_modes(){
         modes_perbin[kind[Index]]             += 1;
 
         mean_modk[kind[Index]]                += kmodulus;
+
+        // printf("\n%d \t %.4lf \t %.4lf \t %d", Index, kLi[Index], kM2[Index], kind[Index]);
       }
     }
   }
 
+  int sum_modes = 0;
+  
   for(j=0; j<kbin_no; j++){
     mean_modk[j]  /= modes_perbin[j];
 
     detA[j]        = modes_perbin[j]*Sum_Li2[j] - Sum_Li[j]*Sum_Li[j];
+
+    // printf("\n%d \t %.4lf \t %.4lf \t %.4lf \t %.4lf", modes_perbin[j], mean_modk[j], Sum_Li[j], Sum_Li2[j], detA[j]);
+
+    sum_modes     += modes_perbin[j];
   }
+
+  printf("\n%d \t %d", sum_modes, n0*n1*n2);
   
   return 0;
 }
@@ -107,23 +115,31 @@ int correct_all_modes(){
   for(k=0; k<n0; k++){  // k_z > 0.0; no restriction on k_x or k_y.
     k_z = kIntervalz*k;
 
+    if(k_z>zNyquistWaveNumber)  k_z   -= n0*kIntervalz;
+    
     for(j=0; j<n1; j++){
       k_y = kIntervaly*j;
 
+      if(k_y>yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
+      
       for(i=0; i<n2; i++){
-	k_x = kIntervalx*i;
+        k_x = kIntervalx*i;
 
-	if(k_x>xNyquistWaveNumber)  k_x   -= n2*kIntervalx;  // Way to remove this?
-	if(k_y>yNyquistWaveNumber)  k_y   -= n1*kIntervaly;
-	if(k_z>zNyquistWaveNumber)  k_z   -= n0*kIntervalz;
-	
-	Index                              = k*n1*n2 + j*n2 + i;
+        if(k_x>xNyquistWaveNumber)  k_x   -= n2*kIntervalx;  // Way to remove this?
+      	
+        Index                              = k*n1*n2 + j*n2 + i;
 
-	// PkCorrections(Index, k_x, k_y, k_z, rand_shot, gal_shot, &pk, &kmodulus, &mu);
+        PkCorrections(Index, k_x, k_y, k_z, rand_shot, gal_shot, &pk, &kmodulus, &mu);
+
+        polar_pk[Index][0] = kmodulus;   
+        polar_pk[Index][1] = fabs(mu);   
+        polar_pk[Index][2] = pk;
       }
     }
   }
 
+  polar_pkcount = n0*n1*n2;
+  
   return 0;
 }
 
@@ -319,12 +335,10 @@ int MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], doubl
          Quadrupole[j]              = (1./detA)*(-Sum_Li*Sum_Pi  + modes_perbin*Sum_PiLi);
                             
          loIndex   = hiIndex;
-         
-         if((fileOutput==1) && (detA>pow(10., -6.))){  	   
-           printf("\n%le \t %le \t %le \t %d", mean_modBin[j], Monopole[j], Quadrupole[j], modes_perbin);
 
-           fprintf(output, "%e \t %e \t %e \t %d \n", mean_modBin[j], Monopole[j], Quadrupole[j], modes_perbin);
-         }
+         if(detA>pow(10., -6.))  printf("\n%le \t %le \t %le \t %d", mean_modBin[j], Monopole[j], Quadrupole[j], modes_perbin);
+         
+         if((fileOutput==1) && (detA>pow(10., -6.)))  fprintf(output, "%e \t %e \t %e \t %d \n", mean_modBin[j], Monopole[j], Quadrupole[j], modes_perbin);
      } 
     
      if(fileOutput==1) fclose(output);

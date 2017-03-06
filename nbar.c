@@ -47,7 +47,7 @@ int spline_nbar(int truth){
     inputfile = fopen(filepath, "r");
 
     for(j=0; j<chibin_no; j++)  fscanf(inputfile, "%le \t %le \n", &chibins[j], &nbar[j]);
-        
+    
     fclose(inputfile);
     
     spline(chibins, nbar, chibin_no, 1.0e31, 1.0e31, nbar_2d);

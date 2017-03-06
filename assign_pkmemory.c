@@ -65,7 +65,7 @@ int set_kbins_linearkspacing(){
 }
 
 
-int prep_pkRegression(int log_linear){
+int prep_pkRegression(){
   set_kbins_logkspacing();
   // set_kbins_linearkspacing();
 

@@ -13,40 +13,55 @@ int load_rands_radec(double sampling){
 int rand_newchi_newbasis(){
   // With nbar specified according to interp_nz(chi), assign chi for randoms such that they satisfy this bar.
   // Achieved with the transformation method, see pg. 287 of NR and smooth_nbar.c
-
+  
+  printf("\n\nAngular limits of randoms: %.4lf < ra < %.4lf, %.4lf < dec < %.4lf", arrayMin(rand_ra, rand_number),  arrayMax(rand_ra,  rand_number),
+                                                                                   arrayMin(rand_dec, rand_number), arrayMax(rand_dec, rand_number));
+  
   printf("\n\nNew basis for randoms.");
-
+  
   double F, cos_dec;
 
   double x1,  y1, z1;
   double x2,  y2, z2;
   double c_ra, c_dec;
 
+  int new;
+  
   c_ra    =  CentreRA*(pi/180.);
   c_dec   = CentreDec*(pi/180.);
   
   // #pragma omp parallel
   //{ // \{ must be on a new line
-    // gsl_rng*  gsl_ran_thread_r;
+    gsl_rng*  gsl_ran_thread_r;
 
-    // gsl_ran_thread_r = gsl_rng_alloc(gsl_rng_taus); // new instance of taus generator. 
+    gsl_ran_thread_r = gsl_rng_alloc(gsl_rng_taus); // new instance of taus generator. 
 
-    // gsl_rng_set(gsl_ran_thread_r, 1 + omp_get_thread_num()); // seed with thread id; 0 is default so start at one.  
+    gsl_rng_set(gsl_ran_thread_r, 1 + omp_get_thread_num()); // seed with thread id; 0 is default so start at one.  
     
     // #pragma omp for private(j, x1, y1, z1, x2, y2, z2, c_ra, c_dec, F, cos_dec)
     for(j=0; j<rand_number; j++){
-      F             = gsl_rng_uniform(gsl_ran_r);  // Chi limits Satisfied by construction.
-    
-      rand_chi[j]   = inverse_cumulative_nbar(F);
-      
-      rand_ra[j]   *= (pi/180.0);                  // Converted to radians.  No need to convert back. 
-      rand_dec[j]  *= (pi/180.0);                  
+      /*
+      new            = gsl_rng_uniform_int(gsl_ran_thread_r, Vipers_Num);
 
-      cos_dec       = cos(rand_dec[j]);
+      while(Acceptanceflag[new] == false){
+        new            = gsl_rng_uniform_int(gsl_ran_thread_r, Vipers_Num);
+      }
+
+      rand_chi[j]    = rDist[new];
+      */
+
+      F              = gsl_rng_uniform(gsl_ran_thread_r);  // Chi limits Satisfied by construction.
+      
+      rand_chi[j]    = inverse_cumulative_nbar(F);
+      
+      rand_ra[j]    *= (pi/180.0);                  // Converted to radians.  No need to convert back. 
+      rand_dec[j]   *= (pi/180.0);                  
+
+      cos_dec        = cos(rand_dec[j]);
     
-      rand_x[j]     =  rand_chi[j]*cos(rand_ra[j])*cos_dec;
-      rand_y[j]     =  rand_chi[j]*sin(rand_ra[j])*cos_dec;
-      rand_z[j]     = -rand_chi[j]*sin(rand_dec[j]);            // Stefano reflection included. 
+      rand_x[j]      =  rand_chi[j]*cos(rand_ra[j])*cos_dec;
+      rand_y[j]      =  rand_chi[j]*sin(rand_ra[j])*cos_dec;
+      rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);            // Stefano reflection included. 
       
       rand_weight[j] = 1./(1. + interp_nz(rand_chi[j])*fkpPk);  // rand fkp weights.
 
@@ -68,6 +83,8 @@ int rand_newchi_newbasis(){
     }
     //}
 
+    printf("\n\nRANDOMS: %.4lf < X < %.4lf", arrayMin(rand_chi, rand_number), arrayMax(rand_chi, rand_number));
+    
   StefanoRotated(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);  // Why doesn't commented code above work!?
   /*
   if(Jenkins_foldfactor > 1.0){
@@ -80,6 +97,7 @@ int rand_newchi_newbasis(){
   }
   */
   printf("\n\nStefano basis, randoms co-ordinates.");                                                                                                      
+
   printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));                                                     
   printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));                                                     
   printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));                                                     

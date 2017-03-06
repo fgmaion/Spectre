@@ -11,8 +11,8 @@ int init_gsl_randgen(){
 int init_padding(){
   n0 = n1 = n2 = fft_size;
 
-  num_modes                 =           n0*n1*n2; // c2c: n0*n1*n2, r2c: (n2/1 + 1)*n1*n0.
-  // num_modes                 =   (n2/1 + 1)*n1*n0;
+  num_modes                 =           n0*n1*n2; // c2c.
+  // num_modes                 =   (n2/1 + 1)*n1*n0; // r2c.
   
   AxisLimsArray[0][0]       =        0.0;      // Embedding volume for P(k) measurement. Stefano basis.
   AxisLimsArray[1][0]       =      800.0;
@@ -47,7 +47,7 @@ int initi_dist_z(){
   loChi                 = interp_comovingDistance(lo_zlim);
   hiChi                 = interp_comovingDistance(hi_zlim);
 
-  printf("\n\nRedshift limits, lower bound: %.2e \t %.2e h^-1 Mpc, \n\t\t upper bound: %.2e \t %.2e h^-1 Mpc", lo_zlim, loChi, hi_zlim, hiChi);
+  printf("\n\nRedshift limits, lower bound: %.4lf \t %.4lf h^-1 Mpc, \n\t\t upper bound: %.4lf \t %.4lf h^-1 Mpc", lo_zlim, loChi, hi_zlim, hiChi);
   
   return 0;
 }

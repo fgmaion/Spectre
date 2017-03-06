@@ -38,7 +38,7 @@ int oldprep_pkRegression(){
 
 
 int oldnosort_MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], double Quadrupole[], double** Array, int modeCount, char filepath[], double mu_lolimit, double mu_hilimit, int fileOutput){
-
+  
   // P(k, mu_i) = P_0(k) + P_2(k)*(3.*mu_i*mu_i - 1.)/2
   // Least squares fit between theory prediction, P(k, mu_i) and measured.  (Linear regression).
 
@@ -55,17 +55,14 @@ int oldnosort_MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopol
 
   int    modes_perbin[modBinNumb];
 
-  double logk_interval, logk_min, logk_max;
-
-  logk_min = -2.0;
-  logk_max = log10(4.0);
+  double logk_interval;
 
   logk_interval        = (logk_max - logk_min)/modBinNumb;
 
   // assign log(k) binning for P(k) and assign memory for binning. (logk_min, logk_max, # bins).
   // prep_pkbinning(-2., log10(modkMax), kbin_no);
 
-  for(k=0; k<modBinNumb-1; k++){
+  for(k=0; k<modBinNumb; k++){
     mean_modBin[k]    = 0.0;
 
     Monopole[k]       = 0.0;
@@ -88,24 +85,28 @@ int oldnosort_MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopol
 
     Index = (int)  floor((log10(Array[j][0]) - logk_min)/logk_interval);
 
-    if(Index >= 0){
-      mean_modBin[Index]  += Array[j][0];
-      modes_perbin[Index] += 1;
+    if(Index < 0)  Index = 0;
+    
+    mean_modBin[Index]  += Array[j][0];
+    modes_perbin[Index] += 1;
 
-      Li                   = gsl_sf_legendre_P2(Array[j][1]);  // L_2 = 0.5*(3.*mu**2 -1.)
-      Pi                   = Array[j][2];
+    Li                   = gsl_sf_legendre_P2(Array[j][1]);  // L_2 = 0.5*(3.*mu**2 -1.)
+    Pi                   = Array[j][2];
 
-      Sum_Li[Index]       += Li;
-      Sum_Li2[Index]      += Li*Li;
+    Sum_Li[Index]       += Li;
+    Sum_Li2[Index]      += Li*Li;
 
-      Sum_Pi[Index]       += Pi;
-      Sum_PiLi[Index]     += Pi*Li;
-    }
+    Sum_Pi[Index]       += Pi;
+    Sum_PiLi[Index]     += Pi*Li;
   }
 
-  for(j=0; j<modBinNumb-1; j++){
+  int sum_modes = 0;
+  
+  for(j=0; j<modBinNumb; j++){
     mean_modBin[j] /= modes_perbin[j];
 
+    sum_modes      += modes_perbin[j];
+    
     // For a matrix A, paramater vector, (P_0, P_2)^T, P and vector B
     // Required to invert AP  = B. 2x2 matrix inversion.
 
@@ -119,8 +120,11 @@ int oldnosort_MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopol
     Monopole[j]    = (1./detA[j])*( Sum_Li2[j]*Sum_Pi[j] - Sum_Li[j]*Sum_PiLi[j]);
     Quadrupole[j]  = (1./detA[j])*( -Sum_Li[j]*Sum_Pi[j] + modes_perbin[j]*Sum_PiLi[j]);
 
-    if(log10(detA[j]) > -6.0)  printf("\n%le \t %le \t %le \t %d", mean_modBin[j], Monopole[j], Quadrupole[j], modes_perbin[j]);
+    // if(log10(detA[j]) > -6.0)
+    printf("\n%le \t %le \t %le \t %d", mean_modBin[j], Monopole[j], Quadrupole[j], modes_perbin[j]);
   }
 
+  printf("\n%d \t %d", sum_modes, n0*n1*n2);
+  
   return 0;
 }
