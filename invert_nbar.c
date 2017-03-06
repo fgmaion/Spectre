@@ -16,8 +16,6 @@ int prep_inverseCumulative_nbar(){
   F.function = &nbar_dV;
   
   gsl_integration_qags(&F, loChi - 1., hiChi + 1., 0, 1e-7, 1000, w, &norm, &error);
-
-  printf("\n\nEVAL: %.6lf", interp_nz(2000.));
   
   for(ii=0; ii<400; ii++){
     chi_cumulative_nbar[ii] = loChi - 1. + ii*(hiChi - loChi + 2.)/399.;

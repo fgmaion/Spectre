@@ -64,8 +64,7 @@ int nosort_MultipoleCalc(){
     Monopole[j]    = (1./detA[j])*( Sum_Li2[j]*Sum_Pi[j] - Sum_Li[j]*Sum_PiLi[j]);
     Quadrupole[j]  = (1./detA[j])*( -Sum_Li[j]*Sum_Pi[j] + modes_perbin[j]*Sum_PiLi[j]);
   
-    // if(log10(detA[j]) > -6.0)
-    printf("\n%le \t %le \t %le \t %d", mean_modk[j], Monopole[j], Quadrupole[j], modes_perbin[j]);
+    if(log10(detA[j]) > -6.0)  printf("\n%le \t %le \t %le \t %d", mean_modk[j], Monopole[j], Quadrupole[j], modes_perbin[j]);
   }
     
   return 0;

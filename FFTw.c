@@ -2,21 +2,19 @@
 
 int PkCalc(){
     fftw_execute(plan);
-    /*
+    
     oldprep_pkRegression();
     
     // correct_ind_modes();
     correct_all_modes();
 
-    oldnosort_MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 0);
-    */
-    // Correct_modes();
+    MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 0);
+    
+    // oldnosort_MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 0);
     
     // observedQuadrupole();
 
-    nosort_MultipoleCalc();
-    
-    // MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 0);
+    // nosort_MultipoleCalc();
     
     return 0;
 }
@@ -64,7 +62,7 @@ int prep_r2c_modes(){
         
         // Needs properly fixed.  Discarding zero index info.
         //                                     if                                            then    else
-        kind[Index]                            = ((dummy >= 0) && (dummy < kbin_no)) ? dummy : 0;
+        kind[Index]                            = ((dummy >= 0) && (dummy < kbin_no)) ? dummy : (kbin_no - 1);
         
         // Each available mode has an index in the binning array. 
         Sum_Li[kind[Index]]                   += kLi[Index];
@@ -91,6 +89,10 @@ int prep_r2c_modes(){
     sum_modes     += modes_perbin[j];
   }
 
+  // modes with k < logk_min are placed into last bin. assign mean k as INF.  
+  mean_modk[kbin_no - 1] /= 0;
+       detA[kbin_no - 1] /= 0;
+  
   printf("\n%d \t %d", sum_modes, n0*n1*n2);
   
   return 0;
@@ -263,7 +265,7 @@ int MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], doubl
     loIndex      = 0;
     hiIndex      = 0;
 
-    for(k=0; k<modBinNumb-1; k++){
+    for(k=0; k<modBinNumb; k++){
         mean_modBin[k]    = 0.0;
         Monopole[k]       = 0.0;
         Quadrupole[k]     = 0.0;
@@ -279,7 +281,7 @@ int MultipoleCalc(int modBinNumb, double mean_modBin[], double Monopole[], doubl
     
     if(fileOutput==1)  output = fopen(filepath, "w");
     
-    for(j=0; j<modBinNumb-1; j++){
+    for(j=0; j<modBinNumb; j++){
         //  Linear regression against P_i(k, \mu_i)  
         //  L_i  = 0.5*(3.*\mu_i**2 -1.)
         //  P_i  = P_i(k, \mu_i)

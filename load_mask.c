@@ -82,8 +82,6 @@ int rand_newchi_newbasis(){
       rand_z[j] = z2 + stefano_trans_z;*/
     }
     //}
-
-    printf("\n\nRANDOMS: %.4lf < X < %.4lf", arrayMin(rand_chi, rand_number), arrayMax(rand_chi, rand_number));
     
   StefanoRotated(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);  // Why doesn't commented code above work!?
   /*
