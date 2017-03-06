@@ -30,15 +30,15 @@ int rand_newchi_newbasis(){
   c_ra    =  CentreRA*(pi/180.);
   c_dec   = CentreDec*(pi/180.);
   
-  // #pragma omp parallel
-  //{ // \{ must be on a new line
+  #pragma omp parallel
+  { // \{ must be on a new line
     gsl_rng*  gsl_ran_thread_r;
 
     gsl_ran_thread_r = gsl_rng_alloc(gsl_rng_taus); // new instance of taus generator. 
 
     gsl_rng_set(gsl_ran_thread_r, 1 + omp_get_thread_num()); // seed with thread id; 0 is default so start at one.  
     
-    // #pragma omp for private(j, x1, y1, z1, x2, y2, z2, c_ra, c_dec, F, cos_dec)
+    #pragma omp for private(j, x1, y1, z1, x2, y2, z2, c_ra, c_dec, F, cos_dec)
     for(j=0; j<rand_number; j++){
       /*
       new            = gsl_rng_uniform_int(gsl_ran_thread_r, Vipers_Num);
@@ -81,7 +81,7 @@ int rand_newchi_newbasis(){
       rand_y[j] = y2 + stefano_trans_y;
       rand_z[j] = z2 + stefano_trans_z;*/
     }
-    //}
+  }
     
   StefanoRotated(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);  // Why doesn't commented code above work!?
   /*

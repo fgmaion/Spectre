@@ -98,9 +98,9 @@ int main(int argc, char **argv){
 
   double begin  = getRealTime();
   
-  // fftw_init_threads();
+  fftw_init_threads();
   
-  // fftw_plan_with_nthreads(omp_get_max_threads());     // Maximum number of threads to be used; use all openmp threads available.  
+  fftw_plan_with_nthreads(omp_get_max_threads());     // Maximum number of threads to be used; use all openmp threads available.  
   
   // Main code. //  
   Initialise();                                          // Initialise grid, fft params and random generation. 
