@@ -115,8 +115,6 @@ int main(int argc, char **argv){
   load_rands_radec(1.0);
   
   prep_r2c_modes();
-
-  walltime("Wall time after prep");
   
   for(loopCount=1; loopCount<2; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
@@ -142,7 +140,7 @@ int main(int argc, char **argv){
     PkCalc();
   }
   
-  walltime("Wall time at end");
+  walltime("Wall time at finish");
 
   printf("\n\n");
   

@@ -32,7 +32,8 @@ int nosort_MultipoleCalc(){
   printf("\n\nPerforming multipole calculation to Quadrupole order:");
 
   int nx = (n2/2+1);
-  
+
+  // pragma loop. summation on array element (Sum_Pi).
   for(k=0; k<n0; k++){
     for(j=0; j<n1; j++){
       for(i=0; i<nx; i++){

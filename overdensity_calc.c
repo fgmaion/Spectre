@@ -27,6 +27,8 @@ int calc_overdensity(){
     
     #pragma omp parallel for private(j)
     for(j=0; j<rand_number; j++)  cic_assign(1, rand_x[j], rand_y[j], rand_z[j], -alpha*rand_weight[j]);  // assumes all randoms up to rand_number are accepted.    
+
+    walltime("Wall time after cloud-in-cell assignment");
     
     return 0;
 }

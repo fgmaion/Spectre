@@ -37,6 +37,8 @@ int prep_x2c(){
     overdensity[j] = 0.0;
   }
 
+  walltime("Wall time after array malloc");
+  
   return 0;
 }
 

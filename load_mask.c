@@ -12,6 +12,8 @@ int load_rands_radec(double sampling){
       rand_dec[j]   *= (pi/180.0);
     }
     
+    walltime("Wall time after randoms load");
+    
     return 0;
 }
 
@@ -93,9 +95,8 @@ int rand_newchi_newbasis(){
   
   printf("\n\nStefano basis, randoms co-ordinates.");                                                                                                      
 
-  printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));                                                     
-  printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));                                                     
-  printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));                                                     
+  printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));                                                printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));                                                printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));                                                     
+  walltime("Wall time after randoms chi reassignment");
   
   return 0;
 }

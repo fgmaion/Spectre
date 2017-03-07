@@ -2,6 +2,9 @@
 
 int PkCalc(){
     fftw_execute(plan);
+
+    walltime("Wall time after FFT");
+    
     /*
     oldprep_pkRegression();
     
@@ -114,7 +117,7 @@ int prep_r2c_modes(){
   mean_modk[kbin_no - 1] /= 0;
        detA[kbin_no - 1] /= 0;
   
-  printf("\n%d \t %d", sum_modes, num_modes);
+  walltime("Wall time after regression prep");
   
   return 0;
 }
