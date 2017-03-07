@@ -33,7 +33,7 @@ int nosort_MultipoleCalc(){
 
   int nx = (n2/2+1);
 
-  // pragma loop. summation on array element (Sum_Pi).
+  // To do: #pragma omp parallel for private(Index, dummy, k, j, i, k_x, k_y, k_z, kSq, kmodulus, mu)
   for(k=0; k<n0; k++){
     for(j=0; j<n1; j++){
       for(i=0; i<nx; i++){
