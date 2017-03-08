@@ -48,6 +48,8 @@ int initi_dist_z(){
   hiChi                 = interp_comovingDistance(hi_zlim);
 
   printf("\n\nRedshift limits, lower bound: %.4lf \t %.4lf h^-1 Mpc, \n\t\t upper bound: %.4lf \t %.4lf h^-1 Mpc", lo_zlim, loChi, hi_zlim, hiChi);
+
+  printf("\n\nObserved volume: %.6lf (h^-1 Gpc)^3", calc_vol());
   
   return 0;
 }
@@ -96,14 +98,4 @@ double SolidAngleCalc(double decLowerBound, double decUpperBound, double raInter
     printf("\n                                    : %e sq degrees.", steradians2sqdegs(SolidAngle));
  
     return SolidAngle;
-}
-
-
-double steradians2sqdegs(double inSteradians){
-    return pow(180./pi, 2.)*inSteradians;
-}
-
-
-double sqdegs2steradians(double inSqdegs){
-  return pow(pi/180., 2.)*inSqdegs;
 }

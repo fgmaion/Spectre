@@ -116,6 +116,8 @@ double HubbleCnst(double z);
 
 float  (*pt2zChiIntegrand)(float);  // FLOAT?!
 
+double interp_nz(double);
+
 double interp_comovingDistance(double z);
 double interp_inverseComovingDistance(double r);
 

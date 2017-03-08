@@ -9,6 +9,7 @@
 #include "linearGrowthRate.c"
 #include "assignAcceptance.c"
 #include "Jenkins_fold.c"
+#include "volavgs.c"
 #include "Initialise.c"
 #include "stefanoBasis.c"
 #include "max_gal.c"
@@ -20,7 +21,7 @@
 #include "load_mask.c"
 // #include "nbar_smooth.c"
 #include "fkp_weights.c"
-//// #include "clipping_weights.c"
+#include "clipping_weights.c"
 #include "CloudInCell.c" 
 #include "overdensity_calc.c"
 #include "FFTw.c"
@@ -101,7 +102,6 @@ int main(int argc, char **argv){
   
   fftw_plan_with_nthreads(omp_get_max_threads());     // Maximum number of threads to be used; use all openmp threads available.  
   
-  // Main code. //  
   Initialise();                                          // Initialise grid, fft params and random generation. 
       
   prep_x2c();                                            // Memory for overdensity, smooth_overdensity and H_k; either double or fftw_complex.  
@@ -129,15 +129,15 @@ int main(int argc, char **argv){
     
     rand_newchi_newbasis();
     
-    // set_clippingweights();
-    
+    set_clippingweights();
+    /*
     alpha_calc();
     
     calc_fkpweights();  // normalisation of FKP weights set by random catalogue.
     
     calc_overdensity(); // Cloud-in-Cell is a bottleneck. 
     
-    PkCalc();
+    PkCalc(); */
   }
   
   walltime("Wall time at finish");
