@@ -106,7 +106,7 @@ int          xlabel, ylabel, zlabel;
 
 
 //-- Jenkins's folding --//
-double       Jenkins_foldfactor;
+double       foldfactor;
 
 // -- n(z) calc. -- //
 int          chibin_no;
@@ -175,9 +175,9 @@ double* Quadrupole;
 double* Monopole;
 
 // -- Clipping -- //
-double  fraction_clipped;
-double  appliedClippingThreshold;
-double  clipping_smoothing_radius;
+double  frac_clip;
+double  d0;
+double  smooth_scale;
 
 double* gal_clippingweights;
 

@@ -13,7 +13,15 @@ double ru(double arg, double base){
 }
 
 
-int calc_occupiedvol(){
+int calc_clipping_weights(){
+  if(appliedClippingThreshold >= 1000){
+    for(j=0; j<Vipers_Num; j++)  clip_galweight[j] = 1.0;
+
+    return 0;
+  }
+
+  else if()
+  
   int m2, m1, m0;
 
   m0 =  n0;
@@ -161,12 +169,14 @@ int calc_occupiedvol(){
   printf("\ny min:  %.3f \t y max:  %.3f", AcceptedMin(yCoor, Acceptanceflag, Vipers_Num), AcceptedMax(yCoor, Acceptanceflag, Vipers_Num));
   printf("\nz min:  %.3f \t z max:  %.3f", AcceptedMin(zCoor, Acceptanceflag, Vipers_Num), AcceptedMax(zCoor, Acceptanceflag, Vipers_Num));
   
-  // Smooth n/<n>.  True/false flag for zero mean; apodises boundaries.
-  // Gaussian_filter(clipping_smoothing_radius, 0);
-
+  // Smooth N/<N>.  True/false flag for zero mean; apodises boundaries. Padding required?
+  Gaussian_filter(clipping_smoothing_radius, dx, dy, dz); // assumes m0 = n0 etc. 
+  
   // Scale (1 + delta) such that <1+ delta> = 1. within surveyed region; i.e. homogeneous "zero mean constraint"; preserving delta_min = -1.0;
-  double norm = 0.0;
+  double      norm = 0.0;
+  double frac_clip = 0.0;
 
+  /*
   for(j=0; j<n0*n1*n2; j++){
     if(rand_occupied[j] == 1)  norm += overdensity[j];
   }
@@ -175,13 +185,72 @@ int calc_occupiedvol(){
 
   printf("\n\nMean renormalisation in clipping weights: %.4lf", norm);
 
-  // rescaling (1 + delta), subtract off to delta, reapply mask.
-  for(j=0; j<n0*n1*n2; j++){
-    overdensity[j] /= norm;
-
-    overdensity[j] -=  1.0;
   
-    overdensity[j] *=  rand_occupied[j];
+  // If no smoothing: rescaling (1 + delta), subtract off to delta, reapply mask.
+  for(j=0; j<n0*n1*n2; j++){
+    overdensity[j]       /= norm;
+
+    overdensity[j]       -=  1.0;
+  
+    overdensity[j]       *=  rand_occupied[j];
+
+    smooth_overdensity[j] =    overdensity[j]; 
+  }
+  */
+
+  // By rescaling (1 + smooth delta), don't slip below delta = -1.
+  for(j=0; j<n0*n1*n2; j++){
+    smooth_overdensity[j]  *=  rand_occupied[j];
+
+    if(rand_occupied[j] == 1)  norm += overdensity[j];
+  }
+
+  norm /= number_occupied;
+
+  printf("\n\nMean renormalisation in clipping weights: %.4lf", norm);
+
+  for(j=0; j<n0*n1*n2; j++){
+    smooth_overdensity[j]  /=  norm;
+
+    smooth_overdensity[j]  -=   1.0; // now it's delta.
+
+    smooth_overdensity[j]  *=  rand_occupied[j];
+
+    if(smooth_overdensity[j] > appliedClippingThreshold){  // either smooth_overdensity or overdensity.
+      cell_weights[j]    = (1. + appliedClippingThreshold)/(1. + overdensity[j]);
+
+      frac_clip         += 1.0;    // must be surveyed, otherwise smooth_overdensity would be zero and cell would be bypassed.  
+    }
+  }
+
+  frac_clip /= number_occupied;
+
+  printf("\n\napplied clipping threshold: %lf, percentage of cells clipped: %lf", appliedClippingThreshold, 100.*frac_clip);
+  
+  for(j=0; j<Vipers_Num; j++){
+    if(Acceptanceflag[j]  == true){
+      chi        =  interp_comovingDistance(zobs[j]);
+
+      cos_dec    =  cos(dec[j]*pi/180.0);
+
+      xCoor[j]   =  chi*cos( ra[j]*pi/180.0)*cos_dec;
+      yCoor[j]   =  chi*sin( ra[j]*pi/180.0)*cos_dec;
+      zCoor[j]   = -chi*sin(dec[j]*pi/180.0); // Includes reflection.
+
+      xlabel     = (int)  floor((xCoor[j] - min_x)/dx);
+      ylabel     = (int)  floor((yCoor[j] - min_y)/dy);
+      zlabel     = (int)  floor((zCoor[j] - min_z)/dz);
+
+      boxlabel   = (int)  xlabel + m2*ylabel + m2*m1*zlabel;
+      
+      clip_galweight[j]  =  cell_weights[boxlabel];
+
+      if(clip_galweight[j] > 1.)  printf("\nspurious weight: %.2lf", clip_galweight[j]);
+    }
+
+    else{
+      clip_galweight[j] = 0.0;
+    }
   }
   
   return 0;
@@ -202,59 +271,6 @@ int set_clippingweights(){
   }
 
   else{
-    
-    for(j=0; j<n0*n1*n2; j++)  overdensity[j] -= 1.0;
-    
-    // By rescaling (1 + ddelta), don't slip below d=-1. 
-    for(j=0; j<n0*n1*n2; j++){
-      smooth_overdensity[j]  /=  norm;  
-        
-      smooth_overdensity[j]  -=   1.0; // now it's delta. 
-
-      if(rand_occupied[j]    == 0.0){
-               overdensity[j] = 0.0;
-        smooth_overdensity[j] = 0.0;   // restore mask after smoothing. spurious empty cells where randoms should be?  
-      }
-    
-      if(smooth_overdensity[j] > appliedClippingThreshold){  // either smooth_overdensity or overdensity. 	    	
-        cell_weights[j]  = (1. + appliedClippingThreshold)/(1. + overdensity[j]);
-
-        if(rand_occupied[j] > 0.)  fraction_clipped  += 1.0;    // clipped volume fraction.
-      }
-    }
-    
-    fraction_clipped /= number_occupied;
-    
-    printf("\n\napplied clipping threshold: %lf, fraction of cells clipped: %lf", appliedClippingThreshold, fraction_clipped);
-
-    int count = 0;
-
-    if(data_mock_flag == 0){
-      sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/clip_weights/W%d/clip_wghts_d0_%.2lf_z_%.1lf_%.1lf_%d_256_pk.dat", root_dir, fieldFlag, appliedClippingThreshold, lo_zlim, hi_zlim, loopCount); 
-    }
-
-    if(data_mock_flag == 1){
-      sprintf(filepath, "%s/W1_Spectro_V7_4/data_v1.7/clip_weights/W%d/clip_wghts_d0_%.2lf_z_%.1lf_%.1lf_%d_256_pk.dat", root_dir, fieldFlag, appliedClippingThreshold, lo_zlim, hi_zlim, loopCount);
-    }
-
-    output = fopen(filepath, "w");
-    
-    //  Clipping weights shouldn't be renormalised, multiplies (fkp_weight/sampling). 
-    for(j=0; j<Vipers_Num; j++){
-        if(Acceptanceflag[j]  == true){ 
-            boxlabel           = boxCoordinates(xCoor, yCoor, zCoor, j);
-
-            clip_galweight[j]  =                 cell_weights[boxlabel];
-        
-	    if(clip_galweight[j] > 1.)  printf("\nspurious weight: %.2lf", clip_galweight[j]);
-	}
-        
-        else{clip_galweight[j] = 0.0;}
-    
-        fprintf(output, "%le \n", clip_galweight[j]);
-    }
-
-    fclose(output); */
   }
   
   // walltime("Walltime after clipping weights");

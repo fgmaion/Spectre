@@ -34,12 +34,12 @@ int main(int argc, char **argv){
   data_mock_flag            =                   0;          // analysis of VIPERS data or mock catalogues.       
   
   fieldFlag                 =       atoi(argv[1]);
-  appliedClippingThreshold  =       atof(argv[2]);
+  d0                        =       atof(argv[2]);
   lo_zlim                   =       atof(argv[3]);          // previously 0.6<z<0.9, 0.9<z<1.2
   hi_zlim                   =       atof(argv[4]);
-  Jenkins_foldfactor        =       atof(argv[5]);          // Apply Jenkins folding to increase spatial resolution of mesh.  
+  foldfactor                =       atof(argv[5]);          // Apply Jenkins folding to increase spatial resolution of mesh.  
 
-  clipping_smoothing_radius =                 2.0;
+  smooth_radius             =                 2.0;
 
   sprintf(root_dir,      "/home/mjw/HOD_MockRun");
   sprintf(vipersHOD_dir, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2/mocks_v1.7/W%d", fieldFlag);
@@ -115,8 +115,6 @@ int main(int argc, char **argv){
   load_rands_radec(1.0);
   
   prep_r2c_modes();
-
-  // calc_occupiedvol();
  
   for(loopCount=1; loopCount<2; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
@@ -129,7 +127,7 @@ int main(int argc, char **argv){
     
     StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
     
-    // rand_newchi_newbasis();
+    rand_newchi_newbasis();
     
     calc_occupiedvol();
     
