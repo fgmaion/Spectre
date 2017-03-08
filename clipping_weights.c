@@ -78,7 +78,7 @@ int calc_occupiedvol(){
 
   printf("\n\nSurveyed vol. calc.");
   
-  double oldvol, newvol, truvol, convergence;
+  double oldvol, newvol, truvol, convergence, accuracy;
 
   oldvol =        0.0;
   truvol = calc_vol();
@@ -97,7 +97,7 @@ int calc_occupiedvol(){
 
       rand_x[j]   =  rand_chi[j]*cos(rand_ra[j])*cos_dec;
       rand_y[j]   =  rand_chi[j]*sin(rand_ra[j])*cos_dec;
-      rand_z[j]   = -rand_chi[j]*sin(rand_dec[j]);
+      rand_z[j]   = -rand_chi[j]*sin(rand_dec[j]); // Includes reflection. 
 
       xlabel      = (int) floor((rand_x[j] - min_x)/dx);
       ylabel      = (int) floor((rand_y[j] - min_y)/dy);
@@ -113,8 +113,10 @@ int calc_occupiedvol(){
     newvol = dx*dy*dz*number_occupied/pow(10., 9.);
 
     convergence = 100.*(newvol-oldvol)/newvol;
+
+    accuracy    = 100.*(truvol-newvol)/truvol;
     
-    printf("\nExact volume: %.6lf (h^-1 Gpc)^3; randoms estimate: %.6lf (h^-1 Gpc)^3; %.6lf percent convergence; %.6lf percent accuracy", truvol, newvol, convergence, 100.*(truvol-newvol)/truvol);
+    printf("\nExact volume: %.6lf (h^-1 Gpc)^3; randoms estimate: %.6lf (h^-1 Gpc)^3; %.6lf percent convergence; %.6lf percent accuracy", truvol, newvol, convergence, accuracy);
 
     oldvol = newvol;
   }
@@ -135,32 +137,52 @@ int calc_occupiedvol(){
   
   for(j=0; j<Vipers_Num; j++){
     if(Acceptanceflag[j] == true){
-      chi         =  interp_comovingDistance(zobs[j]);
+      chi        =  interp_comovingDistance(zobs[j]);
 
-      xlabel      = (int)         floor((xCoor[j] - min_x)/dx);
-      ylabel      = (int)         floor((yCoor[j] - min_y)/dy);
-      zlabel      = (int)         floor((zCoor[j] - min_z)/dz);
+      cos_dec    =  cos(dec[j]*pi/180.0);
 
-      boxlabel    = (int)    xlabel + m2*ylabel + m2*m1*zlabel;
+      // printf("\n%.4lf \t %.4lf", ra[j], dec[j]);
+      
+      xCoor[j]   =  chi*cos( ra[j]*pi/180.0)*cos_dec;
+      yCoor[j]   =  chi*sin( ra[j]*pi/180.0)*cos_dec;
+      zCoor[j]   = -chi*sin(dec[j]*pi/180.0); // Includes reflection. 
 
-      overdensity[boxlabel]  +=  pow(dx*dy*dz*interp_nz(chi)*sampling[j], -1.); // Galaxy counts.
+      xlabel     = (int)  floor((xCoor[j] - min_x)/dx);
+      ylabel     = (int)  floor((yCoor[j] - min_y)/dy);
+      zlabel     = (int)  floor((zCoor[j] - min_z)/dz);
+
+      boxlabel   = (int)  xlabel + m2*ylabel + m2*m1*zlabel;
+
+      overdensity[boxlabel]  +=  pow(dx*dy*dz*interp_nz(chi)*sampling[j], -1.); // N/<N>
     }
   }
 
+  printf("\nx min:  %.3f \t x max:  %.3f", AcceptedMin(xCoor, Acceptanceflag, Vipers_Num), AcceptedMax(xCoor, Acceptanceflag, Vipers_Num));
+  printf("\ny min:  %.3f \t y max:  %.3f", AcceptedMin(yCoor, Acceptanceflag, Vipers_Num), AcceptedMax(yCoor, Acceptanceflag, Vipers_Num));
+  printf("\nz min:  %.3f \t z max:  %.3f", AcceptedMin(zCoor, Acceptanceflag, Vipers_Num), AcceptedMax(zCoor, Acceptanceflag, Vipers_Num));
+  
   // Smooth n/<n>.  True/false flag for zero mean; apodises boundaries.
   // Gaussian_filter(clipping_smoothing_radius, 0);
 
-  // Scale (1 + delta) such that <1+ delta> = 1.; i.e. homogeneous "zero mean constraint"; preserving delta_min = -1.0;
+  // Scale (1 + delta) such that <1+ delta> = 1. within surveyed region; i.e. homogeneous "zero mean constraint"; preserving delta_min = -1.0;
   double norm = 0.0;
 
   for(j=0; j<n0*n1*n2; j++){
-    norm += overdensity[j];
+    if(rand_occupied[j] == 1)  norm += overdensity[j];
   }
   
   norm /= number_occupied;
 
-  printf("\n\nMean renormalisation in clipping weights: %.2lf", norm);
+  printf("\n\nMean renormalisation in clipping weights: %.4lf", norm);
+
+  // rescaling (1 + delta), subtract off to delta, reapply mask.
+  for(j=0; j<n0*n1*n2; j++){
+    overdensity[j] /= norm;
+
+    overdensity[j] -=  1.0;
   
+    overdensity[j] *=  rand_occupied[j];
+  }
   
   return 0;
 }
@@ -180,42 +202,7 @@ int set_clippingweights(){
   }
 
   else{
-    // %% calculation of clipping weights, must have no folding. %% 
-    double                       chi;
-    double*             cell_weights;
-
-    // Save cell weights in real part of H2_k to save memory/time. 
-    cell_weights  = malloc(n0*n1*n2*sizeof(*cell_weights));
     
-    for(j=0; j<n0*n1*n2; j++)  cell_weights[j] = 1.0; // initialise to no clipping.  
-
-    for(j=0; j<Vipers_Num; j++){
-      if(Acceptanceflag[j] == true){ 
-        chi                     =  interp_comovingDistance(zobs[j]);
-    
-        boxlabel                =  boxCoordinates(xCoor, yCoor, zCoor, j);
-
-        overdensity[boxlabel]  +=  pow(CellVolume*interp_nz(chi)*sampling[j], -1.); // Galaxy counts. 
-      }
-    }
-
-    // Smooth n/<n>.  True/false flag for zero mean; apodises boundaries. 
-    // Gaussian_filter(clipping_smoothing_radius, 0);
-    
-    // Scale (1 + delta) such that <1+ delta> = 1.; i.e. homogeneous "zero mean constraint"; preserving delta_min = -1.0; 
-    double norm = 0.0;
-
-    for(j=0; j<n0*n1*n2; j++){
-      // even if randoms don't fully sample the field then still a volume average over a representative sample.  
-      if(rand_occupied[j] > 0.){
-        norm += overdensity[j];
-      }
-    }
-
-    norm /= number_occupied;
-
-    printf("\n\nMean renormalisation in clipping weights: %.2lf", norm);
-
     for(j=0; j<n0*n1*n2; j++)  overdensity[j] -= 1.0;
     
     // By rescaling (1 + ddelta), don't slip below d=-1. 

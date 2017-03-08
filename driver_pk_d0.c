@@ -127,13 +127,11 @@ int main(int argc, char **argv){
     
     spline_nbar(0);  // new <n(z)> for each mock. arg 1: bool for smoothed + reflected 2-field avg., arg 2: 'truth' i.e. mock avg.
     
-    calc_occupiedvol();
-
-    // StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
+    StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
     
     // rand_newchi_newbasis();
     
-    // set_clippingweights();
+    calc_occupiedvol();
     
     // alpha_calc();
     
