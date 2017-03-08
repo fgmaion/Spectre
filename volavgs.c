@@ -1,3 +1,7 @@
+double unity(double chi){
+  return 1.;
+}
+
 double invnbar_chisq(double chi){
   return chi*chi/interp_nz(chi);
 }

@@ -23,8 +23,7 @@ int rand_newchi_newbasis(){
   // Achieved with the transformation method, see pg. 287 of NR and smooth_nbar.c
   
   printf("\n\nAngular limits of randoms: %.4lf < ra < %.4lf, %.4lf < dec < %.4lf", arrayMin(rand_ra, rand_number),  arrayMax(rand_ra,  rand_number),
-                                                                                   arrayMin(rand_dec, rand_number), arrayMax(rand_dec, rand_number));
-  
+                                                                                   arrayMin(rand_dec, rand_number), arrayMax(rand_dec, rand_number));  
   printf("\n\nNew basis for randoms.");
   
   double F, cos_dec;
@@ -52,7 +51,7 @@ int rand_newchi_newbasis(){
       new            = gsl_rng_uniform_int(gsl_ran_thread_r, Vipers_Num);
 
       while(Acceptanceflag[new] == false){
-        new            = gsl_rng_uniform_int(gsl_ran_thread_r, Vipers_Num);
+        new          = gsl_rng_uniform_int(gsl_ran_thread_r, Vipers_Num);
       }
 
       rand_chi[j]    = rDist[new];

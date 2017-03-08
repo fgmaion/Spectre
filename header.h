@@ -123,3 +123,6 @@ double interp_inverseComovingDistance(double r);
 
 double AcceptedMax(double a[], bool b[], int n);
 double AcceptedMin(double a[], bool b[], int n);
+
+// -- Pointers -- //
+double  (*pt2nz)(double) = NULL;

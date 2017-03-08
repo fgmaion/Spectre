@@ -88,7 +88,7 @@ int main(int argc, char **argv){
   }
 
   fkpPk                     =    8000.0;                 // [h^-1 Mpc]^3.
-  fft_size                  =       512;                 // Worker 46 works up to 1024. 
+  fft_size                  =       256;                 // Worker 46 works up to 1024. 
   
   kbin_no                   =        40;                 // kbin_no = 129; // Stefano comparison. 
   logk_min                  =      -2.0;
@@ -115,7 +115,9 @@ int main(int argc, char **argv){
   load_rands_radec(1.0);
   
   prep_r2c_modes();
-  
+
+  // calc_occupiedvol();
+ 
   for(loopCount=1; loopCount<2; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
     
@@ -125,19 +127,21 @@ int main(int argc, char **argv){
     
     spline_nbar(0);  // new <n(z)> for each mock. arg 1: bool for smoothed + reflected 2-field avg., arg 2: 'truth' i.e. mock avg.
     
-    StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
+    calc_occupiedvol();
+
+    // StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
     
-    rand_newchi_newbasis();
+    // rand_newchi_newbasis();
     
-    set_clippingweights();
-    /*
-    alpha_calc();
+    // set_clippingweights();
     
-    calc_fkpweights();  // normalisation of FKP weights set by random catalogue.
+    // alpha_calc();
     
-    calc_overdensity(); // Cloud-in-Cell is a bottleneck. 
+    // calc_fkpweights();  // normalisation of FKP weights set by random catalogue.
     
-    PkCalc(); */
+    // calc_overdensity(); // Cloud-in-Cell is a bottleneck. 
+    
+    // PkCalc(); 
   }
   
   walltime("Wall time at finish");
