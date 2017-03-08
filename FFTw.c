@@ -307,13 +307,13 @@ int correct_r2c_modes(){
 
 int observedQuadrupole(){
   if(data_mock_flag == 0){
-    // sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/pk/d0_%d/W%d/mock_%d_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, (int) appliedClippingThreshold, fieldFlag, loopCount, lo_zlim, hi_zlim, (int) Jenkins_foldfactor);  // Clipping. 10 June 2016
+    // sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/pk/d0_%d/W%d/mock_%d_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, (int) appliedClippingThreshold, fieldFlag, loopCount, lo_zlim, hi_zlim, (int) foldfactor);  // Clipping. 10 June 2016
 
     sprintf(filepath, "%s/W1_Spectro_V7_4/pk.dat", root_dir); 
   }
 
   else if(data_mock_flag == 1){
-    sprintf(filepath, "%s/John/data_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, lo_zlim, hi_zlim, (int) Jenkins_foldfactor);
+    sprintf(filepath, "%s/John/data_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, lo_zlim, hi_zlim, (int) foldfactor);
   }
 
   nosort_MultipoleCalc(filepath, 0);
@@ -739,7 +739,7 @@ int Cartesian2Dpk(int modeCount){
 
   printf("\n\nWriting 2D pk.");
 
-  sprintf(filepath,"%s/W1_Spectro_V7_2/data_v1.7/pk_2d/pk_2d_W%d_%.1lf_%.1lf_Jf_%d.dat", root_dir, fieldFlag, lo_zlim, hi_zlim, (int) Jenkins_foldfactor);
+  sprintf(filepath,"%s/W1_Spectro_V7_2/data_v1.7/pk_2d/pk_2d_W%d_%.1lf_%.1lf_Jf_%d.dat", root_dir, fieldFlag, lo_zlim, hi_zlim, (int) foldfactor);
 
   output = fopen(filepath, "w");
 

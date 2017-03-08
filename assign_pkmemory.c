@@ -30,12 +30,7 @@ int prep_x2c(){
 
   fftw_export_wisdom_to_filename("/home/mjw/HOD_MockRun/wisdom/wisdom.dat");
 
-  for(j=0; j<n0*n1*n2; j++){
-    // overdensity[j][0] = 0.0;  // initialise overdensity
-    // overdensity[j][1] = 0.0;
-
-    overdensity[j] = 0.0;
-  }
+  for(j=0; j<n0*n1*n2; j++)  overdensity[j] = 0.0;
 
   walltime("Wall time after array malloc");
   

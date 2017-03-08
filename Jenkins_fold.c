@@ -1,13 +1,13 @@
 int Jenkins_foldEmbeddingVol(){
     // Jenkin's run to beat aliasing of P(k) near the Nyquist wavenumber. 
-    AxisLimsArray[0][0]         *=     1.0;                                    // h^-1 Mpc
-    AxisLimsArray[1][0]         /=     Jenkins_foldfactor;                     // h^-1 Mpc
+    AxisLimsArray[0][0]         *=     1.0;                            // h^-1 Mpc
+    AxisLimsArray[1][0]         /=     foldfactor;                     // h^-1 Mpc
 
-    AxisLimsArray[0][1]         *=     1.0;                                    // h^-1 Mpc
-    AxisLimsArray[1][1]         /=     Jenkins_foldfactor;                     // h^-1 Mpc
+    AxisLimsArray[0][1]         *=     1.0;                            // h^-1 Mpc
+    AxisLimsArray[1][1]         /=     foldfactor;                     // h^-1 Mpc
 
-    AxisLimsArray[0][2]         *=     1.0;                                    // h^-1 Mpc
-    AxisLimsArray[1][2]         /=     Jenkins_foldfactor;                     // h^-1 Mpc
+    AxisLimsArray[0][2]         *=     1.0;                            // h^-1 Mpc
+    AxisLimsArray[1][2]         /=     foldfactor;                     // h^-1 Mpc
          
     return 0;
 }

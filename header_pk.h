@@ -79,6 +79,10 @@ double*      rand_y      = NULL;
 double*      rand_z      = NULL;
 double*      rand_weight = NULL;
 
+// new seed every call. 
+int rand_basis_call = 0;
+
+
 // -- FKP weighting/normalisation --//
 int    accepted_gals;
 double       fkpPk;
@@ -175,12 +179,20 @@ double* Quadrupole;
 double* Monopole;
 
 // -- Clipping -- //
-double  frac_clip;
 double  d0;
-double  smooth_scale;
+double  smooth_radius;
 
 double* gal_clippingweights;
 
+int     number_occupied = 0;
+int*          rand_occupied;
+
+int m2, m1, m0;
+
+int* occupied_indices;
+
+// New basis for embedding volume.
+double min_x, max_x, dx, min_y, max_y, dy, min_z, max_z, dz, F, cos_dec;
 
 // -- Functions --
 int          comovDistReshiftCalc();

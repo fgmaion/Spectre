@@ -18,13 +18,24 @@ int load_rands_radec(double sampling){
 }
 
 
+int set_cnst_nbar(){
+  // Reassign randoms to have constant \bar n(z); this will (much) better sample high z tail.
+  pt2nz = &unity; // constant <n(z)>
+
+  prep_inverseCumulative_nbar();
+  
+  return 0;
+}
+
+
 int rand_newchi_newbasis(){
   // With nbar specified according to interp_nz(chi), assign chi for randoms such that they satisfy this bar.
   // Achieved with the transformation method, see pg. 287 of NR and smooth_nbar.c
   
-  printf("\n\nAngular limits of randoms: %.4lf < ra < %.4lf, %.4lf < dec < %.4lf", arrayMin(rand_ra, rand_number),  arrayMax(rand_ra,  rand_number),
-                                                                                   arrayMin(rand_dec, rand_number), arrayMax(rand_dec, rand_number));  
-  printf("\n\nNew basis for randoms.");
+  // printf("\n\nAngular limits of randoms: %.4lf < ra < %.4lf, %.4lf < dec < %.4lf", arrayMin(rand_ra, rand_number),  arrayMax(rand_ra,  rand_number),
+  //                                                                                  arrayMin(rand_dec, rand_number), arrayMax(rand_dec, rand_number));  
+
+  // printf("\n\nNew basis for randoms.");
   
   double F, cos_dec;
 
@@ -43,8 +54,8 @@ int rand_newchi_newbasis(){
 
     gsl_ran_thread_r = gsl_rng_alloc(gsl_rng_taus); // new instance of taus generator. 
 
-    gsl_rng_set(gsl_ran_thread_r, 1 + omp_get_thread_num()); // seed with thread id; 0 is default so start at one.  
-   
+    gsl_rng_set(gsl_ran_thread_r, 1 + omp_get_thread_num() + rand_basis_call); // seed with thread id; 0 is default so start at one.  
+    
     #pragma omp for private(j, x1, y1, z1, x2, y2, z2, F, cos_dec)
     for(j=0; j<rand_number; j++){
       /*
@@ -68,7 +79,7 @@ int rand_newchi_newbasis(){
       rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);            // Stefano reflection included. 
       
       rand_weight[j] = 1./(1. + interp_nz(rand_chi[j])*fkpPk);  // rand fkp weights.
-      /*
+      
       // basis formed by: normal spherical co-ordinates subject to inversion through xy plane, then R1 and finally R2.
       // R1: rotation about z such that in the new basis, (x',y',z'), x' hat lies in x-y plane at an angle centreRA to x.
       x1  =     cos(c_ra)*rand_x[j] + sin(c_ra)*rand_y[j];
@@ -86,16 +97,22 @@ int rand_newchi_newbasis(){
 
       // rand_x[j] = fmod(rand_x[j], 800./Jenkins_foldfactor);
       // rand_y[j] = fmod(rand_y[j], 800./Jenkins_foldfactor);
-      // rand_z[j] = fmod(rand_z[j], 800./Jenkins_foldfactor); */
+      // rand_z[j] = fmod(rand_z[j], 800./Jenkins_foldfactor);
     }
   }
 
-  StefanoRotated(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);
-  
+  // StefanoRotated(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);
+  /*
   printf("\n\nStefano basis, randoms co-ordinates.");                                                                                                      
 
-  printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));                                                printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));                                                printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));                                                     
-  walltime("Wall time after randoms chi reassignment");
+  printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));
+  printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));
+  printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));                                                     
+  */
+  // new seed next time.
+  rand_basis_call += 1;
+  
+  // walltime("Wall time after randoms chi reassignment");
   
   return 0;
 }

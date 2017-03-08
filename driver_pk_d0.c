@@ -71,7 +71,7 @@ int main(int argc, char **argv){
   
   stefano_trans_x           =      +100.;
   stefano_trans_y           =      +300.; 
-  stefano_trans_z           =     -1700.;                 // Changed from 1500. on 06/03/2017; as dealing with 0.8 < z < 1.0        
+  stefano_trans_z           =     -1720.;                 // Changed from 1500. on 06/03/2017; as dealing with 0.8 < z < 1.0        
 
   if(1.0 < hi_zlim){             //%% Changed from 0.8 %%
     stefano_trans_z -= 600.;     // Previously 600. Mpc for 0.9 < z < 1.2;
@@ -115,7 +115,9 @@ int main(int argc, char **argv){
   load_rands_radec(1.0);
   
   prep_r2c_modes();
- 
+
+  prep_randoccupied();
+  
   for(loopCount=1; loopCount<2; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
     
@@ -128,8 +130,10 @@ int main(int argc, char **argv){
     StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
     
     rand_newchi_newbasis();
-    
-    calc_occupiedvol();
+
+    calc_clipping_weights();
+
+    // loop over thresholds. 
     
     // alpha_calc();
     
