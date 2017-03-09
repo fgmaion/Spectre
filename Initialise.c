@@ -97,13 +97,3 @@ double SolidAngleCalc(double decLowerBound, double decUpperBound, double raInter
  
     return SolidAngle;
 }
-
-
-double steradians2sqdegs(double inSteradians){
-    return pow(180./pi, 2.)*inSteradians;
-}
-
-
-double sqdegs2steradians(double inSqdegs){
-  return pow(pi/180., 2.)*inSqdegs;
-}
