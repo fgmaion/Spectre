@@ -1,11 +1,11 @@
 #include "qSortCompare.c"
 
 int PkCalc(){
-    fftw_execute(plan);
+  fftw_execute(plan);
 
-    walltime("Wall time after FFT");
+  walltime("Wall time after FFT");
     
-    /*
+  /*
     oldprep_pkRegression();
     
     // correct_ind_modes();
@@ -13,14 +13,14 @@ int PkCalc(){
     // correct_all_modes();
 
     MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 0);
-    */
-    // oldnosort_MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 0);
+  */
+  // oldnosort_MultipoleCalc(kbin_no, mean_modk, Monopole, Quadrupole, polar_pk, polar_pkcount, filepath, 0.0, 1.0, 0);
     
-    // observedQuadrupole();
+  // observedQuadrupole();
 
-    nosort_MultipoleCalc();
+  nosort_MultipoleCalc();
     
-    return 0;
+  return 0;
 }
 
 
@@ -115,7 +115,7 @@ int prep_r2c_modes(){
 
   // modes with k < logk_min are placed into last bin. assign mean k as INF.  
   mean_modk[kbin_no - 1] /= 0;
-       detA[kbin_no - 1] /= 0;
+  detA[kbin_no - 1] /= 0;
   
   walltime("Wall time after regression prep");
   

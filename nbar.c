@@ -50,7 +50,6 @@ int spline_nbar(int truth){
     fclose(inputfile);
     
     spline(chibins, nbar, chibin_no, 1.0e31, 1.0e31, nbar_2d);
-
     
     pt2nz = &interp_nz;
     

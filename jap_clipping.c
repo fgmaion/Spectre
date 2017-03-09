@@ -8,7 +8,7 @@ int ncalc_clippingweights(){
   double*            rand_occupied;
 
   double     number_occupied = 0.0;
-
+  
   cell_weights  = malloc(n0*n1*n2*sizeof(*cell_weights));
   rand_occupied = malloc(n0*n1*n2*sizeof(*rand_occupied));
 
@@ -62,7 +62,7 @@ int ncalc_clippingweights(){
 
   // Scale (1 + delta) such that <1+ delta> = 1.; i.e. homogeneous "zero mean constraint".                                                                                                                                                 
   double norm = 0.0;
-
+  
   for(j=0; j<n0*n1*n2; j++){
     // even if randoms don't fully sample the field then still a volume average over a reasonably representative sample.                                                                                                                   
     if(rand_occupied[j] > 0.){
@@ -103,7 +103,7 @@ int ncalc_clippingweights(){
 
   // Clipping weights should not be renormalised, they simply multiply the (fkp_weight/sampling) without further renormalisation.                                                                                                       
   for(j=0; j<Vipers_Num; j++){
-     if(Acceptanceflag[j]  == true){
+    if(Acceptanceflag[j]  == true){
 	  boxlabel           = boxCoordinates(xCoor, yCoor, zCoor, j);
 
 	  clip_galweight[j]  =                 cell_weights[boxlabel];
@@ -115,16 +115,16 @@ int ncalc_clippingweights(){
 	  mass_frac         +=                 cell_weights[boxlabel];
 
 	  // if(rand_occupied[boxlabel] == 0.){  printf("%d \t %.3lf \n", count, clip_galweight[j]); count +=1;}                                                                                                                           
-        }
+    }
 
-        else{clip_galweight[j] = 0.0;}
+    else{clip_galweight[j] = 0.0;}
 
-        fprintf(output, "%le \n", clip_galweight[j]);
-      }
+    fprintf(output, "%le \n", clip_galweight[j]);
+  }
 
-      fclose(output);
+  fclose(output);
 
-      printf("\n\nMean weight: %.3lf", mass_frac/frac_norm);
+  printf("\n\nMean weight: %.3lf", mass_frac/frac_norm);
       
   return 0;
 }

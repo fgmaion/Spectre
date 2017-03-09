@@ -197,14 +197,6 @@ int calc_clipping_weights(){
   
   for(j=0; j<Vipers_Num; j++){
     if(Acceptanceflag[j]  == true){
-      // chi        =  interp_comovingDistance(zobs[j]);
-
-      // cos_dec    =  cos(dec[j]*pi/180.0);
-
-      // xCoor[j]   =  chi*cos( ra[j]*pi/180.0)*cos_dec;
-      // yCoor[j]   =  chi*sin( ra[j]*pi/180.0)*cos_dec;
-      // zCoor[j]   = -chi*sin(dec[j]*pi/180.0); // Includes reflection.
-
       xlabel     = (int)  floor((xCoor[j] - min_x)/dx);
       ylabel     = (int)  floor((yCoor[j] - min_y)/dy);
       zlabel     = (int)  floor((zCoor[j] - min_z)/dz);
