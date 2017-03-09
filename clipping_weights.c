@@ -1,112 +1,6 @@
-double rd(double arg, double base){
-  return base*floor(arg/base);
-}
-
-
-double ru(double arg, double base){
-  return base*(1. + floor(arg/base));
-}
-
-
-int prep_randoccupied(){
-  m0 =  n0; // or other. 
-  m1 =  n1;
-  m2 =  n2;
-  
-  // Surveyed volume need only be done once; no rotation required.  
-  rand_occupied = malloc(m2*m1*m0*sizeof(*rand_occupied));
-
-  for(j=0; j<m0*m1*m2; j++)  rand_occupied[j] = 0;
-
-  set_cnst_nbar();
-  
-  rand_newchi_newbasis();
-  
-  // what if negative.  Limited padding.   
-  min_x = rd(arrayMin(rand_x, rand_number), 50.); min_y = rd(arrayMin(rand_y, rand_number), 50.); min_z = rd(arrayMin(rand_z, rand_number), 50.);
-  max_x = ru(arrayMax(rand_x, rand_number), 50.); max_y = ru(arrayMax(rand_y, rand_number), 50.); max_z = ru(arrayMax(rand_z, rand_number), 50.);
-
-  dx    = (max_x - min_x)/m2;  dy    = (max_y - min_y)/m1;  dz    = (max_z - min_z)/m0;
-
-  printf("\n\nRandoms:");
-  printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));
-  printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));
-  printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));
-
-  printf("\n\nNew bounds:");
-  printf("\nx: %.1lf \t %.1lf h^-1 Mpc, dx: %.6lf h^-1 Mpc", min_x, max_x, dx);
-  printf("\ny: %.1lf \t %.1lf h^-1 Mpc, dy: %.6lf h^-1 Mpc", min_y, max_y, dy);
-  printf("\nz: %.1lf \t %.1lf h^-1 Mpc, dz: %.6lf h^-1 Mpc", min_z, max_z, dz);
-  
-  for(j=0; j<rand_number; j++){
-    xlabel      = (int) floor((rand_x[j] - min_x)/dx);
-    ylabel      = (int) floor((rand_y[j] - min_y)/dy);
-    zlabel      = (int) floor((rand_z[j] - min_z)/dz);
-
-    boxlabel    = (int)    xlabel + m2*ylabel + m2*m1*zlabel;
-
-    rand_occupied[boxlabel]  =  1;  // binary array, is surveyed or not
-  }
-
-  printf("\n\nSurveyed vol. calc.");
-  
-  double oldvol, newvol, truvol, convergence, accuracy;
-
-  oldvol =        0.0;
-  truvol = calc_vol();
-
-  convergence = 100.;
-
-  while(convergence > 10.0){
-    number_occupied = 0;
-
-    rand_newchi_newbasis();
-    
-    for(j=0; j<rand_number; j++){      
-      xlabel      = (int) floor((rand_x[j] - min_x)/dx);
-      ylabel      = (int) floor((rand_y[j] - min_y)/dy);
-      zlabel      = (int) floor((rand_z[j] - min_z)/dz);
-
-      boxlabel    = (int)    xlabel + m2*ylabel + m2*m1*zlabel;
-
-      rand_occupied[boxlabel]  =  1;  // binary array, is surveyed or not
-    }
-
-    for(j=0; j<m0*m1*m2; j++)  number_occupied   += rand_occupied[j];  // Number of cells over which <1+ delta> is averaged.
-    
-    newvol      = dx*dy*dz*number_occupied/pow(10., 9.);
-
-    convergence = 100.*(newvol-oldvol)/newvol;
-
-    accuracy    = 100.*(truvol-newvol)/truvol;
-    
-    printf("\nExact volume: %.6lf (h^-1 Gpc)^3; randoms estimate: %.6lf (h^-1 Gpc)^3; %+.6lf percent convergence; %+.6lf percent accuracy", truvol, newvol, convergence, accuracy);
-
-    oldvol = newvol;
-  }
-  
-  // roughly 20% of rand_occupied is empty. 
-  occupied_indices = malloc(number_occupied*sizeof(int));  // array with indices of cells that are occupied by randoms.
-  
-  Index = 0;
-
-  for(j=0; j<m0*m1*m2; j++){
-    if(rand_occupied[j] == 1){
-      occupied_indices[Index] = j;
-      
-      Index += 1;
-    }
-  }
-
-  printf("\n\nDifference between all cells and occupied is %.4lf", 100.*(m0*m1*m2 - number_occupied)/((double) m0*m1*m2));
-
-  walltime("Walltime after randoms occupied");
-  
-  return 0;
-}
-
-
 int use_delta(){                                                                                                                                                                             
+  double norm; // This needs fixed. 
+  
   for(j=0; j<n0*n1*n2; j++){                                                                                                                                                                      if(rand_occupied[j] == 1)  norm += overdensity[j];                                                                                                                                        }
 
   norm /= number_occupied;
@@ -138,7 +32,7 @@ int calc_clipping_weights(){
   double  chi;
 
   // Save cell weights in real part of H2_k to save memory/time.
-  for(j=0; j<n0*n1*n2; j++) overdensity[j] = 0.0; // for each mock.
+  for(j=0; j<m0*m1*m2; j++) overdensity[j] = 0.0; // for each mock.
   
   for(j=0; j<Vipers_Num; j++){
     if(Acceptanceflag[j] == true){

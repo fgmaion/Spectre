@@ -54,7 +54,9 @@ int rand_newchi_newbasis(){
 
     gsl_ran_thread_r = gsl_rng_alloc(gsl_rng_taus); // new instance of taus generator. 
 
-    gsl_rng_set(gsl_ran_thread_r, 1 + omp_get_thread_num() + rand_basis_call); // seed with thread id; 0 is default so start at one.  
+    gsl_rng_set(gsl_ran_thread_r, 1 + omp_get_thread_num() + rand_basis_call*omp_get_max_threads()); // seed with thread id; 0 is default so start at one.  
+
+    //  omp_get_max_threads()
     
     #pragma omp for private(j, x1, y1, z1, x2, y2, z2, F, cos_dec)
     for(j=0; j<rand_number; j++){

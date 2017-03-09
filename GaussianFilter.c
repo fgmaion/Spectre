@@ -1,7 +1,7 @@
 int Gaussian_filter(double radius, double dx, double dy, double dz){
   // Gaussian filter the array overdensity, filter radius set by global variable GaussianFilter_radius.
-
-  fftw_execute(plan);
+  
+  fftw_execute(plan); // plan works off n0, n1, n2.  
   
   // Gaussian smooth the counts.
   double factor;
@@ -31,19 +31,12 @@ int Gaussian_filter(double radius, double dx, double dy, double dz){
         
         factor              = exp(-kSq*pow(radius, 2.)/2.);
 
-        H_k[Index][0]      *= factor;
-        H_k[Index][1]      *= factor;
-        
-        H_k[Index][0]      /= n0*n1*n2;
-        H_k[Index][1]      /= n0*n1*n2;
+        H_k[Index][0]      *= factor/n0*n1*n2;
+        H_k[Index][1]      *= factor/n0*n1*n2;
       }
     }
   }
-  
-  fftw_plan iplan;
-
-  iplan = fftw_plan_dft_c2r_3d(n0, n1, n2, H_k, smooth_overdensity, FFTW_ESTIMATE);
-  
+    
   fftw_execute(iplan);
 
   return 0;

@@ -21,6 +21,7 @@
 #include "load_mask.c"
 // #include "nbar_smooth.c"
 #include "fkp_weights.c"
+#include "rand_occupied.c"
 #include "clipping_weights.c"
 #include "CloudInCell.c" 
 #include "overdensity_calc.c"
@@ -100,7 +101,7 @@ int main(int argc, char **argv){
   
   fftw_init_threads();
   
-  fftw_plan_with_nthreads(omp_get_max_threads());     // Maximum number of threads to be used; use all openmp threads available.  
+  fftw_plan_with_nthreads(omp_get_max_threads());        // Maximum number of threads to be used; use all openmp threads available.  
   
   Initialise();                                          // Initialise grid, fft params and random generation. 
       
@@ -113,10 +114,10 @@ int main(int argc, char **argv){
   prep_nbar();
   
   load_rands_radec(1.0);
-  
-  prep_r2c_modes();
 
   prep_randoccupied();
+  
+  // prep_r2c_modes();
   
   for(loopCount=1; loopCount<2; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
