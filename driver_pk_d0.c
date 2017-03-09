@@ -22,12 +22,12 @@
 // #include "nbar_smooth.c"
 #include "fkp_weights.c"
 #include "rand_occupied.c"
-//#include "clipping_weights.c"
+#include "clipping_weights.c"
 #include "CloudInCell.c" 
 #include "overdensity_calc.c"
 #include "FFTw.c"
 #include "old_FFTw.c"
-//#include "GaussianFilter.c"
+#include "GaussianFilter.c"
 #include "assign_pkmemory.c"
 
 
@@ -115,13 +115,13 @@ int main(int argc, char **argv){
   
   load_rands_radec(1.0);
 
-  // prep_randoccupied();
-
-  // prep_clipping_calc();
+  set_randoccupied();
   
-  prep_r2c_modes();
+  prep_clipping_calc();
   
-  for(loopCount=1; loopCount<2; loopCount++){            
+  // prep_r2c_modes();
+  
+  for(loopCount=1; loopCount<1; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
     
     CatalogueInput_500s(); // mocks 1 to 153 are independent. 

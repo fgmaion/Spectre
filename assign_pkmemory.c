@@ -1,22 +1,26 @@
 int prep_c2c(){
+  nx = n2;
+
   overdensity         = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(*overdensity));
   smooth_overdensity  = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(*overdensity)); // 1d: N input elements -> N/2 + 1 output elements.
   
   H_k                 = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(*H_k));
 
-   plan               = fftw_plan_dft_3d(n0, n1, n2, overdensity, H_k, FFTW_FORWARD, FFTW_ESTIMATE); // FFTW_ESTIMATE, FFTW_MEASURE, FFTW_PATIENT, //FFTW_EXHAUSTIVE.
+  plan                = fftw_plan_dft_3d(n0, n1, n2, overdensity, H_k, FFTW_FORWARD, FFTW_ESTIMATE); // FFTW_ESTIMATE, FFTW_MEASURE, FFTW_PATIENT, //FFTW_EXHAUSTIVE.
 
   return 0;
 }
 
 
 int prep_r2c(){
+  nx = n2/2 + 1;
+
   overdensity         = (double*)       fftw_malloc(n0*n1*n2*sizeof(*overdensity));
   smooth_overdensity  = (double*)       fftw_malloc(n0*n1*n2*sizeof(*smooth_overdensity));
   
-  H_k                 = (fftw_complex*) fftw_malloc((n2/2 + 1)*n1*n0*sizeof(*H_k)); // returns half the array, along the fastest memory change direction: x.
+  H_k                 = (fftw_complex*) fftw_malloc(nx*n1*n0*sizeof(*H_k)); // returns half the array, along the fastest memory change direction: x.
 
-   plan               = fftw_plan_dft_r2c_3d(n0, n1, n2, overdensity, H_k, FFTW_ESTIMATE); // r2c is always forward. // FFTW_ESTIMATE, FFTW_MEASURE, FFTW_PATIENT, FFTW_EXHAUSTIVE.
+  plan                = fftw_plan_dft_r2c_3d(n0, n1, n2, overdensity, H_k, FFTW_ESTIMATE); // r2c is always forward. // FFTW_ESTIMATE, FFTW_MEASURE, FFTW_PATIENT, FFTW_EXHAUSTIVE.
   
   return 0;
 }

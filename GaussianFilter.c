@@ -1,6 +1,4 @@
-int prep_filterfactors(double dx, double dy, double dz){
-  int     nx = n2/2 + 1;
-
+int prep_filterfactors(){
   double xNy = pi/dx;
   double yNy = pi/dy;
   double zNy = pi/dz;
@@ -35,14 +33,12 @@ int prep_filterfactors(double dx, double dy, double dz){
 }
 
 
-int Gaussian_filter(){
-  int nx = n2/2 + 1;
-  
+int Gaussian_filter(){  
   // Gaussian filter the array overdensity, filter radius set by global variable GaussianFilter_radius.
   fftw_execute(plan); // plan works off n0, n1, n2.  
   
   // Gaussian smooth the counts.
-  for(j=0; j<n0; k++)
+  for(k=0; k<n0; k++)
     for(j=0; j<n1; j++){
       for(i=0; i<nx; i++){
         Index = k*n1*nx + j*nx + i;

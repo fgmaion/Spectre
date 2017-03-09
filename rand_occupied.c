@@ -8,22 +8,13 @@ double ru(double arg, double base){
 }
 
 
-int prep_randoccupied(){
-  m0 = n0;
-  m1 = n1;
-  m2 = n2;
-
+int set_randoccupied(){
   number_occupied = 0;
   
-  // FFTw plan/H_k is not set correctly for this yet (ever). 
-  // m0 = n0/4; // roughly equal dx, dy, dz.
-  // m1 = 2*n1;
-  // m2 = 2*n2;
-
   // Surveyed volume need only be done once; no rotation required.
-  rand_occupied = malloc(m2*m1*m0*sizeof(*rand_occupied));
+  rand_occupied = malloc(n2*n1*n0*sizeof(*rand_occupied));
 
-  for(j=0; j<m0*m1*m2; j++)  rand_occupied[j] = 0;
+  for(j=0; j<n0*n1*n2; j++)  rand_occupied[j] = 0;
 
   set_cnst_nbar(); // set pt2nz and recalculate spline for inverse nbar.  
 
@@ -40,14 +31,14 @@ int prep_randoccupied(){
     rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);
   }
 
-  // min_x = min_y = min_z =   0.0;  same volume - will need centering, if not rotated. 
+  // min_x = min_y = min_z =   0.0;  same volume - will need centering, and rotated. 
   // max_x = max_y = max_z = 800.0; 
 
   // what if negative, i.e. W4; limited padding.
   min_x = rd(arrayMin(rand_x, rand_number), 50.); min_y = rd(arrayMin(rand_y, rand_number), 50.); min_z = rd(arrayMin(rand_z, rand_number), 50.);
   max_x = ru(arrayMax(rand_x, rand_number), 50.); max_y = ru(arrayMax(rand_y, rand_number), 50.); max_z = ru(arrayMax(rand_z, rand_number), 50.);
 
-  dx    = (max_x - min_x)/m2;  dy    = (max_y - min_y)/m1;  dz    = (max_z - min_z)/m0;
+  dx    = (max_x - min_x)/n2;  dy    = (max_y - min_y)/n1;  dz    = (max_z - min_z)/n0;
 
   printf("\n\nRandoms:");
   printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));
@@ -64,13 +55,13 @@ int prep_randoccupied(){
     ylabel      = (int) floor((rand_y[j] - min_y)/dy);
     zlabel      = (int) floor((rand_z[j] - min_z)/dz);
 
-    boxlabel    = (int)    xlabel + m2*ylabel + m2*m1*zlabel;
+    boxlabel    = (int)    xlabel + n2*ylabel + n2*n1*zlabel;
 
     rand_occupied[boxlabel]  =  1;  // binary array, is surveyed or not
   }
 
   // original estimate. 
-  for(j=0; j<m0*m1*m2; j++)  number_occupied += rand_occupied[j];
+  for(j=0; j<n0*n1*n2; j++)  number_occupied += rand_occupied[j];
   
   printf("\n\nSurveyed vol. calc.");
 
@@ -82,8 +73,6 @@ int prep_randoccupied(){
   convergence = 100.;
 
   while(convergence > 1.0){
-    // rand_newchi_newbasis();
-
     for(j=0; j<rand_number; j++){
       // no rotation.
       F              = gsl_rng_uniform(gsl_ran_r);  // Chi limits satisfied by construction.
@@ -100,7 +89,7 @@ int prep_randoccupied(){
       ylabel         = (int) floor((rand_y[j] - min_y)/dy);
       zlabel         = (int) floor((rand_z[j] - min_z)/dz);
 
-      boxlabel       = (int)    xlabel + m2*ylabel + m2*m1*zlabel;
+      boxlabel       = (int)    xlabel + n2*ylabel + n2*n1*zlabel;
 
       if(rand_occupied[boxlabel] == 0){      
         rand_occupied[boxlabel]  =  1;  // binary array, is surveyed or not
@@ -125,7 +114,7 @@ int prep_randoccupied(){
 
   Index = 0;
 
-  for(j=0; j<m0*m1*m2; j++){
+  for(j=0; j<n0*n1*n2; j++){
     if(rand_occupied[j] == 1){
       occupied_indices[Index] = j;
 
@@ -133,7 +122,7 @@ int prep_randoccupied(){
     }
   }
 
-  printf("\n\nDifference between all cells and occupied is %.4lf", 100.*(m0*m1*m2 - number_occupied)/((double) m0*m1*m2));
+  printf("\n\nDifference between all cells and occupied is %.4lf", 100.*(n0*n1*n2 - number_occupied)/((double) n0*n1*n2));
 
   walltime("Walltime after randoms occupied");
 

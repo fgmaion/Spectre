@@ -1,12 +1,14 @@
 int prep_clipping_calc(){
-  iplan               = fftw_plan_dft_3d(n0, n1, n2, H_k, smooth_overdensity, FFTW_BACKWARD, FFTW_ESTIMATE);
-
-  cell_cweights       = (double *)      malloc(n0*n1*n2*sizeof(*cell_cweights));
+  // iplan            = fftw_plan_dft_3d(n0, n1, n2, H_k, smooth_overdensity, FFTW_BACKWARD, FFTW_ESTIMATE);
+  iplan               = fftw_plan_dft_c2r_3d(n0, n1, n2, H_k, overdensity, FFTW_ESTIMATE);
+  
+  cell_cweights       = (double *)  malloc(n0*n1*n2*sizeof(*cell_cweights));
 
   // pre-compute Gaussian filter factors. 
-  filter_factors      = (double *)      malloc(n0*n1*n2*sizeof(*filter_factors));
+  filter_factors      = (double *)  malloc(n0*n1*n2*sizeof(*filter_factors));
 
-  prep_filterfactors(dx, dy, dz);
+  // dx, dy, dz set by rand_occupied. 
+  prep_filterfactors();
   
   return 0;
 }
@@ -28,7 +30,7 @@ int get_clipping_weights(){
  else{
    walltime("\n\nStarting clipping calc. at");
    
-  for(j=0; j<m0*m1*m2; j++) overdensity[j] = 0.0; // for each mock.
+  for(j=0; j<n0*n1*n2; j++) overdensity[j] = 0.0; // for each mock.
   
   for(j=0; j<Vipers_Num; j++){
     if(Acceptanceflag[j] == true){
@@ -36,7 +38,7 @@ int get_clipping_weights(){
       ylabel     = (int)  floor((yCoor[j] - min_y)/dy);
       zlabel     = (int)  floor((zCoor[j] - min_z)/dz);
 
-      boxlabel   = (int)  xlabel + m2*ylabel + m2*m1*zlabel;
+      boxlabel   = (int)  xlabel + n2*ylabel + n2*n1*zlabel;
 
       overdensity[boxlabel]  +=  pow(dx*dy*dz*interp_nz(rDist[j])*sampling[j], -1.); // N/<N>
     }
@@ -93,7 +95,7 @@ int get_clipping_weights(){
       ylabel     = (int)  floor((yCoor[j] - min_y)/dy);
       zlabel     = (int)  floor((zCoor[j] - min_z)/dz);
 
-      boxlabel   = (int)  xlabel + m2*ylabel + m2*m1*zlabel;
+      boxlabel   = (int)  xlabel + n2*ylabel + n2*n1*zlabel;
       
       clip_galweight[j]  =  cell_cweights[boxlabel];
 

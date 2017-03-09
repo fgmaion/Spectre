@@ -90,7 +90,7 @@ double fkp_norm, daccepted_gals;
 
 
 //-- Embedding volume for mock. --//
-int          n0, n1, n2; // (z == 0), (x == 2).
+int          n0, n1, n2, nx; // (z == 0), (x == 2).
 
 double  AxisLimsArray[2][3];  // Array to hold the coordinate limits of the VIPERS survey.
 
@@ -188,8 +188,6 @@ double* filter_factors;
 
 int     number_occupied = 0;
 int*          rand_occupied;
-
-int m2, m1, m0;
 
 int* occupied_indices;
 
