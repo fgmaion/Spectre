@@ -1,8 +1,8 @@
 int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoor[], double yCoor[], double zCoor[]){
   printf("\n\nAngular limits of galaxies: %.4lf < ra < %.4lf, %.4lf < dec < %.4lf", AcceptedMin(ra,  Acceptanceflag, Vipers_Num),  AcceptedMax(ra, Acceptanceflag, Vipers_Num),
-                                                                                    AcceptedMin(dec, Acceptanceflag, Vipers_Num), AcceptedMax(dec, Acceptanceflag, Vipers_Num));
-  
-  StefanoReflection(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
+                                                                                    AcceptedMin(dec, Acceptanceflag, Vipers_Num), AcceptedMax(dec, Acceptanceflag, Vipers_Num));  
+  // Reflection applied in coordinate calc.  
+  // StefanoReflection(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
   
   // Rotate the input co-ordinates such that the ra direction is aligned more or less with the y axis, dec direction with x, and redshift along z.
   StefanoRotated(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);

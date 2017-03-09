@@ -39,9 +39,9 @@ int CatalogueInput_500s(){
 
       rDist[j]              = interp_comovingDistance(gal_z[j]);          // Comoving distances in h^-1 Mpc
 
-      xCoor[j]              = rDist[j]*cos(dec[j])*cos(ra[j]);
-      yCoor[j]              = rDist[j]*cos(dec[j])*sin(ra[j]);
-      zCoor[j]              = rDist[j]*sin(dec[j]);                       // usual spherical co-ordinates.
+      xCoor[j]              =  rDist[j]*cos(dec[j])*cos(ra[j]);
+      yCoor[j]              =  rDist[j]*cos(dec[j])*sin(ra[j]);
+      zCoor[j]              = -rDist[j]*sin(dec[j]);                      // reflection of spherical coordinates. 
 
       ra[j]                /= (pi/180.0);                                 // Converted to degrees.
       dec[j]               /= (pi/180.0);                                 // Converted to degrees.  

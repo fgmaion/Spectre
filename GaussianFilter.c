@@ -24,11 +24,13 @@ int prep_filterfactors(){
 
         kSq   = pow(k_x, 2.) + pow(k_y, 2.) + pow(k_z, 2.);
         
-        filter_factors[Index] = exp(-kSq*pow(smooth_radius, 2.)/2.)/n0*n1*n2;
+        filter_factors[Index] = exp(-kSq*pow(smooth_radius, 2.)/2.)/(n0*n1*n2);
+
+        // if(Index<100)  printf("\n%.6lf \t %.9lf", kSq, filter_factors[Index]);
       }
     }
   }
-        
+
   return 0;
 }
 
@@ -38,17 +40,11 @@ int Gaussian_filter(){
   fftw_execute(plan); // plan works off n0, n1, n2.  
   
   // Gaussian smooth the counts.
-  for(k=0; k<n0; k++)
-    for(j=0; j<n1; j++){
-      for(i=0; i<nx; i++){
-        Index = k*n1*nx + j*nx + i;
-
-        H_k[Index][0] *= filter_factors[Index];
-        H_k[Index][1] *= filter_factors[Index];
-      }
-    }
+  for(k=0; k<n0*n1*nx; k++){
+    H_k[k][0] *= filter_factors[k];
+    H_k[k][1] *= filter_factors[k];
   }
-    
+
   fftw_execute(iplan);
 
   return 0;

@@ -20,7 +20,8 @@ int prep_r2c(){
   
   H_k                 = (fftw_complex*) fftw_malloc(nx*n1*n0*sizeof(*H_k)); // returns half the array, along the fastest memory change direction: x.
 
-  plan                = fftw_plan_dft_r2c_3d(n0, n1, n2, overdensity, H_k, FFTW_ESTIMATE); // r2c is always forward. // FFTW_ESTIMATE, FFTW_MEASURE, FFTW_PATIENT, FFTW_EXHAUSTIVE.
+  // FFTW_ESTIMATE, FFTW_MEASURE, FFTW_PATIENT, FFTW_EXHAUSTIVE.
+  plan                = fftw_plan_dft_r2c_3d(n0, n1, n2, overdensity, H_k, FFTW_ESTIMATE); // r2c is always forward.
   
   return 0;
 }

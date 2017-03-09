@@ -183,11 +183,11 @@ double  d0;
 double  smooth_radius;
 
 double* gal_clippingweights;
-double* cell_cweights;
+double* cell_metd0; // highest d0 met by cell.
 double* filter_factors;
 
 int     number_occupied = 0;
-int*          rand_occupied;
+int*      rand_occupied;
 
 int* occupied_indices;
 
