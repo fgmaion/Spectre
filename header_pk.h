@@ -14,6 +14,8 @@ double* overdensity;
 double* smooth_overdensity;
 
 // fftw_complex* overdensity;
+// fftw_complex* smooth_overdensity;
+
 fftw_complex* H_k;
 
 //-- embedding volume --// 

@@ -25,7 +25,7 @@ int prep_r2c(){
 int prep_x2c(){
   fftw_import_wisdom_from_filename("/home/mjw/HOD_MockRun/wisdom/wisdom.dat");
 
-  // prep_c2c();
+  //prep_c2c();
   prep_r2c();
 
   fftw_export_wisdom_to_filename("/home/mjw/HOD_MockRun/wisdom/wisdom.dat");

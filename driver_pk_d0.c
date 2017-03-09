@@ -120,7 +120,7 @@ int main(int argc, char **argv){
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
     
     CatalogueInput_500s(); // mocks 1 to 153 are independent. 
-    
+
     assignAcceptance();  
     
     spline_nbar(0);  // new <n(z)> for each mock. arg 1: bool for smoothed + reflected 2-field avg., arg 2: 'truth' i.e. mock avg.
