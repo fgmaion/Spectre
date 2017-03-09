@@ -22,12 +22,12 @@
 // #include "nbar_smooth.c"
 #include "fkp_weights.c"
 #include "rand_occupied.c"
-#include "clipping_weights.c"
+//#include "clipping_weights.c"
 #include "CloudInCell.c" 
 #include "overdensity_calc.c"
 #include "FFTw.c"
 #include "old_FFTw.c"
-#include "GaussianFilter.c"
+//#include "GaussianFilter.c"
 #include "assign_pkmemory.c"
 
 
@@ -115,9 +115,11 @@ int main(int argc, char **argv){
   
   load_rands_radec(1.0);
 
-  prep_randoccupied();
+  // prep_randoccupied();
+
+  // prep_clipping_calc();
   
-  // prep_r2c_modes();
+  prep_r2c_modes();
   
   for(loopCount=1; loopCount<2; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
@@ -127,22 +129,22 @@ int main(int argc, char **argv){
     assignAcceptance();  
     
     spline_nbar(0);  // new <n(z)> for each mock. arg 1: bool for smoothed + reflected 2-field avg., arg 2: 'truth' i.e. mock avg.
+
+    // get_clipping_weights(); // basis without rotation. 
     
     StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
     
     rand_newchi_newbasis();
 
-    calc_clipping_weights();
-
-    // loop over thresholds. 
+    // loop over thresholds here? 
     
-    // alpha_calc();
+    alpha_calc();
     
-    // calc_fkpweights();  // normalisation of FKP weights set by random catalogue.
+    calc_fkpweights();  // normalisation of FKP weights set by random catalogue.
     
-    // calc_overdensity(); // Cloud-in-Cell is a bottleneck. 
+    calc_overdensity(); // Cloud-in-Cell is a bottleneck. 
     
-    // PkCalc(); 
+    PkCalc(); 
   }
   
   walltime("Wall time at finish");

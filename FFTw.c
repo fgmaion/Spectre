@@ -81,7 +81,7 @@ int prep_r2c_modes(){
         kM2[Index]                            *= sinc_factors[i];
         
         kM2[Index]                             = pow(kM2[Index], 2.0);  // Correct mass assignment of randoms; cic = 2, ngp = 1.
-
+        
         dummy                                  = (int)  floor((log10(kmodulus) - logk_min)/logk_interval);
         
         // Needs properly fixed.  Discarding zero index info.

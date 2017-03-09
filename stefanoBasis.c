@@ -1,20 +1,5 @@
 int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoor[], double yCoor[], double zCoor[]){
-  // Convert (ra, dec, z) into (x, y, z) for each catalogue in Stefano's basis.
-  for(j=0; j<Num; j++){
-     ra[j]               *= (pi/180.0);                                 // Converted to radians.
-    dec[j]               *= (pi/180.0);                                 // Converted to radians.
-
-    rDist[j]              = interp_comovingDistance(gal_z[j]);          // Comoving distances in h^-1 Mpc
-
-    xCoor[j]              = rDist[j]*cos(dec[j])*cos(ra[j]);
-    yCoor[j]              = rDist[j]*cos(dec[j])*sin(ra[j]);
-    zCoor[j]              = rDist[j]*sin(dec[j]);                       // usual spherical co-ordinates.
-
-    ra[j]                /= (pi/180.0);                                 // Converted to degrees.
-    dec[j]               /= (pi/180.0);                                 // Converted to degrees.
-  }
-
-  printf("\n\nAngular limits of galaxies: %.4lf < ra < %.4lf, %.4lf < dec < %.4lf", AcceptedMin(ra, Acceptanceflag, Vipers_Num),  AcceptedMax(ra, Acceptanceflag, Vipers_Num),
+  printf("\n\nAngular limits of galaxies: %.4lf < ra < %.4lf, %.4lf < dec < %.4lf", AcceptedMin(ra,  Acceptanceflag, Vipers_Num),  AcceptedMax(ra, Acceptanceflag, Vipers_Num),
                                                                                     AcceptedMin(dec, Acceptanceflag, Vipers_Num), AcceptedMax(dec, Acceptanceflag, Vipers_Num));
   
   StefanoReflection(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);

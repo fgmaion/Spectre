@@ -13,6 +13,8 @@ int prep_randoccupied(){
   m1 = n1;
   m2 = n2;
 
+  number_occupied = 0;
+  
   // FFTw plan/H_k is not set correctly for this yet (ever). 
   // m0 = n0/4; // roughly equal dx, dy, dz.
   // m1 = 2*n1;
@@ -24,8 +26,6 @@ int prep_randoccupied(){
   for(j=0; j<m0*m1*m2; j++)  rand_occupied[j] = 0;
 
   set_cnst_nbar(); // set pt2nz and recalculate spline for inverse nbar.  
-
-  // rand_newchi_newbasis();
 
   for(j=0; j<rand_number; j++){
     // no rotation.
@@ -39,10 +39,13 @@ int prep_randoccupied(){
     rand_y[j]      =  rand_chi[j]*sin(rand_ra[j])*cos_dec;
     rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);
   }
-  
+
+  // min_x = min_y = min_z =   0.0;  same volume - will need centering, if not rotated. 
+  // max_x = max_y = max_z = 800.0; 
+
   // what if negative, i.e. W4; limited padding.
-  min_x = rd(arrayMin(rand_x, rand_number), 20.); min_y = rd(arrayMin(rand_y, rand_number), 20.); min_z = rd(arrayMin(rand_z, rand_number), 20.);
-  max_x = ru(arrayMax(rand_x, rand_number), 20.); max_y = ru(arrayMax(rand_y, rand_number), 20.); max_z = ru(arrayMax(rand_z, rand_number), 20.);
+  min_x = rd(arrayMin(rand_x, rand_number), 50.); min_y = rd(arrayMin(rand_y, rand_number), 50.); min_z = rd(arrayMin(rand_z, rand_number), 50.);
+  max_x = ru(arrayMax(rand_x, rand_number), 50.); max_y = ru(arrayMax(rand_y, rand_number), 50.); max_z = ru(arrayMax(rand_z, rand_number), 50.);
 
   dx    = (max_x - min_x)/m2;  dy    = (max_y - min_y)/m1;  dz    = (max_z - min_z)/m0;
 
@@ -66,6 +69,9 @@ int prep_randoccupied(){
     rand_occupied[boxlabel]  =  1;  // binary array, is surveyed or not
   }
 
+  // original estimate. 
+  for(j=0; j<m0*m1*m2; j++)  number_occupied += rand_occupied[j];
+  
   printf("\n\nSurveyed vol. calc.");
 
   double oldvol, newvol, truvol, convergence, accuracy;
@@ -75,9 +81,7 @@ int prep_randoccupied(){
 
   convergence = 100.;
 
-  while(convergence > 0.5){
-    number_occupied = 0;
-
+  while(convergence > 1.0){
     // rand_newchi_newbasis();
 
     for(j=0; j<rand_number; j++){
@@ -91,19 +95,19 @@ int prep_randoccupied(){
       rand_x[j]      =  rand_chi[j]*cos(rand_ra[j])*cos_dec;
       rand_y[j]      =  rand_chi[j]*sin(rand_ra[j])*cos_dec;
       rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);
-      // }
     
-      // for(j=0; j<rand_number; j++){
-      xlabel      = (int) floor((rand_x[j] - min_x)/dx);
-      ylabel      = (int) floor((rand_y[j] - min_y)/dy);
-      zlabel      = (int) floor((rand_z[j] - min_z)/dz);
+      xlabel         = (int) floor((rand_x[j] - min_x)/dx);
+      ylabel         = (int) floor((rand_y[j] - min_y)/dy);
+      zlabel         = (int) floor((rand_z[j] - min_z)/dz);
 
-      boxlabel    = (int)    xlabel + m2*ylabel + m2*m1*zlabel;
+      boxlabel       = (int)    xlabel + m2*ylabel + m2*m1*zlabel;
 
-      rand_occupied[boxlabel]  =  1;  // binary array, is surveyed or not
+      if(rand_occupied[boxlabel] == 0){      
+        rand_occupied[boxlabel]  =  1;  // binary array, is surveyed or not
+
+        number_occupied         +=  1;
+      }
     }
-
-    for(j=0; j<m0*m1*m2; j++)  number_occupied   += rand_occupied[j];  // Number of cells over which <1+ delta> is averaged.
 
     newvol      = dx*dy*dz*number_occupied/pow(10., 9.);
 

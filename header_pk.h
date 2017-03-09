@@ -183,6 +183,8 @@ double  d0;
 double  smooth_radius;
 
 double* gal_clippingweights;
+double* cell_cweights;
+double* filter_factors;
 
 int     number_occupied = 0;
 int*          rand_occupied;

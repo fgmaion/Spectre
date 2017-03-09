@@ -22,7 +22,7 @@ int prep_CatalogueInput_500s(){
 }
 
 
-int CatalogueInput_500s(){
+int CatalogueInput_500s(){  
     printf("\n\nOpening catalogue: %s", filepath);
     
     inputfile   = fopen(filepath, "r");
@@ -33,13 +33,25 @@ int CatalogueInput_500s(){
       clip_galweight[j] = 1.0;
         
       fscanf(inputfile, "%*d \t %le \t %le \t %le \t %*le \t %*le \t %*le \t %*d \t %*d \t %*d \n", &ra[j], &dec[j], &zobs[j]);
+      
+       ra[j]               *= (pi/180.0);                                 // Converted to radians.
+      dec[j]               *= (pi/180.0);                                 // Converted to radians. 
+
+      rDist[j]              = interp_comovingDistance(gal_z[j]);          // Comoving distances in h^-1 Mpc
+
+      xCoor[j]              = rDist[j]*cos(dec[j])*cos(ra[j]);
+      yCoor[j]              = rDist[j]*cos(dec[j])*sin(ra[j]);
+      zCoor[j]              = rDist[j]*sin(dec[j]);                       // usual spherical co-ordinates.
+
+      ra[j]                /= (pi/180.0);                                 // Converted to degrees.
+      dec[j]               /= (pi/180.0);                                 // Converted to degrees.  
     }
     
     fclose(inputfile);
     
     // Load ESR weights.  
     spec_weights();    // load sampling according to local TSR.
-    
+
     return 0;
 }
 
