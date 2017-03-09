@@ -80,7 +80,7 @@ int set_clippingweights(){
     printf("\n\nMean renormalisation in clipping weights: %.2lf", norm);
 
     // Shouldn't need overdensity again.
-    for(j=0; j<n0*n1*n2; j++)  overdensity[j][0]  -=         1.0;
+    for(j=0; j<n0*n1*n2; j++)  overdensity[j][0]  -=         1.0; // no homogeneous constraint. 
     
     // rescaling of <1+delta>.  by rescaling (1+d), don't slip below d=-1. 
     for(j=0; j<n0*n1*n2; j++){
