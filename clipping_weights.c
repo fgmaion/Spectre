@@ -16,20 +16,28 @@ int prep_clipping_calc(){
 }
 
 
-int get_clipping_weights(){
- if(d0 >= 1000){
-   for(j=0; j<Vipers_Num; j++)  clip_galweight[j] = 1.0;
+int set_clipping_weights(){
+  if(d0 >= 1000){
+    for(j=0; j<Vipers_Num; j++)  clip_galweight[j] = 1.0;
 
-   return 0;
- }
+    return 0;
+  }
 
- else if(foldfactor > 1.0){
-   load_clippingweights();  // %% calculation of clipping weights, must have no folding. %% 
+  else if(foldfactor > 1.0){
+    load_clippingweights();  // %% calculation of clipping weights, must have no folding. %%
 
-   return 0;
- }
+    return 0;
+  }
 
- else{
+  else{
+    calc_clipping_weights();
+  }
+
+  return 0;
+}
+  
+
+int calc_clipping_weights(){
    walltime("\n\nStarting clipping calc. at");
    
   for(j=0; j<n0*n1*n2; j++) overdensity[j] = 0.0; // for each mock.
@@ -159,8 +167,7 @@ int get_clipping_weights(){
     fprintf(output, "\n");
   }
 
-  fclose(output);
- }
+ fclose(output);
 
  // and now load. 
  load_clippingweights();
