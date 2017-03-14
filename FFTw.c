@@ -24,7 +24,7 @@ int prep_sinc_factors(double fund_k, double kNy){
                   kk  =  k;
     if(k > n0/2)  kk -= n0;
 
-    k_z *= fund_k;
+    k_z = kk*fund_k;
     
     sinc_factors[k] = gsl_sf_sinc(0.5*k_z/kNy);
   }
@@ -78,7 +78,7 @@ int prep_r2c_modes(struct regress* inst, double scaling){
         //                                     if                                            then    else
         inst->kind[Index]                      = ((dummy >= 0) && (dummy < KBIN_NO)) ? dummy : (KBIN_NO - 1);
 
-        printf("\n%d %d %d \t %.6lf \t %.6lf \t %d", k, j, i, fund_kz, kmodulus, inst->kind[Index]);
+        // printf("\n%d %d %d \t %.6lf \t %.6lf \t %d", k, j, i, fund_kz, kmodulus, inst->kind[Index]);
                 
         // Latest Open MP: reduction on array elements.  Each available mode has an index in the binning array.
         inst->Sum_Li[inst->kind[Index]]       += inst->kLi[Index];  // Seems to add up to zero numerically.
