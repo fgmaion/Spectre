@@ -78,7 +78,7 @@ int prep_r2c_modes(struct regress* inst, double scaling){
         //                                     if                                            then    else
         inst->kind[Index]                      = ((dummy >= 0) && (dummy < KBIN_NO)) ? dummy : (KBIN_NO - 1);
 
-        printf("\n%d \t %.6lf \t %d", i, kmodulus, inst->kind[Index]); 
+        // printf("\n%d \t %.6lf \t %d", i, kmodulus, inst->kind[Index]); 
         
         // Latest Open MP: reduction on array elements.  Each available mode has an index in the binning array.
         inst->Sum_Li[inst->kind[Index]]       += inst->kLi[Index];  // Seems to add up to zero numerically.
