@@ -35,7 +35,7 @@ int prep_sinc_factors(double fund_k, double kNy){
 
 int prep_r2c_modes(struct regress* inst, double scaling){  
   int ii, jj, kk, dummy;
-
+  
   prep_sinc_factors(scaling*fund_kz, scaling*zNy);
    
   // r2c returns half the modes on the direction in which overdensity changes first, i.e. x. // collapse(3)
@@ -78,7 +78,7 @@ int prep_r2c_modes(struct regress* inst, double scaling){
         //                                     if                                            then    else
         inst->kind[Index]                      = ((dummy >= 0) && (dummy < KBIN_NO)) ? dummy : (KBIN_NO - 1);
 
-        // printf("\n%d", inst->kind[Index]); 
+        printf("\n%.6lf \t %d", kmodulus, inst->kind[Index]); 
         
         // Latest Open MP: reduction on array elements.  Each available mode has an index in the binning array.
         inst->Sum_Li[inst->kind[Index]]       += inst->kLi[Index];  // Seems to add up to zero numerically.
