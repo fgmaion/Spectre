@@ -113,7 +113,7 @@ int linearGrowthRate(){
         // approx2linear_growthfactor[k]         = qromb(&f_Om_545, -9.5, lnAarray[k]);
         // approx2linear_growthfactor[k]         = exp(approx2linear_growthfactor[k])/approx_growthfactor_today;
         
-	gsl_integration_qags(&F, -9.5, lnAarray[k], 0, 1e-7, 1000, w, &result, &error);
+        gsl_integration_qags(&F, -9.5, lnAarray[k], 0, 1e-7, 1000, w, &result, &error);
 
         approx2linear_growthfactor[k]         = exp(result)/approx_growthfactor_today;
 

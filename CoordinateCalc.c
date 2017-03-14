@@ -1,4 +1,5 @@
 int prep_CatalogueInput_500s(){
+  // Maximum number of galaxies present in any mock of the collection (i.e. those for covariance estimate).
   if(strcmp(vipersHOD_dir, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2/mocks_v1.7/W1") == 0)  max_gals = 61765;  // no z cuts.
   
   else max_gals = max_gal();
@@ -17,6 +18,20 @@ int prep_CatalogueInput_500s(){
   clip_galweight =  (double *)  malloc(max_gals*sizeof(*clip_galweight));
 
   gal_z = &zobs[0];  // Choice of redshift from zcos, zpec, zphot, zobs.       
+
+  return 0;
+}
+
+
+int spec_weights(){
+  // DT TSR, for new mocks in W1_Spectro_V7_2.
+  sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/TSR/TSR_W%d_mock_%03d_Nagoya_v6_Samhain.dat", root_dir, fieldFlag, loopCount);
+
+  inputfile = fopen(filepath, "r");
+
+  for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%*d \t %*lf \t %*lf \t %lf \n", &sampling[j]);
+
+  fclose(inputfile);
 
   return 0;
 }
@@ -51,20 +66,6 @@ int CatalogueInput_500s(){
     
     // Load ESR weights.  
     spec_weights();    // load sampling according to local TSR.
-
-    return 0;
-}
-
-
-int spec_weights(){
-    // DT TSR, for new mocks in W1_Spectro_V7_2. 
-    sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/TSR/TSR_W%d_mock_%03d_Nagoya_v6_Samhain.dat", root_dir, fieldFlag, loopCount);
-            
-    inputfile = fopen(filepath, "r");
-
-    for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%*d \t %*lf \t %*lf \t %lf \n", &sampling[j]);
-    
-    fclose(inputfile);
 
     return 0;
 }

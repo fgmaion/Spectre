@@ -3,7 +3,7 @@ double age_Integrand(double x){
 }
 
 
-double f_Om_545(double x){
+double f_Om_545(double x, void* p){
     double Interim;
     
     splint(lnAarray, f_Om_mOfa545, f_Om_mOfa545_2derivs, linearGrowth_nPoints, x, &Interim);

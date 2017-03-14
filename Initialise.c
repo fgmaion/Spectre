@@ -10,10 +10,7 @@ int init_gsl_randgen(){
 
 int init_padding(){
   n0 = n1 = n2 = fft_size;
-  
-  // num_modes                 =           n0*n1*n2; // c2c.
-  num_modes                 =   (n2/1 + 1)*n1*n0; // r2c.
-  
+    
   AxisLimsArray[0][0]       =        0.0;      // Embedding volume for P(k) measurement. Stefano basis.
   AxisLimsArray[1][0]       =      800.0;
 
@@ -33,9 +30,8 @@ int init_cell_info(){
   yCellSize             = (AxisLimsArray[1][1] - AxisLimsArray[0][1])/n1;
   zCellSize             = (AxisLimsArray[1][0] - AxisLimsArray[0][0])/n0;
 
+  // Clipping weights. 
   CellVolume            = xCellSize*yCellSize*zCellSize;                            // h^-3 Mpc^3
-
-  TotalVolume           = n0*n1*n2*CellVolume;   
   
   return 0;
 }
@@ -54,33 +50,30 @@ int initi_dist_z(){
 
 
 int init_fftgrid(){
-  // FFTw calc assignment.
-  xNyquistWaveNumber    = pi/xCellSize;                                               // k = 2*pi x Nyquist frequency
-  yNyquistWaveNumber    = pi/yCellSize;                                               // k = 2*pi x Nyquist frequency
-  zNyquistWaveNumber    = pi/zCellSize;                                               // k = 2*pi x Nyquist frequency
+  xNy = pi/xCellSize;  // k = 2*pi x Nyquist frequency
+  yNy = pi/yCellSize;  // k = 2*pi x Nyquist frequency
+  zNy = pi/zCellSize;  // k = 2*pi x Nyquist frequency
 
-  kIntervalx            = 2.*pi*pow(n2, -1.)*pow(xCellSize, -1.);
-  kIntervaly            = 2.*pi*pow(n1, -1.)*pow(yCellSize, -1.);
-  kIntervalz            = 2.*pi*pow(n0, -1.)*pow(zCellSize, -1.);
+  fund_kx = 2.*pi*pow(n2, -1.)*pow(xCellSize, -1.);
+  fund_ky = 2.*pi*pow(n1, -1.)*pow(yCellSize, -1.);
+  fund_kz = 2.*pi*pow(n0, -1.)*pow(zCellSize, -1.);
   
   return 0;
 }
 
 
 int Initialise(){
-    init_gsl_randgen();
+  init_gsl_randgen();
 
-    initi_dist_z();
+  initi_dist_z();
 
-    init_padding();
+  init_padding();
     
-    Jenkins_foldEmbeddingVol(); // Jenkins's fold boundary. 
+  init_cell_info();
 
-    init_cell_info();
-
-    init_fftgrid();
+  init_fftgrid();
     
-    return 0;
+  return 0;
 }
 
 

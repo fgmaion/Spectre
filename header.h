@@ -114,7 +114,7 @@ double LegendrePolynomials(double x, int n);
 
 double HubbleCnst(double z);
 
-float  (*pt2zChiIntegrand)(float);  // FLOAT?!
+double (*pt2zChiIntegrand)(double);
 
 double interp_nz(double);
 

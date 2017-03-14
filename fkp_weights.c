@@ -29,7 +29,7 @@ int calc_fkpweights(){
 }
 
 
-double veff_integrand(double chi){
+double veff_integrand(double chi, void* p){
   double nbar;
 
   nbar  = interp_nz(chi);

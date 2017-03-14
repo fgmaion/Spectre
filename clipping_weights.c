@@ -1,5 +1,32 @@
+int load_clippingweights(){
+  int line_no;
+
+  // default ordering: double d0s[4] = {4., 6., 10., 1000.};
+
+  if(data_mock_flag == 0) sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/clip_weights/W%d/wghts_z_%.1lf_%.1lf_%d.dat", root_dir, fieldFlag, lo_zlim, hi_zlim, loopCount);
+  if(data_mock_flag == 1) sprintf(filepath, "%s/W1_Spectro_V7_4/data_v1.7/clip_weights/W%d/wghts_%.1lf_z_%.1lf_%d.dat",  root_dir, fieldFlag, lo_zlim, hi_zlim, loopCount);
+
+  inputfile = fopen(filepath, "r");
+
+  line_count(inputfile, &line_no);
+
+  for(j=0; j<line_no; j++){
+    if(d0 ==    4.)  fscanf(inputfile, "%lf \t %*lf \t %*lf \t %*lf \t %*lf", &clip_galweight[j]);
+    if(d0 ==    6.)  fscanf(inputfile, "%*lf \t %lf \t %*lf \t %*lf \t %*lf", &clip_galweight[j]);
+    if(d0 ==   10.)  fscanf(inputfile, "%*lf \t %*lf \t %lf \t %*lf \t %*lf", &clip_galweight[j]);
+    if(d0 == 1000.)  fscanf(inputfile, "%*lf \t %*lf \t %*lf \t %lf \t %*lf", &clip_galweight[j]);
+  }
+
+  fclose(inputfile);
+
+  // for(j=0; j<130; j++)  printf("\n%d \t %.6lf", j, clip_galweight[j]);
+
+  return 0;
+}
+
+
 int prep_clipping_calc(){
-  if((d0 <= 1000) && (foldfactor == 1.0)){
+  if(d0 <= 1000){
     // iplan            = fftw_plan_dft_3d(n0, n1, n2, H_k, smooth_overdensity, FFTW_BACKWARD, FFTW_ESTIMATE);
     iplan               = fftw_plan_dft_c2r_3d(n0, n1, n2, H_k, smooth_overdensity, FFTW_ESTIMATE);
 
@@ -23,12 +50,6 @@ int set_clipping_weights(){
     return 0;
   }
 
-  else if(foldfactor > 1.0){
-    load_clippingweights();  // %% calculation of clipping weights, must have no folding. %%
-
-    return 0;
-  }
-
   else{
     calc_clipping_weights();
   }
@@ -38,7 +59,7 @@ int set_clipping_weights(){
   
 
 int calc_clipping_weights(){
-   walltime("\n\nStarting clipping calc. at");
+  walltime("\n\nStarting clipping calc. at");
    
   for(j=0; j<n0*n1*n2; j++) overdensity[j] = 0.0; // for each mock.
   
@@ -173,37 +194,4 @@ int calc_clipping_weights(){
  load_clippingweights();
  
  return 0;
-}
-
-
-int load_clippingweights(){
-  int line_no;
-
-  // default ordering. 
-  // double d0s[4] = {4., 6., 10., 1000.};
-  
-  if(data_mock_flag == 0){
-    sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/clip_weights/W%d/wghts_z_%.1lf_%.1lf_%d.dat", root_dir, fieldFlag, lo_zlim, hi_zlim, loopCount);
-  }
-
-  if(data_mock_flag == 1){
-    sprintf(filepath, "%s/W1_Spectro_V7_4/data_v1.7/clip_weights/W%d/wghts_%.1lf_z_%.1lf_%d.dat",  root_dir, fieldFlag, lo_zlim, hi_zlim, loopCount);
-  }
-  
-  inputfile = fopen(filepath, "r");  
-    
-  line_count(inputfile, &line_no);
-
-  for(j=0; j<line_no; j++){
-    if(d0 ==    4.)  fscanf(inputfile, "%lf \t %*lf \t %*lf \t %*lf \t %*lf", &clip_galweight[j]);
-    if(d0 ==    6.)  fscanf(inputfile, "%*lf \t %lf \t %*lf \t %*lf \t %*lf", &clip_galweight[j]);
-    if(d0 ==   10.)  fscanf(inputfile, "%*lf \t %*lf \t %lf \t %*lf \t %*lf", &clip_galweight[j]);
-    if(d0 == 1000.)  fscanf(inputfile, "%*lf \t %*lf \t %*lf \t %lf \t %*lf", &clip_galweight[j]);
-  }
-  
-  fclose(inputfile);
-
-  // for(j=0; j<130; j++)  printf("\n%d \t %.6lf", j, clip_galweight[j]);
-  
-  return 0;
 }

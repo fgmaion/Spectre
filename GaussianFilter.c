@@ -1,4 +1,4 @@
-int prep_filterfactors(){
+int prep_filterfactors(void){
   double xNy = pi/dx;
   double yNy = pi/dy;
   double zNy = pi/dz;
@@ -35,7 +35,7 @@ int prep_filterfactors(){
 }
 
 
-int Gaussian_filter(){  
+int Gaussian_filter(void){  
   // Gaussian filter the array overdensity, filter radius set by global variable GaussianFilter_radius.
   fftw_execute(plan); // plan works off n0, n1, n2.  
   

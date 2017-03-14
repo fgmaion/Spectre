@@ -18,7 +18,7 @@ int load_rands_radec(double sampling){
 }
 
 
-int set_cnst_nbar(){
+int set_cnst_nbar(void){
   // Reassign randoms to have constant \bar n(z); this will (much) better sample high z tail.
   pt2nz = &unity; // constant <n(z)>
 
@@ -28,7 +28,7 @@ int set_cnst_nbar(){
 }
 
 
-int rand_newchi_newbasis(){
+int rand_newchi_newbasis(void){
   // With nbar specified according to interp_nz(chi), assign chi for randoms such that they satisfy this bar.
   // Achieved with the transformation method, see pg. 287 of NR and smooth_nbar.c
   
@@ -48,7 +48,7 @@ int rand_newchi_newbasis(){
   c_ra    =  CentreRA*(pi/180.);
   c_dec   = CentreDec*(pi/180.);
   
-  #pragma omp parallel
+  #pragma omp parallel if(thread == 1)
   { // \{ must be on a new line
     gsl_rng*  gsl_ran_thread_r;
 
@@ -96,10 +96,6 @@ int rand_newchi_newbasis(){
       rand_x[j] = x2 + stefano_trans_x;  // Translate to fit in the box. P(k) unaffected.
       rand_y[j] = y2 + stefano_trans_y;
       rand_z[j] = z2 + stefano_trans_z;
-
-      // rand_x[j] = fmod(rand_x[j], 800./Jenkins_foldfactor);
-      // rand_y[j] = fmod(rand_y[j], 800./Jenkins_foldfactor);
-      // rand_z[j] = fmod(rand_z[j], 800./Jenkins_foldfactor);
     }
   }
 
@@ -127,7 +123,7 @@ int lowerSampling_randomisedCatalogue(double sampling){
 }
 
 
-int make_fastread_randomCats(){
+int make_fastread_randomCats(void){
   //  Output ra and dec only, in binary. assumes loaded already. 
   sprintf(filepath, "%s/W1_Spectro_V7_4/randoms/randoms_W%d_xyz_%.1lf_%.1lf_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag, 0.6, 0.9);
   
@@ -138,7 +134,7 @@ int make_fastread_randomCats(){
   
   fclose(output);
 
-  load_fastread_randomCats();
+  load_fastread_randomCats(rand_number);
   
   return 0;
 }

@@ -1,4 +1,4 @@
-double nbar_dV(double chi){
+double nbar_dV(double chi, void* p){ // gsl function prototype is 
   return pow(chi, 2.)*(*pt2nz)(chi);
 }
 
