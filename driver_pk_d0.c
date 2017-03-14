@@ -93,7 +93,7 @@ int main(int argc, char **argv){
   }
 
   fkpPk                     =    8000.0;                 // [h^-1 Mpc]^3.
-  fft_size                  =       256;                 // Worker 46 works up to 1024. 
+  fft_size                  =         8;                 // Worker 46 works up to 1024. 
   
   logk_min                  =      -2.0;
   logk_max                  =   0.60206;                 // k = 4 hMpc^{-1}.
