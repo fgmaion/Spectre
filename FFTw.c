@@ -34,7 +34,7 @@ int prep_sinc_factors(double fund_k, double kNy){
 
 
 int prep_r2c_modes(struct regress* inst, double scaling){  
-  int ii, jj, kk, dummy;
+  int i, jj, kk, dummy;
   
   prep_sinc_factors(scaling*fund_kz, scaling*zNy);
    
@@ -51,7 +51,7 @@ int prep_r2c_modes(struct regress* inst, double scaling){
       for(i=0; i<nx; i++){
         Index                                  = k*n1*nx + j*nx + i;
 
-        kSq                                    = pow(kk, 2.) + pow(jj, 2.) + pow(ii, 2.);
+        kSq                                    = pow(kk, 2.) + pow(jj, 2.) + pow(i, 2.);
         
         kmodulus                               = pow(kSq, 0.5); // units of fundamental interval.
         
