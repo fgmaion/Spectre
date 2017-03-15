@@ -45,8 +45,6 @@ int CatalogueInput_500s(){
     line_count(inputfile, &Vipers_Num);
     
     for(j=0; j<Vipers_Num; j++){  
-      clip_galweight[j] = 1.0;
-        
       fscanf(inputfile, "%*d \t %le \t %le \t %le \t %*le \t %*le \t %*le \t %*d \t %*d \t %*d \n", &ra[j], &dec[j], &zobs[j]);
       
        ra[j]               *= (pi/180.0);                                 // Converted to radians.

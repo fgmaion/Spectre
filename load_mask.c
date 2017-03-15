@@ -48,8 +48,8 @@ int rand_newchi_newbasis(void){
   c_ra    =  CentreRA*(pi/180.);
   c_dec   = CentreDec*(pi/180.);
   
-  #pragma omp parallel if(thread == 1)
-  { // \{ must be on a new line
+  //#pragma omp parallel
+  //{ // \{ must be on a new line
     gsl_rng*  gsl_ran_thread_r;
 
     gsl_ran_thread_r = gsl_rng_alloc(gsl_rng_taus); // new instance of taus generator. 
@@ -58,7 +58,7 @@ int rand_newchi_newbasis(void){
 
     //  omp_get_max_threads()
     
-    #pragma omp for private(j, x1, y1, z1, x2, y2, z2, F, cos_dec)
+    //#pragma omp for private(j, x1, y1, z1, x2, y2, z2, F, cos_dec)  if(thread == 1)
     for(j=0; j<rand_number; j++){
       /*
       new            = gsl_rng_uniform_int(gsl_ran_thread_r, Vipers_Num);
@@ -97,16 +97,16 @@ int rand_newchi_newbasis(void){
       rand_y[j] = y2 + stefano_trans_y;
       rand_z[j] = z2 + stefano_trans_z;
     }
-  }
+    //  }
 
   // StefanoRotated(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);
-  /*
-  printf("\n\nStefano basis, randoms co-ordinates.");                                                                                                      
+  
+  printf("\n\nRandoms: Stefano basis.");                                                                                                      
 
   printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));
   printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));
   printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));                                                     
-  */
+  
   // new seed next time.
   rand_basis_call += 1;
   

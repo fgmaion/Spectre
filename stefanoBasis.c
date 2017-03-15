@@ -7,7 +7,7 @@ int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoo
   // Rotate the input co-ordinates such that the ra direction is aligned more or less with the y axis, dec direction with x, and redshift along z.
   StefanoRotated(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
   
-  printf("\n\nAccepted, inverted, rotated & translated");
+  printf("\n\nGalaxies: accepted, inverted, rotated & translated");
 
   printf("\nx min:  %.3f \t x max:  %.3f", AcceptedMin(xCoor, Acceptanceflag, Vipers_Num), AcceptedMax(xCoor, Acceptanceflag, Vipers_Num));
   printf("\ny min:  %.3f \t y max:  %.3f", AcceptedMin(yCoor, Acceptanceflag, Vipers_Num), AcceptedMax(yCoor, Acceptanceflag, Vipers_Num));

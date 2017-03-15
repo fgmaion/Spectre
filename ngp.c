@@ -20,6 +20,8 @@ int ngp_assign(double x, double y, double z, double p){
       indz = (int) floor(z);
      
       overdensity[indx + n2*indy + n1*n2*indz] += p;
+
+      break;
       
     case 1:
       newlim     = AxisLimsArray[1][2]/FOLDFACTOR;
@@ -35,6 +37,8 @@ int ngp_assign(double x, double y, double z, double p){
       indz = (int) floor(z);
 
       overdensity[indx + n2*indy + n1*n2*indz] += p;
+
+      break;
   }
     
   return 0;
