@@ -102,6 +102,8 @@ int prep_r2c_modes(regress* inst, double scaling){
     inst->mean_modk[j]  /= inst->modes_perbin[j];
 
     inst->detA[j]        = inst->modes_perbin[j]*inst->Sum_Li2[j] - inst->Sum_Li[j]*inst->Sum_Li[j];
+
+    // printf("\n%d \t %.4lf \t %.4lf \t %.4lf \t %.4lf", inst->modes_perbin[j], inst->mean_modk[j], inst->Sum_Li[j], inst->Sum_Li2[j], inst->detA[j]);
   }
 
   // modes with k < logk_min are placed into last bin. assign mean k as INF.
