@@ -43,7 +43,7 @@ int prep_x2c(){
 }
 
 
-int set_kbins_logkspacing(struct regress* inst){
+int set_kbins_logkspacing(regress* inst){
   logk_interval        = (logk_max - logk_min)/KBIN_NO;
 
   for(j=0; j<KBIN_NO; j++)  inst->logk_limits[j] = pow(10., logk_min + j*logk_interval);
@@ -52,12 +52,22 @@ int set_kbins_logkspacing(struct regress* inst){
 }
 
 
-int set_kbins_linearkspacing(struct regress* inst){
+int set_kbins_linearkspacing(regress* inst){
   double kmedia;
 
   kmedia               = 2.*pi/800.;
 
   for(j=0; j<KBIN_NO; j++)  inst->logk_limits[j] = j*kmedia; // needs 800 bins.
+
+  return 0;
+}
+
+
+int regress_mem(regress* inst){
+  inst->kind = calloc(n0*n1*nx, sizeof(int));
+
+  inst->kLi  = calloc(n0*n1*nx, sizeof(double));
+  inst->kM2  = calloc(n0*n1*nx, sizeof(double));
 
   return 0;
 }

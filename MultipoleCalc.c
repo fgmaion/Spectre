@@ -1,4 +1,4 @@
-int nosort_MultipoleCalc(struct regress* inst){
+int nosort_MultipoleCalc(regress* inst){
   // P(k, mu_i) = P_0(k) + P_2(k)*(3.*mu_i*mu_i - 1.)/2
   // Least squares fit between theory prediction, P(k, mu_i) and measured.  (Linear regression).
 
@@ -71,7 +71,7 @@ int nosort_MultipoleCalc(struct regress* inst){
 }
 
 
-int print_multipoles(struct regress* inst){
+int print_multipoles(regress* inst){
   sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/pk/d0_1000/W%d/mock_%03d_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, fieldFlag, loopCount, lo_zlim, hi_zlim, 2*fold);
   
   output = fopen(filepath, "w");

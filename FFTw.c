@@ -1,6 +1,6 @@
 #include "qSortCompare.c"
 
-int PkCalc(struct regress* inst){
+int PkCalc(regress* inst){
   walltime("Wall time before FFT");
 
   fftw_execute(plan);
@@ -33,7 +33,7 @@ int prep_sinc_factors(double fund_k, double kNy){
 }
 
 
-int prep_r2c_modes(struct regress* inst, double scaling){  
+int prep_r2c_modes(regress* inst, double scaling){  
   int i, jj, kk, dummy;
   
   prep_sinc_factors(scaling*fund_kz, scaling*zNy);

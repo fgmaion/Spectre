@@ -3,16 +3,14 @@
 #include "/home/mjw/Aux_functions/header.h"
 #include "/home/mjw/Aux_functions/Aux_functions.c"
 
-#include <sys/types.h>
-
 #include "header.h"
 #include "header_pk.h"
 #include "cosmology_planck2015.h"
+#include "struct_regress.h"
 #include "AgeOftheUniverse.c"
 #include "linearGrowthRate.c"
 #include "comovDistRedshiftCalc.c"
 #include "assignAcceptance.c"
-#include "struct_regress.c"
 #include "volavgs.c"
 #include "Initialise.c"
 #include "stefanoBasis.c"
@@ -95,7 +93,7 @@ int main(int argc, char **argv){
   }
 
   fkpPk                     =    8000.0;                 // [h^-1 Mpc]^3.
-  fft_size                  =       512;                 // Worker 46 works up to 1024. 
+  fft_size                  =       256;                 // Worker 46 works up to 1024. 
   
   logk_min                  =      -2.0;
   logk_max                  =   0.60206;                 // k = 4 hMpc^{-1}.
@@ -125,7 +123,7 @@ int main(int argc, char **argv){
   prep_r2c_modes(&unit, 1.0); // unfolded.
   // prep_r2c_modes(&half, 2.0); // one fold.
 
-  struct regress set[2] = {unit, half};
+  regress set[2] = {unit, half};
   
   walltime("All prep. done");
   

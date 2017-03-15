@@ -85,7 +85,6 @@ double*      rand_weight = NULL;
 // new seed every call. 
 int rand_basis_call = 0;
 
-
 // -- FKP weighting/normalisation --//
 int    accepted_gals;
 double       fkpPk;
@@ -147,8 +146,6 @@ double*       sinc_factors;
 double  logk_min;
 double  logk_max;
 double  logk_interval;
-
-struct regress unit, half;
 
 // -- Multipole decomposition -- //
 int     hiMultipoleOrder; // 0: use monopole only, 2: use quadrupole.
