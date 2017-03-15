@@ -93,7 +93,7 @@ int prep_r2c_modes(regress* inst, double scaling){
       
         inst->mean_modk[inst->kind[Index]]    += kmodulus;
         
-        printf("\n%d \t %.4lf \t %.4lf \t %d", Index, inst->kLi[Index], inst->kM2[Index], inst->kind[Index]);
+        // printf("\n%d \t %.4lf \t %.4lf \t %d", Index, inst->kLi[Index], inst->kM2[Index], inst->kind[Index]);
       }
     }
   }
