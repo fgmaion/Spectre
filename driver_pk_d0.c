@@ -36,7 +36,6 @@
 
 int main(int argc, char **argv){  
   thread                    =                   0; 
-
   data_mock_flag            =                   0;          // analysis of VIPERS data or mock catalogues.       
   
   fieldFlag                 =       atoi(argv[1]);
@@ -102,9 +101,9 @@ int main(int argc, char **argv){
 
   start_walltime();
   
-  fftw_init_threads();
+  // fftw_init_threads();
   
-  fftw_plan_with_nthreads(omp_get_max_threads());        // Maximum number of threads to be used; use all openmp threads available.  
+  // fftw_plan_with_nthreads(omp_get_max_threads());     // Maximum number of threads to be used; use all openmp threads available.  
   
   Initialise();                                          // Initialise grid, fft params and random generation.
 
@@ -151,13 +150,12 @@ int main(int argc, char **argv){
       calc_overdensity();
     
       // PkCalc(&set[fold]);
-
-      PkCalc(&unit);
+      // PkCalc(&unit);
     }
   }
   
   walltime("Wall time at finish");
-
+  
   printf("\n\n");
   
   return 0; 

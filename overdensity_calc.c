@@ -30,10 +30,6 @@ int calc_overdensity(){
       ngp_assign(rand_x[j], rand_y[j], rand_z[j], -alpha*rand_weight[j]);
       // cic_assign(1, rand_x[j], rand_y[j], rand_z[j], -alpha*rand_weight[j]);  // assumes all randoms up to rand_number are accepted.    
     }
-
-    printf("\n\nOverdensity:");
-    
-    for(j=0; j<n0*n1*n2; j++)  printf("\n%.6lf", overdensity[j]);
     
     walltime("Wall time after cloud-in-cell assignment");
     

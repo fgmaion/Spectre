@@ -7,7 +7,7 @@ int snipping_shotnoise(73,4499
 AgeOftheUniverse.c,73
 double age_Integrand(1,0
 double f_Om_545(6,145
-int UniverseAge(15,318
+int UniverseAge(15,327
 
 Alcock_Paczynski.c,621
 int ln_PR(1,0
@@ -49,13 +49,13 @@ int randoms_inenvironment(267,6462
 
 assignAcceptance.c,252
 int assignAcceptance(1,0
-int assignAcceptance_rand(20,373
-int alpha_calc(48,1103
-double AcceptedMax(73,1630
-double AcceptedMin(93,1897
-int assignAcceptance_true(113,2158
-double assignAcceptance_parent(120,2285
-int assignAcceptanceCube(154,3300
+int assignAcceptance_rand(20,387
+int alpha_calc(48,1117
+double AcceptedMax(73,1644
+double AcceptedMin(93,1911
+int assignAcceptance_true(113,2172
+double assignAcceptance_parent(120,2299
+int assignAcceptanceCube(154,3314
 
 assignMemory.c,154
 int assign_LikelihoodMemory(1,0
@@ -64,13 +64,14 @@ int assign2DPkMemory(109,4031
 int prep_fftw(124,4467
 int assign_prep_FFTlog_memory(135,4794
 
-assign_pkmemory.c,165
+assign_pkmemory.c,190
 int prep_c2c(1,0
-int prep_r2c(13,497
-int prep_x2c(25,1044
-int set_kbins_logkspacing(41,1365
-int set_kbins_linearkspacing(52,1626
-int prep_pkRegression(65,1880
+int prep_r2c(15,511
+int prep_x2c(30,1073
+int set_kbins_logkspacing(46,1394
+int set_kbins_linearkspacing(55,1599
+int regress_mem(66,1797
+int prep_pkRegression(76,1991
 
 Bailey.c,169
 double coeff_A(12,395
@@ -151,13 +152,11 @@ Clipped_zSpace.c,45
 int clipDensity(1,0
 int formPkCube(62,1541
 
-clipping_weights.c,156
-double rd(1,0
-double ru(6,71
-int prep_randoccupied(11,149
-int use_delta(109,3447
-int calc_clipping_weights(123,5521
-int load_clippingweights(229,9128
+clipping_weights.c,131
+int load_clippingweights(1,0
+int prep_clipping_calc(28,1066
+int set_clipping_weights(46,1682
+int calc_clipping_weights(61,1866
 
 CloudInCell.c,20
 int cic_assign(1,0
@@ -195,10 +194,10 @@ int prepNumberDensityCalc(246,8730
 
 CoordinateCalc.c,147
 int prep_CatalogueInput_500s(1,0
-int CatalogueInput_500s(25,1085
-int spec_weights(47,1610
-int DataInput(61,2010
-int ParentInput_500s(112,4123
+int spec_weights(26,1193
+int CatalogueInput_500s(40,1564
+int DataInput(72,2807
+int ParentInput_500s(123,4920
 
 CoordinateCalcCube.c,28
 int CoordinateCalcCube(1,0
@@ -215,32 +214,6 @@ int correlationfn(43,938
 int randoms_angular_correlationfn(95,1945
 int angular_correlationfn(138,3320
 int printMockAvg_correlation(169,4113
-
-cosmology_planck2015.h,231
-double  Om_v 3,188
-double  Om_r 4,302
-double  Om_m 7,380
-double  Om_b 8,427
-double  Om_tot 9,476
-double  h 10,522
-double  sigma_8 11,568
-double  ns 12,615
-double  p_index 14,663
-double  pk_gamma 15,692
-double  hz 16,766
-
-cosmology_valueaddedmocks.h,228
-double  Om_v 2,45
-double  Om_r 3,153
-double  Om_m 5,223
-double  Om_b 6,252
-double  Om_tot 7,281
-double  h 8,310
-double  sigma_8 9,339
-double  ns 10,376
-double  p_index 12,411
-double  pk_gamma 13,440
-double  hz 14,514
 
 driver_Ballinger_mcmctest.c,78
 #define  AUXfn_header 28,704
@@ -285,8 +258,9 @@ driver_parent_pk_d0.c,78
 #define  AUXfn_funcs 32,786
 int main(147,3326
 
-driver_pk_d0.c,17
-int main(33,819
+driver_pk_d0.c,39
+#define  KBIN_NO 1,0
+int main(37,916
 
 driver_pk_d0_old.c,78
 #define  AUXfn_header 29,706
@@ -303,9 +277,6 @@ driver_randGen.c,78
 #define  AUXfn_header 29,704
 #define  AUXfn_funcs 32,784
 int main(143,3271
-
-Faddeeva.h,28
-#define FADDEEVA_H 28,1291
 
 FFT_log.c,840
 double C_n(1,0
@@ -338,59 +309,6 @@ FFTLog_config *FFTLog_init(FFTLog_init1000,39149
 FFTLog_complex FFTLog_U_mu(1063,41087
 int FFTLog_free(1110,42046
 
-FFT_log.h,1643
-#define ODD 1,0
-#define EVEN 2,15
-#define PARITY(3,31
-#define FFTLog_SWAP(4,69
-typedef struct FFTLog_complex{FFTLog_complex6,146
-  double re;7,178
-  double im;8,192
-  double amp;9,206
-  double arg;10,221
-}  FFTLog_complex;11,236
-typedef struct FFTLog_config{FFTLog_config14,260
-  int N;15,291
-  double min;17,305
-  double max;18,320
-  double q;19,335
-  double mu;20,348
-  double kr;21,362
-  fftw_plan forwardplan;23,380
-  fftw_plan backwardplan;24,406
-  fftw_complex *pk;pk26,437
-  fftw_complex *xi;xi27,458
-  fftw_complex *cm;cm28,479
-  fftw_complex *um;um29,500
-  fftw_complex *cmum;cmum30,521
-  fftw_complex *input;input32,546
-  fftw_complex *output;output33,570
-  double** krvals;36,676
-} FFTLog_config;38,698
-int     FFTlogRes;40,718
-double FFTLog_TMP;42,740
-FFTLog_config*  octupole_config;54,1203
-FFTLog_config*      mono_config;55,1237
-FFTLog_config*      quad_config;56,1271
-FFTLog_config*      zero_config;57,1305
-FFTLog_config*       hex_config;58,1339
-FFTLog_config*       oct_config;59,1373
-FFTLog_config*       dec_config;60,1407
-FFTLog_config*   mono_config_ap;62,1443
-FFTLog_config*   quad_config_ap;63,1477
-FFTLog_config*   limmono_config;65,1513
-FFTLog_config*  clipmono_config;67,1549
-FFTLog_config*  clipquad_config;68,1583
-FFTLog_config*    lnnorm_mono_config;70,1619
-FFTLog_config*    lnnorm_quad_config;71,1658
-FFTLog_config*    convlmonoCorr;73,1699
-FFTLog_config*    convlquadCorr;74,1733
-FFTLog_config*    convlhexCorr;75,1767
-double* xi_mu_prefactor;78,1873
-double* xi_mu_postfactor;79,1899
-double* pk_mu_prefactor;80,1926
-double* pk_mu_postfactor;81,1952
-
 FFT_log_zeldovich.c,404
 int zeldovich_memory(1,0
 int zeldovich_eta_para(20,664
@@ -405,16 +323,6 @@ double splint_sigma2para(300,10511
 int print_zeldovichDispersions(319,10906
 int print_linearpk(334,11282
 
-FFT_log_zeldovich.h,228
-#define ODD 1,0
-#define EVEN 2,15
-#define PARITY(3,31
-#define FFTLog_SWAP(4,69
-FFTLog_config*          eta_perp;6,146
-FFTLog_config*          eta_para;7,181
-FFTLog_config*        meanInfall;8,216
-double sigma2eta;10,253
-
 FFTw_3Dmpirun.c,106
 int main(3,21
   struct floatOutputArray{floatOutputArray15,560
@@ -426,18 +334,10 @@ int wfPkCalc(1,0
 FFTw_3Dwf_pad.c,21
 int padwfPkCalc(1,0
 
-FFTw.c,319
+FFTw.c,74
 int PkCalc(3,27
-int prep_r2c_modes(27,554
-int correct_all_modes(126,4356
-int correct_ind_modes(173,5579
-int correct_r2c_modes(256,8834
-int observedQuadrupole(308,10215
-int MultipoleCalc(325,10776
-int MonopoleCalc(431,14441
-int HexadecapoleCalc(497,16364
-int DualBinning(641,21943
-int Cartesian2Dpk(736,25121
+int prep_sinc_factors(18,226
+int prep_r2c_modes(39,626
 
 FKP_Pshot_randESR.c,39
 int compare_randESR_PkCorrections(1,0
@@ -445,7 +345,7 @@ int compare_randESR_PkCorrections(1,0
 fkp_weights.c,77
 int calc_fkpweights(1,0
 double veff_integrand(32,809
-int calc_veff(42,969
+int calc_veff(42,978
 
 freeMemory.c,171
 int free_HOD(1,0
@@ -460,8 +360,9 @@ GaussianField.c,49
 int Gaussianfield(1,0
 int lnNormfield(166,4944
 
-GaussianFilter.c,25
-int Gaussian_filter(1,0
+GaussianFilter.c,56
+int prep_filterfactors(1,0
+int Gaussian_filter(38,814
 
 GRF_HermitianCondition.c,23
 int Gaussianfield(1,0
@@ -480,452 +381,6 @@ double ukm_nfw_profile(10,170
 double haloModel_pk(29,859
 int prep_NFWhaloCat(42,1379
 
-header_chi2.h,3628
-double fracArea;1,0
-int    data_mock_flag;4,58
-int order,6,82
-int order, nrotations,6,82
-int order, nrotations, mono_order;6,82
-double* xdata;8,118
-double****** xtheory;9,133
-double* ydata;11,156
-double****** ytheory;12,171
-double*    kdata 14,194
-double*   dkdata 15,297
-double**     Multipoles;17,323
-double**    dMultipoles;18,348
-int     kbin_no;21,395
-double* kVals;22,412
-int*   fftlog_indices;24,428
-int     jenkins_foldIndex_foldedfile;27,472
-int     jenkins_foldIndex_unfoldedfile;28,510
-double  jenkins_fold_kjoin;29,550
-int        Res;32,605
-double    dRes;33,621
-int     Res_ap;35,638
-double dRes_ap;36,654
-double    paramNumber;38,671
-double               A11Sq;40,710
-double             fsigma8;41,738
-double             bsigma8;42,776
-double           alpha_pad;43,804
-double          linearBias;44,832
-double         epsilon_pad;45,860
-double       velDispersion;46,888
-double      fsigma8Interval;48,917
-double      bsigma8Interval;49,965
-double        sigmaInterval;50,994
-double    alpha_padInterval;51,1023
-double  epsilon_padInterval;52,1052
-double        A11SqInterval;53,1081
-double  min_fsigma8;55,1111
-double  max_fsigma8;56,1132
-double  min_bsigma8;58,1154
-double  max_bsigma8;59,1175
-double    min_velDisperse;61,1197
-double    max_velDisperse;62,1224
-double    min_alpha_pad;64,1252
-double    max_alpha_pad;65,1335
-double  min_epsilon_pad;67,1361
-double  max_epsilon_pad;68,1386
-double      min_A11Sq;70,1412
-double      max_A11Sq;71,1435
-double       minChiSq;73,1459
-double ChiSq_expected;74,1482
-double***** ChiSqGrid;76,1507
-double    minChiSq_fsigma8;78,1531
-double    minChiSq_A11Sq;79,1576
-double    minChiSq_sigma;80,1602
-double    minChiSq_bsigma8;81,1628
-double    minChiSq_alpha_pad;82,1656
-double    minChiSq_epsilon_pad;83,1686
-int     sp_kL_N;87,1827
-double* sp_kL_ks;88,1844
-double* sp_kL_mu0;90,1863
-double* sp_kL_mu2;91,1882
-double* sp_kL_mu4;92,1901
-double* sp_kL_mu6;93,1920
-double* sp_kL_mu8;94,1939
-double* sp_kL_mu10;95,1958
-double* sp_kL_mu0_2d;97,1979
-double* sp_kL_mu2_2d;98,2001
-double* sp_kL_mu4_2d;99,2023
-double* sp_kL_mu6_2d;100,2045
-double* sp_kL_mu8_2d;101,2067
-double* sp_kL_mu10_2d;102,2089
-double* FFTlog_Pk;105,2164
-double* FFTlog_W0;107,2184
-double* FFTlog_W2;108,2240
-double* FFTlog_W4;109,2259
-double* FFTlog_W6;110,2278
-double* FFTlog_W0_joint;112,2298
-double* FFTlog_W2_joint;113,2347
-double* FFTlog_W4_joint;114,2372
-double* FFTlog_W6_joint;115,2397
-double* FFTlog_Wk0;117,2423
-double* FFTlog_Wk2;118,2465
-double mono_epsilonCorrection_1,122,2513
-double mono_epsilonCorrection_1, mono_epsilonCorrection_2;122,2513
-double quad_epsilonCorrection_1,123,2630
-double quad_epsilonCorrection_1, quad_epsilonCorrection_2;123,2630
-double* spline_lnk;125,2690
-double* dlnPR_dlnk;126,2742
-double* dlnPR_dlnk_2D;127,2762
-int           varcalc_index;131,2819
-int cnvldpk_zeropoint_index;132,2848
-double         clipmono_amp;134,2878
-double       clip_distcoeff;135,2907
-double  app_sigma8;138,2960
-double  ChiSq_kmax;140,2981
-double  ChiSq_kmin;141,3001
-gsl_matrix* Covariance;143,3022
-gsl_matrix* sigma_norm;144,3046
-gsl_vector* eval;146,3071
-gsl_matrix* evec;147,3089
-gsl_eigen_symmv_workspace* w;149,3108
-gsl_vector* col;151,3139
-double*   MeanMultipoles;153,3157
-double*  eigenVals;155,3184
-double** eigenVecs;156,3204
-double  smallestEigenvalue;158,3225
-int     chiSq_kmaxIndex;160,3254
-int     chiSq_kminIndex;161,3279
-double  PosteriorNorm 165,3329
-double* bsigma8Posterior;167,3397
-double* fsigma8Posterior;168,3423
-double*   sigmaPosterior;169,3449
-
-header.h,2442
-double       Interim,2,16
-double       Interim, dummy;2,16
-int          Index,3,45
-int          Index, local_Index,3,45
-int          Index, local_Index, loopCount,3,45
-int          Index, local_Index, loopCount, lineNo;3,45
-double   H_0;6,119
-double   H_0inPerSec;7,133
-double   HubbleTime;8,155
-const double gamma_GR 10,177
-const double gamma_DGP 11,221
-int                     nPoints 14,322
-double                   z_Array[z_Array15,362
-double        ComovingDistance_z[ComovingDistance_z16,402
-double       redshiftInterval 17,442
-double       z_ComovingDistance_2derivatives[z_ComovingDistance_2derivatives19,483
-double       ComovingDistance_z_2derivatives[ComovingDistance_z_2derivatives20,548
-double*  AgeOftheUniverse;23,704
-double*  HubbleCnstWithTime;24,748
-int    nVar 30,1021
-float* yStartArray;32,1042
-float* yFinalArray;33,1062
-float* y2derivsStartArray;34,1082
-int   linearGrowth_nPoints;36,1110
-float eps 38,1139
-float defaultStepSize 39,1175
-float MinAllowedStepSize 40,1209
-float InitialStartTime;42,1247
-float FinalTime;43,1271
-float Initial_lnScalefactor;44,1288
-float Final_lnScalefactor;45,1317
-double* Age2derivatives;49,1504
-double* Om_mOfa;50,1529
-double* f_Om_mOfa545;51,1546
-double* f_Om_mOfa545_2derivs;52,1568
-double* approx2linear_growthfactor;53,1598
-double* lnAarray;55,1635
-double* lnA2derivatives;56,1653
-double* linear_growthfactor;57,1678
-double* SplineParams_ofgrowthfactor;58,1707
-double* SplineParams_ofgdot;59,1744
-float* xVals;61,1774
-float* length_scales;62,1788
-float* gdot;63,1810
-float* derivs_error;64,1823
-float* Second_derivs;66,1845
-float* Second_derivs_error;67,1867
-float* Second_deriv_lengthscales;68,1895
-float* SplineParams_ofgdotdot;70,1930
-int    nDerivs;72,1962
-double growthfactor_today;73,1978
-double approx_growthfactor_today;74,2005
-double* HubbleConstant2derivatives;76,2040
-int      pk_lineNo;80,2124
-double*      sdltk 82,2145
-double*      sdltPk 83,2199
-double*      sdlt2d 84,2240
-double*      lineark 86,2282
-double*      linearPk 87,2343
-double*      linear2d 88,2384
-double pk_hin;90,2426
-double pk_lon;91,2527
-double pk_hiA;92,2542
-double pk_loA;93,2557
-int          fieldFlag;96,2590
-double   TotalW1W4area;97,2614
-double  W1area;99,2639
-double  W4area;100,2655
-double  CentreRA;102,2672
-double  CentreDec;103,2690
-int   CatalogNumber;105,2710
-double u0,109,2754
-double u0, variance;109,2754
-
-header_pk.h,4889
-char         vipersHOD_dir[vipersHOD_dir2,34
-char   maskmultipoles_path[maskmultipoles_path3,67
-char covariance_mocks_path[covariance_mocks_path4,100
-int    data_mock_flag;7,146
-int     fft_size;10,193
-int     num_modes;11,211
-double* overdensity;13,271
-double* smooth_overdensity;14,292
-fftw_complex* H_k;17,351
-double    TotalVolume 20,399
-double    TotalSurveyedVolume 21,436
-double    stefano_trans_x;23,474
-double    stefano_trans_y;24,556
-double    stefano_trans_z;25,583
-int               max_gals;28,628
-int           accepted 29,758
-int             Vipers_Num;30,786
-double        loChi;32,815
-double        hiChi;33,836
-double        UpperRAlimit;35,858
-double        LowerRAlimit;36,886
-double        UpperDecLimit;38,915
-double        LowerDecLimit;39,944
-int*                id 41,974
-double*             ra 42,1007
-double*            dec 43,1040
-double*           zobs 44,1073
-double*           zcos 45,1106
-double*            M_B 46,1139
-double*          zflag 47,1172
-int*              type 48,1205
-int*          photoMask 49,1238
-double*           zpec 51,1272
-double*          zphot 52,1343
-double*          gal_z 53,1376
-double*         sampling 54,1409
-double*    fkp_galweight 55,1442
-double*   clip_galweight 56,1475
-bool*    Acceptanceflag 59,1531
-double*          rDist 60,1563
-double*          xCoor 61,1595
-double*          yCoor 62,1627
-double*          zCoor 63,1659
-double                   alpha;67,1712
-int          rand_number 69,1787
-int          accepted_rand 70,1819
-double       fkp_accepted_rand 72,1852
-double*      rand_ra 74,1891
-double*      rand_dec 75,1924
-double*      rand_chi 76,1957
-double*      rand_x 77,1990
-double*      rand_y 78,2046
-double*      rand_z 79,2079
-double*      rand_weight 80,2112
-int rand_basis_call 83,2171
-int    accepted_gals;87,2237
-double       fkpPk;88,2259
-double fkp_norm,89,2279
-double fkp_norm, daccepted_gals;89,2279
-int          n0,93,2351
-int          n0, n1,93,2351
-int          n0, n1, n2;93,2351
-double  AxisLimsArray[AxisLimsArray95,2400
-double        xCellSize;97,2492
-double        yCellSize;98,2570
-double        zCellSize;99,2648
-double       CellVolume;101,2728
-double        lo_zlim;103,2754
-double        hi_zlim;104,2866
-double          z_eff;105,2889
-double           aexp;106,2912
-int       boxlabel;108,2936
-int          xlabel,109,2956
-int          xlabel, ylabel,109,2956
-int          xlabel, ylabel, zlabel;109,2956
-double       foldfactor;113,3023
-int          chibin_no;116,3072
-double       chi_interval;117,3096
-double       nz_smoothRadius;118,3123
-double*      zbins 120,3176
-double*      chibins 121,3206
-double*      Nchi 122,3236
-double*      nbar 123,3266
-double*      nbar_2d 124,3296
-double*      comovVol 125,3326
-double        cumulative_nbar[cumulative_nbar127,3357
-double     cumulative_nbar_2d[cumulative_nbar_2d128,3393
-double    chi_cumulative_nbar[chi_cumulative_nbar129,3429
-double k_x,132,3487
-double k_x, k_y,132,3487
-double k_x, k_y, k_z;132,3487
-double kSq,134,3510
-double kSq, kmodulus,134,3510
-double kSq, kmodulus, mu;134,3510
-double kbinInterval;135,3573
-double        kIntervalx;137,3595
-double        kIntervaly;138,3633
-double        kIntervalz;139,3659
-double        xNyquistWaveNumber;141,3686
-double        yNyquistWaveNumber;142,3730
-double        zNyquistWaveNumber;143,3764
-int     kbin_no;147,3825
-double  logk_min;149,3843
-double  logk_max;150,3861
-double  logk_interval;151,3879
-int*    modes_perbin 153,3903
-double* mean_modk 155,3939
-double* binnedPk 156,3974
-double* logk_limits 157,4009
-int      polar_pkcount;160,4081
-double** polar_pk;161,4118
-int     hiMultipoleOrder;164,4158
-double* kLi;166,4229
-double* kM2;167,4286
-int*    kind;168,4355
-double* detA;170,4422
-double* Sum_Pi;171,4439
-double* Sum_Li;172,4455
-double* Sum_Li2;173,4471
-double* Sum_PiLi;174,4488
-int*    modes_perbin;175,4506
-double* Hexadecapole;177,4529
-double* Quadrupole;178,4551
-double* Monopole;179,4571
-double  d0;182,4611
-double  smooth_radius;183,4623
-double* gal_clippingweights;185,4647
-int     number_occupied 187,4677
-int*          rand_occupied;188,4706
-int m2,190,4736
-int m2, m1,190,4736
-int m2, m1, m0;190,4736
-int* occupied_indices;192,4753
-double min_x,195,4812
-double min_x, max_x,195,4812
-double min_x, max_x, dx,195,4812
-double min_x, max_x, dx, min_y,195,4812
-double min_x, max_x, dx, min_y, max_y,195,4812
-double min_x, max_x, dx, min_y, max_y, dy,195,4812
-double min_x, max_x, dx, min_y, max_y, dy, min_z,195,4812
-double min_x, max_x, dx, min_y, max_y, dy, min_z, max_z,195,4812
-double min_x, max_x, dx, min_y, max_y, dy, min_z, max_z, dz,195,4812
-double min_x, max_x, dx, min_y, max_y, dy, min_z, max_z, dz, F,195,4812
-double min_x, max_x, dx, min_y, max_y, dy, min_z, max_z, dz, F, cos_dec;195,4812
-
-header_W2.h,3413
-int    len;1,0
-char   logfilepath[logfilepath3,13
-char    surveyType[surveyType4,81
-int VIPERS_kSpace_multipoles_lineNo;6,107
-double* VIPERS_k;8,145
-double* VIPERS_kMono;9,198
-double* VIPERS_kMono2D;10,220
-double* VIPERS_kQuad;11,244
-double* VIPERS_kQuad2D;12,266
-int     VIPERS_mask_lineNo_lo;14,291
-int     VIPERS_jmask_lineNo_lo;15,357
-double* VIPERS_maskr_lo;17,390
-double* VIPERS_jmaskr_lo;18,415
-double* VIPERS_maskMono_lo;20,442
-double* VIPERS_jmaskMono_lo;21,470
-double* VIPERS_maskQuad_lo;23,500
-double* VIPERS_jmaskQuad_lo;24,528
-double* VIPERS_maskHex_lo;26,558
-double* VIPERS_jmaskHex_lo;27,585
-double* VIPERS_maskOct_lo;29,614
-double* VIPERS_jmaskOct_lo;30,641
-double* VIPERS_maskDec_lo;32,670
-double* VIPERS_jmaskDec_lo;33,697
-double* VIPERS_maskMono2D_lo;35,726
-double* VIPERS_jmaskMono2D_lo;36,756
-double* VIPERS_maskQuad2D_lo;38,788
-double* VIPERS_jmaskQuad2D_lo;39,818
-double* VIPERS_maskHex2D_lo;41,850
-double* VIPERS_jmaskHex2D_lo;42,879
-double* VIPERS_maskOct2D_lo;44,910
-double* VIPERS_jmaskOct2D_lo;45,939
-double* VIPERS_maskDec2D_lo;47,970
-double* VIPERS_jmaskDec2D_lo;48,999
-double mask_monopolenorm_lo;50,1030
-double jmask_monopolenorm_lo;51,1059
-int     VIPERS_mask_lineNo_hi;53,1090
-int     VIPERS_jmask_lineNo_hi;54,1121
-double* VIPERS_maskr_hi;56,1154
-double* VIPERS_maskMono_hi;57,1179
-double* VIPERS_maskQuad_hi;58,1207
-double* VIPERS_maskHex_hi;59,1235
-double* VIPERS_maskOct_hi;60,1262
-double* VIPERS_maskDec_hi;61,1289
-double* VIPERS_jmaskr_hi;63,1317
-double* VIPERS_jmaskMono_hi;64,1343
-double* VIPERS_jmaskQuad_hi;65,1372
-double* VIPERS_jmaskHex_hi;66,1401
-double* VIPERS_jmaskOct_hi;67,1429
-double* VIPERS_jmaskDec_hi;68,1457
-double* VIPERS_maskMono2D_hi;70,1486
-double* VIPERS_maskQuad2D_hi;71,1516
-double* VIPERS_maskHex2D_hi;72,1546
-double* VIPERS_maskOct2D_hi;73,1575
-double* VIPERS_maskDec2D_hi;74,1604
-double* VIPERS_jmaskMono2D_hi;76,1634
-double* VIPERS_jmaskQuad2D_hi;77,1665
-double* VIPERS_jmaskHex2D_hi;78,1696
-double* VIPERS_jmaskOct2D_hi;79,1726
-double* VIPERS_jmaskDec2D_hi;80,1756
-double mask_monopolenorm_hi;82,1787
-double jmask_monopolenorm_hi;83,1816
-double  loRes_highRes_join;85,1847
-double jloRes_highRes_join;86,1875
-int     VIPERS_mask_lineNo_hihi;88,1904
-double* VIPERS_maskr_hihi;89,1937
-double* VIPERS_maskMono_hihi;90,1964
-double* VIPERS_maskQuad_hihi;91,1994
-double* VIPERS_maskHex_hihi;92,2024
-double* VIPERS_maskOct_hihi;93,2053
-double* VIPERS_maskDec_hihi;94,2082
-int     VIPERS_jmask_lineNo_hihi;96,2112
-double* VIPERS_jmaskr_hihi;97,2146
-double* VIPERS_jmaskMono_hihi;98,2174
-double* VIPERS_jmaskQuad_hihi;99,2205
-double* VIPERS_jmaskHex_hihi;100,2236
-double* VIPERS_jmaskOct_hihi;101,2266
-double* VIPERS_jmaskDec_hihi;102,2296
-double* VIPERS_maskMono2D_hihi;104,2327
-double* VIPERS_maskQuad2D_hihi;105,2359
-double* VIPERS_maskHex2D_hihi;106,2391
-double* VIPERS_maskOct2D_hihi;107,2422
-double* VIPERS_maskDec2D_hihi;108,2453
-double* VIPERS_jmaskMono2D_hihi;110,2485
-double* VIPERS_jmaskQuad2D_hihi;111,2518
-double* VIPERS_jmaskHex2D_hihi;112,2551
-double* VIPERS_jmaskOct2D_hihi;113,2583
-double* VIPERS_jmaskDec2D_hihi;114,2615
-double mask_monopolenorm_hihi;116,2648
-double loRes_highRes_join;118,2680
-double hiRes_hihiRes_join;119,2707
-double jmask_monopolenorm_hihi;121,2735
-double jloRes_highRes_join;123,2768
-double jhiRes_hihiRes_join;124,2796
-
-header_za.h,351
-double zel_r;1,0
-double zel_xi;2,14
-double zel_err;3,29
-double zel_scale;4,45
-double* sigma2rvals;6,64
-double* sigma2perp;8,86
-double* sigma2para;9,106
-double* sigma2perp_2d;11,127
-double* sigma2para_2d;12,150
-double zel_vecr[zel_vecr14,174
-double zel_vecx[zel_vecx15,194
-double zel_qmin[zel_qmin17,215
-double zel_qmax[zel_qmax18,235
-
 hod_cube.c,152
 int CatalogueInput_Cube(1,0
 int calc_overdensityCube(39,1046
@@ -943,11 +398,11 @@ int pointRandGen(26,902
 Initialise.c,185
 int init_gsl_randgen(1,0
 int init_padding(11,262
-int init_cell_info(30,801
-int initi_dist_z(44,1240
-int init_fftgrid(56,1669
-int Initialise(70,2288
-double SolidAngleCalc(87,2505
+int init_cell_info(27,683
+int initi_dist_z(40,1095
+int init_fftgrid(52,1524
+int Initialise(65,1885
+double SolidAngleCalc(80,2028
 
 InvErrorfn.c,98
 #define MAXDUB 11,322
@@ -955,24 +410,25 @@ double sign(13,389
 double inverse_erf(22,477
 int InvErrorfnTest(69,1973
 
-invert_nbar.c,98
+invert_nbar.c,99
 double nbar_dV(1,0
-int prep_inverseCumulative_nbar(6,69
-double inverse_cumulative_nbar(40,1093
+int prep_inverseCumulative_nbar(6,108
+double inverse_cumulative_nbar(40,1132
 
 jap_clipping.c,144
 int ncalc_clippingweights(5,105
-int nalpha_calc(133,7326
-int ncalc_overdensity(168,8529
-int nPkCalc(247,11195
-int nPkCorrections(273,12227
+int nalpha_calc(133,7305
+int ncalc_overdensity(168,8508
+int nPkCalc(247,11174
+int nPkCorrections(273,12206
 
-Jenkins_fold.c,146
-int Jenkins_foldEmbeddingVol(1,0
-int Jenkins_foldRand(16,635
-int Jenkins_foldCat(34,1294
-int JenkinsFold(50,2006
-int JenkinsFoldTest(57,2260
+Jenkins_fold.c,151
+#define FOLDFACTOR 1,0
+int fold_volume(3,24
+int fold_randoms(13,326
+int fold_galaxies(28,927
+int JenkinsFold(43,1632
+int JenkinsFoldTest(50,1822
 
 KaiserGaussMultipoles.c,369
 double muOrderZero(10,174
@@ -1086,74 +542,6 @@ NodeP *createNodeP(createNodeP537,16621
 void free_NodeP(673,20702
 void cpyPolygon(691,20961
 
-libkdpoly.h,1855
-#define PI 5,75
-#define LEAF 14,257
-#define NODE 15,272
-#define NVERTICES 19,325
-#define MAX(21,348
-#define MIN(22,389
-#define ABS(23,430
-#define PARITY(24,468
-#define getDoubleValue(26,506
-#define getIntValue(27,567
-#define getCharValue(28,625
-#define getLine(29,677
-char MYNAME[MYNAME32,725
-size_t IDERR;34,744
-FILE *fic;fic36,759
-char file[file38,773
-char file[BUFSIZ], maskfile[maskfile38,773
-char mock_specmask[mock_specmask40,813
-char mock_specmask[BUFSIZ], mock_spec[mock_spec40,813
-double outmask[outmask42,863
-int Npolygons,44,885
-int Npolygons, Nagoya_N;44,885
-int* idx;46,913
-double *ra,ra47,923
-double *ra,*dec,dec47,923
-double *ra,*dec,*rax,rax47,923
-double *ra,*dec,*rax, *decx,decx47,923
-double *ra,*dec,*rax, *decx, *zx;zx47,923
-int *id;id49,960
-int  NN;50,969
-double* spoc_weights_spec;52,981
-double* spoc_weights_photo;53,1008
-int*    spoc_counts;54,1036
-int**   quad_gal_ids;55,1057
-int  n,57,1082
-int  n, nw,57,1082
-int  n, nw, nx;57,1082
-typedef struct Complex{Complex59,1099
-    double re;60,1123
-    double im;61,1138
-} Complex;62,1153
-typedef struct Polygon{Polygon65,1166
-  int N,66,1190
-  int N, id;66,1190
-  double *x;x68,1206
-  double *y;y70,1238
-  double *xmin;xmin72,1270
-  double *xmax;xmax74,1296
-} Polygon;75,1319
-typedef struct NodeP{NodeP78,1332
-  int type,79,1354
-  int type, *root,root79,1354
-  int type, *root, id,79,1354
-  int type, *root, id, *polysAll,polysAll79,1354
-  int type, *root, id, *polysAll, SplitDim;79,1354
-  double SplitValue;81,1401
-  size_t Nnodes,83,1425
-  size_t Nnodes, Npolys,83,1425
-  size_t Nnodes, Npolys, NpolysAll;83,1425
-  int *poly_id;poly_id85,1464
-  void *Left,Left87,1483
-  void *Left, *Right;Right87,1483
-} NodeP;88,1505
-NodeP* polymask 90,1515
-NodeP* Nagoya 91,1540
-Polygon* polysAll 93,1566
-
 libkdtree.c,584
 int grow_randTree(1,0
 int grow_galTree(12,214
@@ -1174,100 +562,6 @@ int print_dd(459,17563
 int print_dd_meanr(480,17935
 int print_dd_meanmu(497,18263
 
-libkdtree.h,4290
-#define NDIM 1,0
-double   zerolog;4,45
-double    maxlog;5,63
-int     nlogbins;6,81
-double  logbinsz;7,99
-double   zerolin;10,161
-double    maxlin;11,179
-int     nlinbins;12,197
-double  linbinsz;13,215
-char filename[filename15,234
-int   indi;17,255
-int   indj;18,268
-int   bruteforceCount 20,281
-double pairCount 22,309
-int   Nmin 24,334
-int   sortDim,26,433
-int   sortDim, treelevel;26,433
-int   NLeft,27,459
-int   NLeft, NRight;27,459
-int   tree_N,29,481
-int   tree_N, firstSplitDim,29,481
-int   tree_N, firstSplitDim, tree_labelCount;29,481
-int   pairwisepdf_pairCount=30,527
-double SplitValue;32,561
-double **gg,gg34,581
-double **gg, **rr,rr34,581
-double **gg, **rr, **gr,gr34,581
-double **gg, **rr, **gr, **landy_xi,landy_xi34,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg,dummy_gg34,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0,rr_034,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2,rr_234,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4,rr_434,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, **rr_6,rr_634,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, **rr_6, **rr_8,rr_834,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, **rr_6, **rr_8, **rr_10,rr_1034,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, **rr_6, **rr_8, **rr_10, *xi0,xi034,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, **rr_6, **rr_8, **rr_10, *xi0, *xi2,xi234,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, **rr_6, **rr_8, **rr_10, *xi0, *xi2, *xi4,xi434,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, **rr_6, **rr_8, **rr_10, *xi0, *xi2, *xi4, *xi6,xi634,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, **rr_6, **rr_8, **rr_10, *xi0, *xi2, *xi4, *xi6, *xi8,xi834,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, **rr_6, **rr_8, **rr_10, *xi0, *xi2, *xi4, *xi6, *xi8, *xi10,xi1034,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, **rr_6, **rr_8, **rr_10, *xi0, *xi2, *xi4, *xi6, *xi8, *xi10, *logrbins,logrbins34,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, **rr_6, **rr_8, **rr_10, *xi0, *xi2, *xi4, *xi6, *xi8, *xi10, *logrbins, ngg,34,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, **rr_6, **rr_8, **rr_10, *xi0, *xi2, *xi4, *xi6, *xi8, *xi10, *logrbins, ngg, ngr,34,581
-double **gg, **rr, **gr, **landy_xi, **dummy_gg, **rr_0, **rr_2, **rr_4, **rr_6, **rr_8, **rr_10, *xi0, *xi2, *xi4, *xi6, *xi8, *xi10, *logrbins, ngg, ngr, nrr;34,581
-double **gg_meanr,gg_meanr36,743
-double **gg_meanr, **gg_meanmu;gg_meanmu36,743
-double **gr_meanr,gr_meanr37,775
-double **gr_meanr, **gr_meanmu;gr_meanmu37,775
-double **rr_meanr,rr_meanr38,807
-double **rr_meanr, **rr_meanmu;rr_meanmu38,807
-double** mean_xi;40,840
-int*   pairsperbin;42,859
-int Distinct_pairCount 44,880
-int    Sumof_Childrenparticles 46,909
-typedef struct Particle{Particle48,946
-  double x[x51,996
-  double disp;53,1017
-  int    index;55,1035
-  double weight;57,1054
-} Particle;58,1071
-Particle*  point_gals;61,1085
-Particle* point_rands;62,1110
-typedef struct Node{Node64,1134
-  int              N;65,1155
-  int          label;67,1180
-  int      treelevel;69,1205
-  int       SplitDim;71,1230
-  int       Children;73,1255
-  double  SplitValue;75,1280
-  double  xmin[xmin77,1305
-  double  xmax[xmax79,1330
-  Particle* particle;81,1355
-  void*         Left;83,1380
-  void*        Right;84,1402
-  int          NLeft;86,1427
-  int         NRight;87,1449
-} Node;88,1477
-Node*  galTree;90,1486
-Node* randTree;91,1502
-int    NodeStart_Indices[NodeStart_Indices93,1519
-double* pairwisepdf_pairs;115,2531
-double max_pairSeparation 117,2559
-double min_pairSeparation 118,2594
-double max_mu 120,2629
-double min_mu 121,2652
-double* meanMono;143,3246
-double* meanQuad;144,3264
-double* meanMono_error;146,3283
-double* meanQuad_error;147,3307
-double* Mono_suitable_mockCount;149,3332
-double* Quad_suitable_mockCount;150,3365
-
 linearGrowthRate.c,90
 double HubbleInterp(1,0
 double linearGrowth_factor(19,443
@@ -1276,18 +570,18 @@ int linearGrowthRate(49,1519
 load_mask.c,464
 int load_rands_radec(1,0
 int set_cnst_nbar(21,555
-int rand_newchi_newbasis(31,760
-int lowerSampling_randomisedCatalogue(121,4469
-int make_fastread_randomCats(128,4592
-int load_fastread_randomCats(145,5061
-double cmpfunc(159,5448
-int cut_rand_bydec(164,5539
-int load_ascii_randomCats(188,6371
-int del_lockfile(207,8905
-int load_maskedRSDpaper_mask(226,10363
-int zeff_calc(274,11659
-int mean_CellChi(296,12036
-int load_randStefanoCoordinates(340,13145
+int rand_newchi_newbasis(31,764
+int lowerSampling_randomisedCatalogue(115,4321
+int make_fastread_randomCats(122,4444
+int load_fastread_randomCats(139,4928
+double cmpfunc(153,5315
+int cut_rand_bydec(158,5406
+int load_ascii_randomCats(182,6238
+int del_lockfile(201,8772
+int load_maskedRSDpaper_mask(220,10230
+int zeff_calc(268,11526
+int mean_CellChi(290,11903
+int load_randStefanoCoordinates(334,13012
 
 load_maskQmultipoles.c,253
 int load_homogeneous_rands_window(1,0
@@ -1358,8 +652,9 @@ int spline_realSpaceCorrfn(26,454
 int MonteCarlo_SSPOC(51,993
 int fprintf_fiberCollision(129,3218
 
-MultipoleCalc.c,30
+MultipoleCalc.c,60
 int nosort_MultipoleCalc(1,0
+int print_multipoles(74,2669
 
 MultipoleCovariance.c,294
 #define min(1,0
@@ -1379,8 +674,8 @@ int fprintf_dCov(96,3134
 nbar.c,93
 int prep_nbar(1,0
 int spline_nbar(26,964
-int nbar_calc(63,2250
-double interp_nz(123,3871
+int nbar_calc(62,2249
+double interp_nz(122,3870
 
 nbar_fit.c,125
 double CSR(1,0
@@ -1395,6 +690,10 @@ int test_Gaussianfilter(39,1049
 int reflect_up(63,1508
 int reflect_down(83,2004
 int smoothed_nbar_calc(105,2553
+
+ngp.c,45
+#define FOLDFACTOR 1,0
+int ngp_assign(3,24
 
 old_FFTw.c,94
 int PkCorrections(1,0
@@ -1455,6 +754,11 @@ int randoms_maskGen_GriddingError(85,3301
 randNGP.c,17
 int randNGP(1,0
 
+rand_occupied.c,60
+double rd(1,0
+double ru(6,71
+int set_randoccupied(11,149
+
 rollCube.c,107
 int header(1,0
 int sphereCentre(15,201
@@ -1493,9 +797,6 @@ int halofit_fittingfn(327,8904
 double BunnWhite(403,11177
 double EisensteinHu(426,11970
 
-smith_mjw.h,17
-double amp;4,57
-
 spec_weights.c,770
 #define NCHAR 1,0
 #define NR_END 2,17
@@ -1526,9 +827,9 @@ int toySpoc(894,32629
 
 stefanoBasis.c,117
 int StefanoBasis(1,0
-double invert_StefanoBasis(37,2156
-int StefanoReflection(79,3044
-int StefanoRotated(86,3266
+double invert_StefanoBasis(20,1330
+int StefanoReflection(62,2218
+int StefanoRotated(69,2440
 
 super_vipers.c,19
 int scale_Cov(1,0
@@ -1643,8 +944,6 @@ int pointRandGen(78,3655
 
 zCubeCreate.c,21
 int zCubeCreate(1,0
-
-header_smooth.h,0
 
 FFTLog_ompcalc.c,0
 

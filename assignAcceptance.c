@@ -4,11 +4,11 @@ int assignAcceptance(){
     
     if((lo_zlim<=gal_z[j]) && (gal_z[j]<=hi_zlim)){
       if(data_mock_flag == 1){
-	if(dec[j] >= -5.97)  Acceptanceflag[j]  = true;  // dec problem in mocks; cut data to have the same boundary. 
+        if(dec[j] >= -5.97)  Acceptanceflag[j]  = true;  // dec problem in mocks; cut data to have the same boundary. 
       }
 
       else{
-	Acceptanceflag[j]  = true;
+        Acceptanceflag[j]  = true;
       }
     }
   }
