@@ -28,9 +28,6 @@ int prep_sinc_factors(double fund_k, double kNy){
     
     sinc_factors[k] = gsl_sf_sinc(0.5*k_z/kNy);
   }
-
-  // printf("\n\nSince factors:");  
-  // for(k=0; k<n0; k++)  printf("\n%.6lf", sinc_factors[k]);
   
   return 0;
 }
@@ -114,7 +111,3 @@ int prep_r2c_modes(regress* inst, double scaling){
   
   return 0;
 }
-
-
-
-  

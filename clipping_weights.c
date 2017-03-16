@@ -1,44 +1,40 @@
+int prep_clipping_calc(){
+  // iplan            = fftw_plan_dft_3d(n0, n1, n2, H_k, smooth_overdensity, FFTW_BACKWARD, FFTW_ESTIMATE);
+  iplan               = fftw_plan_dft_c2r_3d(n0, n1, n2, H_k, smooth_overdensity, FFTW_ESTIMATE);
+
+  cell_metd0          = (double *)  malloc(n0*n1*n2*sizeof(double));  // highest d0 met by cell; could be integer.
+  filter_factors      = (double *)  malloc(n0*n1*nx*sizeof(double));  // pre-compute (Fourier-space) Gaussian filter factors.
+
+  set_randoccupied();
+
+  prep_filterfactors();  // dx, dy, dz set by rand_occupied.
+
+  return 0;
+}
+
+
 int load_clippingweights(){
   int line_no;
 
   // default ordering: double d0s[4] = {4., 6., 10., 1000.};
-
-  if(data_mock_flag == 0) sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/clip_weights/W%d/wghts_z_%.1lf_%.1lf_%d.dat", root_dir, fieldFlag, lo_zlim, hi_zlim, loopCount);
-  if(data_mock_flag == 1) sprintf(filepath, "%s/W1_Spectro_V7_4/data_v1.7/clip_weights/W%d/wghts_%.1lf_z_%.1lf_%d.dat",  root_dir, fieldFlag, lo_zlim, hi_zlim, loopCount);
-
+  if(data_mock_flag == 0)  sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/clip_weights/W%d/mock_%03d_z_%.1lf_%.1lf.dat", root_dir, fieldFlag, loopCount, lo_zlim, hi_zlim);
+  if(data_mock_flag == 1)  sprintf(filepath, "%s/W1_Spectro_V7_4/data_v1.7/clip_weights/W%d/data_%.1lf_z_%.1lf.dat",  root_dir, fieldFlag, lo_zlim, hi_zlim);
+  
   inputfile = fopen(filepath, "r");
 
   line_count(inputfile, &line_no);
 
   for(j=0; j<line_no; j++){
-    if(d0 ==    4.)  fscanf(inputfile, "%lf \t %*lf \t %*lf \t %*lf \t %*lf", &clip_galweight[j]);
-    if(d0 ==    6.)  fscanf(inputfile, "%*lf \t %lf \t %*lf \t %*lf \t %*lf", &clip_galweight[j]);
-    if(d0 ==   10.)  fscanf(inputfile, "%*lf \t %*lf \t %lf \t %*lf \t %*lf", &clip_galweight[j]);
-    if(d0 == 1000.)  fscanf(inputfile, "%*lf \t %*lf \t %*lf \t %lf \t %*lf", &clip_galweight[j]);
+    if(d0 ==    4)  fscanf(inputfile, "%lf \t %*lf \t %*lf \t %*lf \t %*lf", &clip_galweight[j]);
+    if(d0 ==    6)  fscanf(inputfile, "%*lf \t %lf \t %*lf \t %*lf \t %*lf", &clip_galweight[j]);
+    if(d0 ==   10)  fscanf(inputfile, "%*lf \t %*lf \t %lf \t %*lf \t %*lf", &clip_galweight[j]);
+    if(d0 == 1000)  fscanf(inputfile, "%*lf \t %*lf \t %*lf \t %lf \t %*lf", &clip_galweight[j]);
   }
 
   fclose(inputfile);
 
   // for(j=0; j<130; j++)  printf("\n%d \t %.6lf", j, clip_galweight[j]);
 
-  return 0;
-}
-
-
-int prep_clipping_calc(){
-  if(d0 <= 1000){
-    // iplan            = fftw_plan_dft_3d(n0, n1, n2, H_k, smooth_overdensity, FFTW_BACKWARD, FFTW_ESTIMATE);
-    iplan               = fftw_plan_dft_c2r_3d(n0, n1, n2, H_k, smooth_overdensity, FFTW_ESTIMATE);
-
-    cell_metd0          = (double *)  malloc(n0*n1*n2*sizeof(double)); // highest d0 met by cell; could be integer.
-  
-    filter_factors      = (double *)  malloc(n0*n1*nx*sizeof(double));  // pre-compute (Fourier-space) Gaussian filter factors. 
-
-    prep_filterfactors();  // dx, dy, dz set by rand_occupied.
-
-    set_randoccupied();
-  }
-  
   return 0;
 }
 
@@ -51,7 +47,7 @@ int set_clipping_weights(){
   }
 
   else{
-    calc_clipping_weights();
+    load_clippingweights();
   }
 
   return 0;
@@ -59,15 +55,15 @@ int set_clipping_weights(){
   
 
 int calc_clipping_weights(){
-  walltime("\n\nStarting clipping calc. at");
+  walltime("\n\nStarting clipping calc.");
    
   for(j=0; j<n0*n1*n2; j++) overdensity[j] = 0.0; // for each mock.
   
   for(j=0; j<Vipers_Num; j++){
     if(Acceptanceflag[j] == true){
-      xlabel     = (int)  floor((xCoor[j] - min_x)/dx);
-      ylabel     = (int)  floor((yCoor[j] - min_y)/dy);
-      zlabel     = (int)  floor((zCoor[j] - min_z)/dz);
+      xlabel     = (int)  trunc((xCoor[j] - min_x)/dx);
+      ylabel     = (int)  trunc((yCoor[j] - min_y)/dy);
+      zlabel     = (int)  trunc((zCoor[j] - min_z)/dz);
 
       boxlabel   = (int)  xlabel + n2*ylabel + n2*n1*zlabel;
 
@@ -75,9 +71,9 @@ int calc_clipping_weights(){
     }
   }
 
-  printf("\nx min:  %.3f \t x max:  %.3f", AcceptedMin(xCoor, Acceptanceflag, Vipers_Num), AcceptedMax(xCoor, Acceptanceflag, Vipers_Num));
-  printf("\ny min:  %.3f \t y max:  %.3f", AcceptedMin(yCoor, Acceptanceflag, Vipers_Num), AcceptedMax(yCoor, Acceptanceflag, Vipers_Num));
-  printf("\nz min:  %.3f \t z max:  %.3f", AcceptedMin(zCoor, Acceptanceflag, Vipers_Num), AcceptedMax(zCoor, Acceptanceflag, Vipers_Num));
+  // printf("\nx min:  %.3f \t x max:  %.3f", AcceptedMin(xCoor, Acceptanceflag, Vipers_Num), AcceptedMax(xCoor, Acceptanceflag, Vipers_Num));
+  // printf("\ny min:  %.3f \t y max:  %.3f", AcceptedMin(yCoor, Acceptanceflag, Vipers_Num), AcceptedMax(yCoor, Acceptanceflag, Vipers_Num));
+  // printf("\nz min:  %.3f \t z max:  %.3f", AcceptedMin(zCoor, Acceptanceflag, Vipers_Num), AcceptedMax(zCoor, Acceptanceflag, Vipers_Num));
   
   // Smooth N/<N>.
   Gaussian_filter(); // assumes m0 = n0 etc. 
@@ -150,13 +146,8 @@ int calc_clipping_weights(){
     printf("\nFor d0 of %.4lf, %lf%% of cells are clipped", td0, 100.*frac_clip);
   }
   
-  if(data_mock_flag == 0){
-    sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/clip_weights/W%d/wghts_z_%.1lf_%.1lf_%d.dat", root_dir, fieldFlag, lo_zlim, hi_zlim, loopCount);
-  }
-  
-  if(data_mock_flag == 1){
-    sprintf(filepath, "%s/W1_Spectro_V7_4/data_v1.7/clip_weights/W%d/wghts_%.1lf_z_%.1lf_%d.dat",  root_dir, fieldFlag, lo_zlim, hi_zlim, loopCount);
-  }
+  if(data_mock_flag == 0)  sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/clip_weights/W%d/mock_%03d_z_%.1lf_%.1lf.dat", root_dir, fieldFlag, loopCount, lo_zlim, hi_zlim);
+  if(data_mock_flag == 1)  sprintf(filepath, "%s/W1_Spectro_V7_4/data_v1.7/clip_weights/W%d/data_%.1lf_z_%.1lf.dat",  root_dir, fieldFlag, lo_zlim, hi_zlim);
 
   output = fopen(filepath, "w");
   
@@ -189,9 +180,6 @@ int calc_clipping_weights(){
   }
 
  fclose(output);
-
- // and now load. 
- load_clippingweights();
  
  return 0;
 }

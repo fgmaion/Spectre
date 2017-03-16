@@ -74,10 +74,10 @@ int regress_mem(regress* inst){
 
 
 int prep_pkRegression(){
-  regress_mem(&unit);
+  regress_mem(&flat);
   regress_mem(&half);
   
-  set_kbins_logkspacing(&unit);
+  set_kbins_logkspacing(&flat);
   set_kbins_logkspacing(&half);
     
   return 0;

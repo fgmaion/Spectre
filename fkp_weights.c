@@ -1,31 +1,31 @@
-int calc_fkpweights(){
-    double nbar, chi;
+int calc_bare_fkpweights(){
+  // stripped of (d0 dependent) alpha. 
+  
+  double nbar, chi;
 
-    fkp_norm = 0.0;
-    
-    for(j=0; j<rand_number; j++){
-      nbar       =    interp_nz(rand_chi[j]);      // assumes randoms up to rand_number are all accepted.
-      fkp_norm  += nbar*pow(rand_weight[j], 2.);   // FKP weights for randoms sets the normalisation
+  bare_fkp_norm = 0.0;
+
+  for(j=0; j<rand_number; j++){
+    nbar            =    interp_nz(rand_chi[j]);      // assumes randoms up to rand_number are all accepted.
+    bare_fkp_norm  += nbar*pow(rand_weight[j], 2.);   // FKP weights for randoms sets the normalisation
+  }
+
+  bare_fkp_norm  = sqrt(bare_fkp_norm);
+  
+  for(j=0; j<rand_number; j++)  rand_weight[j] /= bare_fkp_norm;
+
+  for(j=0; j<Vipers_Num; j++){
+    if(Acceptanceflag[j] == true){
+      chi               = interp_comovingDistance(zobs[j]);
+
+      fkp_galweight[j]  = 1./(1. + fkpPk*interp_nz(chi));
+
+      fkp_galweight[j] /= bare_fkp_norm;
     }
-    
-    fkp_norm    *= alpha;   // alpha includes clipping weights.
-    fkp_norm     = sqrt(fkp_norm);
-    
-    for(j=0; j<rand_number; j++)  rand_weight[j] /= fkp_norm;
-    
-    for(j=0; j<Vipers_Num; j++){
-      if(Acceptanceflag[j] == true){
-        chi               = interp_comovingDistance(zobs[j]);
-
-        fkp_galweight[j]  = 1./(1. + fkpPk*interp_nz(chi));
-
-        fkp_galweight[j] /= fkp_norm;
-      }
-    }
-
-    printf("\n\nFKP norm: %.4lf", fkp_norm);
-    
-    return 0;
+  }
+  
+  
+  return 0;
 }
 
 

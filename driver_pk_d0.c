@@ -1,4 +1,5 @@
 #define  KBIN_NO 40          // Variables deciding memory allocation. 
+#define  FOLDFACTOR 2.0
 
 #include "/home/mjw/Aux_functions/header.h"
 #include "/home/mjw/Aux_functions/Aux_functions.c"
@@ -29,7 +30,6 @@
 #include "CloudInCell.c" 
 #include "overdensity_calc.c"
 #include "FFTw.c"
-//#include "old_FFTw.c"
 #include "GaussianFilter.c"
 #include "assign_pkmemory.c"
 
@@ -39,9 +39,8 @@ int main(int argc, char **argv){
   data_mock_flag            =                   0;          // analysis of VIPERS data or mock catalogues.       
   
   fieldFlag                 =       atoi(argv[1]);
-  d0                        =       atof(argv[2]);
-  lo_zlim                   =       atof(argv[3]);          // previously 0.6<z<0.9, 0.9<z<1.2
-  hi_zlim                   =       atof(argv[4]);
+  lo_zlim                   =       atof(argv[2]);          // previously 0.6<z<0.9, 0.9<z<1.2
+  hi_zlim                   =       atof(argv[3]);
 
   smooth_radius             =                 2.0;
 
@@ -92,7 +91,7 @@ int main(int argc, char **argv){
   }
 
   fkpPk                     =    8000.0;                 // [h^-1 Mpc]^3.
-  fft_size                  =         4;                 // Worker 46 works up to 1024. 
+  fft_size                  =       256;                 // Worker 46 works up to 1024. 
   
   logk_min                  =      -2.0;
   logk_max                  =   0.60206;                 // k = 4 hMpc^{-1}.
@@ -101,9 +100,9 @@ int main(int argc, char **argv){
 
   start_walltime();
   
-  // fftw_init_threads();
+  fftw_init_threads();
   
-  // fftw_plan_with_nthreads(omp_get_max_threads());     // Maximum number of threads to be used; use all openmp threads available.  
+  fftw_plan_with_nthreads(omp_get_max_threads());        // Maximum number of threads to be used; use all openmp threads available.  
   
   Initialise();                                          // Initialise grid, fft params and random generation.
 
@@ -117,12 +116,13 @@ int main(int argc, char **argv){
   
   load_rands_radec(1.0);
 
-  // prep_clipping_calc();
+  prep_clipping_calc();
   
-  prep_r2c_modes(&unit, 1.0); // unfolded.
-  // prep_r2c_modes(&half, 2.0); // one fold.
+  prep_r2c_modes(&flat,        1.0); // unfolded.
+  prep_r2c_modes(&half, FOLDFACTOR); // one fold.
 
-  regress set[2] = {unit, half};
+  regress set[2] = {flat, half};
+  int     d0s[4] = {1000, 10, 6, 4};
   
   walltime("All prep. done");
   
@@ -135,22 +135,30 @@ int main(int argc, char **argv){
     
     spline_nbar(0);  // new <n(z)> for each mock. arg 1: bool for smoothed + reflected 2-field avg., arg 2: 'truth' i.e. mock avg.
 
-    set_clipping_weights(); // basis without rotation. 
+    calc_clipping_weights(); // calc. in pre-rotated basis. 
     
     StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
     
     rand_newchi_newbasis();
 
-    // loop over thresholds here. 
-    alpha_calc();
-    
-    calc_fkpweights();  // normalisation of FKP weights set by random catalogue.
+    calc_bare_fkpweights(); // fkp_weights in units of alpha. 
 
-    for(fold=0; fold<1; fold++){
-      calc_overdensity();
+    bare_shot(); // calc. of shot noice in units of (d0 dependent) alpha.
     
-      // PkCalc(&set[fold]);
-      // PkCalc(&unit);
+    printf("\n\n");
+    
+    for(int m=0; m<4; m++){
+      d0 = d0s[m];
+
+      set_clipping_weights(); // basis without rotation.
+      
+      alpha_calc();
+      
+      for(fold=0; fold<2; fold++){
+        calc_overdensity();
+    
+        PkCalc(&set[fold]);
+      }
     }
   }
   

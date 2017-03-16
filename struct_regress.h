@@ -16,7 +16,7 @@ struct Regress{
   double* kLi;
   double* kM2;
 
-} unit, half;
+} flat, half;
 
 typedef struct Regress regress;
 
