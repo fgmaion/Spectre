@@ -5,7 +5,7 @@ int set_clippingweights(){
     return 0;
   }
 
-  else if((appliedClippingThreshold < 1000) && (Jenkins_foldfactor > 1.0)){
+  else if((appliedClippingThreshold < 1000)){// && (Jenkins_foldfactor > 1.0)){
     load_clippingweights();  // clip folded measurements using precomputed (foldfactor == 1) weights.
 
     return 0;
@@ -140,13 +140,13 @@ int set_clippingweights(){
 
 int load_clippingweights(){
   int line_no;
-    
+  
   if(data_mock_flag == 0){
-    sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/clip_weights/W%d/clip_wghts_d0_%.2lf_z_%.1lf_%.1lf_%d_256_pk.dat", root_dir, fieldFlag, appliedClippingThreshold, lo_zlim, hi_zlim, loopCount);
+    sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/clip_weights/W%d/clip_wghts_d0_%.2lf_z_%.1lf_%.1lf_%d_256_pk.dat", root_dir, fieldFlag, appliedClippingThreshold, lo_zlim, hi_zlim, loopCount);
   }
     
   if(data_mock_flag == 1){
-    sprintf(filepath, "%s/W1_Spectro_V7_4/data_v1.7/clip_weights/W%d/clip_wghts_d0_%.2lf_z_%.1lf_%.1lf_%d_256_pk.dat", root_dir, fieldFlag, appliedClippingThreshold, lo_zlim, hi_zlim, loopCount);      
+    sprintf(filepath, "%s/W1_Spectro_V7_2/data_v1.7/clip_weights/W%d/clip_wghts_d0_%.2lf_z_%.1lf_%.1lf_%d_256_pk.dat", root_dir, fieldFlag, appliedClippingThreshold, lo_zlim, hi_zlim, loopCount);      
   }
 
   inputfile = fopen(filepath, "r");  
@@ -156,6 +156,8 @@ int load_clippingweights(){
   for(j=0; j<line_no; j++)  fscanf(inputfile, "%le \n", &clip_galweight[j]);
     
   fclose(inputfile);
-    
+
+  printf("\n\nClipping weights: %s loaded", filepath);
+  
   return 0;
 }
