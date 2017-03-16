@@ -20,7 +20,7 @@
 #include "load_mask.c"
 // #include "nbar_smooth.c"
 #include "fkp_weights.c"
-//// #include "clipping_weights.c"
+#include "clipping_weights.c"
 #include "CloudInCell.c" 
 #include "overdensity_calc.c"
 #include "FFTw.c"
@@ -129,7 +129,7 @@ int main(int argc, char **argv){
     
     rand_newchi_newbasis();
     
-    // set_clippingweights();
+    set_clippingweights();
     
     alpha_calc();
     
