@@ -122,7 +122,9 @@ int main(int argc, char **argv){
   prep_r2c_modes(&half, FOLDFACTOR); // one fold.
 
   regress set[2] = {flat, half};
-  int     d0s[4] = {1000, 10, 6, 4};
+
+  //int     d0s[4] = {1000, 10, 6, 4};
+  int     d0s[4] = {1000, 8, 5, 4};
   
   walltime("All prep. done");
   
@@ -135,7 +137,7 @@ int main(int argc, char **argv){
     
     spline_nbar(0);  // new <n(z)> for each mock. arg 1: bool for smoothed + reflected 2-field avg., arg 2: 'truth' i.e. mock avg.
 
-    calc_clipping_weights(); // calc. in pre-rotated basis. 
+    // calc_clipping_weights(); // calc. in pre-rotated basis. 
     
     StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
     
@@ -147,10 +149,10 @@ int main(int argc, char **argv){
     
     printf("\n\n");
     
-    for(int m=0; m<4; m++){
+    for(int m=1; m<2; m++){
       d0 = d0s[m];
-
-      set_clipping_weights(); // basis without rotation.
+      
+      set_clipping_weights(); // unity weights for d0=1000, else load. 
       
       alpha_calc();
       

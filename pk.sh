@@ -20,5 +20,5 @@ export OMP_NUM_THREADS=16 # Threads = processors.
 # current default standard is equivalent to -std=gnu90, which is the 1989/1990 standard with GNU-specific extensions. gcc 5.1.0 (2015-04-22) changed from gnu90 to gnu11. 
 gcc -std=gnu11 -g -w -O2 -o driver_pk_d0.o Scripts/driver_pk_d0.c -fopenmp -lfftw3_omp -lfftw3 -lm  -lgsl -lgslcblas
 
-##GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_pk_d0.o 1 0.8 1.0
+GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_pk_d0.o 1 0.6 0.9
 #gdb driver_pk_d0.o

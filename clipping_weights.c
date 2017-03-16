@@ -13,6 +13,31 @@ int prep_clipping_calc(){
 }
 
 
+int oldload_clippingweights(){
+  int line_no;
+
+  if(data_mock_flag == 0){
+    sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/clip_weights/W%d/clip_wghts_d0_%.2lf_z_%.1lf_%.1lf_%d_256_pk.dat", root_dir, fieldFlag, (double) d0, lo_zlim, hi_zlim, loopCount);
+  }
+
+  if(data_mock_flag == 1){
+    sprintf(filepath, "%s/W1_Spectro_V7_2/data_v1.7/clip_weights/W%d/clip_wghts_d0_%.2lf_z_%.1lf_%.1lf_%d_256_pk.dat", root_dir, fieldFlag, (double) d0, lo_zlim, hi_zlim, loopCount);
+  }
+  
+  inputfile = fopen(filepath, "r");
+
+  line_count(inputfile, &line_no);
+
+  for(j=0; j<line_no; j++)  fscanf(inputfile, "%le \n", &clip_galweight[j]);
+
+  fclose(inputfile);
+  
+  printf("\n\nClipping weights: %s loaded", filepath);
+  
+  return 0;
+}
+
+
 int load_clippingweights(){
   int line_no;
 
@@ -47,7 +72,7 @@ int set_clipping_weights(){
   }
 
   else{
-    load_clippingweights();
+    oldload_clippingweights();
   }
 
   return 0;

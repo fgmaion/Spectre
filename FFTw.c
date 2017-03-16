@@ -9,7 +9,7 @@ int PkCalc(regress* inst){
 
   nosort_MultipoleCalc(inst);
 
-  print_multipoles(inst);
+  // print_multipoles(inst);
   
   return 0;
 }
