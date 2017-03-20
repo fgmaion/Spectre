@@ -108,7 +108,7 @@ int main(int argc, char **argv){
   Initialise();                                          // Initialise grid, fft params and random generation.
 
   prep_x2c();                                            // Memory for overdensity, smooth_overdensity and H_k; either double or fftw_complex.
-  /*
+  
   prep_pkRegression();                                   
 
   prep_CatalogueInput_500s();                            // Requires max. number of gals of ALL mocks analysed simultaneously to be hard coded in.  
@@ -129,7 +129,7 @@ int main(int argc, char **argv){
   
   walltime("All prep. done");
   
-  for(loopCount=1; loopCount<1; loopCount++){            
+  for(loopCount=1; loopCount<2; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
 
     CatalogueInput_500s(); // mocks 1 to 153 are independent. 
@@ -138,7 +138,7 @@ int main(int argc, char **argv){
     
     spline_nbar(0);  // new <n(z)> for each mock. arg 1: bool for smoothed + reflected 2-field avg., arg 2: 'truth' i.e. mock avg.
 
-    // calc_clipping_weights(); // calc. in pre-rotated basis. 
+    calc_clipping_weights(); // calc. in pre-rotated basis. 
     
     StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
     
@@ -164,7 +164,7 @@ int main(int argc, char **argv){
       }
     }
   }
-  */
+  
   walltime("Wall time at finish");
 
   // MPI_Finalize();
