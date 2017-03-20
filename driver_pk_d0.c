@@ -124,8 +124,8 @@ int main(int argc, char **argv){
 
   regress set[2] = {flat, half};
 
-  //int     d0s[4] = {1000, 10, 6, 4};
-  int     d0s[4] = {1000, 8, 5, 4};
+  int     d0s[4] = {1000, 10, 6, 4};
+  // int     d0s[4] = {1000, 8, 5, 4};
   
   walltime("All prep. done");
   
@@ -150,7 +150,7 @@ int main(int argc, char **argv){
     
     printf("\n\n");
     
-    for(int m=1; m<2; m++){
+    for(int m=0; m<4; m++){
       d0 = d0s[m];
       
       set_clipping_weights(); // unity weights for d0=1000, else load. 

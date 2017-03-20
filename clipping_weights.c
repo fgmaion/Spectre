@@ -72,7 +72,7 @@ int set_clipping_weights(){
   }
 
   else{
-    oldload_clippingweights();
+    load_clippingweights();
   }
 
   return 0;
