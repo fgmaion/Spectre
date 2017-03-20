@@ -1,0 +1,950 @@
+
+A11_vals.c,90
+int set_u0(1,0
+int snipping_amplitudeCorrection(39,3618
+int snipping_shotnoise(73,4499
+
+AgeOftheUniverse.c,73
+double age_Integrand(1,0
+double f_Om_545(6,145
+int UniverseAge(15,327
+
+Alcock_Paczynski.c,621
+int ln_PR(1,0
+int prep_dlnPR_dlnk(13,363
+double splint_dlnPR_dlnk(47,1141
+double dP2_dlnk(60,1432
+double dP4_dlnk(105,2949
+double dP6_dlnk(158,5257
+double dPn_dlnk(232,7709
+double dP0_dlnk(307,11720
+int FFTLog_updateInput_monoAP(349,12883
+int FFTLog_updateInput_quadAP(363,13515
+int FFTLog_updateInput_hexAP(379,14184
+double AP_PN(394,14923
+int FFTLog_updateInput_multipolesAP(420,16038
+double AP_P0(441,17016
+double AP_P2(467,17800
+double AP_P4(490,18694
+double n4_beff_multipoles(514,20128
+int pw_ap_corrected_multipoles(529,20836
+double KaiserLorentz_AP(611,23516
+int test_mulitpole_calc(639,24970
+
+AngularSelectionCats.c,62
+int initialisefiberCatGen(1,0
+int fiberCollision_cat(16,266
+
+anisotropicGaussian_multipoles.c,257
+double anisotropicGaussian_monopoleIntegrand(1,0
+double anisotropicGaussian_quadrupoleIntegrand(6,182
+double anisotropicGaussian_hexadecapoleIntegrand(12,412
+double anisotropicGaussian_octupoleIntegrand(18,644
+int anisotropicGaussian_multipoles(24,873
+
+ArtificialWf.c,101
+int knownGRF_mask_smallCell(230,5620
+int randoms_Cube(243,5938
+int randoms_inenvironment(267,6462
+
+assignAcceptance.c,252
+int assignAcceptance(1,0
+int assignAcceptance_rand(20,387
+int alpha_calc(48,1117
+double AcceptedMax(73,1644
+double AcceptedMin(93,1911
+int assignAcceptance_true(113,2172
+double assignAcceptance_parent(120,2299
+int assignAcceptanceCube(154,3314
+
+assignMemory.c,154
+int assign_LikelihoodMemory(1,0
+int assignCovMat(66,2382
+int assign2DPkMemory(109,4031
+int prep_fftw(124,4467
+int assign_prep_FFTlog_memory(135,4794
+
+assign_pkmemory.c,190
+int prep_c2c(1,0
+int prep_r2c(15,511
+int prep_x2c(30,1073
+int set_kbins_logkspacing(46,1394
+int set_kbins_linearkspacing(55,1599
+int regress_mem(66,1797
+int prep_pkRegression(76,1991
+
+Bailey.c,169
+double coeff_A(12,395
+int productLegendrePolys_coefficients(23,583
+double productLegendrePolys(46,1132
+int clippingCoefficient_test(65,1604
+int Bailey_test(93,2332
+
+BasisChange.c,49
+int VIPERSbasis(1,0
+int Celestialbasis(39,1591
+
+bispectrum.c,93
+double bispecJ(1,0
+double bispecJPcombo(5,187
+int theory(9,343
+int calc_bispectra(29,884
+
+BootStrap.c,75
+int prepBootStrap(1,0
+int BootStrapGen(13,437
+int SubVolAssign(103,3739
+
+buildTree.c,413
+#define NDIM 1,0
+double minimum_twodoubles(8,346
+double maximum_twodoubles(19,503
+Node* buildTree(30,660
+int switchSplit(86,2317
+int printSorted(105,2744
+Node* createNode(126,3677
+Node* Create_toyChildNode(232,7084
+int sortby_position_alongDim_splitDim(262,7851
+double log10_minimum_modDisplacementBetweenNodes(273,8059
+double log10_maximum_modDisplacementBetweenNodes(300,8782
+int free_tree(310,9211
+
+calc_model.c,57
+int model_compute(1,0
+int benchmark_ChiSq_eval(58,2368
+
+ChiSq_eval.c,96
+int model_compute ChiSqEval(1,0
+int benchmark_ChiSq_eval(55,1992
+double ChiSqEval_ap(68,2220
+
+ChiSq_input.c,138
+int load_mock(1,0
+int load_withoutfolding(37,1090
+int load_withfolding(58,1594
+int load_data(95,2794
+int set_meanmultipoles(130,4550
+
+ChiSq_minimisation.c,211
+int default_params(1,0
+int bestfit_params(15,196
+int set_chiSq_intervals(26,421
+int kvals_matchup(38,881
+int calc_models(62,1385
+int calc_ChiSqs(106,2397
+int read_models(184,4988
+int test_chiSq(222,5782
+
+clipped_lnnormal.c,329
+double J0_calc(1,0
+double recursion(6,100
+double series_term(11,290
+double dG0_given_d0(16,396
+double u_0_given_dG0(22,631
+double f_given_u0(28,857
+int print_amplitude_threshold_relation(34,1075
+int kvals_pairup(63,1679
+double regression_calc(97,2706
+int Gauss_varlognormal(170,4772
+int clipped_lnnormal_main(234,6726
+
+Clipped_zSpace.c,45
+int clipDensity(1,0
+int formPkCube(62,1541
+
+clipping_weights.c,131
+int load_clippingweights(1,0
+int prep_clipping_calc(28,1066
+int set_clipping_weights(46,1682
+int calc_clipping_weights(61,1866
+
+CloudInCell.c,20
+int cic_assign(1,0
+
+combining_clipped_fsig8.c,99
+double mock_mean_fsig8(1,0
+double calc_clipped_fsig8_cov(29,1276
+int calc_bestfit_fsig8(89,3909
+
+comovDistRedshiftCalc.c,172
+double HubbleCnst(1,0
+double zChi_Integrand(7,122
+int comovDistReshiftCalc(12,258
+double interp_comovingDistance(71,2808
+double interp_inverseComovingDistance(81,3081
+
+ComovingNumberDensityCalc_Data.c,40
+int ComovingNumberDensityCalc_Data(1,0
+
+ComovingNumberDensityCalc_old.c,428
+double CSR(1,0
+double sdltNz(9,121
+double sdltNz_minChi2(21,505
+double minChi2_nz(33,810
+float NChi_dChi(46,1226
+float identitytransform(57,1697
+float ln_factor_fittedNz(62,1763
+float factor_fittedNz_exp(67,1879
+int Gaussianfilter(72,1988
+int NormedGaussianfilter(108,3013
+int ComovingNumberDensityCalc(128,3674
+int splineGaussfilteredW1_W4_nz(213,7455
+double interp_nz(236,8497
+int prepNumberDensityCalc(246,8730
+
+CoordinateCalc.c,147
+int prep_CatalogueInput_500s(1,0
+int spec_weights(26,1193
+int CatalogueInput_500s(40,1564
+int DataInput(72,2807
+int ParentInput_500s(123,4920
+
+CoordinateCalcCube.c,28
+int CoordinateCalcCube(1,0
+
+CoordinateCalc_valueadded_data.c,56
+ int ObservedDataInput(1,0
+int CoordinateCalc(83,4042
+
+correlation_fns.c,240
+double ra_criterion(1,0
+double dec_criterion(12,164
+int initialise_angularCorrelation(25,396
+int correlationfn(43,938
+int randoms_angular_correlationfn(95,1945
+int angular_correlationfn(138,3320
+int printMockAvg_correlation(169,4113
+
+driver_Ballinger_mcmctest.c,78
+#define  AUXfn_header 28,704
+#define  AUXfn_funcs 31,784
+int main(145,3273
+
+driver.c,80
+#define   AUXfn_header 22,483
+#define   AUXfn_funcs 25,566
+int main(130,3170
+
+driver_cube.c,80
+#define   AUXfn_header 22,483
+#define   AUXfn_funcs 25,566
+int main(126,3142
+
+driver_data.c,78
+#define  AUXfn_header 27,641
+#define  AUXfn_funcs 30,721
+int main(139,3112
+
+driver_datalikelihood.c,78
+#define  AUXfn_header 28,704
+#define  AUXfn_funcs 31,784
+int main(142,3282
+
+driver_data_pk.c,78
+#define  AUXfn_header 29,704
+#define  AUXfn_funcs 32,784
+int main(149,3372
+
+driver_likelihood.c,17
+int main(33,863
+
+driver_nbarfit.c,78
+#define  AUXfn_header 29,704
+#define  AUXfn_funcs 32,784
+int main(145,3295
+
+driver_parent_pk_d0.c,78
+#define  AUXfn_header 29,706
+#define  AUXfn_funcs 32,786
+int main(147,3326
+
+driver_pk_d0.c,39
+#define  KBIN_NO 1,0
+int main(37,916
+
+driver_pk_d0_old.c,78
+#define  AUXfn_header 29,706
+#define  AUXfn_funcs 32,786
+int main(148,3355
+
+driver_Qmultipoles.c,102
+#define  AUXfn_header 29,704
+#define  AUXfn_funcs 32,784
+int set_files(143,3275
+int main(152,3485
+
+driver_randGen.c,78
+#define  AUXfn_header 29,704
+#define  AUXfn_funcs 32,784
+int main(143,3271
+
+FFT_log.c,840
+double C_n(1,0
+int FFTlog_memory(6,203
+int FFTlog_lnnormmemory(79,3746
+int FFTLog_initialise(90,4166
+int FFTlog_updatepk(129,5563
+int FFTlog_checkupdatepk(157,6667
+int FFTLog_zeroInput(224,9240
+int xi_mu(260,10178
+int pk_mu(285,11134
+int varCalc(310,12150
+int clip_p0p2(321,12681
+int clipmono(338,13591
+int clipquad(351,14048
+int cliphex(363,14636
+int lnnorm(375,15537
+int invert_lnnorm(387,15905
+int add_fogRSD(444,18147
+int cnvldmonoCorr_joint(455,18468
+int cnvldmonoCorr(467,18962
+int cnvldquadCorr(487,19825
+int fog_xiCalc(574,23014
+int VIPERS_mask_clippedpk(671,25589
+int VIPERS_mask_cnvldpk(733,28031
+int printf_kMask_multipoles(828,32381
+int Edinburgh_PDRA(871,33880
+void FFTLog(946,36846
+FFTLog_config *FFTLog_init(FFTLog_init1000,39149
+FFTLog_complex FFTLog_U_mu(1063,41087
+int FFTLog_free(1110,42046
+
+FFT_log_zeldovich.c,404
+int zeldovich_memory(1,0
+int zeldovich_eta_para(20,664
+int zeldovich_eta_perp(46,1899
+int zeldovich_meanInfall(71,3373
+int sigma_eta(94,4644
+int cubature_trialfunc(106,4858
+int cubature_zeldovich_GaussianIntegral(120,5266
+int calc_zeldovichxi(178,7057
+double splint_sigma2perp(281,10116
+double splint_sigma2para(300,10511
+int print_zeldovichDispersions(319,10906
+int print_linearpk(334,11282
+
+FFTw_3Dmpirun.c,106
+int main(3,21
+  struct floatOutputArray{floatOutputArray15,560
+    float floatArray[floatArray16,587
+
+FFTw_3Dwf.c,18
+int wfPkCalc(1,0
+
+FFTw_3Dwf_pad.c,21
+int padwfPkCalc(1,0
+
+FFTw.c,74
+int PkCalc(3,27
+int prep_sinc_factors(18,226
+int prep_r2c_modes(39,626
+
+FKP_Pshot_randESR.c,39
+int compare_randESR_PkCorrections(1,0
+
+fkp_weights.c,77
+int calc_fkpweights(1,0
+double veff_integrand(32,809
+int calc_veff(42,978
+
+freeMemory.c,171
+int free_HOD(1,0
+int free_grid(40,825
+int free_pkRegression(47,882
+int free2dPk(70,1318
+int free_sdltInterp(98,1886
+int free_linear(106,1972
+int free_rand(114,2068
+
+GaussianField.c,49
+int Gaussianfield(1,0
+int lnNormfield(166,4944
+
+GaussianFilter.c,56
+int prep_filterfactors(1,0
+int Gaussian_filter(38,814
+
+GRF_HermitianCondition.c,23
+int Gaussianfield(1,0
+
+growthfactor_derivative.c,203
+#define NR_END 1,0
+#define FREE_ARG 2,17
+float ln_linearGrowth_factor(4,41
+float linearGrowth_factor_firstDeriv(11,149
+float linearGrowth_factor_scndDeriv(20,361
+int growthfactor_derivative(29,587
+
+halomodel.c,121
+double splint_nfw_inversion(1,0
+double ukm_nfw_profile(10,170
+double haloModel_pk(29,859
+int prep_NFWhaloCat(42,1379
+
+hod_cube.c,152
+int CatalogueInput_Cube(1,0
+int calc_overdensityCube(39,1046
+int cube_PkCorrections(62,1641
+int clipDensity_cube(154,5461
+int cube_PkCalc(178,6050
+
+HOD_mock_theoryExp.c,28
+int HOD_mock_theoryExp(1,0
+
+HODrandGen.c,47
+int randGenerate(1,0
+int pointRandGen(26,902
+
+Initialise.c,185
+int init_gsl_randgen(1,0
+int init_padding(11,262
+int init_cell_info(27,683
+int initi_dist_z(40,1095
+int init_fftgrid(52,1524
+int Initialise(65,1885
+double SolidAngleCalc(80,2028
+
+InvErrorfn.c,98
+#define MAXDUB 11,322
+double sign(13,389
+double inverse_erf(22,477
+int InvErrorfnTest(69,1973
+
+invert_nbar.c,99
+double nbar_dV(1,0
+int prep_inverseCumulative_nbar(6,108
+double inverse_cumulative_nbar(40,1132
+
+jap_clipping.c,144
+int ncalc_clippingweights(5,105
+int nalpha_calc(133,7305
+int ncalc_overdensity(168,8508
+int nPkCalc(247,11174
+int nPkCorrections(273,12206
+
+Jenkins_fold.c,151
+#define FOLDFACTOR 1,0
+int fold_volume(3,24
+int fold_randoms(13,326
+int fold_galaxies(28,927
+int JenkinsFold(43,1632
+int JenkinsFoldTest(50,1822
+
+KaiserGaussMultipoles.c,369
+double muOrderZero(10,174
+double muOrderTwo(20,496
+double muOrderFour(29,710
+double muOrderSix(38,952
+double muOrderEight(47,1199
+double kaiserGauss_Monofactor(60,1666
+double kaiserGauss_Quadfactor(65,1806
+double kaiserGauss_Hexfactor(70,2010
+double kaiserGauss_multipole(75,2326
+int setGaussianRSD(87,2632
+int kaiser_nonlinearSuppression_Multipoles(97,2788
+
+KaiserLorentzMultipoles.c,523
+double muOrderZero(6,118
+double muOrderTwo(14,319
+double muOrderFour(22,558
+double muOrderSix(30,823
+double muOrderEight(38,1105
+double muOrderTen(46,1400
+double kaiserLorentz_Monofactor(55,1778
+double kaiserLorentz_Quadfactor(59,1919
+double kaiserLorentz_Hexfactor(63,2124
+double kaiserLorentz_Octfactor(67,2380
+double kaiserLorentz_multipole(72,2696
+int prep_kaiserLorentSpline(87,3171
+double seqsp_kLmu(127,4750
+double noRSD(152,5457
+int setLorentzianRSD(168,5831
+int DispersionModel_Multipoles(177,5991
+
+KaiserMultipoles.c,226
+double kaiser_Monofactor(2,62
+double kaiser_Quadfactor(7,161
+double kaiser_Hexfactor(12,259
+double kaiser_multipole(17,342
+double kaiser_multipole_xifactors(31,719
+int setKaiserRSD(43,1019
+int kaiser_Multipoles(53,1165
+
+kdtree_xi_mom.c,672
+int xiMonopole(1,0
+int xiMonopole_error(35,984
+int xiQuadrupole(63,1802
+int xiQuadrupole_error(100,2923
+int xiMultipoles(128,3750
+int landy_szalay(188,5847
+int assignGal_xiMemory(220,6791
+int assignMemory_xi(264,7763
+int prep_randpairs(401,12127
+int prep_pairwisepdf(429,12923
+int print_pairwisepdf(439,13140
+int NFW_profile_pairCount(452,13424
+int randWindow_pairCount(511,14779
+int print_xiMultipoles(554,15869
+int computeCorrelation_fns(567,16190
+int testNode_separations(658,18898
+int test_particleSeparations(673,19321
+int load2d(685,19688
+int print_rr(702,20028
+int print_rr_meanr(724,20386
+int print_rr_meanmu(742,20746
+int print_dr(759,21108
+
+LapackExample.c,505
+    double** M;3,35
+    M 5,56
+    for(j=0; j<3; j++)  M[M7,103
+            M[M11,214
+    M[M15,262
+    M[M16,281
+    M[M17,301
+    M[M19,323
+    M[M20,343
+    M[M21,363
+    M[M23,389
+    M[M24,410
+    M[M25,431
+    int    order 27,453
+    int    order2 28,476
+    double pivotArray[pivotArray31,521
+    int    errorHandler;33,552
+    double lapackWorkspace[lapackWorkspace35,579
+    double flattenedM[flattenedM37,611
+    int count 39,638
+	flattenedM[flattenedM49,930
+
+LAPACK_MultipoleCovariance_Inverse.c,27
+int CovarianceInverse(1,0
+
+libkdpoly.c,617
+#define NNCHAR 1,0
+#define NNFIELD 2,18
+#define NNVERTICES 3,38
+double PEPS 5,62
+NodeP *init_poly(init_poly7,84
+int inPoly(23,342
+int idPoly(35,546
+double distAngSpher(49,759
+void rotate(58,1244
+int insidePolygonTree(78,1910
+int addgal_overlapPoly_counts(151,4277
+double poly_area(165,4542
+double clockwise_vertices(184,5079
+int overlapping_polygonCounts(284,8308
+int insideOnePolygon(364,10971
+Polygon *readPolygonFile(readPolygonFile405,12132
+NodeP *readPolygonFileTree(readPolygonFileTree411,12268
+NodeP *createNodeP(createNodeP537,16621
+void free_NodeP(673,20702
+void cpyPolygon(691,20961
+
+libkdtree.c,584
+int grow_randTree(1,0
+int grow_galTree(12,214
+int CountPairs_rMu(27,485
+double computeNorm(66,2368
+int assignLeafValues(76,2569
+int sumPairs(92,3032
+int print_tree(107,3274
+int nodes_printParticles_print(124,3579
+int prep_nodeLimits_print(137,3881
+int print_nodeLimits(150,4111
+int findSuitableNodePairs_bruteforcePairCount(165,4494
+int bruteforceCountpairs_betweenChildren(203,6585
+int bruteforce_nonodes(356,13690
+double log10_particleSeparation(441,16989
+double pair_zmu(453,17365
+int print_dd(459,17563
+int print_dd_meanr(480,17935
+int print_dd_meanmu(497,18263
+
+linearGrowthRate.c,90
+double HubbleInterp(1,0
+double linearGrowth_factor(19,443
+int linearGrowthRate(49,1519
+
+load_mask.c,464
+int load_rands_radec(1,0
+int set_cnst_nbar(21,555
+int rand_newchi_newbasis(31,764
+int lowerSampling_randomisedCatalogue(115,4321
+int make_fastread_randomCats(122,4444
+int load_fastread_randomCats(139,4928
+double cmpfunc(153,5315
+int cut_rand_bydec(158,5406
+int load_ascii_randomCats(182,6238
+int del_lockfile(201,8772
+int load_maskedRSDpaper_mask(220,10230
+int zeff_calc(268,11526
+int mean_CellChi(290,11903
+int load_randStefanoCoordinates(334,13012
+
+load_maskQmultipoles.c,253
+int load_homogeneous_rands_window(1,0
+int load_maskedRSDpaper_mask(70,2674
+int rand_chiReassignment(115,3941
+int zeff_calc(150,5178
+int mean_CellChi(172,5555
+int load_randStefanoCoordinates(215,6641
+int lowerSampling_randomisedCatalogue(257,7963
+
+matter_pk.c,416
+double powerlaw(1,0
+int input_powerlaw_n4(5,75
+int inputLinearPk(15,264
+double splintLinearPk(56,2223
+double linearPk_Gaussian(71,2520
+double splintHODpk(76,2614
+double sigma8_integrand(92,2984
+double sigma8_calc(97,3124
+int inputHODPk(106,3263
+int print_fsigma8(151,5368
+int print_matterpk(183,5969
+double HODPk_Gaussian(195,6276
+double splint_maskedRSD_pk(200,6365
+int set_maskedRSDpaper_pk(216,6743
+
+max_gal.c,39
+int max_array(1,0
+int max_gal(14,162
+
+Metropolis_algorithm.c,126
+double likelihood(1,0
+double vipers_chiSq(9,619
+int new_position(14,760
+int proposal(43,1968
+int metropolis_mcmc(94,3314
+
+MockAvgComovingDensity.c,95
+int MockAverageComovingdensity(1,0
+double MockAvg_nz(130,5291
+int splineMockAvg_nz(141,5525
+
+mockGalaxyCats.c,493
+int prep_DisplacementCalc(1,0
+int DisplacementCalc(18,743
+int periodic_bounds(179,6405
+int poissonSample_lnNorm(187,6637
+int poissonSample_homogeneous(232,7950
+int load_homogeneous_rands(258,8716
+int write_homogeneous_rands_window_gridded(296,9571
+int deplete_homogeneous(367,11704
+int load_clustered(412,13164
+int poissonSample_fog(457,14629
+int randomiseCatalogue(499,15900
+int rows_randomOrder(527,16690
+int shuffle(536,16902
+int shuffletest(547,17139
+int toyTrees(559,17319
+
+mock_TSR_cats.c,32
+int CatalogueInput_mockTSR(1,0
+
+MonteCarlo_SSPOC.c,191
+double fiberCollision(1,0
+double fiberCorr(12,156
+double splint_realSpaceCorrfn(17,319
+int spline_realSpaceCorrfn(26,454
+int MonteCarlo_SSPOC(51,993
+int fprintf_fiberCollision(129,3218
+
+MultipoleCalc.c,60
+int nosort_MultipoleCalc(1,0
+int print_multipoles(74,2669
+
+MultipoleCovariance.c,294
+#define min(1,0
+int load_CovarianceMatrix(3,45
+int load_CovarianceMatrix_withoutfolding(22,589
+int load_CovarianceMatrix_withfolding(106,3260
+int initialiseCovariance(234,7707
+int prewhitenCov(249,8029
+int fprintf_meanMultipoes(264,8528
+int fprintf_Cov(282,9266
+int scale_Cov(307,9858
+
+MultipoleCovariance_eigenvecs.c,56
+int Covariance_eigenVecs(1,0
+int fprintf_dCov(96,3134
+
+nbar.c,93
+int prep_nbar(1,0
+int spline_nbar(26,964
+int nbar_calc(62,2249
+double interp_nz(122,3870
+
+nbar_fit.c,125
+double CSR(1,0
+double model_NzGaussian(5,70
+double leastSquares(11,218
+int fitted_nbar_calc(41,1088
+int Nz_fit(144,5601
+
+nbar_smooth.c,140
+int Gaussianfilter(1,0
+int test_Gaussianfilter(39,1049
+int reflect_up(63,1508
+int reflect_down(83,2004
+int smoothed_nbar_calc(105,2553
+
+ngp.c,45
+#define FOLDFACTOR 1,0
+int ngp_assign(3,24
+
+old_FFTw.c,94
+int PkCorrections(1,0
+int oldprep_pkRegression(31,1323
+int oldnosort_MultipoleCalc(40,1551
+
+old_filecomments.c,121
+int spec_weights(2,27
+int prep_fftw(44,3195
+int  assignAcceptance(77,6200
+int load_homogeneous_rands_window(108,8305
+
+omp_hello.c,50
+int c2c(9,147
+int r2c(49,2312
+int main(91,4758
+
+omp_qsort.c,234
+int max_threads;8,100
+int num_of_workers 11,169
+int num_of_active_workers 13,233
+omp_lock_t * worker_lock;15,265
+int * generate_data(17,292
+void _qsort(28,442
+void verify(85,1555
+void parallel_qsort(93,1660
+int main(112,2256
+
+overdensity_calc.c,53
+int boxCoordinates(1,0
+int calc_overdensity(12,498
+
+paircount_mask.c,24
+int paircount_mask(1,0
+
+posteriors_1D.c,144
+double calc_fsigma8Posterior(1,0
+int Calc_fsigma8_68conf(55,1660
+double calc_velDispPosterior(95,2921
+double calc_bsigma8Posterior(129,3843
+
+posteriors_2D.c,40
+int calc_fsigma8_bsigma8_posterior(1,0
+
+qSortCompare.c,93
+int FirstColumnCompare(3,2
+int SecondColumnCompare(21,489
+int TwoColumnCompareTest(38,968
+
+RandCoorCalc.c,22
+int RandCoorCalc(1,0
+
+randGen.c,98
+int assign_randmemory(1,0
+int randoms_maskGen(18,715
+int randoms_maskGen_GriddingError(85,3301
+
+randNGP.c,17
+int randNGP(1,0
+
+rand_occupied.c,60
+double rd(1,0
+double ru(6,71
+int set_randoccupied(11,149
+
+rollCube.c,107
+int header(1,0
+int sphereCentre(15,201
+int rollcube(41,1127
+int rollxyz(66,2005
+double signum(87,2861
+
+Ruiz.c,24
+int Ruiz_locus(19,1087
+
+SaundersDeproject.c,81
+double toyCorrfn(1,0
+double projectedCorrfn(6,85
+int SaundersDeproject(10,234
+
+slow_DFT.c,162
+int gal_slowDFT(1,0
+int rand_slowDFT(32,722
+int randoms_slowDFTcalc(60,1372
+int slowDFTcalc(121,3368
+int modeSampling(233,7926
+int vipers_fkpCalc(356,12138
+
+smith_mjw.c,351
+int set_testparams(5,42
+int halofit(17,243
+double BondEfstathiou(108,3204
+double omega_m(128,3811
+double omega_v(140,4138
+double CarollPressTurner(152,4465
+double sigint(162,4735
+double rknl_int_power(201,5531
+int rknlCalc(220,6116
+int wint(275,7496
+int halofit_fittingfn(327,8904
+double BunnWhite(403,11177
+double EisensteinHu(426,11970
+
+spec_weights.c,770
+#define NCHAR 1,0
+#define NR_END 2,17
+#define FREE_ARG 3,34
+#define deg2rad 4,57
+int ct_lines(6,83
+int getStrings(34,395
+int load_WX_Photometry(61,1138
+int load_catSpecmask(117,3019
+int load_catSpec(156,4404
+int load_catMockTSR(210,6927
+int create_polygonMask(247,8161
+int load_polygonMask(301,11153
+int load_Nagoya_v6(351,13692
+int localTSR_calc_Data(362,13927
+int write_localTSR(412,15660
+int localTSR_Calc(466,18477
+int sampleGals_byPoly(536,20713
+int write_TSR_subsample(611,23406
+int randoms_mockTSR_weights(651,25325
+int assign_spocweights_memory(677,26072
+int mask_area(703,26767
+int quadrant_sampling(729,27559
+int write_mockSpec_subsample(760,28232
+int create_gridoverlay(828,30771
+int load_gridoverlay(872,32222
+int toySpoc(894,32629
+
+stefanoBasis.c,117
+int StefanoBasis(1,0
+double invert_StefanoBasis(20,1330
+int StefanoReflection(62,2218
+int StefanoRotated(69,2440
+
+super_vipers.c,19
+int scale_Cov(1,0
+
+tidal_tensor.c,1050
+int calc_delta(1,0
+double switchup(33,786
+int tidal_tensor(48,1105
+ double dimension[dimension185,5923
+ for(k=0; k<n0;n0187,5958
+   for(j=0; j<n1;n1188,5980
+     for(i=0; i<n2;n2189,6004
+       Index 190,6030
+       dimension[dimension193,6108
+       double data[data195,6141
+       gsl_matrix_view m 200,6372
+       gsl_eigen_symmv(&m.matrix, eval, evec, w)202,6440
+  	   double eval_i 209,6633
+ output 222,6866
+ double projection[projection224,6900
+     projection[projection228,6979
+       Index 231,7042
+       projection[projection233,7085
+  double expected 251,7389
+  for(j=0; j<n0*n1*n2;n2253,7417
+  for(j=0; j<n0*n1*n2;n2257,7523
+  for(j=0; j<n0*n1*n2; j++)  smooth_overdensity[smooth_overdensity257,7523
+  output 264,7746
+      projection[projection268,7831
+        Index 271,7896
+        projection[projection273,7940
+  double gal_invoid;290,8202
+ output 314,8987
+ for(j=0; j<rand_number;rand_number316,9021
+    xlabel 317,9052
+    ylabel 318,9144
+    zlabel 319,9232
+    gal_invoid 321,9322
+
+tinker.c,325
+double sig2_integrand(1,0
+double splint_sig2(17,483
+double splint_msig2(27,643
+double fs_tinker(37,802
+double fs_Jenkins(58,1386
+double nm_tinker(63,1484
+double splint_ln_invSig(83,2029
+double press_Schechter(93,2230
+int mass_fn(117,2678
+double b_Kaiser(181,4544
+double b_tinker(203,5019
+int halobias_fn(231,5735
+
+toymodel_pk_xi.c,322
+double Pk_powerlaw_truncated(2,47
+double Pk_powerlaw_truncated_xi(11,228
+int inputTruncPowerLawPk(22,476
+double Pk_powerlaw(31,607
+double Pk_powerlaw_xi(36,756
+double toyRSD_OnePlusOneHalfMuSq(40,846
+double toyRSD_unitLegendreCoefficient(51,1019
+double spherical_tophat(67,1310
+double spherical_tophat_pk(79,1538
+
+VIPERS_kwindow.c,116
+double splint_VIPERS_kSpaceMono(1,0
+double splint_VIPERS_kSpaceQuad(16,256
+int prepVIPERS_kSpaceMultipole(31,512
+
+VIPERS_window.c,484
+double splint_VIPERS_maskMono(1,0
+double splint_VIPERS_maskQuad(25,859
+double splint_VIPERS_maskHex(49,1494
+double splint_VIPERS_maskOct(73,2126
+double splint_VIPERS_maskDec(97,2754
+double splint_VIPERS_maskMultipoles(121,3382
+double splint_unit_maskMultipoles(139,3875
+int scaleandnormalise(157,4227
+int prep_VIPERS_maskMultipoles(186,5971
+int lowRes_amplitudeCalc(334,14968
+int flatSlope_amp(383,16246
+int powerlaw_regression(402,16733
+int print_windowCorrfn(474,18783
+
+VIPERS_window_jointfield.c,237
+double splint_VIPERS_jmaskMono(1,0
+double splint_VIPERS_jmaskQuad(34,1273
+double splint_VIPERS_jmaskHex(64,1922
+double splint_VIPERS_jmaskMultipoles(94,2564
+int print_jwindowCorrfn(106,2827
+int prep_VIPERS_jmaskMultipoles(127,3231
+
+volavgs.c,301
+double unity(1,0
+double invnbar_chisq(5,42
+double chisq(9,112
+double chicubed(13,159
+double chicubed_nbar(17,213
+double chisq_nbar(21,287
+double calc_vol(26,355
+double calc_volavg_chi(47,792
+double calc_galavg_chi(56,964
+double chiSq_fkpweight(65,1146
+double calc_volavg_fkpweights(70,1262
+
+wedgeMockCreate.c,25
+int wedgeMockCreate(1,0
+
+ZADErandGen.c,48
+int randGenerate(1,0
+int pointRandGen(78,3655
+
+zCubeCreate.c,21
+int zCubeCreate(1,0
+
+FFTLog_ompcalc.c,0
+
+Faddeeva.c,0

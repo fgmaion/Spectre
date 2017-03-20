@@ -1,5 +1,5 @@
-double nbar_dV(double chi){
-  return pow(chi, 2.)*interp_nz(chi);
+double nbar_dV(double chi, void* p){ // gsl function prototype is 
+  return pow(chi, 2.)*(*pt2nz)(chi);
 }
 
 
@@ -15,13 +15,13 @@ int prep_inverseCumulative_nbar(){
 
   F.function = &nbar_dV;
   
-  gsl_integration_qags(&F, loChi - 1., hiChi + 1., 0, 1e-7, 1000, w, &norm, &error);
+  gsl_integration_qags(&F, loChi - 0.1, hiChi + 0.1, 0, 1e-7, 1000, w, &norm, &error);
   
   for(ii=0; ii<400; ii++){
-    chi_cumulative_nbar[ii] = loChi - 1. + ii*(hiChi - loChi + 2.)/399.;
+    chi_cumulative_nbar[ii] = loChi - 0.1 + ii*(hiChi - loChi + 0.2)/399.;
 
     // function, low limit, high limit, abs err., rel. err., max step number, workspace (memory), result, error.
-    gsl_integration_qags(&F, loChi - 1., chi_cumulative_nbar[ii], 0, 1e-7, 1000, w, &result, &error);
+    gsl_integration_qags(&F, loChi - 0.1, chi_cumulative_nbar[ii], 0, 1e-7, 1000, w, &result, &error);
 
     // cumulative_nbar[i]  = qromb(&nbar_dV, loChi-100., chi_cumulative_nbar[i]);
     cumulative_nbar[ii]     = result;

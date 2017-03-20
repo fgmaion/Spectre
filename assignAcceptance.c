@@ -4,11 +4,11 @@ int assignAcceptance(){
     
     if((lo_zlim<=gal_z[j]) && (gal_z[j]<=hi_zlim)){
       if(data_mock_flag == 1){
-	if(dec[j] >= -5.97)  Acceptanceflag[j]  = true;  // dec problem in mocks; cut data to have the same boundary. 
+        if(dec[j] >= -5.97)  Acceptanceflag[j]  = true;  // dec problem in mocks; cut data to have the same boundary; should specify W4 is not cut.  
       }
 
       else{
-	Acceptanceflag[j]  = true;
+        Acceptanceflag[j]  = true;
       }
     }
   }
@@ -46,8 +46,7 @@ int assignAcceptance_rand(){
 
 
 int alpha_calc(){
-  accepted = 0;
-
+   accepted      =   0;
   daccepted_gals = 0.0;
 
   for(j=0; j<Vipers_Num; j++){
@@ -60,11 +59,9 @@ int alpha_calc(){
     }
   }
 
-  printf("\n\nTotal number of galaxies on input: %d, accepted: %d, accepted (weighted) %.2lf", Vipers_Num, accepted, daccepted_gals);
-
   alpha = 1.*daccepted_gals/accepted_rand;
-
-  printf("\n\n(1/alpha) = %.3lf", 1./alpha);
+  
+  printf("\nInfo: d0=% 5d;  Total number of galaxies on input: %d, accepted: %d, accepted(weighted): % 6.2lf. (1./alpha): %.9lf; FKP norm: %.6lf", d0, Vipers_Num, accepted, daccepted_gals, 1./alpha, sqrt(alpha)*bare_fkp_norm);
   
   return 0;
 }

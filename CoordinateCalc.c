@@ -1,4 +1,5 @@
 int prep_CatalogueInput_500s(){
+  // Maximum number of galaxies present in any mock of the collection (i.e. those for covariance estimate).
   if(strcmp(vipersHOD_dir, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2/mocks_v1.7/W1") == 0)  max_gals = 61765;  // no z cuts.
   
   else max_gals = max_gal();
@@ -22,7 +23,21 @@ int prep_CatalogueInput_500s(){
 }
 
 
-int CatalogueInput_500s(){
+int spec_weights(){
+  // DT TSR, for new mocks in W1_Spectro_V7_2.
+  sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/TSR/TSR_W%d_mock_%03d_Nagoya_v6_Samhain.dat", root_dir, fieldFlag, loopCount);
+
+  inputfile = fopen(filepath, "r");
+
+  for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%*d \t %*lf \t %*lf \t %lf \n", &sampling[j]);
+
+  fclose(inputfile);
+
+  return 0;
+}
+
+
+int CatalogueInput_500s(){  
     printf("\n\nOpening catalogue: %s", filepath);
     
     inputfile   = fopen(filepath, "r");
@@ -30,29 +45,25 @@ int CatalogueInput_500s(){
     line_count(inputfile, &Vipers_Num);
     
     for(j=0; j<Vipers_Num; j++){  
-      clip_galweight[j] = 1.0;
-        
       fscanf(inputfile, "%*d \t %le \t %le \t %le \t %*le \t %*le \t %*le \t %*d \t %*d \t %*d \n", &ra[j], &dec[j], &zobs[j]);
+      
+       ra[j]               *= (pi/180.0);                                 // Converted to radians.
+      dec[j]               *= (pi/180.0);                                 // Converted to radians. 
+
+      rDist[j]              = interp_comovingDistance(gal_z[j]);          // Comoving distances in h^-1 Mpc
+
+      xCoor[j]              =  rDist[j]*cos(dec[j])*cos(ra[j]);
+      yCoor[j]              =  rDist[j]*cos(dec[j])*sin(ra[j]);
+      zCoor[j]              = -rDist[j]*sin(dec[j]);                      // reflection of spherical coordinates. 
+
+      ra[j]                /= (pi/180.0);                                 // Converted to degrees.
+      dec[j]               /= (pi/180.0);                                 // Converted to degrees.  
     }
     
     fclose(inputfile);
     
     // Load ESR weights.  
     spec_weights();    // load sampling according to local TSR.
-    
-    return 0;
-}
-
-
-int spec_weights(){
-    // DT TSR, for new mocks in W1_Spectro_V7_2. 
-    sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/TSR/TSR_W%d_mock_%03d_Nagoya_v6_Samhain.dat", root_dir, fieldFlag, loopCount);
-            
-    inputfile = fopen(filepath, "r");
-
-    for(j=0; j<Vipers_Num; j++)  fscanf(inputfile, "%*d \t %*lf \t %*lf \t %lf \n", &sampling[j]);
-    
-    fclose(inputfile);
 
     return 0;
 }

@@ -114,10 +114,15 @@ double LegendrePolynomials(double x, int n);
 
 double HubbleCnst(double z);
 
-float  (*pt2zChiIntegrand)(float);  // FLOAT?!
+double (*pt2zChiIntegrand)(double);
+
+double interp_nz(double);
 
 double interp_comovingDistance(double z);
 double interp_inverseComovingDistance(double r);
 
 double AcceptedMax(double a[], bool b[], int n);
 double AcceptedMin(double a[], bool b[], int n);
+
+// -- Pointers -- //
+double  (*pt2nz)(double) = NULL;

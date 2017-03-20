@@ -18,14 +18,24 @@ int load_rands_radec(double sampling){
 }
 
 
-int rand_newchi_newbasis(){
+int set_cnst_nbar(void){
+  // Reassign randoms to have constant \bar n(z); this will (much) better sample high z tail.
+  pt2nz = &unity; // constant <n(z)>
+
+  prep_inverseCumulative_nbar();
+  
+  return 0;
+}
+
+
+int rand_newchi_newbasis(void){
   // With nbar specified according to interp_nz(chi), assign chi for randoms such that they satisfy this bar.
   // Achieved with the transformation method, see pg. 287 of NR and smooth_nbar.c
   
-  printf("\n\nAngular limits of randoms: %.4lf < ra < %.4lf, %.4lf < dec < %.4lf", arrayMin(rand_ra, rand_number),  arrayMax(rand_ra,  rand_number),
-                                                                                   arrayMin(rand_dec, rand_number), arrayMax(rand_dec, rand_number));
-  
-  printf("\n\nNew basis for randoms.");
+  // printf("\n\nAngular limits of randoms: %.4lf < ra < %.4lf, %.4lf < dec < %.4lf", arrayMin(rand_ra, rand_number),  arrayMax(rand_ra,  rand_number),
+  //                                                                                  arrayMin(rand_dec, rand_number), arrayMax(rand_dec, rand_number));  
+
+  // printf("\n\nNew basis for randoms.");
   
   double F, cos_dec;
 
@@ -38,27 +48,25 @@ int rand_newchi_newbasis(){
   c_ra    =  CentreRA*(pi/180.);
   c_dec   = CentreDec*(pi/180.);
   
-  #pragma omp parallel
-  { // \{ must be on a new line
-    gsl_rng*  gsl_ran_thread_r;
-
-    gsl_ran_thread_r = gsl_rng_alloc(gsl_rng_taus); // new instance of taus generator. 
-
-    gsl_rng_set(gsl_ran_thread_r, 1 + omp_get_thread_num()); // seed with thread id; 0 is default so start at one.  
-   
-    #pragma omp for private(j, x1, y1, z1, x2, y2, z2, F, cos_dec)
+  //#pragma omp parallel
+  //{ // \{ must be on a new line
+    // gsl_rng*  gsl_ran_thread_r;
+    // gsl_ran_thread_r = gsl_rng_alloc(gsl_rng_taus); // new instance of taus generator. 
+    // gsl_rng_set(gsl_ran_thread_r, 1 + omp_get_thread_num() + rand_basis_call*omp_get_max_threads()); // seed with thread id; 0 is default so start at one.  
+    
+    //#pragma omp for private(j, x1, y1, z1, x2, y2, z2, F, cos_dec)  if(thread == 1)
     for(j=0; j<rand_number; j++){
       /*
       new            = gsl_rng_uniform_int(gsl_ran_thread_r, Vipers_Num);
 
       while(Acceptanceflag[new] == false){
-        new            = gsl_rng_uniform_int(gsl_ran_thread_r, Vipers_Num);
+        new          = gsl_rng_uniform_int(gsl_ran_thread_r, Vipers_Num);
       }
 
       rand_chi[j]    = rDist[new];
       */
 
-      F              = gsl_rng_uniform(gsl_ran_thread_r);  // Chi limits Satisfied by construction.
+      F              = gsl_rng_uniform(gsl_ran_r);  // Chi limits Satisfied by construction.
       
       rand_chi[j]    = inverse_cumulative_nbar(F);
       
@@ -69,7 +77,7 @@ int rand_newchi_newbasis(){
       rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);            // Stefano reflection included. 
       
       rand_weight[j] = 1./(1. + interp_nz(rand_chi[j])*fkpPk);  // rand fkp weights.
-      /*
+      
       // basis formed by: normal spherical co-ordinates subject to inversion through xy plane, then R1 and finally R2.
       // R1: rotation about z such that in the new basis, (x',y',z'), x' hat lies in x-y plane at an angle centreRA to x.
       x1  =     cos(c_ra)*rand_x[j] + sin(c_ra)*rand_y[j];
@@ -84,19 +92,21 @@ int rand_newchi_newbasis(){
       rand_x[j] = x2 + stefano_trans_x;  // Translate to fit in the box. P(k) unaffected.
       rand_y[j] = y2 + stefano_trans_y;
       rand_z[j] = z2 + stefano_trans_z;
-
-      // rand_x[j] = fmod(rand_x[j], 800./Jenkins_foldfactor);
-      // rand_y[j] = fmod(rand_y[j], 800./Jenkins_foldfactor);
-      // rand_z[j] = fmod(rand_z[j], 800./Jenkins_foldfactor); */
     }
-  }
+    //  }
 
-  StefanoRotated(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);
+  // StefanoRotated(rand_number, CentreRA, CentreDec, rand_x, rand_y, rand_z);
   
-  printf("\n\nStefano basis, randoms co-ordinates.");                                                                                                      
+  printf("\n\nRandoms: Stefano basis.");                                                                                                      
 
-  printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));                                                printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));                                                printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));                                                     
-  walltime("Wall time after randoms chi reassignment");
+  printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));
+  printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));
+  printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));                                                     
+  
+  // new seed next time.
+  rand_basis_call += 1;
+  
+  // walltime("Wall time after randoms chi reassignment");
   
   return 0;
 }
@@ -109,7 +119,7 @@ int lowerSampling_randomisedCatalogue(double sampling){
 }
 
 
-int make_fastread_randomCats(){
+int make_fastread_randomCats(void){
   //  Output ra and dec only, in binary. assumes loaded already. 
   sprintf(filepath, "%s/W1_Spectro_V7_4/randoms/randoms_W%d_xyz_%.1lf_%.1lf_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag, 0.6, 0.9);
   
@@ -120,7 +130,7 @@ int make_fastread_randomCats(){
   
   fclose(output);
 
-  load_fastread_randomCats();
+  load_fastread_randomCats(rand_number);
   
   return 0;
 }

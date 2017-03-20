@@ -5,10 +5,10 @@ char covariance_mocks_path[200];
 
 // Misc. //
 int    data_mock_flag;
+int    thread; // Multi-thread FFTw, but 1 means multithread useful loops aswell.
 
 // r2c or c2c arrays/ 
 int     fft_size;
-int     num_modes; // c2c: n0*n1*n2, r2c: (n2/2 + 1)*n1*n0
 
 double* overdensity;
 double* smooth_overdensity;
@@ -25,6 +25,9 @@ double    TotalSurveyedVolume = 0.0;
 double    stefano_trans_x;  // translation parameters for Stefano's co-ordinates.
 double    stefano_trans_y;
 double    stefano_trans_z;
+
+//-- Jenkins folding --//
+int fold;
 
 //-- VIPERS --//
 int               max_gals;  // max. number of galaxies (lines) in any mock in covariance calc, i.e. in files in mocks directory.
@@ -81,14 +84,19 @@ double*      rand_y      = NULL;
 double*      rand_z      = NULL;
 double*      rand_weight = NULL;
 
+double bare_rand_shot, bare_gal_shot;
+
+// new seed every call. 
+int rand_basis_call = 0;
+
 // -- FKP weighting/normalisation --//
 int    accepted_gals;
 double       fkpPk;
-double fkp_norm, daccepted_gals;
+double bare_fkp_norm, daccepted_gals;
 
 
 //-- Embedding volume for mock. --//
-int          n0, n1, n2; // (z == 0), (x == 2).
+int          n0, n1, n2, nx; // (z == 0), (x == 2).
 
 double  AxisLimsArray[2][3];  // Array to hold the coordinate limits of the VIPERS survey.
 
@@ -105,10 +113,6 @@ double           aexp;
 
 int       boxlabel;
 int          xlabel, ylabel, zlabel;
-
-
-//-- Jenkins's folding --//
-double       Jenkins_foldfactor;
 
 // -- n(z) calc. -- //
 int          chibin_no;
@@ -132,74 +136,64 @@ double k_x, k_y, k_z;
 double kSq, kmodulus, mu; // necessary for these to be global?
 double kbinInterval;
 
-double        kIntervalx; // fund_kx.
-double        kIntervaly;
-double        kIntervalz;
+double        fund_kx; // fund_kx.
+double        fund_ky;
+double        fund_kz;
 
-double        xNyquistWaveNumber; // Ny_kx.
-double        yNyquistWaveNumber;
-double        zNyquistWaveNumber;
+double        xNy; // Ny_kx.
+double        yNy;
+double        zNy;
 
+double*       sinc_factors;
 
 // -- Binned modes -- //
-int     kbin_no;
-
 double  logk_min;
 double  logk_max;
 double  logk_interval;
 
-int*    modes_perbin       = NULL;
-
-double* mean_modk          = NULL;
-double* binnedPk           = NULL;
-double* logk_limits        = NULL;
-
 // -- Multipole decomposition -- //
-int      polar_pkcount; // REDUNDANT
-double** polar_pk;      // REDUNDANT.
-
-
 int     hiMultipoleOrder; // 0: use monopole only, 2: use quadrupole.
 
-double* kLi; // L_2 evaluated for each individual mode. 
-double* kM2; // Square NGP/CIC correction for each available mode.  
-int*    kind;  // index in which mode falls in binned p(k) array.
-
-double* detA; //
-double* Sum_Pi;
-double* Sum_Li;
-double* Sum_Li2;
-double* Sum_PiLi;
-int*    modes_perbin;
-
-double* Hexadecapole;
-double* Quadrupole;
-double* Monopole;
-
 // -- Clipping -- //
-double  fraction_clipped;
-double  appliedClippingThreshold;
-double  clipping_smoothing_radius;
+int     d0;
+double  smooth_radius;
 
 double* gal_clippingweights;
+double* cell_metd0; // highest d0 met by cell.
+double* filter_factors;
 
+int     number_occupied = 0;
+int*      rand_occupied;
+
+int* occupied_indices;
+
+// New basis for embedding volume.
+double min_x, max_x, dx, min_y, max_y, dy, min_z, max_z, dz, F, cos_dec;
 
 // -- Functions --
-int          comovDistReshiftCalc();
-double       SolidAngleCalc(double decLowerBound, double decUpperBound, double raInterval);
+int     comovDistReshiftCalc();  // Prototyping should use voids, e.g. comovDistRedshiftCalc(void).
+double  SolidAngleCalc(double decLowerBound, double decUpperBound, double raInterval);
 
-double       invert_StefanoBasis(double centreRA, double centreDec, double* xval, double* yval, double* zval);
+double  invert_StefanoBasis(double centreRA, double centreDec, double* xval, double* yval, double* zval);
+int     StefanoRotated(int Number, double centreRA, double centreDec, double xCoors[], double yCoors[], double zCoors[]);
 
-//double       nbar_dV(double chi);
-int          prep_inverseCumulative_nbar();
-//double       interp_nz(double chi);
-//double       inverse_cumulative_nbar(double arg);
+int     load_fastread_randomCats(int rand_number);
 
-int          CoordinateCalc();
+int     prep_inverseCumulative_nbar();
 
-int          JenkinsCoordinates();
-int          JenkinsFold(double original[], int lenArray, int axis);
-int          ApplyJenkins();
+int     prep_filterfactors(void);
+int     Gaussian_filter(void);
 
-int          PkCalc();
+int     CoordinateCalc();
 
+int     boxCoordinates(double xCoor[], double yCoor[], double zCoor[], int rowNumber);
+
+int     calc_clipping_weights();
+
+int     JenkinsCoordinates();
+int     JenkinsFold(double original[], int lenArray, int axis);
+int     ApplyJenkins();
+
+int     PkCalc();
+
+// -- Pointers -- //

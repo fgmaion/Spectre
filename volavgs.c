@@ -1,3 +1,7 @@
+double unity(double chi){
+  return 1.;
+}
+
 double invnbar_chisq(double chi){
   return chi*chi/interp_nz(chi);
 }
@@ -18,16 +22,25 @@ double chisq_nbar(double chi){
   return chi*chi*interp_nz(chi);
 }
 
-double calc_volavg_invnbar(){
-  // Shot noise correction for a varying background number density.
-  // P(k) is the volume avg. therefore so must be the shot noise correction.
 
-  double vol            =  qromb(&chisq, loChi, hiChi);
+double calc_vol(){
+  double result;
 
-  double volavg_invnbar =  qromb(&invnbar_chisq, loChi, hiChi);
+  result = (pow(hiChi, 3.) - pow(loChi, 3.))/3.; // Vol. of sphere when stripped of 4pi steradians.  
 
-  // solid angle drops out if nbar is independent of direction.
-  return volavg_invnbar/vol;
+  // convert from h^-1 Mpc to Mpc. 
+  // result *= pow(h, -3.);
+
+  // full sky. 
+  // result *= 4.*pi;
+
+  // VIPERS W1 area. 
+  result *= sqdegs2steradians(W1area);  // printf("\n\nSTERADIANS: %.6lf", sqdegs2steradians(W1area));
+
+  // Gpc to Mpc
+  result *= pow(10., -9.);
+  
+  return result;
 }
 
 

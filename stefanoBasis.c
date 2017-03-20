@@ -1,34 +1,17 @@
 int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoor[], double yCoor[], double zCoor[]){
-  // Convert (ra, dec, z) into (x, y, z) for each catalogue in Stefano's basis.
-  for(j=0; j<Num; j++){
-     ra[j]               *= (pi/180.0);                                 // Converted to radians.
-    dec[j]               *= (pi/180.0);                                 // Converted to radians.
-
-    rDist[j]              = interp_comovingDistance(gal_z[j]);          // Comoving distances in h^-1 Mpc
-
-    xCoor[j]              = rDist[j]*cos(dec[j])*cos(ra[j]);
-    yCoor[j]              = rDist[j]*cos(dec[j])*sin(ra[j]);
-    zCoor[j]              = rDist[j]*sin(dec[j]);                       // usual spherical co-ordinates.
-
-    ra[j]                /= (pi/180.0);                                 // Converted to degrees.
-    dec[j]               /= (pi/180.0);                                 // Converted to degrees.
-  }
-
-  printf("\n\nAngular limits of galaxies: %.4lf < ra < %.4lf, %.4lf < dec < %.4lf", AcceptedMin(ra, Acceptanceflag, Vipers_Num),  AcceptedMax(ra, Acceptanceflag, Vipers_Num),
-                                                                                    AcceptedMin(dec, Acceptanceflag, Vipers_Num), AcceptedMax(dec, Acceptanceflag, Vipers_Num));
-  
-  StefanoReflection(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
+  printf("\n\nAngular limits of galaxies: %.4lf < ra < %.4lf, %.4lf < dec < %.4lf", AcceptedMin(ra,  Acceptanceflag, Vipers_Num),  AcceptedMax(ra, Acceptanceflag, Vipers_Num),
+                                                                                    AcceptedMin(dec, Acceptanceflag, Vipers_Num), AcceptedMax(dec, Acceptanceflag, Vipers_Num));  
+  // Reflection applied in coordinate calc.  
+  // StefanoReflection(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
   
   // Rotate the input co-ordinates such that the ra direction is aligned more or less with the y axis, dec direction with x, and redshift along z.
   StefanoRotated(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
   
-  printf("\n\nAccepted, inverted, rotated & translated");
+  printf("\n\nGalaxies: accepted, inverted, rotated & translated");
 
   printf("\nx min:  %.3f \t x max:  %.3f", AcceptedMin(xCoor, Acceptanceflag, Vipers_Num), AcceptedMax(xCoor, Acceptanceflag, Vipers_Num));
   printf("\ny min:  %.3f \t y max:  %.3f", AcceptedMin(yCoor, Acceptanceflag, Vipers_Num), AcceptedMax(yCoor, Acceptanceflag, Vipers_Num));
   printf("\nz min:  %.3f \t z max:  %.3f", AcceptedMin(zCoor, Acceptanceflag, Vipers_Num), AcceptedMax(zCoor, Acceptanceflag, Vipers_Num));
-
-  Jenkins_foldCat(); // Jenkins's fold positions. 
   
   return 0;
 }
