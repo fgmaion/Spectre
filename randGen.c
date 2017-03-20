@@ -9,7 +9,7 @@ int assign_randmemory(){
     
     rand_weight   = (double *) realloc(rand_weight, rand_number*sizeof(*rand_weight));
     
-    // rand_accept   = (bool *)   realloc(rand_accept, rand_number*sizeof(*rand_accept));
+    rand_rng      = (double *) realloc(rand_rng,    rand_number*sizeof(*rand_rng));
     
     return 0;
 }

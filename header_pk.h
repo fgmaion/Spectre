@@ -83,11 +83,9 @@ double*      rand_x      = NULL;  // Really need x,y,z?
 double*      rand_y      = NULL;
 double*      rand_z      = NULL;
 double*      rand_weight = NULL;
+double*      rand_rng    = NULL;
 
 double bare_rand_shot, bare_gal_shot;
-
-// new seed every call. 
-int rand_basis_call = 0;
 
 // -- FKP weighting/normalisation --//
 int    accepted_gals;
