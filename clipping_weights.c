@@ -191,13 +191,26 @@ int calc_clipping_weights(){
         else{
           fprintf(output, "%.4lf \t", 1.0);
         }
-
-        fprintf(output, "\n");
       }
 
-      fclose(output);
-
-      return 0;
+      fprintf(output, "%.4lf", cell_metd0[boxlabel]);
+      // fprintf(output, "%.4lf \t %.4lf \t %.4lf", smooth_overdensity[boxlabel], overdensity[boxlabel], cell_metd0[boxlabel]);
     }
 
-    
+    else{
+      for(i=0; i<5; i++)  fprintf(output, "%.4lf \t", 0.0);
+    }
+
+    fprintf(output, "\n");
+  }
+
+  fclose(output);
+
+  return 0;
+}
+
+
+
+
+
+
