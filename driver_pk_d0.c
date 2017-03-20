@@ -32,6 +32,7 @@
 #include "FFTw.c"
 #include "GaussianFilter.c"
 #include "assign_pkmemory.c"
+// #include "add_sprng.c"
 
 
 int main(int argc, char **argv){  
@@ -99,7 +100,7 @@ int main(int argc, char **argv){
   CatalogNumber             =       306;                 // Total number of HOD mocks.
 
   start_walltime();
-  
+
   fftw_init_threads();
   
   fftw_plan_with_nthreads(omp_get_max_threads());        // Maximum number of threads to be used; use all openmp threads available.  
@@ -107,7 +108,7 @@ int main(int argc, char **argv){
   Initialise();                                          // Initialise grid, fft params and random generation.
 
   prep_x2c();                                            // Memory for overdensity, smooth_overdensity and H_k; either double or fftw_complex.
-  
+  /*
   prep_pkRegression();                                   
 
   prep_CatalogueInput_500s();                            // Requires max. number of gals of ALL mocks analysed simultaneously to be hard coded in.  
@@ -128,7 +129,7 @@ int main(int argc, char **argv){
   
   walltime("All prep. done");
   
-  for(loopCount=1; loopCount<2; loopCount++){            
+  for(loopCount=1; loopCount<1; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
 
     CatalogueInput_500s(); // mocks 1 to 153 are independent. 
@@ -163,10 +164,12 @@ int main(int argc, char **argv){
       }
     }
   }
-  
+  */
   walltime("Wall time at finish");
+
+  // MPI_Finalize();
   
   printf("\n\n");
-  
-  return 0; 
+
+  exit(EXIT_SUCCESS);
 }
