@@ -191,3 +191,13 @@ int calc_clipping_weights(){
         else{
           fprintf(output, "%.4lf \t", 1.0);
         }
+
+        fprintf(output, "\n");
+      }
+
+      fclose(output);
+
+      return 0;
+    }
+
+    
