@@ -20,6 +20,8 @@ int max_gal(){
     inputfile = fopen(filepath, "r");
 
     line_count(inputfile, &Ngal[j]);
+
+    printf("\n%d \t %d", j, Ngal[j]);
     
     fclose(inputfile);
   }

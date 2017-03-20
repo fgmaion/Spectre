@@ -112,7 +112,7 @@ int main(int argc, char **argv){
   prep_pkRegression();                                   
 
   prep_CatalogueInput_500s();                            // Requires max. number of gals of ALL mocks analysed simultaneously to be hard coded in.  
-  
+  /*
   prep_nbar();
   
   load_rands_radec(1.0);
@@ -162,8 +162,8 @@ int main(int argc, char **argv){
     
         PkCalc(&set[fold]);
       }
-    }*/
-  }
+    }
+  }*/
   
   walltime("Wall time at finish");
 
