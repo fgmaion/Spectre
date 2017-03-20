@@ -3,7 +3,7 @@ double bare_shot(){
   bare_gal_shot  = 0.0;
   bare_rand_shot = 0.0;
 
-  for(j=0; j<rand_number; j++)  bare_rand_shot += pow(rand_weight[j], 2.);
+  for(j=0; j<rand_number; j++)    bare_rand_shot += pow(rand_weight[j], 2.);
 
   for(j=0; j<Vipers_Num; j++){
     if(Acceptanceflag[j] == true) bare_gal_shot  += pow(fkp_galweight[j]/sampling[j], 2.);  // galaxy shot noise, inc. sampling.

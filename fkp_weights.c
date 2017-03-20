@@ -24,6 +24,7 @@ int calc_bare_fkpweights(){
     }
   }
   
+  printf("\n\nBare FKP norm: %.6lf", bare_fkp_norm);
   
   return 0;
 }
