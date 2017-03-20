@@ -76,23 +76,23 @@ int calc_models(){
       bsigma8 = min_bsigma8 + bsigma8Interval*bb;
 
       for(cc=0; cc<Res; cc++){
-	velDispersion = min_velDisperse + sigmaInterval*cc;
+        velDispersion = min_velDisperse + sigmaInterval*cc;
 
-	for(dd=0; dd<Res_ap; dd++){
-	  alpha_pad = min_alpha_pad + alpha_padInterval*dd;
-
-	  for(ee=0; ee<Res_ap; ee++){
-	    epsilon_pad = min_epsilon_pad + epsilon_padInterval*ee;
-
-	    alpha_pad   = 1.0;
-	    epsilon_pad = 0.0;
-
-	    model_compute(aa, bb, cc, dd, ee); // updates xtheory and ytheory. 
+        for(dd=0; dd<Res_ap; dd++){
+          alpha_pad = min_alpha_pad + alpha_padInterval*dd;
+          
+          for(ee=0; ee<Res_ap; ee++){
+            epsilon_pad = min_epsilon_pad + epsilon_padInterval*ee;
+            
+            alpha_pad   = 1.0;
+            epsilon_pad = 0.0;
+            
+            model_compute(aa, bb, cc, dd, ee); // updates xtheory and ytheory. 
 	    
-	    fwrite(xtheory[aa][bb][cc][dd][ee], sizeof(double),  order,   output);
-	    // fwrite(ytheory[jj][kk][ii][ll][mm], sizeof(double),  order,   output);
-	  }
-	}
+            fwrite(xtheory[aa][bb][cc][dd][ee], sizeof(double),  order,   output);
+            // fwrite(ytheory[jj][kk][ii][ll][mm], sizeof(double),  order,   output);
+          }
+        }
       }
     }
   }
@@ -121,7 +121,7 @@ int calc_ChiSqs(int mockNumber){
       gsl_matrix_get_col(col, evec, j);
         
       for(k=0; k<order; k++){
-	ydata[j] += gsl_vector_get(col, k)*gsl_matrix_get(sigma_norm, k, k)*xdata[k];
+        ydata[j] += gsl_vector_get(col, k)*gsl_matrix_get(sigma_norm, k, k)*xdata[k];
        dkdata[j] += gsl_vector_get(col, k)*gsl_matrix_get(sigma_norm, k, k)*kdata[k];	// normalisation problem? 
       }
     }
@@ -147,17 +147,17 @@ int calc_ChiSqs(int mockNumber){
             for(mm=0; mm<Res_ap; mm++){
               epsilon_pad = min_epsilon_pad + epsilon_padInterval*mm;
                     
-	      alpha_pad   = 1.0;
-	      epsilon_pad = 0.0; 
+              alpha_pad   = 1.0;
+              epsilon_pad = 0.0; 
 
               ChiSqGrid[jj][kk][ii][ll][mm] = 0.0;
 
-	      for(nn=0; nn<order; nn++){
-	        ChiSqGrid[jj][kk][ii][ll][mm] += pow(ydata[nn] - ytheory[jj][kk][ii][ll][mm][nn], 2.)/gsl_vector_get(eval, nn);
-		// ChiSqGrid[jj][kk][ii][ll][mm] += pow(xdata[nn] - xtheory[jj][kk][ii][ll][mm][nn], 2.)*pow(gsl_matrix_get(sigma_norm, nn, nn), 2.);
-	      }
+              for(nn=0; nn<order; nn++){
+                ChiSqGrid[jj][kk][ii][ll][mm] += pow(ydata[nn] - ytheory[jj][kk][ii][ll][mm][nn], 2.)/gsl_vector_get(eval, nn);
+                // ChiSqGrid[jj][kk][ii][ll][mm] += pow(xdata[nn] - xtheory[jj][kk][ii][ll][mm][nn], 2.)*pow(gsl_matrix_get(sigma_norm, nn, nn), 2.);
+              }
 
-	      // printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  ChiSqGrid[jj][kk][ii][ll][mm]);
+              // printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  ChiSqGrid[jj][kk][ii][ll][mm]);
 	      
               if(ChiSqGrid[jj][kk][ii][ll][mm] < minChiSq){
                 minChiSq = ChiSqGrid[jj][kk][ii][ll][mm];
@@ -169,9 +169,9 @@ int calc_ChiSqs(int mockNumber){
                 minChiSq_alpha_pad   = alpha_pad;
                 minChiSq_epsilon_pad = epsilon_pad;
 
-		printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  minChiSq);
-	      }
-	    }
+                printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  minChiSq);
+              }
+            }
           }
         }
       }
@@ -195,20 +195,20 @@ int read_models(){
       bsigma8 = min_bsigma8 + bsigma8Interval*kk;
 
       for(ii=0; ii<Res; ii++){
-	velDispersion = min_velDisperse + sigmaInterval*ii;
+        velDispersion = min_velDisperse + sigmaInterval*ii;
 
-	for(ll=0;ll<Res_ap; ll++){
-	  alpha_pad = min_alpha_pad + alpha_padInterval*ll;
+        for(ll=0;ll<Res_ap; ll++){
+          alpha_pad = min_alpha_pad + alpha_padInterval*ll;
+          
+          for(mm=0; mm<Res_ap; mm++){
+            epsilon_pad = min_epsilon_pad + epsilon_padInterval*mm;
+            
+            alpha_pad   = 1.0;
+            epsilon_pad = 0.0;
 
-	  for(mm=0; mm<Res_ap; mm++){
-	    epsilon_pad = min_epsilon_pad + epsilon_padInterval*mm;
-
-	    alpha_pad   = 1.0;
-	    epsilon_pad = 0.0;
-
-	    fread(xtheory[jj][kk][ii][ll][mm], sizeof(double),  order,   inputfile);
-	  }
-	}
+            fread(xtheory[jj][kk][ii][ll][mm], sizeof(double),  order,   inputfile);
+          }
+        }
       }
     }
   }

@@ -1,22 +1,24 @@
 int load_rands_radec(double sampling){
-    rand_number = accepted_rand = (int) ceil(1382582*sampling);  // Hard coded catalogue row number.
+  rand_number = accepted_rand = (int) ceil(1382582*sampling);  // Hard coded catalogue row number.
     
-    assign_randmemory();
+  assign_randmemory();
     
-    // load_ascii_randomCats(sampling);    
-    load_fastread_randomCats(rand_number);
+  // load_ascii_randomCats(sampling);    
+  load_fastread_randomCats(rand_number);
 
-    // To do: save randoms in radians.
-    for(j=0; j< rand_number; j++){
-      rand_ra[j]    *= (pi/180.0);                  // Converted to radians.  No need to convert back.
-      rand_dec[j]   *= (pi/180.0);
-    }
+  // make_fastread_randomCats();
+  
+  // To do: save randoms in radians.
+  for(j=0; j< rand_number; j++){
+    rand_ra[j]    *= (pi/180.0);                  // Converted to radians.  No need to convert back.
+    rand_dec[j]   *= (pi/180.0);
+  }
 
-    set_rand_rng();
+  set_rand_rng();
     
-    walltime("Wall time after randoms load");
-    
-    return 0;
+  walltime("Wall time after randoms load");
+  
+  return 0;
 }
 
 
@@ -59,30 +61,30 @@ int rand_newchi_newbasis(void){
   
   #pragma omp parallel for private(j, x1, y1, z1, x2, y2, z2, F, cos_dec) if(thread == 1)
   for(j=0; j<rand_number; j++){
-      rand_chi[j]    = inverse_cumulative_nbar(rand_rng[j]);
+    rand_chi[j]    = inverse_cumulative_nbar(rand_rng[j]);
       
-      cos_dec        = cos(rand_dec[j]);
+    cos_dec        = cos(rand_dec[j]);
     
-      rand_x[j]      =  rand_chi[j]*cos(rand_ra[j])*cos_dec;
-      rand_y[j]      =  rand_chi[j]*sin(rand_ra[j])*cos_dec;
-      rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);            // Stefano reflection included. 
+    rand_x[j]      =  rand_chi[j]*cos(rand_ra[j])*cos_dec;
+    rand_y[j]      =  rand_chi[j]*sin(rand_ra[j])*cos_dec;
+    rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);            // Stefano reflection included. 
       
-      rand_weight[j] = 1./(1. + interp_nz(rand_chi[j])*fkpPk);  // rand fkp weights.
+    rand_weight[j] = 1./(1. + interp_nz(rand_chi[j])*fkpPk);  // rand fkp weights.
       
-      // basis formed by: normal spherical co-ordinates subject to inversion through xy plane, then R1 and finally R2.
-      // R1: rotation about z such that in the new basis, (x',y',z'), x' hat lies in x-y plane at an angle centreRA to x.
-      x1  =     cos(c_ra)*rand_x[j] + sin(c_ra)*rand_y[j];
-      y1  =    -sin(c_ra)*rand_x[j] + cos(c_ra)*rand_y[j];
-      z1  =               rand_z[j];
+    // basis formed by: normal spherical co-ordinates subject to inversion through xy plane, then R1 and finally R2.
+    // R1: rotation about z such that in the new basis, (x',y',z'), x' hat lies in x-y plane at an angle centreRA to x.
+    x1  =     cos(c_ra)*rand_x[j] + sin(c_ra)*rand_y[j];
+    y1  =    -sin(c_ra)*rand_x[j] + cos(c_ra)*rand_y[j];
+    z1  =               rand_z[j];
 
-      // R2: rotation about y such that in the new basis, (x'', y'', z''), z'' hat lies in (x', z') plane at an angle -CentreDec to x' hat.
-      x2  = -sin(c_dec)*x1  - cos(c_dec)*z1;
-      y2  =  y1;
-      z2  =  cos(c_dec)*x1  - sin(c_dec)*z1;
+    // R2: rotation about y such that in the new basis, (x'', y'', z''), z'' hat lies in (x', z') plane at an angle -CentreDec to x' hat.
+    x2  = -sin(c_dec)*x1  - cos(c_dec)*z1;
+    y2  =  y1;
+    z2  =  cos(c_dec)*x1  - sin(c_dec)*z1;
 
-      rand_x[j] = x2 + stefano_trans_x;  // Translate to fit in the box. P(k) unaffected.
-      rand_y[j] = y2 + stefano_trans_y;
-      rand_z[j] = z2 + stefano_trans_z;
+    rand_x[j] = x2 + stefano_trans_x;  // Translate to fit in the box. P(k) unaffected.
+    rand_y[j] = y2 + stefano_trans_y;
+    rand_z[j] = z2 + stefano_trans_z;
   }
  
   printf("\n\nRandoms: Stefano basis.");                                                                                                      
@@ -106,7 +108,7 @@ int lowerSampling_randomisedCatalogue(double sampling){
 
 int make_fastread_randomCats(void){
   //  Output ra and dec only, in binary. assumes loaded already. 
-  sprintf(filepath, "%s/W1_Spectro_V7_4/randoms/randoms_W%d_xyz_%.1lf_%.1lf_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag, 0.6, 0.9);
+  sprintf(filepath, "%s/W1_Spectro_V7_4/randoms/randoms_W%d_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag);
   
   output = fopen(filepath, "wb");
 
@@ -115,14 +117,14 @@ int make_fastread_randomCats(void){
   
   fclose(output);
 
-  load_fastread_randomCats(rand_number);
+  // load_fastread_randomCats(rand_number);
   
   return 0;
 }
 
 
 int load_fastread_randomCats(int rand_number){  
-  sprintf(filepath, "%s/W1_Spectro_V7_4/randoms/randoms_W%d_xyz_%.1lf_%.1lf_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag, 0.6, 0.9);
+  sprintf(filepath, "%s/W1_Spectro_V7_4/randoms/randoms_W%d_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag);
 
   inputfile = fopen(filepath, "rb");
 

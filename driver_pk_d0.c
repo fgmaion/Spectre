@@ -106,17 +106,17 @@ int main(int argc, char **argv){
   fftw_plan_with_nthreads(omp_get_max_threads());        // Maximum number of threads to be used; use all openmp threads available.  
   
   Initialise();                                          // Initialise grid, fft params and random generation.
-
+  
   prep_x2c();                                            // Memory for overdensity, smooth_overdensity and H_k; either double or fftw_complex.
   
   prep_pkRegression();                                   
-
+  
   prep_CatalogueInput_500s();                            // Requires max. number of gals of ALL mocks analysed simultaneously to be hard coded in.  
-  /*
+  
   prep_nbar();
   
   load_rands_radec(1.0);
-
+  
   prep_clipping_calc();
   
   prep_r2c_modes(&flat,        1.0); // unfolded.
@@ -143,7 +143,7 @@ int main(int argc, char **argv){
     StefanoBasis(Vipers_Num, ra, dec, rDist, xCoor, yCoor, zCoor);  // applied to both gals and rands.  (ra, dec, z) to (x, y, z) in Stefano's basis.
     
     rand_newchi_newbasis();
-    /*
+    
     calc_bare_fkpweights(); // fkp_weights in units of alpha. 
 
     bare_shot(); // calc. of shot noice in units of (d0 dependent) alpha.
@@ -163,7 +163,7 @@ int main(int argc, char **argv){
         PkCalc(&set[fold]);
       }
     }
-  }*/
+  }
   
   walltime("Wall time at finish");
 
