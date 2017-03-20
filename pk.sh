@@ -26,6 +26,6 @@ export OMP_NUM_THREADS=2 # Threads = processors.
 gcc -std=gnu11 -w -O2 -o driver_pk_d0.o Scripts/driver_pk_d0.c -fopenmp -lfftw3_omp -lfftw3 -lm -lgsl -lgslcblas
 
 # GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_pk_d0.o $FIELDFLAG $LOZ $HIZ
-GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_pk_d0.o 4 0.6 0.8
+GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_pk_d0.o 1 0.8 1.0
 
 #gdb driver_pk_d0.o

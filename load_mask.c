@@ -59,7 +59,7 @@ int rand_newchi_newbasis(void){
   c_ra    =  CentreRA*(pi/180.);
   c_dec   = CentreDec*(pi/180.);
   
-  #pragma omp parallel for private(j, x1, y1, z1, x2, y2, z2, F, cos_dec) if(thread == 1)
+  #pragma omp parallel for private(j, cos_dec, x1, y1, z1, x2, y2, z2) if(thread == 1)
   for(j=0; j<rand_number; j++){
     rand_chi[j]    = inverse_cumulative_nbar(rand_rng[j]);
       

@@ -75,10 +75,10 @@ int main(int argc, char **argv){
   
   stefano_trans_x           =      +100.;
   stefano_trans_y           =      +300.; 
-  stefano_trans_z           =     -1720.;                 // Changed from 1500. on 06/03/2017; as dealing with 0.8 < z < 1.0        
+  stefano_trans_z           =     -1500.;                 // Changed from 1500. on 06/03/2017; as dealing with 0.8 < z < 1.0        
 
-  if(1.0 < hi_zlim){             //%% Changed from 0.8 %%
-    stefano_trans_z -= 600.;     // Previously 600. Mpc for 0.9 < z < 1.2;
+  if(1.0 <= hi_zlim){            //%% Changed from 0.8 %%
+    stefano_trans_z -= 200.;     // Previously 600. Mpc for 0.9 < z < 1.2;
   }
   
   chi_interval              =     16.00;                 // Comoving number density, n(z), measurement.
@@ -125,7 +125,6 @@ int main(int argc, char **argv){
   regress set[2] = {flat, half};
   
   int     d0s[4] = {1000, 10, 6, 4};
-  // int     d0s[4] = {1000, 8, 5, 4};
   
   walltime("All prep. done");
   
