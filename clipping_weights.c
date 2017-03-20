@@ -148,23 +148,34 @@ int calc_clipping_weights(){
     frac_clip =    0.0;
 
     td0       = d0s[k];
-    
+
     for(j=0; j<number_clipped; j++){
       i = occupied_indices[j];
+
+      if(smooth_overdensity[i] >= td0){
+        cell_metd0[i] = td0; // either smooth_overdensity or overdensity.
+        // overdensity has not had <1 + delta> = 1 enforced in master.
+
+        occupied_indices[Index] = i;
+
+        Index     +=   1;
+
+        frac_clip += 1.0;
+      }
+    }
 
     number_clipped = Index;
 
     frac_clip /= number_occupied;
 
     printf("\nFor d0 of %.4lf, %lf%% of cells are clipped", td0, 100.*frac_clip);
-
   }
-  
+
   if(data_mock_flag == 0)  sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/clip_weights/W%d/mock_%03d_z_%.1lf_%.1lf.dat", root_dir, fieldFlag, loopCount, lo_zlim, hi_zlim);
   if(data_mock_flag == 1)  sprintf(filepath, "%s/W1_Spectro_V7_4/data_v1.7/clip_weights/W%d/data_%.1lf_z_%.1lf.dat",  root_dir, fieldFlag, lo_zlim, hi_zlim);
 
   output = fopen(filepath, "w");
-  
+
   for(j=0; j<Vipers_Num; j++){
     if(Acceptanceflag[j]  == true){
       xlabel     = (int)  floor((xCoor[j] - min_x)/dx);
@@ -180,20 +191,3 @@ int calc_clipping_weights(){
         else{
           fprintf(output, "%.4lf \t", 1.0);
         }
-      }
-
-      fprintf(output, "%.4lf", cell_metd0[boxlabel]);
-      // fprintf(output, "%.4lf \t %.4lf \t %.4lf", smooth_overdensity[boxlabel], overdensity[boxlabel], cell_metd0[boxlabel]);
-    }
-
-    else{
-      for(i=0; i<5; i++)  fprintf(output, "%.4lf \t", 0.0);
-    }
-
-    fprintf(output, "\n");
-  }
-
- fclose(output);
- 
- return 0;
-}
