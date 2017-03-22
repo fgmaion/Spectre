@@ -125,6 +125,8 @@ double jhiRes_hihiRes_join;
 
 
 //-- Functions --//
+int    print_windowCorrfn(void);
+
 double splint_unit_maskMultipoles(double r, int transformOrder);
 
 double splint_VIPERS_maskMono(double r);
@@ -143,7 +145,12 @@ double splint_VIPERS_jmaskDec(double r);
 
 double splint_VIPERS_jmaskMultipoles(double r, int transformOrder);
 
+int    prepVIPERS_kSpaceMultipole(void);
+
 double splint_VIPERS_kSpaceMono(double k);
 double splint_VIPERS_kSpaceQuad(double k);
+
+int    flatSlope_amp(int N, double rmin, double rmax, double sign, double ri[], double Di[], double* norm);
+int    lowRes_amplitudeCalc(int Nhi, int Nlo, double rmin, double rmax, double rhi[], double rlo[], double Dhi[], double Dlo[], double* norm);
 
 double (*pt2maskMultipoles)(double r, int transformOrder) = NULL;

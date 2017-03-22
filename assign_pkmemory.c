@@ -37,28 +37,11 @@ int prep_x2c(){
 
   for(j=0; j<n0*n1*n2; j++)  overdensity[j] = 0.0;
 
+  regress_mem(&flat);
+  regress_mem(&half);
+  
   walltime("Wall time after array malloc");
   
-  return 0;
-}
-
-
-int set_kbins_logkspacing(regress* inst){
-  logk_interval        = (logk_max - logk_min)/KBIN_NO;
-
-  for(j=0; j<KBIN_NO; j++)  inst->logk_limits[j] = pow(10., logk_min + j*logk_interval);
-
-  return 0;
-}
-
-
-int set_kbins_linearkspacing(regress* inst){
-  double kmedia;
-
-  kmedia               = 2.*pi/800.;
-
-  for(j=0; j<KBIN_NO; j++)  inst->logk_limits[j] = j*kmedia; // needs 800 bins.
-
   return 0;
 }
 
@@ -69,16 +52,5 @@ int regress_mem(regress* inst){
   inst->kLi  = calloc(n0*n1*nx, sizeof(double));
   inst->kM2  = calloc(n0*n1*nx, sizeof(double));
 
-  return 0;
-}
-
-
-int prep_pkRegression(){
-  regress_mem(&flat);
-  regress_mem(&half);
-  
-  set_kbins_logkspacing(&flat);
-  set_kbins_logkspacing(&half);
-    
   return 0;
 }

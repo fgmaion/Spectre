@@ -10,8 +10,8 @@ int load_rands_radec(double sampling){
   
   // To do: save randoms in radians.
   for(j=0; j< rand_number; j++){
-    rand_ra[j]    *= (pi/180.0);                  // Converted to radians.  No need to convert back.
-    rand_dec[j]   *= (pi/180.0);
+    rand_ra[j]  *= (pi/180.0); // Converted to radians.  No need to convert back.
+    rand_dec[j] *= (pi/180.0);
   }
 
   set_rand_rng();
@@ -203,7 +203,7 @@ int del_lockfile(){
   return 0;
 }
 
-
+/*
 int load_maskedRSDpaper_mask(double sampling){
     sprintf(filepath, "%s/Data/maskedRSD_draftwork/randoms_W1_Nagoya_xyz_0.7_0.8_gridded.cat", root_dir);
 
@@ -234,7 +234,7 @@ int load_maskedRSDpaper_mask(double sampling){
     printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));
     printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));
     printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));
-    /*
+    
     for(j=0; j<n0*n1*n2; j++)  surveyMask[j] = 0.0;
     
     for(j=0; j<rand_number; j++){
@@ -242,16 +242,15 @@ int load_maskedRSDpaper_mask(double sampling){
     
         surveyMask[boxlabel] = 1.;
     }
-    */
+        
     for(j=0; j<rand_number; j++)  rand_weight[j] = 1.;
-
 
     sprintf(filepath, "");
 
     return 0;
-}
+}*/
 
-
+/*
 int zeff_calc(){
     double Norm = 0.0;
     double zz;
@@ -271,9 +270,9 @@ int zeff_calc(){
     printf("\n\nEffective redshift: %.2lf", z_eff);
 
     return 0;
-}
+}*/
 
-
+/*
 int mean_CellChi(){
     // assign memory for grid representation of mask, Cell_SurveyLimitsMask. 
     double* meanchi;
@@ -315,9 +314,9 @@ int mean_CellChi(){
     free(meanchi);
     
     return 0;
-}
+}*/
 
-
+/*
 int load_randStefanoCoordinates(int load, double sampling){
     sprintf(filepath, "%s/W1_Spectro_V5_0/randoms_W1_Nagoya_v5_Samhain_realdata_incnbar_StefanoCoordinates_xyz_%.1lf_%.1lf.cat", root_dir, lo_zlim, hi_zlim);
 
@@ -357,5 +356,5 @@ int load_randStefanoCoordinates(int load, double sampling){
     assignAcceptance_rand();
 
     return 0;
-}
+    }*/
 

@@ -1,4 +1,4 @@
-#define  KBIN_NO 40          // Variables deciding memory allocation. 
+#define  KBIN_NO 40          
 #define  FOLDFACTOR 2.0
 
 #include "/home/mjw/Aux_functions/header.h"
@@ -6,7 +6,7 @@
 
 #include "header.h"
 #include "header_pk.h"
-#include "cosmology_planck2015.h"
+#include "cosmology_planck15.h"
 #include "struct_regress.h"
 #include "AgeOftheUniverse.c"
 #include "linearGrowthRate.c"
@@ -32,6 +32,7 @@
 #include "FFTw.c"
 #include "GaussianFilter.c"
 #include "assign_pkmemory.c"
+#include "assign_binnedpk_memory.c"
 // #include "add_sprng.c"
 
 
@@ -44,7 +45,7 @@ int main(int argc, char **argv){
   hi_zlim                   =       atof(argv[3]);
 
   smooth_radius             =                 2.0;
-
+  
   sprintf(root_dir,      "/home/mjw/HOD_MockRun");
   sprintf(vipersHOD_dir, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2/mocks_v1.7/W%d", fieldFlag);
   
@@ -58,7 +59,7 @@ int main(int argc, char **argv){
     CentreDec               =     -5.091;                 // Stefano:  CentreDec               =     -5.07;
   }
     
-  else if(fieldFlag == 4){
+  else{
     LowerRAlimit            =    330.046;                 // W4 catalogue. Nagoya v6 & Samhain mask. parent boundary limits.     
     UpperRAlimit            =    335.389;
     CentreRA                =    332.638;
@@ -99,8 +100,12 @@ int main(int argc, char **argv){
   
   CatalogNumber             =       306;                 // Total number of HOD mocks.
 
+
+  
   start_walltime();
 
+  printf_branch();
+  
   fftw_init_threads();
   
   fftw_plan_with_nthreads(omp_get_max_threads());        // Maximum number of threads to be used; use all openmp threads available.  
@@ -123,12 +128,11 @@ int main(int argc, char **argv){
   prep_r2c_modes(&half, FOLDFACTOR); // one fold.
 
   regress set[2] = {flat, half};
-  
   int     d0s[4] = {1000, 10, 6, 4};
   
   walltime("All prep. done");
   
-  for(loopCount=1; loopCount<2; loopCount++){            
+  for(loopCount=1; loopCount<154; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
 
     CatalogueInput_500s(); // mocks 1 to 153 are independent. 

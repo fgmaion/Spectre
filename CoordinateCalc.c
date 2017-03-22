@@ -1,7 +1,7 @@
 int prep_CatalogueInput_500s(){
   // Maximum number of galaxies present in any mock of the collection (i.e. those for covariance estimate).
-  if(strcmp(vipersHOD_dir, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2/mocks_v1.7/W1") == 0)       max_gals = 61765;  // no z cuts.
-  else if(strcmp(vipersHOD_dir, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2/mocks_v1.7/W4") == 0)  max_gals = 30261;  // no z cuts.  
+       if(strcmp(vipersHOD_dir, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2/mocks_v1.7/W1") == 0)  max_gals = 61765;
+  else if(strcmp(vipersHOD_dir, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2/mocks_v1.7/W4") == 0)  max_gals = 30261;  
   
   else max_gals = max_gal();
 

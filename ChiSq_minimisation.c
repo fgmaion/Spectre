@@ -13,11 +13,11 @@ int default_params(){
 
 
 int bestfit_params(){
-  fsigma8       = minChiSq_fsigma8;
-  velDispersion = minChiSq_sigma;
-  bsigma8       = minChiSq_bsigma8;
-  alpha_pad     = minChiSq_alpha_pad;
-  epsilon_pad   = minChiSq_epsilon_pad;
+  fsigma8       = minX2_fsig8;
+  velDispersion = minX2_sigp;
+  bsigma8       = minX2_bsig8;
+  alpha_pad     = minX2_alpha_pad;
+  epsilon_pad   = minX2_epsilon_pad;
   
   return 0;
 }
@@ -27,35 +27,36 @@ int set_chiSq_intervals(){
     fsigma8Interval       = (max_fsigma8     - min_fsigma8)/dRes;
     bsigma8Interval       = (max_bsigma8     - min_bsigma8)/dRes;
     sigmaInterval         = (max_velDisperse - min_velDisperse)/dRes;
+    A11SqInterval         = (max_A11Sq       - min_A11Sq)/dRes;
+
     alpha_padInterval     = (max_alpha_pad   - min_alpha_pad)/dRes_ap;
     epsilon_padInterval   = (max_epsilon_pad - min_epsilon_pad)/dRes_ap;
-    A11SqInterval         = (max_A11Sq       - min_A11Sq)/dRes;
     
     return 0;
 }
 
 
 int kvals_matchup(){
-    double     diff;
-    double min_diff;
+  double     diff;
+  double min_diff;
     
-    fftlog_indices = malloc(mono_order*sizeof(*fftlog_indices));
+  fftlog_indices = realloc(fftlog_indices, mono_order*sizeof(*fftlog_indices));
     
-    for(i=0; i<mono_order; i++){  
-        min_diff = pow(10., 99.);
-    
-        for(j=0; j<FFTlogRes; j++){  
-            diff = fabs(mono_config->krvals[j][0] - kVals[i]);
+  for(i=0; i<mono_order; i++){  
+    min_diff = pow(10., 99.);
+        
+    for(j=0; j<FFTlogRes; j++){  
+      diff = fabs(mono_config->krvals[j][0] - kVals[i]);
             
-            if(diff<min_diff){
-                min_diff = diff;
-            
-                fftlog_indices[i]  = j;
-            }
-        }
+      if(diff<min_diff){
+        min_diff = diff;
+              
+        fftlog_indices[i]  = j;
+      }
     }
-            
-    return 0;
+  }
+  
+  return 0;
 }
 
 
@@ -64,8 +65,10 @@ int calc_models(){
 
   // input_check();
   // prep_dlnPR_dlnk();   
+
+  printf("\n\nCalculating models: \n");
   
-  sprintf(filepath, "%s/W1_Spectro_V7_4/models/models_W%d_%.1lf_%.1f.cat", root_dir, fieldFlag, 0.6, 0.9);
+  sprintf(filepath, "%s/W1_Spectro_V7_4/models/realspace_%s_d0_%d_W%d_%.1lf_%.1f_res_%d.cat", root_dir, model_flag, d0, fieldFlag, lo_zlim, hi_zlim, Res);
 
   output = fopen(filepath, "wb");
   
@@ -86,11 +89,16 @@ int calc_models(){
             
             alpha_pad   = 1.0;
             epsilon_pad = 0.0;
+
+            // printf("\nfsig8, bsig8, sigv: %.4lf \t %.4lf \t %.4lf", fsigma8, bsigma8, velDispersion);
             
-            model_compute(aa, bb, cc, dd, ee); // updates xtheory and ytheory. 
-	    
-            fwrite(xtheory[aa][bb][cc][dd][ee], sizeof(double),  order,   output);
-            // fwrite(ytheory[jj][kk][ii][ll][mm], sizeof(double),  order,   output);
+            model_compute(aa, bb, cc, dd, ee);  // updates convlmonoCorr, convlquadCorr 
+
+            for(j=0; j<mono_order; j++)  fwrite(&convlmonoCorr->pk[fftlog_indices[j]][0], sizeof(double), 1, output);
+            for(j=0; j<mono_order; j++)  fwrite(&convlquadCorr->pk[fftlog_indices[j]][0], sizeof(double), 1, output);
+            
+            // fwrite(xtheory[aa][bb][cc][dd][ee], sizeof(double),  order,   output);
+            // fwrite(ytheory[aa][bb][cc][dd][ee], sizeof(double),  order,   output);
           }
         }
       }
@@ -127,7 +135,7 @@ int calc_ChiSqs(int mockNumber){
     }
 
     printf("\n\nDecorrelated data (normalisation?): ");
-
+    
     for(j=0; j<order; j++)  printf("\n%+.4le \t %+.4le \t %+.4le", dkdata[j], ydata[j], sqrt(gsl_vector_get(eval, j)));
     
     printf("\n\nChi sq. calc:");
@@ -162,12 +170,12 @@ int calc_ChiSqs(int mockNumber){
               if(ChiSqGrid[jj][kk][ii][ll][mm] < minChiSq){
                 minChiSq = ChiSqGrid[jj][kk][ii][ll][mm];
                     
-                minChiSq_fsigma8     = fsigma8;
-                minChiSq_A11Sq       = A11Sq;
-                minChiSq_sigma       = velDispersion;
-                minChiSq_bsigma8     = bsigma8;
-                minChiSq_alpha_pad   = alpha_pad;
-                minChiSq_epsilon_pad = epsilon_pad;
+                minX2_fsig8       = fsigma8;
+                minX2_A11Sq       = A11Sq;
+                minX2_sigp        = velDispersion;
+                minX2_bsig8       = bsigma8;
+                minX2_alpha_pad   = alpha_pad;
+                minX2_epsilon_pad = epsilon_pad;
 
                 printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  minChiSq);
               }
@@ -181,12 +189,34 @@ int calc_ChiSqs(int mockNumber){
 }
 
 
-int read_models(){
+int calc_marginalisedposteriors(){
+  // calc_fsigma8Posterior();
+  // calc_bsigma8Posterior();
+  // calc_velDispPosterior();
+
+  // output = fopen(filepath, "w");
+
+  // fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxlike_fsig8,      maxlike_sigv,    maxlike_bsig8, ChiSq_expected);
+  // fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \n", minChiSq_fsigma8, minChiSq_sigma, minChiSq_bsigma8,       minChiSq);
+
+  // fclose(output);
+
+  return 0;
+}
+
+
+int set_models(){
   int ll, mm;
 
-  sprintf(filepath, "%s/W1_Spectro_V7_4/models/models_W%d_%.1lf_%.1f.cat", root_dir, fieldFlag, 0.6, 0.9);
-
+  sprintf(filepath, "%s/W1_Spectro_V7_4/models/realspace_%s_d0_%d_W%d_%.1lf_%.1f_res_%d.cat", root_dir, model_flag, d0, fieldFlag, lo_zlim, hi_zlim, Res);
+  
   inputfile = fopen(filepath, "rb");
+
+  if(inputfile == NULL){
+    printf("\n\nCalculating models");
+    
+    calc_models();
+  }
   
   for(jj=0; jj<Res; jj++){
     fsigma8 = min_fsigma8 + fsigma8Interval*jj;
@@ -207,6 +237,8 @@ int read_models(){
             epsilon_pad = 0.0;
 
             fread(xtheory[jj][kk][ii][ll][mm], sizeof(double),  order,   inputfile);
+
+            ydata_compute(jj, kk, ii, ll, mm);
           }
         }
       }

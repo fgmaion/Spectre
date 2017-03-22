@@ -165,14 +165,6 @@ double noRSD(double ks, double beta, int monoQuad){
     }
 }
 
-int setLorentzianRSD(){
-    pt2RSD_k  = &kaiserLorentz_multipole;
-    
-    sprintf(theoryRSD_flag, "LorentzianRSD");
-
-    return 0;
-}
-
 // Print model to file. 
 int DispersionModel_Multipoles(){
     double k;

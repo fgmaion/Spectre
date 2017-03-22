@@ -1,9 +1,28 @@
+// Path to relevant directories.  
+char         vipersHOD_dir[200];
+char   maskmultipoles_path[200];
+char covariance_mocks_path[200];
+
 double fracArea; // W%d/Total area fraction. 
 
-// Misc //
-int    data_mock_flag;
+//-- VIPERS --//
+double  lo_zlim, loChi;
+double  hi_zlim, hiChi;
 
-int order, nrotations, mono_order;
+double  UpperRAlimit;
+double  LowerRAlimit;
+
+double  UpperDecLimit;
+double  LowerDecLimit;
+
+//-- Clipping --//
+int     d0;
+double  smooth_radius;
+
+//-- Misc --//
+int     data_mock_flag;
+
+int     order, nrotations, mono_order;
 
 double* xdata;
 double****** xtheory;
@@ -18,8 +37,11 @@ double**     Multipoles;
 double**    dMultipoles;
 
 //-- binned pk. --//
-int     kbin_no;
+int     hiMultipoleOrder;
 double* kVals;
+double  modkMax;
+
+double logk_min, logk_max, logk_interval;
 
 int*   fftlog_indices;
 
@@ -75,15 +97,17 @@ double ChiSq_expected;
 
 double***** ChiSqGrid;
 
-double    minChiSq_fsigma8; // min_x2_fsig8.
-double    minChiSq_A11Sq;
-double    minChiSq_sigma;
-double    minChiSq_bsigma8;
-double    minChiSq_alpha_pad;
-double    minChiSq_epsilon_pad;
+double    minX2_fsig8; // min_x2_fsig8.
+double    minX2_A11Sq;
+double    minX2_sigp;
+double    minX2_bsig8;
+double    minX2_alpha_pad;
+double    minX2_epsilon_pad;
 
 //-- Model eval. --//
 // Spline and squential splint of D^2(k*sigma*mu) Kaiser-Lorentz dispersion factors. 
+char    model_flag[200];
+
 int     sp_kL_N;
 double* sp_kL_ks;
 
@@ -137,8 +161,13 @@ double       clip_distcoeff;
 // -- Likelihood -- //
 double  app_sigma8;
 
-double  ChiSq_kmax;
-double  ChiSq_kmin;
+double ChiSq_kmax;
+double ChiSq_kmin;
+
+int     ChiSq_nkmaxes;
+int*    ChiSq_ikmaxes; // index in appropriate file.
+double* ChiSq_kmaxes;
+
 
 gsl_matrix* Covariance;
 gsl_matrix* sigma_norm;
@@ -167,7 +196,6 @@ double  PosteriorNorm = 0.0; // variable to normalise posteriros.
 double* bsigma8Posterior;
 double* fsigma8Posterior;
 double*   sigmaPosterior; // velocity dispersion posterior. 
-
 
 
 // -- Functions -- //

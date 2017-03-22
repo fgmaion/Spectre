@@ -1,26 +1,27 @@
-double calc_fsigma8Posterior(double* error){   
+double calc_fsigma8Posterior(void){ 
+//double calc_fsigma8Posterior(double* error){   
     PosteriorNorm = 0.0;
     
-    int                                   maxLikelihood_index = 0;
+    int     maxLikelihood_index = 0;
     
-    double     fsigma8Interval = (max_fsigma8 - min_fsigma8)/dRes;
+    double  fsigma8Interval = (max_fsigma8 - min_fsigma8)/dRes;
     
-    double     result = NAN; // Gotta gamble.
+    double  result = NAN; // Gotta gamble.
     
     for(k=0; k<Res; k++){
-        fsigma8Posterior[k] = 0.0;
+      fsigma8Posterior[k] = 0.0;
 
-        for(j=0; j<Res; j++){
-            for(i=0; i<Res; i++)  fsigma8Posterior[k] += exp(lnLikelihoodGrid[k][j][i][0][0]);
-        }
+      for(j=0; j<Res; j++){
+        for(i=0; i<Res; i++)  fsigma8Posterior[k] += exp(-ChiSqGrid[k][j][i][0][0]/2.);
+      }
 
-        if(fsigma8Posterior[k]  > PosteriorNorm){
-            PosteriorNorm       = fsigma8Posterior[k];
-            
-            maxLikelihood_index = k;
+      if(fsigma8Posterior[k]  > PosteriorNorm){
+        PosteriorNorm       = fsigma8Posterior[k];
         
-            result              = min_fsigma8 + fsigma8Interval*maxLikelihood_index;
-        }
+        maxLikelihood_index = k;
+        
+        result              = min_fsigma8 + fsigma8Interval*maxLikelihood_index;
+      }
     }
 
     // for(k=0; k<Res; k++)  fsigma8Posterior[k] /= PosteriorNorm;
@@ -45,13 +46,14 @@ double calc_fsigma8Posterior(double* error){
     fclose(output);
     */
     
-    printf("\nmax likelihood fsig8: %le", result);
+    // printf("\nmax likelihood fsig8: %le", result);
     
-    Calc_fsigma8_68conf(maxLikelihood_index, error);
+    // Calc_fsigma8_68conf(maxLikelihood_index, error);
     
     return result;
 }
 
+/*
 int Calc_fsigma8_68conf(int maxLikeIndex, double* error){
     double Prob          = 0.0;
     double totalProb     = 0.0;
@@ -158,3 +160,4 @@ double calc_bsigma8Posterior(){
      
     return result;
 }
+*/

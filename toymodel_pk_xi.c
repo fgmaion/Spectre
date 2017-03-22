@@ -21,8 +21,6 @@ double Pk_powerlaw_truncated_xi(double r){
 
 int inputTruncPowerLawPk(){
     pt2Pk   = &Pk_powerlaw_truncated;
-    
-    pt2Xi   = &Pk_powerlaw_truncated_xi;
 
     return 0;
 }

@@ -32,20 +32,17 @@ int model_compute(int aa, int bb, int cc, int dd, int ee){
     convlmonoCorr->pk[j][0] -= cnvldpk_zero*fracArea*FFTlog_Wk0[j];
     convlquadCorr->pk[j][0] -= cnvldpk_zero*fracArea*FFTlog_Wk2[j];
   }
-  
-  for(j=0; j<mono_order; j++){
-    xtheory[aa][bb][cc][dd][ee][j]              =  convlmonoCorr->pk[fftlog_indices[j]][0]; // clipmono_config->pk[fftlog_indices[j]][0];
-    xtheory[aa][bb][cc][dd][ee][j + mono_order] =  convlquadCorr->pk[fftlog_indices[j]][0]; // clipquad_config->pk[fftlog_indices[j]][0];
-  }
 
-  // for(j=0; j<mono_order; j++)  printf("\n%.4le \t %.4le", convlmonoCorr->pk[fftlog_indices[j]][0], convlquadCorr->pk[fftlog_indices[j]][0]);  
-  // for(j=0; j<mono_order; j++)  printf("\n%.4le \t %.4le", xtheory[aa][bb][cc][dd][ee][j], xtheory[aa][bb][cc][dd][ee][j + mono_order]);
-  
+  return 0;
+}
+
+
+int ydata_compute(int aa, int bb, int cc, int dd, int ee){
   for(j=0; j<order; j++){
     ytheory[aa][bb][cc][dd][ee][j] = 0.0;
 
     gsl_matrix_get_col(col, evec, j);
-    
+
     for(k=0; k<order; k++){
       ytheory[aa][bb][cc][dd][ee][j] += gsl_vector_get(col, k)*gsl_matrix_get(sigma_norm, k, k)*xtheory[aa][bb][cc][dd][ee][k];
     }

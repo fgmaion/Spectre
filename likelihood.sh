@@ -1,94 +1,47 @@
 #PBS -S /bin/bash                                                                                              
-#PBS -l nodes=1:ppn=1:walltime=48:10:00                                                                                      
-#PBS -e /home/mjw/HOD_MockRun/likelihood_errors.pbs                                                                       
-#PBS -o /home/mjw/HOD_MockRun/likelihood_messages.pbs                                                                                                     
+#PBS -N likelihood.sh
+#PBS -l nodes=1:ppn=1                                                                                      
+#PBS -l walltime=06:00:00
+#PBS -e /home/mjw/HOD_MockRun/chi2_stderr.pbs                                                                       
+#PBS -o /home/mjw/HOD_MockRun/chi2_stdout.pbs                                                                                                     
 
-DIR="$HOME/HOD_MockRun/"
+DIR="$HOME/HOD_MockRun/Scripts/"
 cd $DIR
 
-# no warnings
-gcc -w -DHCUBATURE -fopenmp -lfftw3_omp -o driver_likelihood.o Scripts/cubature/hcubature.c Scripts/driver_likelihood.c -lfftw3 -lm -I/home/ert/local/gsl/current/gcc-4.7.2/include/ -L/home/ert/local/gsl/current/gcc-4.7.2/lib/ -lgsl -lgslcblas
+export d0=1000
+export LOZ=0.6
+export HIZ=0.8
+export FIELDFLAG=1
 
-export OMP_NUM_THREADS=1  # Threads = processors.  
+#export LOZ=0.8
+#export HIZ=1.0
+#export FIELDFLAG=1
 
-GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 1000.0 0.6 0.9 1.0 8
+#export LOZ=0.6
+#export HIZ=0.8
+#export FIELDFLAG=4
 
-## for mean multipoles
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 1000.0 0.6 0.9 1.0 8 # > likelihood_output.txt
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 1000.0 0.9 1.2 1.0 8 > likelihood_output.txt                    
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.6 0.9 1.0 8 > likelihood_output.txt                    
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.9 1.2 1.0 8 > likelihood_output.txt
+#export LOZ=0.8
+#export HIZ=1.0
+#export FIELDFLAG=4
 
-## for k_max
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 1000.0 0.6 0.9 1.0 1 > likelihood_output.txt                                                   #GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 1000.0 0.9 1.2 1.0 1 > likelihood_output.txt                                                   #GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.6 0.9 1.0 1 > likelihood_output.txt                                                   #GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.9 1.2 1.0 1 > likelihood_output.txt
+export USCORE=_
 
-#for((i=1; i<26; i++))
-#  do  
-#    qsub  singleRun_likelihood_kmax0.4.sh -v NUM=$i
+export BRANCH=$(git symbolic-ref --short HEAD) # current Git branch
 
-#    sleep 20 
+export GSL_RNG_SEED=123
+export GSL_RNG_TYPE=taus
 
-#    qsub singleRun_likelihood_kmax0.6.sh -v NUM=$i
+export OMP_NUM_THREADS=1 # Threads = processors.
 
-#    sleep 20
+cd .. 
 
-#    qsub singleRun_likelihood_kmax0.8.sh -v NUM=$i
+rm /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG$USCORE$LOZ$USCORE$HIZ.log || true # or true. 
 
-#    sleep 60  
-#  done
+# -g: gnu debug; -w: no warnings; -o2/-03: optimization level; -DHCUBATURE; Scripts/cubature/hcubature.c; SPRNG: -lsprng -lgmp
+# -std=gnu99 (for C99 with GNU extensions; https://gcc.gnu.org/onlinedocs/gcc-5.1.0/gcc/Standards.html);
+# current default standard is equivalent to -std=gnu90, which is the 1989/1990 standard with GNU-specific extensions. gcc 5.1.0 (2015-04-22) changed from gnu90 to gnu11.
+# -L/home/mjw/gperftools-2.5/lib -ltcmalloc -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+gcc -std=gnu11 -w -O2 -o likelihood.o Scripts/driver_likelihood.c -lfftw3 -lm -lgsl -lgslcblas
 
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 1000.0 0.6 0.9 1.0 8                                                                           #GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 1000.0 0.9 1.2 1.0 8                                                                           #GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.6 0.9 1.0 8                                                                           #GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.9 1.2 1.0 8
-
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 1000.0 0.6 0.9 1.0 6
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 1000.0 0.9 1.2 1.0 6
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.6 0.9 1.0 6
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.9 1.2 1.0 6
-
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 1000.0 0.6 0.9 1.0 4
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 1000.0 0.9 1.2 1.0 4
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.6 0.9 1.0 4
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.9 1.2 1.0 4
-
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 10.0 0.6 0.9 1.0 8
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 10.0 0.6 0.9 1.0 4
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 10.0 0.6 0.9 1.0 4
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 10.0 0.6 0.9 1.0 4
-
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 6.0 0.6 0.9 1.0 8
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 6.0 0.6 0.9 1.0 4
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 6.0 0.6 0.9 1.0 4
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 6.0 0.6 0.9 1.0 4
-
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 4.0 0.6 0.9 1.0 8
-
-## 0.8 < z < 1.0
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 4.0 0.8 1.0 1.0 8
-
-#for each kmax value. 
-#for((i=2; i<8; i=i+2))
-#  do
-#   echo $i 
-    
-   #GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 1000.0 0.6 0.9 1.0 $i                                                                                                     
-   #GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 1 1000.0 0.9 1.2 1.0 $i
-   #GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.6 0.9 1.0 $i  
-#   GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.9 1.2 1.0 $i     
-#  done  
-
-
-## ******************** W4 *********************** ##
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.6 0.9 1.0 4                                                                                                                                                          
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.6 0.9 1.0 6                                                                            
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 1000.0 0.6 0.9 1.0 8 
-
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 10.0 0.6 0.9 1.0 4                                                                                                                                                            
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 10.0 0.6 0.9 1.0 6                                                                                                                                                            
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 10.0 0.6 0.9 1.0 8 
-
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 6.0 0.6 0.9 1.0 4                                                                                                                                                             
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 6.0 0.6 0.9 1.0 6                                                                                                                                                             
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 6.0 0.6 0.9 1.0 8
-
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 4.0 0.6 0.9 1.0 4
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 4.0 0.6 0.9 1.0 6
-#GSL_RNG_TYPE="taus" GSL_RNG_SEED=123 ./driver_likelihood.o 4 4.0 0.6 0.9 1.0 8
+./likelihood.o $d0 $FIELDFLAG $LOZ $HIZ >> /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG$USCORE$LOZ$USCORE$HIZ.log 2>&1

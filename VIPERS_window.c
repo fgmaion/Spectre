@@ -219,12 +219,12 @@ int prep_VIPERS_maskMultipoles(){
     }
 
     fclose(inputfile);
-
+    
     scaleandnormalise(VIPERS_mask_lineNo_hihi, VIPERS_maskr_hihi, VIPERS_maskMono_hihi, VIPERS_maskQuad_hihi, VIPERS_maskHex_hihi, VIPERS_maskOct_hihi, VIPERS_maskDec_hihi, &mask_monopolenorm_hihi, VIPERS_maskMono2D_hihi, VIPERS_maskQuad2D_hihi, VIPERS_maskHex2D_hihi, VIPERS_maskOct2D_hihi, VIPERS_maskDec2D_hihi);
  
     hiRes_hihiRes_join = VIPERS_maskr_hihi[VIPERS_mask_lineNo_hihi - 1];  // Set the r at which the really high resolution will join the high resolution counts.
     
-    //** High resolution counts **//
+    //-- High resolution counts --//
     inputfile = fopen(hiRes_filepath, "r");
 
     line_count(inputfile, &VIPERS_mask_lineNo_hi);
@@ -273,7 +273,7 @@ int prep_VIPERS_maskMultipoles(){
     
     loRes_highRes_join = VIPERS_maskr_hi[VIPERS_mask_lineNo_hi - 1];
                                                     
-    //** Low resolution counts **//
+    //-- Low resolution counts --//
     inputfile = fopen(loRes_filepath, "r");
 
     line_count(inputfile, &VIPERS_mask_lineNo_lo);
@@ -321,10 +321,10 @@ int prep_VIPERS_maskMultipoles(){
     spline(VIPERS_maskr_lo, VIPERS_maskHex_lo,  VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskHex2D_lo);
     spline(VIPERS_maskr_lo, VIPERS_maskOct_lo,  VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskOct2D_lo);
     spline(VIPERS_maskr_lo, VIPERS_maskDec_lo,  VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskDec2D_lo);
-
+    
     // Print and calculate k-space multipoles. 
     print_windowCorrfn();
-
+    
     prepVIPERS_kSpaceMultipole(); // for integral constraint. 
     
     return 0;

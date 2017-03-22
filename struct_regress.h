@@ -10,8 +10,8 @@ struct Regress{
   double Sum_Pi[KBIN_NO], Sum_Li[KBIN_NO], Sum_Li2[KBIN_NO], Sum_PiLi[KBIN_NO];
   double Monopole[KBIN_NO], Quadrupole[KBIN_NO];
   double logk_limits[KBIN_NO];
-  
-  int*   kind;
+
+  int*   kind; // arrays of parameters for 3D FFT modes regression.
   
   double* kLi;
   double* kM2;
