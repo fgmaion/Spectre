@@ -124,10 +124,11 @@ int main(int argc, char **argv){
   
   prep_clipping_calc();
   
-  prep_r2c_modes(&flat,        1.0); // unfolded.
-  prep_r2c_modes(&half, FOLDFACTOR); // one fold.
-
-  regress set[2] = {flat, half};
+  prep_r2c_modes(&flat,                    1.0); // unfolded.
+  prep_r2c_modes(&half,             FOLDFACTOR); // one fold.
+  prep_r2c_modes(&quart, FOLDFACTOR*FOLDFACTOR); // two folds.
+  
+  regress set[3] = {flat, half, quart};
   int     d0s[4] = {1000, 10, 6, 4};
   
   walltime("All prep. done");
@@ -160,7 +161,7 @@ int main(int argc, char **argv){
       
       alpha_calc();
       
-      for(fold=0; fold<2; fold++){
+      for(fold=0; fold<3; fold++){
         calc_overdensity();
     
         PkCalc(&set[fold]);

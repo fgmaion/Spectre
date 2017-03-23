@@ -21,6 +21,7 @@ int set_kbins_linearkspacing(regress* inst){
 int prep_pkRegression(void){  
   set_kbins_logkspacing(&flat);
   set_kbins_logkspacing(&half);
-    
+  set_kbins_logkspacing(&quart);  
+
   return 0;
 }

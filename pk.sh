@@ -1,6 +1,6 @@
 #PBS -S /bin/bash
 #PBS -N pk.sh
-#PBS -l nodes=1:ppn=32
+#PBS -l nodes=1:ppn=16
 #PBS -l walltime=0:30:00 
 #PBS -e pk_stderr.pbs
 #PBS -o pk_stdout.pbs
@@ -32,7 +32,7 @@ export BRANCH=$(git symbolic-ref --short HEAD) # current Git branch
 export GSL_RNG_SEED=123
 export GSL_RNG_TYPE=taus
 
-export OMP_NUM_THREADS=32 # Threads = processors. 
+export OMP_NUM_THREADS=16 # Threads = processors. 
 
 cd .. 
 
