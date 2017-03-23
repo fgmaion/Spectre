@@ -35,7 +35,7 @@ int model_compute(int aa, int bb, int cc, int dd, int ee){
 
   printf("\n\nMonopole and quadrupole: ");
   
-  for(j=0; j<allmono_order; j++)  printf("\n%.6le \t %.6le \t %.6le", all_kVals[j], convlmonoCorr->pk[fftlog_indices[j]][0], convlmonoCorr->pk[fftlog_indices[j]][0]);
+  for(j=0; j<allmono_order; j++)  printf("\n%.6le \t %.6le \t %.6le", all_kVals[j], convlmonoCorr->pk[fftlog_indices[j]][0], convlquadCorr->pk[fftlog_indices[j]][0]);
   
   return 0;
 }
