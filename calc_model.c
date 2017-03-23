@@ -33,6 +33,10 @@ int model_compute(int aa, int bb, int cc, int dd, int ee){
     convlquadCorr->pk[j][0] -= cnvldpk_zero*fracArea*FFTlog_Wk2[j];
   }
 
+  printf("\n\nMonopole and quadrupole: ");
+  
+  for(j=0; j<allmono_order; j++)  printf("\n%.6le \t %.6le", convlmonoCorr->pk[fftlog_indices[j]][0], convlmonoCorr->pk[fftlog_indices[j]][0]);
+  
   return 0;
 }
 

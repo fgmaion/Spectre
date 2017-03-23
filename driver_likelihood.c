@@ -169,18 +169,18 @@ int main(int argc, char **argv){
 
   allkvals_matchup(); // Match all available kVals to FFTlog modes; not just those up to ChiSq_kmax. 
 
-  // default_params();
+  default_params();
 
-  // model_compute(0, 0, 0, 0, 0);
+  model_compute(0, 0, 0, 0, 0);
   
-  calc_models();  
-  
+  // calc_models();  
+  /*
   // -- Covariance matrix -- //
   load_CovarianceMatrix(305, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock.
   
   // -- Match model to mocks --//
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
-  
+
   // -- Set up Likelihood grid -- //
   set_chiSq_intervals(); // set e.g. fsig8 interval = (max - min)/interval.
 
@@ -204,7 +204,7 @@ int main(int argc, char **argv){
     
     // fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
   }
-  
+  */
   // fclose(output);
   
   walltime("Wall time at finish");
