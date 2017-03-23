@@ -65,13 +65,13 @@ int load_mock(int mockNumber){
   printf("\n\n%s", filepath);
   
   if(ChiSq_kmax <= jenkins_fold_kjoin){
-    printf("\n\nLoading mock without folding");
+    // printf("\n\nLoading mock without folding");
 
     load_withoutfolding(filepath);  // amplitude rescaling in load_withoutfolding.
   }
 
   else{
-    printf("\n\nLoading mock with folding");
+    // printf("\n\nLoading mock with folding");
 
     load_withfolding(filepath);  // amplitude recsaling in load_withfolding.
   }
@@ -80,9 +80,9 @@ int load_mock(int mockNumber){
 
   // snipping_shotnoise(xdata, mono_order);  // corrects monopole only;
 
-  printf("\n\nCorrelated data.");
+  // printf("\n\nCorrelated data.");
 
-  for(j=0; j<mono_order; j++)  printf("\n%le \t %le \t %le", kVals[j], xdata[j], xdata[j + mono_order]);
+  // for(j=0; j<mono_order; j++)  printf("\n%le \t %le \t %le", kVals[j], xdata[j], xdata[j + mono_order]);
 
   for(j=0; j<mono_order; j++){
     kdata[j]              = kVals[j];

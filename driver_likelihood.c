@@ -111,8 +111,8 @@ int main(int argc, char **argv){
 
   paramNumber               =       3.0;  // # of fitted params. -> dof in X^2. 
 
-   Res                      =         2;  // Likelihood resolution [voxel number].
-  dRes                      =       2.0;  // Previously 16: 13/02/17
+   Res                      =        16;  // Likelihood resolution [voxel number].
+  dRes                      =      16.0;  // Previously 16: 13/02/17
 
    Res_ap                   =         1;  // Resoltuion in AP.
   dRes_ap                   =       1.0;
@@ -175,13 +175,13 @@ int main(int argc, char **argv){
 
   // model_compute(0, 0, 0, 0, 0);
   
-  calc_models();  
+  // calc_models();  
   
   // -- Set up Likelihood grid -- //
   assign_LikelihoodMemory();  // Assigns memory for xdata, ydata, xtheory, ytheory, ChiSqGrid.
   
   set_models();
- 
+  
   // -- Covariance matrix -- //
   load_CovarianceMatrix(305, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock.
   
@@ -189,7 +189,7 @@ int main(int argc, char **argv){
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
   
   cut_xtheory_bykmax();
-
+  
   // -- Calc. chi sqs. --//
   double maxL_fsig8, maxL_sigv, maxL_bsig8;
 

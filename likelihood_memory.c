@@ -24,7 +24,7 @@ int assign_chisq_kmaxes(){
 int assign_LikelihoodMemory(){
   int kk, ll;
 
-  int order = 2*allmono_order; // 
+  int order = all_order; // 
   
   xdata             = malloc(order*sizeof(double));
   ydata             = malloc(order*sizeof(double));  // Decorrelated data.
@@ -79,7 +79,7 @@ int assign_LikelihoodMemory(){
   
   for(i=0; i<Res; i++){
     fsigma8Posterior[i] = 0.0;
-    sigmaPosterior[i] = 0.0;
+    sigmaPosterior[i]   = 0.0;
   }
   
   return 0;

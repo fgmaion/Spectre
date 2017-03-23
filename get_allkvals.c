@@ -40,8 +40,12 @@ int get_allkvals(int start){
   fclose(inputfile);
 
   allmono_order = jenkins_foldIndex_unfoldedfile + lineNo - jenkins_foldIndex_foldedfile;
+
+  all_order     = 2*allmono_order;
+  
     
   all_kVals     = (double  *) malloc(allmono_order*sizeof(*all_kVals));
+
   
   inputfile  = fopen(firstfilepath, "r");
 
@@ -87,9 +91,9 @@ int allkvals_matchup(){
     }
   }
 
-  printf("\n\nAll k vals matchup:");
+  // printf("\n\nAll k vals matchup:");
   
-  for(j=0; j<allmono_order; j++)  printf("\n%.6le \t %.6le", all_kVals[j], mono_config->krvals[fftlog_indices[j]][0]);
+  // for(j=0; j<allmono_order; j++)  printf("\n%.6le \t %.6le", all_kVals[j], mono_config->krvals[fftlog_indices[j]][0]);
   
   return 0;
 }

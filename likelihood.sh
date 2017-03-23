@@ -42,4 +42,4 @@ rm /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ.log || tr
 # -L/home/mjw/gperftools-2.5/lib -ltcmalloc -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
 gcc -std=gnu11 -w -O2 -o likelihood.o Scripts/driver_likelihood.c -lfftw3 -lm -lgsl -lgslcblas
 
-./likelihood.o $d0 $FIELDFLAG $LOZ $HIZ ## >> /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG$USCORE$LOZ$USCORE$HIZ.log 2>&1
+./likelihood.o $d0 $FIELDFLAG $LOZ $HIZ >> /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ.log 2>&1

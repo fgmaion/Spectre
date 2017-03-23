@@ -66,7 +66,7 @@ int calc_models(){
   // input_check();
   // prep_dlnPR_dlnk();   
 
-  printf("\n\nCalculating models: \n");
+  // printf("\n\nCalculating models: \n");
   
   sprintf(filepath, "%s/W1_Spectro_V7_4/models/realspace_%s_d0_%d_W%d_%.1lf_%.1f_res_%d.cat", root_dir, model_flag, d0, fieldFlag, lo_zlim, hi_zlim, Res);
 
@@ -134,12 +134,12 @@ int calc_ChiSqs(int mockNumber){
       }
     }
 
-    printf("\n\nDecorrelated data (normalisation?): ");
+    // printf("\n\nDecorrelated data (normalisation?): ");
     
-    for(j=0; j<order; j++)  printf("\n%+.4le \t %+.4le \t %+.4le", dkdata[j], ydata[j], sqrt(gsl_vector_get(eval, j)));
+    // for(j=0; j<order; j++)  printf("\n%+.4le \t %+.4le \t %+.4le", dkdata[j], ydata[j], sqrt(gsl_vector_get(eval, j)));
     
     printf("\n\nChi sq. calc:");
-    
+
     for(jj=0; jj<Res; jj++){    
       fsigma8 = min_fsigma8 + fsigma8Interval*jj;
 
@@ -158,7 +158,6 @@ int calc_ChiSqs(int mockNumber){
               alpha_pad   = 1.0;
               epsilon_pad = 0.0; 
 
-
               ytheory_compute(jj, kk, ii, ll, mm);
 
               ChiSqGrid[jj][kk][ii][ll][mm] = 0.0;
@@ -168,7 +167,7 @@ int calc_ChiSqs(int mockNumber){
                 // ChiSqGrid[jj][kk][ii][ll][mm] += pow(xdata[nn] - xtheory[jj][kk][ii][ll][mm][nn], 2.)*pow(gsl_matrix_get(sigma_norm, nn, nn), 2.);
               }
 
-              printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  ChiSqGrid[jj][kk][ii][ll][mm]);
+              // printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  ChiSqGrid[jj][kk][ii][ll][mm]);
 	      
               if(ChiSqGrid[jj][kk][ii][ll][mm] < minChiSq){
                 minChiSq = ChiSqGrid[jj][kk][ii][ll][mm];
@@ -180,7 +179,7 @@ int calc_ChiSqs(int mockNumber){
                 minX2_alpha_pad   = alpha_pad;
                 minX2_epsilon_pad = epsilon_pad;
 
-                // printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  minChiSq);
+                printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  minChiSq);
               }
             }
           }
@@ -220,33 +219,22 @@ int set_models(){
     
     calc_models();
   }
-  
-  for(jj=0; jj<Res; jj++){
-    fsigma8 = min_fsigma8 + fsigma8Interval*jj;
 
-    for(kk=0; kk<Res; kk++){
-      bsigma8 = min_bsigma8 + bsigma8Interval*kk;
-
-      for(ii=0; ii<Res; ii++){
-        velDispersion = min_velDisperse + sigmaInterval*ii;
-
-        for(ll=0;ll<Res_ap; ll++){
-          alpha_pad = min_alpha_pad + alpha_padInterval*ll;
-          
-          for(mm=0; mm<Res_ap; mm++){
-            epsilon_pad = min_epsilon_pad + epsilon_padInterval*mm;
-            
-            alpha_pad   = 1.0;
-            epsilon_pad = 0.0;
-
-            fread(xtheory[jj][kk][ii][ll][mm], sizeof(double), 2*allmono_order,   inputfile); // load mono and quad; size of all mono order, i.e. no ChiSq_kmax cut.  
+  else{
+    for(jj=0; jj<Res; jj++){ // f sigma8
+      for(kk=0; kk<Res; kk++){ // b sigma8
+        for(ii=0; ii<Res; ii++){ // sigma_p
+          for(ll=0;ll<Res_ap; ll++){ // alpha_pad
+            for(mm=0; mm<Res_ap; mm++){ // epsilon_pad
+              fread(xtheory[jj][kk][ii][ll][mm], sizeof(double), all_order,   inputfile); // load mono and quad; size of all mono order, i.e. no ChiSq_kmax cut.  
+            }
           }
         }
       }
     }
+
+    fclose(inputfile);
   }
-  
-  fclose(inputfile);
   
   return 0;
 }
@@ -254,15 +242,39 @@ int set_models(){
 
 int cut_xtheory_bykmax(){
   int ll, mm, nn;
+
+  double spare[Res][Res][Res][Res_ap][Res_ap][all_order];
   
   for(jj=0; jj<Res; jj++){ // fsigma8
     for(kk=0; kk<Res; kk++){ // bsigma8
       for(ii=0; ii<Res; ii++){ // velDispersion
         for(ll=0;ll<Res_ap; ll++){ // alpha_pad
           for(mm=0; mm<Res_ap; mm++){ // epsilon_pad
+
+            for(j=0; j<all_order; j++)  spare[jj][kk][ii][ll][mm][j] = 0.0;
+            
             for(j=0; j<mono_order; j++){
-              xtheory[jj][kk][ii][ll][mm][j]              = xtheory[jj][kk][ii][ll][mm][fftlog_indices[j]];
-              xtheory[jj][kk][ii][ll][mm][j + mono_order] = xtheory[jj][kk][ii][ll][mm][fftlog_indices[j] + mono_order]; 
+              spare[jj][kk][ii][ll][mm][j]              = xtheory[jj][kk][ii][ll][mm][fftlog_indices[j]];
+              spare[jj][kk][ii][ll][mm][j + mono_order] = xtheory[jj][kk][ii][ll][mm][fftlog_indices[j] + allmono_order]; 
+            }
+          }
+        }
+      }
+    }
+  }
+
+  
+  for(jj=0; jj<Res; jj++){ // fsigma8
+    for(kk=0; kk<Res; kk++){ // bsigma8
+      for(ii=0; ii<Res; ii++){ // velDispersion
+        for(ll=0;ll<Res_ap; ll++){ // alpha_pad
+          for(mm=0; mm<Res_ap; mm++){ // epsilon_pad
+
+            for(j=0; j<all_order; j++) xtheory[jj][kk][ii][ll][mm][0] = 0.0; // NaN
+
+            for(j=0; j<mono_order; j++){
+              xtheory[jj][kk][ii][ll][mm][j]              = spare[jj][kk][ii][ll][mm][j];
+              xtheory[jj][kk][ii][ll][mm][j + mono_order] = spare[jj][kk][ii][ll][mm][j + mono_order];
             }
           }
         }

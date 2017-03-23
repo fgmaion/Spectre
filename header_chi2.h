@@ -22,7 +22,7 @@ double  smooth_radius;
 //-- Misc --//
 int     data_mock_flag;
 
-int     order, nrotations, mono_order, allmono_order;
+int     order, nrotations, mono_order, allmono_order, all_order;
 
 double* xdata;
 double****** xtheory;
