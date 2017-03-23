@@ -87,5 +87,9 @@ int allkvals_matchup(){
     }
   }
 
+  printf("\n\nAll k vals matchup:");
+  
+  for(j=0; j<allmono_order; j++)  printf("\n%.6le \t %.6le", all_kVals[j], mono_config->krvals[fftlog_indices[j]][0]);
+  
   return 0;
 }

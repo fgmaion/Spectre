@@ -25,8 +25,6 @@ export FIELDFLAG=1
 #export HIZ=1.0
 #export FIELDFLAG=4
 
-export USCORE=_
-
 export BRANCH=$(git symbolic-ref --short HEAD) # current Git branch
 
 export GSL_RNG_SEED=123
@@ -36,7 +34,7 @@ export OMP_NUM_THREADS=1 # Threads = processors.
 
 cd .. 
 
-rm /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG$USCORE$LOZ$USCORE$HIZ.log || true # or true. 
+rm /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ.log || true # or true. 
 
 # -g: gnu debug; -w: no warnings; -o2/-03: optimization level; -DHCUBATURE; Scripts/cubature/hcubature.c; SPRNG: -lsprng -lgmp
 # -std=gnu99 (for C99 with GNU extensions; https://gcc.gnu.org/onlinedocs/gcc-5.1.0/gcc/Standards.html);
