@@ -158,8 +158,11 @@ int calc_ChiSqs(int mockNumber){
               alpha_pad   = 1.0;
               epsilon_pad = 0.0; 
 
-              ChiSqGrid[jj][kk][ii][ll][mm] = 0.0;
 
+              ytheory_compute(jj, kk, ii, ll, mm);
+
+              ChiSqGrid[jj][kk][ii][ll][mm] = 0.0;
+              
               for(nn=0; nn<order; nn++){
                 ChiSqGrid[jj][kk][ii][ll][mm] += pow(ydata[nn] - ytheory[jj][kk][ii][ll][mm][nn], 2.)/gsl_vector_get(eval, nn);
                 // ChiSqGrid[jj][kk][ii][ll][mm] += pow(xdata[nn] - xtheory[jj][kk][ii][ll][mm][nn], 2.)*pow(gsl_matrix_get(sigma_norm, nn, nn), 2.);
@@ -236,9 +239,7 @@ int set_models(){
             alpha_pad   = 1.0;
             epsilon_pad = 0.0;
 
-            fread(xtheory[jj][kk][ii][ll][mm], sizeof(double),  allmono_order,   inputfile);
-
-            ydata_compute(jj, kk, ii, ll, mm);
+            fread(xtheory[jj][kk][ii][ll][mm], sizeof(double), 2*allmono_order,   inputfile); // load mono and quad; size of all mono order, i.e. no ChiSq_kmax cut.  
           }
         }
       }
@@ -246,6 +247,28 @@ int set_models(){
   }
   
   fclose(inputfile);
+  
+  return 0;
+}
+
+
+int cut_xtheory_bykmax(){
+  int ll, mm, nn;
+  
+  for(jj=0; jj<Res; jj++){ // fsigma8
+    for(kk=0; kk<Res; kk++){ // bsigma8
+      for(ii=0; ii<Res; ii++){ // velDispersion
+        for(ll=0;ll<Res_ap; ll++){ // alpha_pad
+          for(mm=0; mm<Res_ap; mm++){ // epsilon_pad
+            for(j=0; j<mono_order; j++){
+              xtheory[jj][kk][ii][ll][mm][j]              = xtheory[jj][kk][ii][ll][mm][fftlog_indices[j]];
+              xtheory[jj][kk][ii][ll][mm][j + mono_order] = xtheory[jj][kk][ii][ll][mm][fftlog_indices[j] + mono_order]; 
+            }
+          }
+        }
+      }
+    }
+  }
   
   return 0;
 }

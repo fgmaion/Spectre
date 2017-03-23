@@ -41,7 +41,7 @@ int model_compute(int aa, int bb, int cc, int dd, int ee){
 }
 
 
-int ydata_compute(int aa, int bb, int cc, int dd, int ee){
+int ytheory_compute(int aa, int bb, int cc, int dd, int ee){
   for(j=0; j<order; j++){
     ytheory[aa][bb][cc][dd][ee][j] = 0.0;
 

@@ -23,6 +23,8 @@ int assign_chisq_kmaxes(){
 
 int assign_LikelihoodMemory(){
   int kk, ll;
+
+  int order = 2*allmono_order; // 
   
   xdata             = malloc(order*sizeof(double));
   ydata             = malloc(order*sizeof(double));  // Decorrelated data.
@@ -36,7 +38,6 @@ int assign_LikelihoodMemory(){
   for(j=0; j<Res; j++){
     xtheory[j] = (double *****) malloc(Res*sizeof(**xtheory));
     ytheory[j] = (double *****) malloc(Res*sizeof(**ytheory));
-	
     ChiSqGrid[j] = (double ****) malloc(Res*sizeof(**ChiSqGrid));
     
     for(k=0; k<Res; k++){
