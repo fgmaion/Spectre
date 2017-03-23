@@ -44,8 +44,8 @@ int main(int argc, char **argv){
   sprintf(root_dir,              "/home/mjw/HOD_MockRun");
 
   sprintf(vipersHOD_dir,         "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); 
-  sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_4");
-  sprintf(maskmultipoles_path,   "/home/mjw/HOD_MockRun/W1_Spectro_V7_4");
+  sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3");
+  sprintf(maskmultipoles_path,   "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
 
   d0                        =       atoi(argv[1]);
   fieldFlag                 =       atoi(argv[2]);
@@ -80,7 +80,7 @@ int main(int argc, char **argv){
     
     fracArea                = W4area/TotalW1W4area;
   }
-  /*
+  
   min_bsigma8               =      0.05;                  // FOR GRANETT 2D POSTERIOR.
   max_bsigma8               =      1.00;                  // Previously 0.2 < b \sig_8 < 1.6
                                                           // 0.05 < b s8 < 1.0 (13/02/17)   
@@ -89,8 +89,8 @@ int main(int argc, char **argv){
 
   min_velDisperse           =      0.00;                  // CHANGED FROM 0.00 13/02/2017
   max_velDisperse           =      6.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
-  */
-
+  
+  /*
   min_bsigma8               =      0.05;                  // 22/02/2017
   max_bsigma8               =      1.50;                  // 
                                                           //
@@ -99,7 +99,7 @@ int main(int argc, char **argv){
 
   min_velDisperse           =      0.00;                  // 
   max_velDisperse           =     15.00;                  //   
-
+  */
   min_alpha_pad             =    0.9999;
   max_alpha_pad             =    1.0001;
 
@@ -111,8 +111,8 @@ int main(int argc, char **argv){
 
   paramNumber               =       3.0;  // # of fitted params. -> dof in X^2. 
 
-   Res                      =        64;  // Likelihood resolution [voxel number].
-  dRes                      =      64.0;  // Previously 16: 13/02/17
+   Res                      =         2;  // Likelihood resolution [voxel number].
+  dRes                      =       2.0;  // Previously 16: 13/02/17
 
    Res_ap                   =         1;  // Resoltuion in AP.
   dRes_ap                   =       1.0;
@@ -124,7 +124,7 @@ int main(int argc, char **argv){
   logk_max                  =   0.60206;  // k = 4 hMpc^{-1}.
   
   ChiSq_kmin                =      0.02;
-  ChiSq_kmax                =      0.80;  // Easier to pass int in bash.
+  ChiSq_kmax                =      0.80;  
 
   hiMultipoleOrder          =         2;  // Fit monopole (1) or mono + quad (2).
 
@@ -150,8 +150,8 @@ int main(int argc, char **argv){
   //-- Model calc. --//
   comovDistReshiftCalc();  // Cosmology from cosmology_planck2015.h or cosmology_valueaddedmocks.h// Selection parameters.
 
-  inputHODPk();      //  Must match Cosmology in cosmology_planck2015.h, or cosmology_valueaddedmocks.h
-  // inputLinearPk();      //  This is NOT automatically ensured.               
+  // inputHODPk();      //  Must match Cosmology in cosmology_planck2015.h, or cosmology_valueaddedmocks.h
+  inputLinearPk();      //  This is NOT automatically ensured.               
   
   // assign_chisq_kmaxes(); // Problem: submatrix of A is not represented by a submatrix in A^-1.
   
@@ -160,55 +160,52 @@ int main(int argc, char **argv){
   set_FFTlog(FFTlogRes, pow(10., -10.), pow(10., 14.), 1., velDispersion);  // assigns values to mono_config etc. 
   
   prep_VIPERS_maskMultipoles();
-
+  
   prep_VIPERS_jmaskMultipoles();
   
   precompute_vipers_clipping_model(FFTlogRes);  
-  
 
-  sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock", covariance_mocks_path, d0, fieldFlag);
-  
-  get_allkvals(1, filepath); // all kVals, ignoring ChiSq_kmin and ChiSq_kmax, but including folding. 
+  get_allkvals(1);    // all kVals, ignoring ChiSq_kmin and ChiSq_kmax, but including folding. 
 
-  kvals_matchup(); // Match all kVals to FFTlog modes.
+  allkvals_matchup(); // Match all available kVals to FFTlog modes; not just those up to ChiSq_kmax. 
 
   // default_params();
-  // model_compute(0, 0, 0, 0, 0);
 
+  // model_compute(0, 0, 0, 0, 0);
+  
   calc_models();  
   
   // -- Covariance matrix -- //
-  load_CovarianceMatrix(153, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock.
-
+  load_CovarianceMatrix(305, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock.
+  
   // -- Match model to mocks --//
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
-
+  
   // -- Set up Likelihood grid -- //
   set_chiSq_intervals(); // set e.g. fsig8 interval = (max - min)/interval.
 
   assign_LikelihoodMemory();  // Assigns memory for xdata, ydata, xtheory, ytheory, ChiSqGrid.  
-
+  
   // -- Calc. chi sqs. --//
   set_models();
 
-  
   double maxL_fsig8, maxL_sigv, maxL_bsig8;
 
-  sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", root_dir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
+  // sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", root_dir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
 
-  output = fopen(filepath, "w");
+  // output = fopen(filepath, "w");
   
-  for(int ab=1; ab<154; ab++){
+  for(int ab=20; ab<21; ab++){
     calc_ChiSqs(ab);
 
     // maxL_sigv  = calc_velDispPosterior();
-    maxL_fsig8 = calc_fsigma8Posterior();
+    // maxL_fsig8 = calc_fsigma8Posterior();
     // maxL_bsig8 = calc_bsigma8Posterior();
     
-    fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
+    // fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
   }
-
-  fclose(output);
+  
+  // fclose(output);
   
   walltime("Wall time at finish");
 

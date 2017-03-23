@@ -45,8 +45,8 @@ int kvals_matchup(){
   for(i=0; i<mono_order; i++){  
     min_diff = pow(10., 99.);
         
-    for(j=0; j<FFTlogRes; j++){  
-      diff = fabs(mono_config->krvals[j][0] - kVals[i]);
+    for(j=0; j<allmono_order; j++){  
+      diff = fabs(all_kVals[j] - kVals[i]);
             
       if(diff<min_diff){
         min_diff = diff;
@@ -94,8 +94,8 @@ int calc_models(){
             
             model_compute(aa, bb, cc, dd, ee);  // updates convlmonoCorr, convlquadCorr 
 
-            for(j=0; j<mono_order; j++)  fwrite(&convlmonoCorr->pk[fftlog_indices[j]][0], sizeof(double), 1, output);
-            for(j=0; j<mono_order; j++)  fwrite(&convlquadCorr->pk[fftlog_indices[j]][0], sizeof(double), 1, output);
+            for(j=0; j<allmono_order; j++)  fwrite(&convlmonoCorr->pk[fftlog_indices[j]][0], sizeof(double), 1, output);
+            for(j=0; j<allmono_order; j++)  fwrite(&convlquadCorr->pk[fftlog_indices[j]][0], sizeof(double), 1, output);
             
             // fwrite(xtheory[aa][bb][cc][dd][ee], sizeof(double),  order,   output);
             // fwrite(ytheory[aa][bb][cc][dd][ee], sizeof(double),  order,   output);
@@ -165,7 +165,7 @@ int calc_ChiSqs(int mockNumber){
                 // ChiSqGrid[jj][kk][ii][ll][mm] += pow(xdata[nn] - xtheory[jj][kk][ii][ll][mm][nn], 2.)*pow(gsl_matrix_get(sigma_norm, nn, nn), 2.);
               }
 
-              // printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  ChiSqGrid[jj][kk][ii][ll][mm]);
+              printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  ChiSqGrid[jj][kk][ii][ll][mm]);
 	      
               if(ChiSqGrid[jj][kk][ii][ll][mm] < minChiSq){
                 minChiSq = ChiSqGrid[jj][kk][ii][ll][mm];
@@ -177,7 +177,7 @@ int calc_ChiSqs(int mockNumber){
                 minX2_alpha_pad   = alpha_pad;
                 minX2_epsilon_pad = epsilon_pad;
 
-                printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  minChiSq);
+                // printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  minChiSq);
               }
             }
           }
@@ -236,7 +236,7 @@ int set_models(){
             alpha_pad   = 1.0;
             epsilon_pad = 0.0;
 
-            fread(xtheory[jj][kk][ii][ll][mm], sizeof(double),  order,   inputfile);
+            fread(xtheory[jj][kk][ii][ll][mm], sizeof(double),  allmono_order,   inputfile);
 
             ydata_compute(jj, kk, ii, ll, mm);
           }

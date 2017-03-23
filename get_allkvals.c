@@ -1,10 +1,10 @@
-int get_allkvals(int start, char filepath[]){
+int get_allkvals(int start){
   char   firstfilepath[200];
   char  foldedfilepath[200];
 
+  sprintf(filepath,      "%s/mocks_v1.7/pk/d0_%d/W%d/mock",   covariance_mocks_path, d0, fieldFlag);
+  
   sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
-
-  // printf("\n\n%s", firstfilepath);
   
   inputfile  = fopen(firstfilepath, "r");
   
@@ -38,18 +38,14 @@ int get_allkvals(int start, char filepath[]){
   }
 
   fclose(inputfile);
-  
-  mono_order = jenkins_foldIndex_unfoldedfile + lineNo - jenkins_foldIndex_foldedfile;
 
-  kVals = (double  *) realloc(kVals, mono_order*sizeof(*kVals));
+  allmono_order = jenkins_foldIndex_unfoldedfile + lineNo - jenkins_foldIndex_foldedfile;
+    
+  all_kVals     = (double  *) malloc(allmono_order*sizeof(*all_kVals));
   
   inputfile  = fopen(firstfilepath, "r");
 
-  for(i=0; i<jenkins_foldIndex_unfoldedfile; i++){
-    fscanf(inputfile, "%le \t %*le \t %*le \t %*d \n", &kVals[i]);
-
-    // printf("\n%.6lf", kVals[i]);
-  }
+  for(i=0; i<jenkins_foldIndex_unfoldedfile; i++)  fscanf(inputfile, "%le \t %*le \t %*le \t %*d \n", &all_kVals[i]);
 
   fclose(inputfile);
   
@@ -61,15 +57,35 @@ int get_allkvals(int start, char filepath[]){
     if(i<jenkins_foldIndex_foldedfile) fscanf(inputfile, "%*le \t %*le \t %*le \t %*d \n");
 
     else{
-      fscanf(inputfile, "%le \t %*le \t %*le \t %*d \n", &kVals[jenkins_foldIndex_unfoldedfile + i - jenkins_foldIndex_foldedfile]);
-
-      // printf("\n%.6lf", kVals[jenkins_foldIndex_unfoldedfile + i - jenkins_foldIndex_foldedfile]);
+      fscanf(inputfile, "%le \t %*le \t %*le \t %*d \n", &all_kVals[jenkins_foldIndex_unfoldedfile + i - jenkins_foldIndex_foldedfile]);
     }
   }
   
   fclose(inputfile);
-
-  // for(i=0; i<mono_order; i++)  printf("\n%.9lf", kVals[i]);
   
+  return 0;
+}
+
+
+int allkvals_matchup(){
+  double     diff;
+  double min_diff;
+
+  fftlog_indices = realloc(fftlog_indices, allmono_order*sizeof(*fftlog_indices));
+
+  for(i=0; i<allmono_order; i++){
+    min_diff = pow(10., 99.);
+
+    for(j=0; j<FFTlogRes; j++){
+      diff = fabs(mono_config->krvals[j][0] - all_kVals[i]);
+
+      if(diff<min_diff){
+        min_diff = diff;
+
+        fftlog_indices[i]  = j;
+      }
+    }
+  }
+
   return 0;
 }

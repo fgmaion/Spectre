@@ -22,7 +22,7 @@ double  smooth_radius;
 //-- Misc --//
 int     data_mock_flag;
 
-int     order, nrotations, mono_order;
+int     order, nrotations, mono_order, allmono_order;
 
 double* xdata;
 double****** xtheory;
@@ -38,7 +38,10 @@ double**    dMultipoles;
 
 //-- binned pk. --//
 int     hiMultipoleOrder;
-double* kVals;
+
+double*     kVals;
+double* all_kVals;
+
 double  modkMax;
 
 double logk_min, logk_max, logk_interval;
