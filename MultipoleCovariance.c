@@ -34,7 +34,7 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
   char     Nthfilepath[200];    
   char   firstfilepath[200];
 
-  sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
+  sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
   
   printf("\n\n%s", firstfilepath);
   
@@ -63,7 +63,7 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
   
   // Be careful with 0 or 1 for the mock numbering. 
   for(k=0; k<mocks; k++){
-    sprintf(Nthfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, k + start, lo_zlim, hi_zlim);	//  Be careful with 0 or 1 for initial mock. 
+    sprintf(Nthfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, k + start, lo_zlim, hi_zlim);	//  Be careful with 0 or 1 for initial mock. 
 	
     inputfile = fopen(Nthfilepath, "r");
 

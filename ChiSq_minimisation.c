@@ -179,7 +179,7 @@ int calc_ChiSqs(int mockNumber){
                 minX2_alpha_pad   = alpha_pad;
                 minX2_epsilon_pad = epsilon_pad;
 
-                printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  minChiSq);
+                printf("\n%.4lf \t %.4lf \t %.4lf \t %.4lf", fsigma8, velDispersion, bsigma8,  minChiSq);
               }
             }
           }
@@ -206,36 +206,34 @@ int calc_marginalisedposteriors(){
   return 0;
 }
 
-
+  
 int set_models(){
   int ll, mm;
-
+  
   sprintf(filepath, "%s/W1_Spectro_V7_4/models/realspace_%s_d0_%d_W%d_%.1lf_%.1f_res_%d.cat", root_dir, model_flag, d0, fieldFlag, lo_zlim, hi_zlim, Res);
   
   inputfile = fopen(filepath, "rb");
 
   if(inputfile == NULL){
-    printf("\n\nCalculating models");
-    
     calc_models();
+  
+    inputfile = fopen(filepath, "rb");
   }
-
-  else{
-    for(jj=0; jj<Res; jj++){ // f sigma8
-      for(kk=0; kk<Res; kk++){ // b sigma8
-        for(ii=0; ii<Res; ii++){ // sigma_p
-          for(ll=0;ll<Res_ap; ll++){ // alpha_pad
-            for(mm=0; mm<Res_ap; mm++){ // epsilon_pad
-              fread(xtheory[jj][kk][ii][ll][mm], sizeof(double), all_order,   inputfile); // load mono and quad; size of all mono order, i.e. no ChiSq_kmax cut.  
-            }
+  
+  for(jj=0; jj<Res; jj++){ // f sigma8
+    for(kk=0; kk<Res; kk++){ // b sigma8
+      for(ii=0; ii<Res; ii++){ // sigma_p
+        for(ll=0;ll<Res_ap; ll++){ // alpha_pad
+          for(mm=0; mm<Res_ap; mm++){ // epsilon_pad
+            fread(xtheory[jj][kk][ii][ll][mm], sizeof(double), all_order,   inputfile); // load mono and quad; size of all mono order, i.e. no ChiSq_kmax cut.
           }
         }
       }
     }
-
-    fclose(inputfile);
   }
-  
+
+  fclose(inputfile);
+    
   return 0;
 }
 

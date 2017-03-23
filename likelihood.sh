@@ -8,9 +8,9 @@
 DIR="$HOME/HOD_MockRun/Scripts/"
 cd $DIR
 
-export d0=1000
-export LOZ=0.6
-export HIZ=0.9
+export d0=4
+export LOZ=0.8
+export HIZ=1.0
 export FIELDFLAG=1
 
 #export LOZ=0.8
@@ -42,4 +42,8 @@ rm /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ.log || tr
 # -L/home/mjw/gperftools-2.5/lib -ltcmalloc -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
 gcc -std=gnu11 -w -O2 -o likelihood.o Scripts/driver_likelihood.c -lfftw3 -lm -lgsl -lgslcblas
 
-./likelihood.o $d0 $FIELDFLAG $LOZ $HIZ >> /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ.log 2>&1
+./likelihood.o $d0 $FIELDFLAG $LOZ $HIZ 0.1 >> /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ.log 2>&1
+./likelihood.o $d0 $FIELDFLAG $LOZ $HIZ 0.2 >> /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ.log 2>&1
+./likelihood.o $d0 $FIELDFLAG $LOZ $HIZ 0.4 >> /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ.log 2>&1
+./likelihood.o $d0 $FIELDFLAG $LOZ $HIZ 0.6 >> /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ.log 2>&1
+./likelihood.o $d0 $FIELDFLAG $LOZ $HIZ 0.8 >> /home/mjw/HOD_MockRun/likelihood_d0_$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ.log 2>&1

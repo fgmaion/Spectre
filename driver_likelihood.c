@@ -44,13 +44,14 @@ int main(int argc, char **argv){
   sprintf(root_dir,              "/home/mjw/HOD_MockRun");
 
   sprintf(vipersHOD_dir,         "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); 
-  sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3");
-  sprintf(maskmultipoles_path,   "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
+  sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_4");
+  sprintf(maskmultipoles_path,   "/home/mjw/HOD_MockRun/W1_Spectro_V7_4");
 
   d0                        =       atoi(argv[1]);
   fieldFlag                 =       atoi(argv[2]);
   lo_zlim                   =       atof(argv[3]);   // previously 0.6<z<0.9, 0.7<z<1.1
   hi_zlim                   =       atof(argv[4]);
+  ChiSq_kmax                =       atof(argv[5]);
   
   W1area                    =              10.692;   // Nagoya v7 - overlapping Samhain v7; v6 and v7 has identical area. 
   W4area                    =               5.155;   // Don't move!
@@ -80,26 +81,26 @@ int main(int argc, char **argv){
     
     fracArea                = W4area/TotalW1W4area;
   }
-  
+  /*
   min_bsigma8               =      0.05;                  // FOR GRANETT 2D POSTERIOR.
   max_bsigma8               =      1.00;                  // Previously 0.2 < b \sig_8 < 1.6
                                                           // 0.05 < b s8 < 1.0 (13/02/17)   
   min_fsigma8               =      0.05;                  // Priors on the model params.  
   max_fsigma8               =      0.80;
 
-  min_velDisperse           =      0.00;                  // CHANGED FROM 0.00 13/02/2017
+  min_velDisperse           =      0.05;                  // CHANGED FROM 0.00 13/02/2017
   max_velDisperse           =      6.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
+  */
   
-  /*
   min_bsigma8               =      0.05;                  // 22/02/2017
   max_bsigma8               =      1.50;                  // 
                                                           //
-  min_fsigma8               =      0.00;                  //
+  min_fsigma8               =      0.05;                  //
   max_fsigma8               =      1.50;
 
-  min_velDisperse           =      0.00;                  // 
+  min_velDisperse           =      0.05;                  // 
   max_velDisperse           =     15.00;                  //   
-  */
+  
   min_alpha_pad             =    0.9999;
   max_alpha_pad             =    1.0001;
 
@@ -124,14 +125,10 @@ int main(int argc, char **argv){
   logk_max                  =   0.60206;  // k = 4 hMpc^{-1}.
   
   ChiSq_kmin                =      0.02;
-  ChiSq_kmax                =      0.80;  
 
   hiMultipoleOrder          =         2;  // Fit monopole (1) or mono + quad (2).
 
   jenkins_fold_kjoin        =       0.4;  // k at which P(k) switches from unfolded to folded.     
-
-  logk_min                  =      -2.0;
-  logk_max                  =   0.60206;  // k = 4 hMpc^{-1}. 
 
   modkMax                   =      1.00;  
 
@@ -183,7 +180,7 @@ int main(int argc, char **argv){
   set_models();
   
   // -- Covariance matrix -- //
-  load_CovarianceMatrix(305, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock.
+  load_CovarianceMatrix(153, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock.
   
   // -- Match model to mocks --//
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
@@ -193,21 +190,23 @@ int main(int argc, char **argv){
   // -- Calc. chi sqs. --//
   double maxL_fsig8, maxL_sigv, maxL_bsig8;
 
-  // sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", root_dir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
+  sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", root_dir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
 
-  // output = fopen(filepath, "w");
+  output = fopen(filepath, "w");
+
+  walltime("Walltime at start of chi^2 calc.");
   
-  for(int ab=20; ab<21; ab++){
+  for(int ab=1; ab<154; ab++){
     calc_ChiSqs(ab);
 
-    // maxL_sigv  = calc_velDispPosterior();
-    // maxL_fsig8 = calc_fsigma8Posterior();
-    // maxL_bsig8 = calc_bsigma8Posterior();
+    maxL_sigv  = calc_velDispPosterior();
+    maxL_fsig8 = calc_fsigma8Posterior();
+    maxL_bsig8 = calc_bsigma8Posterior();
     
-    // fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
+    fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
   }
   
-  // fclose(output);
+  fclose(output);
   
   walltime("Wall time at finish");
 
