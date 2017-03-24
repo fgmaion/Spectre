@@ -87,32 +87,32 @@ int assign_LikelihoodMemory(){
 
 
 int assignCovMat(int mocks){
-    // Multipoles is a [CatalogNumber][hiMultipoleOrder][kBinNumb] object, where [x][][] corresponds to mock number, [][x][] corresponds to x e [Mono, Quad, Hex], [][][x] mid or mean k bin.
-     Multipoles                                          = (double **) malloc(mocks*sizeof(*Multipoles));
-    dMultipoles                                          = (double **) malloc(mocks*sizeof(*dMultipoles));  // Decorrelated multipole moments measurements
+  // Multipoles is a [CatalogNumber][hiMultipoleOrder][kBinNumb] object, where [x][][] corresponds to mock number, [][x][] corresponds to x e [Mono, Quad, Hex], [][][x] mid or mean k bin.
+   Multipoles                = (double **) malloc(mocks*sizeof(*Multipoles));
+  dMultipoles                = (double **) malloc(mocks*sizeof(*dMultipoles));  // Decorrelated multipole moments measurements
         
-    for(j=0; j<mocks; j++){ 
-       Multipoles[j]                                     = (double  *) malloc(order*sizeof( *Multipoles));
-      dMultipoles[j]                                     = (double  *) malloc(order*sizeof(*dMultipoles));
-    }
+  for(j=0; j<mocks; j++){ 
+     Multipoles[j]           = (double  *) malloc(order*sizeof( *Multipoles));
+    dMultipoles[j]           = (double  *) malloc(order*sizeof(*dMultipoles));
+  }
     
-    kVals                                                = (double  *) realloc(kVals, mono_order*sizeof(*kVals));
+  kVals                      = (double  *) realloc(kVals, mono_order*sizeof(*kVals));
 
-    MeanMultipoles                                       = (double  *) malloc(order*sizeof(*MeanMultipoles));    
+  MeanMultipoles             = (double  *) malloc(order*sizeof(*MeanMultipoles));    
     
-    for(j=0; j<order; j++)  MeanMultipoles[j]   = 0.0;
+  for(j=0; j<order; j++)  MeanMultipoles[j]   = 0.0;
     
-    Covariance = gsl_matrix_alloc(order, order);
-    sigma_norm = gsl_matrix_alloc(order, order);
+  Covariance = gsl_matrix_alloc(order, order);
+  sigma_norm = gsl_matrix_alloc(order, order);
     
-    eval       = gsl_vector_alloc(order);
-    evec       = gsl_matrix_alloc(order, order);
+  eval       = gsl_vector_alloc(order);
+  evec       = gsl_matrix_alloc(order, order);
     
-    w          = gsl_eigen_symmv_alloc(order); 
+  w          = gsl_eigen_symmv_alloc(order); 
     
-    col        = gsl_vector_alloc(order);  // Assign gsl_vector for eigenvector.
+  col        = gsl_vector_alloc(order);  // Assign gsl_vector for eigenvector.
     
-    return 0;
+  return 0;
 }
 
 

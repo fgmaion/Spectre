@@ -5,10 +5,12 @@
 #include "/home/mjw/Aux_functions/Aux_functions.c"
 
 #include "header.h"
+#include "a11_calc.h"
 #include "FFT_log.h"
 #include "header_W2.h"
 #include "header_chi2.h"
 #include "struct_regress.h"
+// #include "struct_multipoles.h"
 #include "cosmology_planck15.h"
 
 #include "AgeOftheUniverse.c"
@@ -25,7 +27,8 @@
 #include "FFTlog_vipers_clipping.c"
 #include "toymodel_pk_xi.c"
 #include "matter_pk.c"
-#include "A11_vals.c"
+#include "a11_vals.c"
+#include "a11_calc.c"
 #include "get_allkvals.c"
 #include "MultipoleCovariance_eigenvecs.c"
 #include "MultipoleCovariance.c"
@@ -177,11 +180,13 @@ int main(int argc, char **argv){
   // -- Set up Likelihood grid -- //
   assign_LikelihoodMemory();  // Assigns memory for xdata, ydata, xtheory, ytheory, ChiSqGrid.
   
-  set_models();
+  // set_models();
   
   // -- Covariance matrix -- //
-  load_CovarianceMatrix(153, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock.
-  
+  load_CovarianceMatrix(10, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock.
+
+  a11_scale(10, 1);
+  /*
   // -- Match model to mocks --//
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
   
@@ -207,7 +212,7 @@ int main(int argc, char **argv){
   }
   
   fclose(output);
-  
+  */
   walltime("Wall time at finish");
 
   // MPI_Finalize();
