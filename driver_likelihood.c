@@ -177,11 +177,11 @@ int main(int argc, char **argv){
   // -- Set up Likelihood grid -- //
   assign_LikelihoodMemory();  // Assigns memory for xdata, ydata, xtheory, ytheory, ChiSqGrid.
   
-  set_models();
+  // set_models();
   
   // -- Covariance matrix -- //
   load_CovarianceMatrix(153, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock.
-  
+  /*
   // -- Match model to mocks --//
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
   
@@ -207,7 +207,7 @@ int main(int argc, char **argv){
   }
   
   fclose(output);
-  
+  */
   walltime("Wall time at finish");
 
   // MPI_Finalize();
