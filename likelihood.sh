@@ -8,7 +8,7 @@
 DIR="$HOME/HOD_MockRun/Scripts/"
 cd $DIR
 
-export d0=10
+export d0=6
 export LOZ=0.8
 export HIZ=1.0
 export FIELDFLAG=1
