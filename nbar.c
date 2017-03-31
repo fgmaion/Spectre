@@ -1,3 +1,8 @@
+double vollim_nz(double chi){
+  return accepted/(pow(10., 9.)*calc_vol()); // Mpc^3
+}
+
+
 int prep_nbar(){
   chibin_no =  (int)       ceil((interp_comovingDistance(2.0) - interp_comovingDistance(0.0))/chi_interval);   
                                                                                                                              
@@ -50,10 +55,6 @@ int spline_nbar(int truth){
     fclose(inputfile);
     
     spline(chibins, nbar, chibin_no, 1.0e31, 1.0e31, nbar_2d);
-    
-    pt2nz = &interp_nz;
-    
-    prep_inverseCumulative_nbar();
         
     return 0;
 }

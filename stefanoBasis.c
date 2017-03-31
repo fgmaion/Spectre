@@ -67,8 +67,7 @@ int StefanoReflection(int Number, double centreRA, double centreDec, double xCoo
 
 
 int StefanoRotated(int Number, double centreRA, double centreDec, double xCoors[], double yCoors[], double zCoors[]){
-  double x1,  y1, z1;
-  double x2,  y2, z2;
+  double      x2, z2;
   double c_ra, c_dec;
 
   c_ra    =  centreRA*(pi/180.);
@@ -77,18 +76,17 @@ int StefanoRotated(int Number, double centreRA, double centreDec, double xCoors[
   // basis formed by: normal spherical co-ordinates subject to inversion through xy plane, then R1 and finally R2.
   for(j=0; j<Number; j++){
     // R1: rotation about z such that in the new basis, (x',y',z'), x' hat lies in x-y plane at an angle centreRA to x.
-    x1  =     cos(c_ra)*xCoors[j] + sin(c_ra)*yCoors[j];
-    y1  =    -sin(c_ra)*xCoors[j] + cos(c_ra)*yCoors[j];
-    z1  =               zCoors[j];
+    // x1  =     cos(c_ra)*xCoors[j] + sin(c_ra)*yCoors[j];
+    // y1  =    -sin(c_ra)*xCoors[j] + cos(c_ra)*yCoors[j];
+    // z1  =               zCoors[j];
     
     // R2: rotation about y such that in the new basis, (x'', y'', z''), z'' hat lies in (x', z') plane at an angle -CentreDec to x' hat.
-    x2  = -sin(c_dec)*x1  - cos(c_dec)*z1;
-    y2  =  y1;
-    z2  =  cos(c_dec)*x1  - sin(c_dec)*z1;
+    x2  = -sin(c_dec)*xCoors[j]  - cos(c_dec)*zCoors[j];
+    z2  =  cos(c_dec)*xCoors[j]  - sin(c_dec)*zCoors[j];
 
-    xCoors[j] = x2 + stefano_trans_x;  // Translate to fit in the box. P(k) unaffected.
-    yCoors[j] = y2 + stefano_trans_y;
-    zCoors[j] = z2 + stefano_trans_z;
+    xCoors[j]  = x2 + stefano_trans_x;  // Translate to fit in the box. P(k) unaffected.
+    yCoors[j] +=      stefano_trans_y;
+    zCoors[j]  = z2 + stefano_trans_z;
   }
 
   return 0;

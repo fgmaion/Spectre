@@ -10,37 +10,31 @@ int boxCoordinates(double xCoor[], double yCoor[], double zCoor[], int rowNumber
 
 
 int calc_overdensity(){    
-    for(j=0; j<n0*n1*n2; j++){
-      // overdensity[j][0] = 0.0;  // Clean before galaxy/random assignment.
-      // overdensity[j][1] = 0.0;
-
-      overdensity[j] = 0.0;
-    }
+    for(j=0; j<n0*n1*n2; j++)  overdensity[j] = 0.0;
     
     for(j=0; j<Vipers_Num; j++){
-      if(Acceptanceflag[j] == true){  
-        ngp_assign(xCoor[j], yCoor[j], zCoor[j], (fkp_galweight[j]/sqrt(alpha))*clip_galweight[j]/sampling[j]);
+      if(Acceptanceflag[j] == true){
+        // ngp_assign(xCoor[j], yCoor[j], zCoor[j], (fkp_galweight[j]/sqrt(alpha))*clip_galweight[j]/sampling[j]);
         // cic_assign(1, xCoor[j], yCoor[j], zCoor[j], fkp_galweight[j]*clip_galweight[j]/sampling[j]);  // cic assign, weighted by sampling, fkp wghts and clipping.
       }
     }
-    
-    // #pragma omp parallel for private(j) if(thread == 1)
+
     for(j=0; j<rand_number; j++){
       ngp_assign(rand_x[j], rand_y[j], rand_z[j], -sqrt(alpha)*rand_weight[j]);
       // cic_assign(1, rand_x[j], rand_y[j], rand_z[j], -alpha*rand_weight[j]);  // assumes all randoms up to rand_number are accepted.    
     }
-    
+      
     walltime("Wall time after assignment to cell");
     
     return 0;
 }
 
-/*
-static int rand_int(int n) {
+
+static int rand_int(int n){
   int limit = RAND_MAX - RAND_MAX % n;
   int rnd;
 
-  do {
+  do{
     rnd = rand();
   }
 
@@ -50,7 +44,7 @@ static int rand_int(int n) {
 }
 
 
-void shuffle(double *array, int n) {
+void shuffle(double *array, int n){
   int i, j;
 
   double tmp;
@@ -65,4 +59,4 @@ void shuffle(double *array, int n) {
     array[i] = tmp;
   }
 }
-*/
+

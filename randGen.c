@@ -1,15 +1,18 @@
 int assign_randmemory(){
-    rand_ra       = (double *) realloc(rand_ra,  rand_number*sizeof(*rand_ra));
-    rand_dec      = (double *) realloc(rand_dec, rand_number*sizeof(*rand_dec));
-    rand_chi      = (double *) realloc(rand_chi, rand_number*sizeof(*rand_chi));
+    rand_ra         = (double *) realloc(rand_ra,  rand_number*sizeof(*rand_ra));
+    rand_dec        = (double *) realloc(rand_dec, rand_number*sizeof(*rand_dec));
+    rand_chi        = (double *) realloc(rand_chi, rand_number*sizeof(*rand_chi));
 
-    rand_x        = (double *) realloc(rand_x,   rand_number*sizeof(*rand_x));
-    rand_y        = (double *) realloc(rand_y,   rand_number*sizeof(*rand_y));
-    rand_z        = (double *) realloc(rand_z,   rand_number*sizeof(*rand_z));
+    rand_x          = (double *) realloc(rand_x,   rand_number*sizeof(*rand_x));
+    rand_y          = (double *) realloc(rand_y,   rand_number*sizeof(*rand_y));
+    rand_z          = (double *) realloc(rand_z,   rand_number*sizeof(*rand_z));
     
-    rand_weight   = (double *) realloc(rand_weight, rand_number*sizeof(*rand_weight));
+    rand_weight     = (double *) realloc(rand_weight, rand_number*sizeof(*rand_weight));
+
+    rand_rng        = (double *) realloc(rand_rng,    rand_number*sizeof(*rand_rng));
     
-    rand_rng      = (double *) realloc(rand_rng,    rand_number*sizeof(*rand_rng));
+    // rand_box        = (int    *) realloc(rand_box,           rand_number*sizeof(*rand_box));
+    // clip_randweight = (double *) realloc(clip_randweight,    rand_number*sizeof(*clip_randweight));
     
     return 0;
 }

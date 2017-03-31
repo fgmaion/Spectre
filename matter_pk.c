@@ -75,12 +75,13 @@ int input_powerlaw_n4(){
 
 
 int inputLinearPk(){
+  double sig8;
+  
   sprintf(model_flag, "linear");
 
   pt2Pk = &splintLinearPk;
   
   if((lo_zlim==0.6) && (hi_zlim<1.0))       sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/linear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
-
   else if((lo_zlim==0.8) && (hi_zlim<1.3))  sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/linear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
 
   else{
@@ -100,25 +101,24 @@ int inputLinearPk(){
   for(j=0; j<pk_lineNo; j++)  fscanf(inputfile, "%le \t %le \n", &sdltk[j], &sdltPk[j]);
     
   fclose(inputfile);
-    
+
   spline(sdltk, sdltPk, pk_lineNo, 1.0e31, 1.0e31, sdlt2d);
         
   powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon); // Add power laws for k<<1 and k>>1 for FFTlog calcs.
   powerlaw_regression(pk_lineNo,    8.0,  10.0, 1., sdltk, sdltPk, &pk_hiA, &pk_hin);
-    
-  // aexp       = 1./(1. + z_eff);  
 
-  // P(z) = pow(b*sig8/sig8_fid, 2.)*P(0)  // assuming linear p(k).
-    
-  if((lo_zlim==0.6) && (hi_zlim<1.0))       app_sigma8 = 0.593139; 
-  else if((lo_zlim==0.8) && (hi_zlim<1.3))  app_sigma8 = 0.518062;  // CHANGED FROM LOZ=0.9 AND app_sigma8 = 0.518 on 22 Mar 2017.  
+  sig8 = sigma8_calc();
 
-  else{
-   exit(EXIT_FAILURE);
-  }
+  for(j=0; j<pk_lineNo; j++)  sdltPk[j] /= pow(sig8, 2.); // normalised to unit sigma_8. 
 
-  sigma8_calc();
-                                                                                 // ln(a);    
+  spline(sdltk, sdltPk, pk_lineNo, 1.0e31, 1.0e31, sdlt2d);
+
+  powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon); // Add power laws for k<<1 and k>>1 for FFTlog calcs.
+  powerlaw_regression(pk_lineNo,    8.0,  10.0, 1., sdltk, sdltPk, &pk_hiA, &pk_hin);
+  
+  // if((lo_zlim==0.6) && (hi_zlim<1.0))       app_sigma8 = 0.593139; 
+  // else if((lo_zlim==0.8) && (hi_zlim<1.3))  app_sigma8 = 0.518062;  // CHANGED FROM LOZ=0.9 AND app_sigma8 = 0.518 on 22 Mar 2017.  
+                                                                                
   // printf("\n\nz_eff: %.2f.  sigma_8(z_eff): %.4f. f(z_eff): %.4f. f(z_eff)*sigma_8(z_eff): %.4f.", 0.75, 0.593, f_Om_545(log(1./(1. + 0.75))), 0.593*f_Om_545(log(1./(1. + 0.75))));
   // printf("\nz_eff: %.2f.  sigma_8(z_eff): %.4f. f(z_eff): %.4f. f(z_eff)*sigma_8(z_eff): %.4f.", 1.05, 0.518, f_Om_545(log(1./(1. + 1.05))), 0.518*f_Om_545(log(1./(1. + 1.05))));
 
@@ -127,13 +127,14 @@ int inputLinearPk(){
 
 
 int inputHODPk(){
+  double sig8;
+
   sprintf(model_flag, "nonlinear");
 
   pt2Pk = &splintHODpk;
   
   // sprintf(filepath, "%s/Data/500s/EisensteinHu_halofit_pk_%.2f.dat", root_dir, z_eff);    
   if((lo_zlim == 0.6) && (hi_zlim < 1.0))       sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
-  
   else if((lo_zlim == 0.8) && (lo_zlim < 1.3))  sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
   
   else{
@@ -158,21 +159,24 @@ int inputHODPk(){
         
   powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon);  // Add power laws for k<<1 and k>>1 for FFTlog calcs.    
   powerlaw_regression(pk_lineNo,    8.0,  10.0, 1., sdltk, sdltPk, &pk_hiA, &pk_hin);
-    
+
+  sig8 = sigma8_calc();
+
+  for(j=0; j<pk_lineNo; j++)  sdltPk[j] /= pow(sig8, 2.); // normalised to unit sigma_8.
+
+  spline(sdltk, sdltPk, pk_lineNo, 1.0e31, 1.0e31, sdlt2d);
+
+  powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon); // Add power laws for k<<1 and k>>1 for FFTlog calcs.
+  powerlaw_regression(pk_lineNo,    8.0,  10.0, 1., sdltk, sdltPk, &pk_hiA, &pk_hin);
+  
   // aexp       = 1./(1. + z_eff);  
   
   // P(z) = pow(b*sig8/sig8_fid, 2.)*P(0)
   // assuming linear p(k).
     
   // Value added mocks cosmology.   
-  if((lo_zlim==0.6) && (hi_zlim<1.0))       app_sigma8 = 0.638897; // CHANGED FROM app_sigma8 = 0.593 ON 22 Mar 17;  
-  else if((lo_zlim==0.8) && (hi_zlim<1.3))  app_sigma8 = 0.550554; // CHANGED FROM app_sigma8 = 0.518 ON 22 Mar 17;
-
-  else{
-    exit(EXIT_FAILURE);
-  }
-
-  sigma8_calc();
+  // if((lo_zlim==0.6) && (hi_zlim<1.0))       app_sigma8 = 0.638897; // CHANGED FROM app_sigma8 = 0.593 ON 22 Mar 17;  
+  // else if((lo_zlim==0.8) && (hi_zlim<1.3))  app_sigma8 = 0.550554; // CHANGED FROM app_sigma8 = 0.518 ON 22 Mar 17;
   
   // ln(a);                                                                                                                         
   // printf("\n\nz_eff: %.2f.  sigma_8(z_eff): %.4f. f(z_eff): %.4f. f(z_eff)*sigma_8(z_eff): %.4f.", 0.75, 0.593, f_Om_545(log(1./(1. + 0.75))), 0.593*f_Om_545(log(1./(1. + 0.75))));

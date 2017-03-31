@@ -57,7 +57,7 @@ int load_withfolding(char filepath[]){
 
 
 int load_mock(int mockNumber){
-  //  Chapter 7, snipping results.  Snipped results are raw power, need shot noise corrected.
+  // Chapter 7, snipping results.  Snipped results are raw power, need shot noise corrected.
   // d0 = {1000, 10, 6}, Ps = {277.16, 243.944925, 208.99925}.  Determined from Jf_8 results.
 
   sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock_%03d", covariance_mocks_path, d0, fieldFlag, mockNumber);
@@ -93,7 +93,7 @@ int load_mock(int mockNumber){
 }
 
 
-int load_data(){
+int load_data(void){
   // sprintf(filepath, "%s/W1_Spectro_V7_2/data_v1.7/pk/d0_%d/W%d/data", root_dir, d0, fieldFlag);
   // sprintf(filepath, "%s/W1_Spectro_V7_2/data_v1.7/pk/old_d0_%d/W%d/data", root_dir, d0, fieldFlag);
   sprintf(filepath, "%s/W1_Spectro_V7_3/data_v1.7/pk/d0_%d/W%d/data", root_dir, d0, fieldFlag);
@@ -109,7 +109,7 @@ int load_data(){
 
     load_withfolding(filepath);  // Ignore reference to mock, should work just fine.
   }
-
+  /*
   if(fieldFlag == 1){
     if(d0      == 1000.)  for(j=0; j<mono_order; j++) xdata[j] -= 335.538;  // Correct monopole.
     else if(d0 ==   10.)  for(j=0; j<mono_order; j++) xdata[j] -= 283.993;  // Note: as a difference estimator, covariance does not have to explicity corrected.
@@ -123,7 +123,7 @@ int load_data(){
     else if(d0 ==    6.)  for(j=0; j<mono_order; j++) xdata[j] -= 227.51;
     else if(d0 ==    4.)  for(j=0; j<mono_order; j++) xdata[j] -= 177.75;
   }
-  
+  */
   return 0;
 }
   

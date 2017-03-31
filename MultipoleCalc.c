@@ -81,7 +81,8 @@ int nosort_MultipoleCalc(regress* inst){
 
 
 int print_multipoles(regress* inst){
-  sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/pk/d0_%d/W%d/mock_%03d_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, d0, fieldFlag, loopCount, lo_zlim, hi_zlim, 2*fold);
+  // sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/pk/d0_%d/W%d/mock_%03d_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, d0, fieldFlag, loopCount, lo_zlim, hi_zlim, 2*fold);
+  sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/pk/mask_pk/W%d/mock_%03d_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, fieldFlag, loopCount, lo_zlim, hi_zlim, 2*fold);
   
   output = fopen(filepath, "w");
 

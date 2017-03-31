@@ -1,12 +1,11 @@
 int calc_bare_fkpweights(){
-  // stripped of (d0 dependent) alpha. 
-  
+  // stripped of (d0 dependent) alpha.   
   double nbar, chi;
 
   bare_fkp_norm = 0.0;
 
   for(j=0; j<rand_number; j++){
-    nbar            =    interp_nz(rand_chi[j]);      // assumes randoms up to rand_number are all accepted.
+    nbar            =    (*pt2nz)(rand_chi[j]);      // assumes randoms up to rand_number are all accepted.
     bare_fkp_norm  += nbar*pow(rand_weight[j], 2.);   // FKP weights for randoms sets the normalisation
   }
 
@@ -18,7 +17,7 @@ int calc_bare_fkpweights(){
     if(Acceptanceflag[j] == true){
       chi               = interp_comovingDistance(zobs[j]);
 
-      fkp_galweight[j]  = 1./(1. + fkpPk*interp_nz(chi));
+      fkp_galweight[j]  = 1./(1. + fkpPk*(*pt2nz)(chi));
 
       fkp_galweight[j] /= bare_fkp_norm;
     }
@@ -33,7 +32,7 @@ int calc_bare_fkpweights(){
 double veff_integrand(double chi, void* p){
   double nbar;
 
-  nbar  = interp_nz(chi);
+  nbar  = (*pt2nz)(chi);
 
   // return pow(chi, 2.);
   return pow(chi*nbar*fkpPk/(1. + nbar*fkpPk), 2.);

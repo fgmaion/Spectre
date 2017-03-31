@@ -159,6 +159,7 @@ int           varcalc_index;
 int cnvldpk_zeropoint_index;
 
 double         clipmono_amp;
+double         clipshot_amp;
 double       clip_distcoeff;
 
 // -- Likelihood -- //

@@ -60,10 +60,8 @@ int FFTLog_initialise(FFTLog_config *fc, double beta, double velDispersion){
             fc->pk[i][0]        =
                                   //** MUST TURN ON NO RSD, OTHERWISE QUAD is SET TO MONO ETC. **
                                   (*pt2Pk)(fc->krvals[i][0])
-
-                                  *pow(app_sigma8, -2.)
-                                  *pow(   bsigma8,  2.)
-                                  *kaiserLorentz_multipole(fc->krvals[i][0]*velDispersion, beta, (int) transformOrder);
+                                   *pow(   bsigma8,  2.)
+                                   *kaiserLorentz_multipole(fc->krvals[i][0]*velDispersion, beta, (int) transformOrder);
 
             fc->pk[i][1]        = 0.0;
 
@@ -153,7 +151,7 @@ int precompute_vipers_clipping_model(int FFTlogRes){
   prep_kaiserLorentSpline();
 
   for(j=0; j<FFTlogRes; j++){    
-    FFTlog_Pk[j]         = (*pt2Pk)(mono_config->krvals[j][0])*pow(app_sigma8, -2.);  // normalise to sigma_8 = 1.
+    FFTlog_Pk[j]         = (*pt2Pk)(mono_config->krvals[j][0]);  // normalise to sigma_8 = 1.
 
     FFTlog_W0[j]         = splint_VIPERS_maskMultipoles(mono_config->krvals[j][1], 0); // splint W_0(r).
     FFTlog_W2[j]         = splint_VIPERS_maskMultipoles(mono_config->krvals[j][1], 2);

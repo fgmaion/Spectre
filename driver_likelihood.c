@@ -36,7 +36,7 @@
 #include "calc_model.c"
 #include "ChiSq_minimisation.c"
 #include "posteriors_1D.c"
-// #include "Alcock_Paczynski.c"
+// #include "Alcock_Paczynski.c" // app_sig8 needs removed. 
 // #include "Ruiz.c"
 // #include "combining_clipped_fsig8.c"
 
@@ -84,7 +84,7 @@ int main(int argc, char **argv){
     
     fracArea                = W4area/TotalW1W4area;
   }
-  /*
+  
   min_bsigma8               =      0.05;                  // FOR GRANETT 2D POSTERIOR.
   max_bsigma8               =      1.00;                  // Previously 0.2 < b \sig_8 < 1.6
                                                           // 0.05 < b s8 < 1.0 (13/02/17)   
@@ -93,8 +93,8 @@ int main(int argc, char **argv){
 
   min_velDisperse           =      0.05;                  // CHANGED FROM 0.00 13/02/2017
   max_velDisperse           =      6.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
-  */
   
+  /*
   min_bsigma8               =      0.05;                  // 22/02/2017
   max_bsigma8               =      1.50;                  // 
                                                           //
@@ -103,7 +103,7 @@ int main(int argc, char **argv){
 
   min_velDisperse           =      0.05;                  // 
   max_velDisperse           =     15.00;                  //   
-  
+  */
   min_alpha_pad             =    0.9999;
   max_alpha_pad             =    1.0001;
 
@@ -147,7 +147,7 @@ int main(int argc, char **argv){
 
   // fftw_plan_with_nthreads(omp_get_max_threads()); // Maximum number of threads to be used; use all openmp threads available. 
   
-  //-- Model calc. --//
+  //-- model calc. --//
   comovDistReshiftCalc();  // Cosmology from cosmology_planck2015.h or cosmology_valueaddedmocks.h// Selection parameters.
 
   // inputHODPk();      //  Must match Cosmology in cosmology_planck2015.h, or cosmology_valueaddedmocks.h
@@ -180,13 +180,13 @@ int main(int argc, char **argv){
   // -- Set up Likelihood grid -- //
   assign_LikelihoodMemory();  // Assigns memory for xdata, ydata, xtheory, ytheory, ChiSqGrid.
   
-  // set_models();
+  set_models();
   
+  prep_a11(153, 1, &clipmono_amp, &clipshot_amp);
+    
   // -- Covariance matrix -- //
-  load_CovarianceMatrix(10, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock.
-
-  a11_scale(10, 1);
-  /*
+  load_CovarianceMatrix(153, 1, clipshot_amp); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock.
+    
   // -- Match model to mocks --//
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
   
@@ -197,12 +197,14 @@ int main(int argc, char **argv){
 
   sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", root_dir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
 
+  printf("\n\nOutput filepath: %s", filepath);
+  
   output = fopen(filepath, "w");
 
   walltime("Walltime at start of chi^2 calc.");
   
   for(int ab=1; ab<154; ab++){
-    calc_ChiSqs(ab);
+    calc_ChiSqs(ab, clipshot_amp); // passed to load_mock. 
 
     maxL_sigv  = calc_velDispPosterior();
     maxL_fsig8 = calc_fsigma8Posterior();
@@ -212,7 +214,7 @@ int main(int argc, char **argv){
   }
   
   fclose(output);
-  */
+  
   walltime("Wall time at finish");
 
   // MPI_Finalize();

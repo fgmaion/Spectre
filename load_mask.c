@@ -1,3 +1,12 @@
+int rotate_ra(void){
+  // Stefano basis has ra aligned with y and redshift along z; R1 rotation can be done simply by changing ra coordinate,
+  // this is NOT true of dec. 
+  for(j=0; j<rand_number; j++)  rand_ra[j] -= CentreRA;
+
+  return 0;
+}
+  
+
 int load_rands_radec(double sampling){
   rand_number = accepted_rand = (int) ceil(1382582*sampling);  // Hard coded catalogue row number.
     
@@ -7,9 +16,11 @@ int load_rands_radec(double sampling){
   load_fastread_randomCats(rand_number);
 
   // make_fastread_randomCats();
+
+  rotate_ra();
   
   // To do: save randoms in radians.
-  for(j=0; j< rand_number; j++){
+  for(j=0; j<rand_number; j++){
     rand_ra[j]  *= (pi/180.0); // Converted to radians.  No need to convert back.
     rand_dec[j] *= (pi/180.0);
   }
@@ -48,18 +59,15 @@ int rand_newchi_newbasis(void){
 
   // printf("\n\nNew basis for randoms.");
   
-  double F, cos_dec;
+  double  F, cos_dec;
 
-  double x1,  y1, z1;
-  double x2,  y2, z2;
+  double      x2, z2;
   double c_ra, c_dec;
-
-  int new;
   
   c_ra    =  CentreRA*(pi/180.);
   c_dec   = CentreDec*(pi/180.);
   
-  #pragma omp parallel for private(j, cos_dec, x1, y1, z1, x2, y2, z2) if(thread == 1)
+  #pragma omp parallel for private(j, cos_dec, x2, z2) if(thread == 1)
   for(j=0; j<rand_number; j++){
     rand_chi[j]    = inverse_cumulative_nbar(rand_rng[j]);
       
@@ -67,24 +75,23 @@ int rand_newchi_newbasis(void){
     
     rand_x[j]      =  rand_chi[j]*cos(rand_ra[j])*cos_dec;
     rand_y[j]      =  rand_chi[j]*sin(rand_ra[j])*cos_dec;
-    rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);            // Stefano reflection included. 
+    rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);           // Stefano reflection included. 
       
-    rand_weight[j] = 1./(1. + interp_nz(rand_chi[j])*fkpPk);  // rand fkp weights.
+    rand_weight[j] = 1./(1. + (*pt2nz)(rand_chi[j])*fkpPk);   // rand fkp weights.
       
     // basis formed by: normal spherical co-ordinates subject to inversion through xy plane, then R1 and finally R2.
     // R1: rotation about z such that in the new basis, (x',y',z'), x' hat lies in x-y plane at an angle centreRA to x.
-    x1  =     cos(c_ra)*rand_x[j] + sin(c_ra)*rand_y[j];
-    y1  =    -sin(c_ra)*rand_x[j] + cos(c_ra)*rand_y[j];
-    z1  =               rand_z[j];
+    // x1  =     cos(c_ra)*rand_x[j] + sin(c_ra)*rand_y[j]; 
+    // y1  =    -sin(c_ra)*rand_x[j] + cos(c_ra)*rand_y[j]; //** RA rotation can be done explicitly. 
+    // z1  =               rand_z[j];
 
     // R2: rotation about y such that in the new basis, (x'', y'', z''), z'' hat lies in (x', z') plane at an angle -CentreDec to x' hat.
-    x2  = -sin(c_dec)*x1  - cos(c_dec)*z1;
-    y2  =  y1;
-    z2  =  cos(c_dec)*x1  - sin(c_dec)*z1;
+    x2  = -sin(c_dec)*rand_x[j]  - cos(c_dec)*rand_z[j];
+    z2  =  cos(c_dec)*rand_x[j]  - sin(c_dec)*rand_z[j];
 
-    rand_x[j] = x2 + stefano_trans_x;  // Translate to fit in the box. P(k) unaffected.
-    rand_y[j] = y2 + stefano_trans_y;
-    rand_z[j] = z2 + stefano_trans_z;
+    rand_x[j]  = x2 + stefano_trans_x;  // Translate to fit in the box. P(k) unaffected.
+    rand_y[j] +=      stefano_trans_y;
+    rand_z[j]  = z2 + stefano_trans_z;
   }
  
   printf("\n\nRandoms: Stefano basis.");                                                                                                      
@@ -95,6 +102,19 @@ int rand_newchi_newbasis(void){
   
   // walltime("Wall time after randoms chi reassignment");
   
+  return 0;
+}
+
+
+int assign_randbox(){
+  for(j=0; j<rand_number; j++){
+    xlabel     = (int)  floor((rand_x[j] - min_x)/dx);
+    ylabel     = (int)  floor((rand_y[j] - min_y)/dy);
+    zlabel     = (int)  floor((rand_z[j] - min_z)/dz);
+
+    rand_box[j] = (int)  xlabel + n2*ylabel + n2*n1*zlabel;
+  }
+
   return 0;
 }
 

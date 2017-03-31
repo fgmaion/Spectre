@@ -9,6 +9,7 @@ int prep_CatalogueInput_500s(){
   ra             =  (double *)  malloc(max_gals*sizeof(*ra));
   dec            =  (double *)  malloc(max_gals*sizeof(*dec));
   zobs           =  (double *)  malloc(max_gals*sizeof(*zobs));
+  M_B            =  (double *)  malloc(max_gals*sizeof(*M_B));
   Acceptanceflag =  (bool  *)   malloc(max_gals*sizeof(*Acceptanceflag));
   rDist          =  (double *)  malloc(max_gals*sizeof(*rDist));
   xCoor          =  (double *)  malloc(max_gals*sizeof(*xCoor));
@@ -46,26 +47,28 @@ int CatalogueInput_500s(){
     line_count(inputfile, &Vipers_Num);
     
     for(j=0; j<Vipers_Num; j++){  
-      fscanf(inputfile, "%*d \t %le \t %le \t %le \t %*le \t %*le \t %*le \t %*d \t %*d \t %*d \n", &ra[j], &dec[j], &zobs[j]);
+      fscanf(inputfile, "%*d \t %le \t %le \t %le \t %le \t %*le \t %*le \t %*d \t %*d \t %*d \n", &ra[j], &dec[j], &zobs[j], &M_B[j]);
       
-       ra[j]               *= (pi/180.0);                                 // Converted to radians.
-      dec[j]               *= (pi/180.0);                                 // Converted to radians. 
+       ra[j]           -=   CentreRA;                                 // R1 rotation of stefano basis, remains to rotate by R2. 
+      
+       ra[j]           *= (M_PI/180.0);                               // Convert to radians.
+      dec[j]           *= (M_PI/180.0);                               // Convert to radians. 
 
-      rDist[j]              = interp_comovingDistance(gal_z[j]);          // Comoving distances in h^-1 Mpc
+      rDist[j]          = interp_comovingDistance(gal_z[j]);          // Comoving distances in h^-1 Mpc
+      
+      xCoor[j]          =  rDist[j]*cos(dec[j])*cos(ra[j]);
+      yCoor[j]          =  rDist[j]*cos(dec[j])*sin(ra[j]);
+      zCoor[j]          = -rDist[j]*sin(dec[j]);                       // reflection of spherical coordinates. 
 
-      xCoor[j]              =  rDist[j]*cos(dec[j])*cos(ra[j]);
-      yCoor[j]              =  rDist[j]*cos(dec[j])*sin(ra[j]);
-      zCoor[j]              = -rDist[j]*sin(dec[j]);                      // reflection of spherical coordinates. 
-
-      ra[j]                /= (pi/180.0);                                 // Converted to degrees.
-      dec[j]               /= (pi/180.0);                                 // Converted to degrees.  
+       ra[j]           /= (M_PI/180.0);                               // Converted to degrees.
+      dec[j]           /= (M_PI/180.0);                               // Converted to degrees.  
     }
     
     fclose(inputfile);
     
     // Load ESR weights.  
     spec_weights();    // load sampling according to local TSR.
-
+    
     return 0;
 }
 

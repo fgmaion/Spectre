@@ -111,14 +111,17 @@ int calc_models(){
 }
 
 
-int calc_ChiSqs(int mockNumber){    
+int calc_ChiSqs(int mockNumber, double shot_amp){    
     int ll, mm, nn;
 
     minChiSq = pow(10., 12.);
     
-    if(data_mock_flag == 0)  load_mock(mockNumber);  // Needs amplitude corrected. 
+    if(data_mock_flag == 0)  load_mock(mockNumber);    // needs amplitude corrected. 
     else                     load_data();
 
+
+    for(j=0; j<mono_order; j++)  xdata[j] -= shot_amp; // subtract shot noise.
+    
     // set_meanmultipoles();
     // scale_Cov(130);
     

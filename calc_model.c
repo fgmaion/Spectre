@@ -13,7 +13,7 @@ int model_compute(int aa, int bb, int cc, int dd, int ee){
   varCalc(mono_config, &variance);
   
   // Can openmp loops. mono_config updated by clip_mono.
-  // clip_p0p2(clipmono_config, clipquad_config, mono_config, quad_config, zero_config, zero_config, u0, variance);
+  clip_p0p2(clipmono_config, clipquad_config, mono_config, quad_config, zero_config, zero_config, u0, variance);
   
   cnvldmonoCorr_joint(convlmonoCorr, mono_config, quad_config, hex_config);
   
