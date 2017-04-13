@@ -94,12 +94,11 @@ int rand_newchi_newbasis(void){
     rand_z[j]  = z2 + stefano_trans_z;
   }
  
-  printf("\n\nRandoms: Stefano basis.");                                                                                                      
+  // printf("\n\nRandoms: Stefano basis.");                                                                                                      
+  // printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));
+  // printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));
+  // printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));                                                   
 
-  printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));
-  printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));
-  printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));                                                     
-  
   // walltime("Wall time after randoms chi reassignment");
   
   return 0;

@@ -57,24 +57,19 @@ int FFTLog_initialise(FFTLog_config *fc, double beta, double velDispersion){
     fc->krvals[i][1]    = exp(logrc + ((double)i-nc)*dlogr);
 
     // purely real.  Set P(k) to obtain xi(r) by inverse Hankel transform.
-            fc->pk[i][0]        =
-                                  //** MUST TURN ON NO RSD, OTHERWISE QUAD is SET TO MONO ETC. **
-                                  (*pt2Pk)(fc->krvals[i][0])
-                                   *pow(   bsigma8,  2.)
-                                   *kaiserLorentz_multipole(fc->krvals[i][0]*velDispersion, beta, (int) transformOrder);
+    fc->pk[i][0]        = (*pt2Pk)(fc->krvals[i][0])*pow(bsigma8,  2.)*kaiserLorentz_multipole(fc->krvals[i][0]*velDispersion, beta, (int) transformOrder);
+    fc->pk[i][1]        = 0.0;
 
-            fc->pk[i][1]        = 0.0;
-
-            // purely real.  Set xi(r) to obtain P(k) by Hankel transform.
-            fc->xi[i][0]        = 0.0; // splint_VIPERS_maskMultipoles(fc->krvals[i][1], transformOrder); // (*pt2Xi)(fc->krvals[i][1]);
-            fc->xi[i][1]        = 0.0;
+    // purely real.  Set xi(r) to obtain P(k) by Hankel transform.
+    fc->xi[i][0]        = 0.0; // splint_VIPERS_maskMultipoles(fc->krvals[i][1], transformOrder); // (*pt2Xi)(fc->krvals[i][1]);
+    fc->xi[i][1]        = 0.0;
   }
 
   return 0;
 }
 
 
-int FFTLog_initialise_mask(FFTLog_config *fc, double beta, double velDispersion){
+int FFTLog_initialise_mask(FFTLog_config *fc){
   double transformOrder;
 
   double logrmin  = log(fc->min);
@@ -87,7 +82,7 @@ int FFTLog_initialise_mask(FFTLog_config *fc, double beta, double velDispersion)
 
   double logkc    = log(fc->kr) - logrc;
 
-  transformOrder  =  fc->mu - 0.5;
+  transformOrder  = fc->mu - 0.5;
 
   for(i=0; i<fc->N; i++){
     fc->krvals[i][0]  = exp(logkc + ((double)i-nc)*dlogr);
@@ -98,7 +93,7 @@ int FFTLog_initialise_mask(FFTLog_config *fc, double beta, double velDispersion)
     fc->pk[i][1]      = 0.0;
     
     // purely real.  Set xi(r) to obtain P(k) by Hankel transform.
-    fc->xi[i][0]      = splint_VIPERS_maskMultipoles(fc->krvals[i][1], transformOrder); // (*pt2Xi)(fc->krvals[i][1]);
+    fc->xi[i][0]      = splint_VIPERS_maskMultipoles(fc->krvals[i][1], (int) transformOrder);
     fc->xi[i][1]      = 0.0;
   }
 
@@ -151,7 +146,7 @@ int precompute_vipers_clipping_model(int FFTlogRes){
   prep_kaiserLorentSpline();
 
   for(j=0; j<FFTlogRes; j++){    
-    FFTlog_Pk[j]         = (*pt2Pk)(mono_config->krvals[j][0]);  // normalise to sigma_8 = 1.
+    FFTlog_Pk[j]         = (*pt2Pk)(mono_config->krvals[j][0]);  // normalised to sigma_8 = 1.
 
     FFTlog_W0[j]         = splint_VIPERS_maskMultipoles(mono_config->krvals[j][1], 0); // splint W_0(r).
     FFTlog_W2[j]         = splint_VIPERS_maskMultipoles(mono_config->krvals[j][1], 2);
@@ -257,8 +252,8 @@ int clip_p0p2(FFTLog_config* clip_p0, FFTLog_config* clip_p2, FFTLog_config* mon
     clip_p2->xi[i][0]  = clipmono_amp*quad->xi[i][0];
     clip_p2->xi[i][0] += (clip_distcoeff/var)*(2.*mono->xi[i][0]*quad->xi[i][0] + (2./7.)*pow(quad->xi[i][0], 2.) + (4./7.)*quad->xi[i][0]*hex->xi[i][0] + (100./693.)*pow(hex->xi[i][0], 2.) + (50./143.)*hex->xi[i][0]*oct->xi[i][0] + (14./143.)*pow(oct->xi[i][0], 2.));
 
-    mono->xi[i][0] = clip_p0->xi[i][0]; // what happens if no clipping.
-    quad->xi[i][0] = clip_p2->xi[i][0];
+    mono->xi[i][0]     = clip_p0->xi[i][0]; // what happens if no clipping.
+    quad->xi[i][0]     = clip_p2->xi[i][0];
   }
 
   return 0;
@@ -325,20 +320,26 @@ int FFTlog_updatepk(FFTLog_config *mono, FFTLog_config *quad, FFTLog_config *hex
 
   for(i=0; i<mono->N; i++){
     ks   = mono->krvals[i][0]*velDispersion;
-
+    
+    mu_0 = muOrderZero(ks);  
+    mu_2 = muOrderTwo(ks);   
+    mu_4 = muOrderFour(ks);
+    mu_6 = muOrderSix(ks);   
+    mu_8 = muOrderEight(ks); 
+    /*
     mu_0 = seqsp_kLmu(ks, 0, &klo);
     mu_2 = seqsp_kLmu(ks, 2, &klo);
     mu_4 = seqsp_kLmu(ks, 4, &klo);
     mu_6 = seqsp_kLmu(ks, 6, &klo);
-    mu_8 = seqsp_kLmu(ks, 8, &klo);
-
-    mono->pk[i][0] = FFTlog_Pk[i]*pow(bsigma8, 2.)*(mu_0 + 2.*beta*mu_2 + beta*beta*mu_4); //  *kaiserLorentz_multipole(ks, beta, 0)
-    quad->pk[i][0] = FFTlog_Pk[i]*pow(bsigma8, 2.)*((5./2.)*(-1.*mu_0 + mu_2*(3. - 2.*beta) + mu_4*(-beta*beta + 6.*beta) + 3.*beta*beta*mu_6));
-    hex->pk[i][0] = FFTlog_Pk[i]*pow(bsigma8, 2.)*((9./8.)*(35.*beta*beta*mu_8  + 10.*beta*(7. -3.*beta)*mu_6 + (35. - 60.*beta + 3.*beta*beta)*mu_4 + 6.*(beta - 5.)*mu_2 + 3.*mu_0));
+    mu_8 = seqsp_kLmu(ks, 8, &klo);  
+    */
+    mono->pk[i][0] = FFTlog_Pk[i]*pow(bsigma8, 2.)*(mu_0 + 2.*beta*mu_2 + beta*beta*mu_4);
+    quad->pk[i][0] = FFTlog_Pk[i]*pow(bsigma8, 2.)*((5./2.)*(-mu_0 + mu_2*(3. - 2.*beta) + mu_4*(-beta*beta + 6.*beta) + 3.*beta*beta*mu_6));
+     hex->pk[i][0] = FFTlog_Pk[i]*pow(bsigma8, 2.)*((9./8.)*(35.*beta*beta*mu_8  + 10.*beta*(7. -3.*beta)*mu_6 + (35. - 60.*beta + 3.*beta*beta)*mu_4 + 6.*(beta - 5.)*mu_2 + 3.*mu_0));
 
     mono->pk[i][1] = 0.0;
     quad->pk[i][1] = 0.0;
-    hex->pk[i][1] = 0.0;
+     hex->pk[i][1] = 0.0;
   }
 
   return 0;

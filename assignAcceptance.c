@@ -77,7 +77,7 @@ int alpha_calc(){
     if(Acceptanceflag[j] == true){
       accepted           += 1;
 
-      // daccepted_gals     += 1./sampling[j];
+      // daccepted_gals  += 1./sampling[j];
       daccepted_gals     += clip_galweight[j]/sampling[j]; //  13/05/16.
     }
   }

@@ -1,7 +1,7 @@
 int default_params(){
   fsigma8       = 0.14;
   A11Sq         = 1.00;
-  velDispersion = 2.62;
+  velDispersion = 6.00;
   bsigma8       = 0.82;
   epsilon_pad   = 0.00;
   alpha_pad     = 1.00;
@@ -72,7 +72,7 @@ int calc_models(){
 
   output = fopen(filepath, "wb");
   
-  for(aa=0; aa<Res; aa++){
+  for(aa=0; aa<Res; aa++){    
     fsigma8 = min_fsigma8 + fsigma8Interval*aa;
 
     for(bb=0; bb<Res; bb++){
@@ -93,7 +93,7 @@ int calc_models(){
             // printf("\nfsig8, bsig8, sigv: %.4lf \t %.4lf \t %.4lf", fsigma8, bsigma8, velDispersion);
             
             model_compute(aa, bb, cc, dd, ee);  // updates convlmonoCorr, convlquadCorr 
-
+            
             for(j=0; j<allmono_order; j++)  fwrite(&convlmonoCorr->pk[fftlog_indices[j]][0], sizeof(double), 1, output);
             for(j=0; j<allmono_order; j++)  fwrite(&convlquadCorr->pk[fftlog_indices[j]][0], sizeof(double), 1, output);
             
@@ -119,7 +119,6 @@ int calc_ChiSqs(int mockNumber, double shot_amp){
     if(data_mock_flag == 0)  load_mock(mockNumber);    // needs amplitude corrected. 
     else                     load_data();
 
-
     for(j=0; j<mono_order; j++)  xdata[j] -= shot_amp; // subtract shot noise.
     
     // set_meanmultipoles();
@@ -141,8 +140,9 @@ int calc_ChiSqs(int mockNumber, double shot_amp){
     
     // for(j=0; j<order; j++)  printf("\n%+.4le \t %+.4le \t %+.4le", dkdata[j], ydata[j], sqrt(gsl_vector_get(eval, j)));
     
-    printf("\n\nChi sq. calc:");
+    // printf("\n\nChi sq. calc:");
 
+    // #pragma omp parallel for private(kk, jj, ii, ll, mm, nn, fsigma8, bsigma8, velDispersion)
     for(jj=0; jj<Res; jj++){    
       fsigma8 = min_fsigma8 + fsigma8Interval*jj;
 
@@ -153,10 +153,10 @@ int calc_ChiSqs(int mockNumber, double shot_amp){
           velDispersion = min_velDisperse + sigmaInterval*ii;
                 
           for(ll=0;ll<Res_ap; ll++){
-            alpha_pad = min_alpha_pad + alpha_padInterval*ll;
+            // alpha_pad = min_alpha_pad + alpha_padInterval*ll;
                 
             for(mm=0; mm<Res_ap; mm++){
-              epsilon_pad = min_epsilon_pad + epsilon_padInterval*mm;
+              // epsilon_pad = min_epsilon_pad + epsilon_padInterval*mm;
                     
               alpha_pad   = 1.0;
               epsilon_pad = 0.0; 
@@ -171,19 +171,6 @@ int calc_ChiSqs(int mockNumber, double shot_amp){
               }
 
               // printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  ChiSqGrid[jj][kk][ii][ll][mm]);
-	      
-              if(ChiSqGrid[jj][kk][ii][ll][mm] < minChiSq){
-                minChiSq = ChiSqGrid[jj][kk][ii][ll][mm];
-                    
-                minX2_fsig8       = fsigma8;
-                minX2_A11Sq       = A11Sq;
-                minX2_sigp        = velDispersion;
-                minX2_bsig8       = bsigma8;
-                minX2_alpha_pad   = alpha_pad;
-                minX2_epsilon_pad = epsilon_pad;
-
-                printf("\n%.4lf \t %.4lf \t %.4lf \t %.4lf", fsigma8, velDispersion, bsigma8,  minChiSq);
-              }
             }
           }
         }
@@ -194,22 +181,6 @@ int calc_ChiSqs(int mockNumber, double shot_amp){
 }
 
 
-int calc_marginalisedposteriors(){
-  // calc_fsigma8Posterior();
-  // calc_bsigma8Posterior();
-  // calc_velDispPosterior();
-
-  // output = fopen(filepath, "w");
-
-  // fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxlike_fsig8,      maxlike_sigv,    maxlike_bsig8, ChiSq_expected);
-  // fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \n", minChiSq_fsigma8, minChiSq_sigma, minChiSq_bsigma8,       minChiSq);
-
-  // fclose(output);
-
-  return 0;
-}
-
-  
 int set_models(){
   int ll, mm;
   

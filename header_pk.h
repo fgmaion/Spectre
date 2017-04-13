@@ -7,6 +7,14 @@ char covariance_mocks_path[200];
 int    data_mock_flag;
 int    thread; // Multi-thread FFTw, but 1 means multithread useful loops aswell.
 
+int    thread_no;
+
+// -- thread safe random number streams. --//
+typedef struct drand48_data drand48_data;
+
+drand48_data* randBuffers;
+// struct drand48_data randBuffers
+
 // r2c or c2c arrays/ 
 int     fft_size;
 

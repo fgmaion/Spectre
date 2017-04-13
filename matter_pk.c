@@ -54,7 +54,8 @@ double sigma8_calc(){
 
   Interim = qromb(&sigma8_integrand, 0.0000001, 200.);
 
-  printf("\n\nsig_8: %.6lf (GSL) \t %.6lf (NR)", sqrt(result), sqrt(Interim));
+  // double precision handles %.15lf for initialisation, e.g. p = PI.
+  printf("\n\nsig_8: %.10lf (GSL) \t %.10lf (NR)", sqrt(result), sqrt(Interim));
 
   return sqrt(result);
 }
@@ -104,13 +105,17 @@ int inputLinearPk(){
 
   spline(sdltk, sdltPk, pk_lineNo, 1.0e31, 1.0e31, sdlt2d);
         
-  powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon); // Add power laws for k<<1 and k>>1 for FFTlog calcs.
+  powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon); // Add power laws for k<<1 and k>>1 for sigma_8 calc.
   powerlaw_regression(pk_lineNo,    8.0,  10.0, 1., sdltk, sdltPk, &pk_hiA, &pk_hin);
 
   sig8 = sigma8_calc();
 
-  for(j=0; j<pk_lineNo; j++)  sdltPk[j] /= pow(sig8, 2.); // normalised to unit sigma_8. 
-
+  for(j=0; j<pk_lineNo; j++)  sdltPk[j] /= pow(sig8, 2.); // normalised to sigma_8 of unity. 
+  /*
+  for(j=0; j<pk_lineNo; j++){
+    if((0.02 < sdltk[j]) && (sdltk[j] < 0.4))  printf("\n%.6le \t %.6le", sdltk[j], sdltPk[j]);
+  }
+  */
   spline(sdltk, sdltPk, pk_lineNo, 1.0e31, 1.0e31, sdlt2d);
 
   powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon); // Add power laws for k<<1 and k>>1 for FFTlog calcs.

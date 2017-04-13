@@ -10,11 +10,13 @@ int boxCoordinates(double xCoor[], double yCoor[], double zCoor[], int rowNumber
 
 
 int calc_overdensity(){    
-    for(j=0; j<n0*n1*n2; j++)  overdensity[j] = 0.0;
+  walltime("Wall time af start of overdensity calc.");
+
+  for(j=0; j<n0*n1*n2; j++)  overdensity[j] = 0.0;
     
     for(j=0; j<Vipers_Num; j++){
       if(Acceptanceflag[j] == true){
-        // ngp_assign(xCoor[j], yCoor[j], zCoor[j], (fkp_galweight[j]/sqrt(alpha))*clip_galweight[j]/sampling[j]);
+        ngp_assign(xCoor[j], yCoor[j], zCoor[j], (fkp_galweight[j]/sqrt(alpha))*clip_galweight[j]/sampling[j]);
         // cic_assign(1, xCoor[j], yCoor[j], zCoor[j], fkp_galweight[j]*clip_galweight[j]/sampling[j]);  // cic assign, weighted by sampling, fkp wghts and clipping.
       }
     }
@@ -24,7 +26,7 @@ int calc_overdensity(){
       // cic_assign(1, rand_x[j], rand_y[j], rand_z[j], -alpha*rand_weight[j]);  // assumes all randoms up to rand_number are accepted.    
     }
       
-    walltime("Wall time after assignment to cell");
+    walltime("Wall time after overdensity calc.");
     
     return 0;
 }

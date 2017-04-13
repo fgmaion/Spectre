@@ -1,5 +1,8 @@
+//OLD:0.050000  2.421875  5.025000
+//NEW:0.268750  3.284375  5.025000
+
 double calc_bsigma8Posterior(void){
-  PosteriorNorm = 0.0;
+  PosteriorNorm = -99.; // changed from 0.
 
   int     maxLikelihood_index = 0;
 
@@ -32,7 +35,7 @@ double calc_bsigma8Posterior(void){
 
 
 double calc_velDispPosterior(void){
-  PosteriorNorm               = 0.0;
+  PosteriorNorm = -99.; // changed from 0.
 
   int     maxLikelihood_index =   0;
 
@@ -66,7 +69,7 @@ double calc_velDispPosterior(void){
 
 
 double calc_fsigma8Posterior(void){ 
-    PosteriorNorm = 0.0;
+    PosteriorNorm = -99.; // changed from 0.
     
     int     maxLikelihood_index = 0;
     

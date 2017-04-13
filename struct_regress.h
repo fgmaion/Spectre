@@ -4,19 +4,19 @@
 #ifndef REGRESS_GUARD // if REGRESS_GUARD IS NOT DEFINED
 #define REGRESS_GUARD // Define REGRESS_GUARD
 
-  struct Regress{
-    int    modes_perbin[KBIN_NO];
-    double mean_modk[KBIN_NO], detA[KBIN_NO];
-    double Sum_Pi[KBIN_NO], Sum_Li[KBIN_NO], Sum_Li2[KBIN_NO], Sum_PiLi[KBIN_NO];
-    double Monopole[KBIN_NO], Quadrupole[KBIN_NO];
-    double logk_limits[KBIN_NO];
+struct Regress{
+  int    modes_perbin[KBIN_NO];
+  double mean_modk[KBIN_NO], detA[KBIN_NO];
+  double Sum_Pi[KBIN_NO], Sum_Li[KBIN_NO], Sum_Li2[KBIN_NO], Sum_PiLi[KBIN_NO];
+  double Monopole[KBIN_NO], Quadrupole[KBIN_NO];
+  double logk_limits[KBIN_NO];
 
-    int*   kind; // arrays of parameters for 3D FFT modes regression.
+  int*   kind; // arrays of parameters for 3D FFT modes regression.
   
-    double* kLi;
-    double* kM2;
-
-  } flat, half, quart;
+  double* kLi;
+  double* kM2;
+    
+} flat, half, quart;
 
   typedef struct Regress regress;
 #endif

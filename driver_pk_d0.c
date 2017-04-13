@@ -33,11 +33,13 @@
 #include "GaussianFilter.c"
 #include "assign_pkmemory.c"
 #include "assign_binnedpk_memory.c"
+// #include "fftw_qlr.c"
+#include "fftw_qlk.c"
 // #include "add_sprng.c"
 
 
 int main(int argc, char **argv){  
-  thread                    =                   0; 
+  thread                    =                   1; 
   data_mock_flag            =                   0;          // analysis of VIPERS data or mock catalogues.       
   
   fieldFlag                 =       atoi(argv[1]);
@@ -94,13 +96,13 @@ int main(int argc, char **argv){
 
   fkpPk                     =    8000.0;                 // [h^-1 Mpc]^3.
 
-  fft_size                  =       512;                 // Worker 46 works up to 1024. 
+  fft_size                  =       256;                 // Worker 46 works up to 1024. 
   
   logk_min                  =      -2.0;
   logk_max                  =   0.60206;                 // k = 4 hMpc^{-1}.
   
-  CatalogNumber             =       306;                 // Total number of HOD mocks.
-
+  CatalogNumber             =       154;                 // Total number of HOD mocks.
+    
   
   start_walltime();
 
@@ -130,10 +132,12 @@ int main(int argc, char **argv){
   
   regress set[3] = {flat, half, quart};
   int     d0s[5] = {2, 4, 6, 10, 1000};
+
+  int mock_end   = atoi(argv[4]) + atoi(argv[5]) > 154 ? 154 : atoi(argv[4]) + atoi(argv[5]);
   
   walltime("All prep. done");
-  
-  for(loopCount=1; loopCount<2; loopCount++){            
+
+  for(loopCount=atoi(argv[4]); loopCount<mock_end; loopCount++){            
     sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
 
     CatalogueInput_500s(); // mocks 1 to 153 are independent. 
@@ -157,19 +161,22 @@ int main(int argc, char **argv){
     
     calc_clipping_weights(); 
     
+    walltime("Clipping weights done.");
+    
     // print_metd0();
     
     rand_newchi_newbasis();
-
+    
     // assign_randbox();
+    
+    // fft_qellk(&flat);
+    
     
     calc_bare_fkpweights(); // fkp_weights in units of alpha. 
     
-    bare_shot(); // calc. of shot noice in units of (d0 dependent) alpha.
-    
     printf("\n\n");
     
-    for(int m=0; m<1; m++){
+    for(int m=0; m<5; m++){
       d0 = d0s[m];
       
       set_clipping_weights(); // unity weights for d0=1000, else load. 

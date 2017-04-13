@@ -121,15 +121,15 @@ double splint_VIPERS_maskDec(double r){
 double splint_VIPERS_maskMultipoles(double r, int transformOrder){
   switch(transformOrder){
   case 0:
-    return  splint_VIPERS_maskMono(r);  
-  case 2:
-    return  splint_VIPERS_maskQuad(r);
+    return  splint_VIPERS_maskMono(r); break;  
+  case 2:    
+    return  splint_VIPERS_maskQuad(r); break;
   case 4:
-    return  splint_VIPERS_maskHex(r);
+    return  splint_VIPERS_maskHex(r);  break; 
   case 6:
-    return  splint_VIPERS_maskOct(r);
+    return  splint_VIPERS_maskOct(r);  break;
   case 8:
-    return  splint_VIPERS_maskDec(r);
+    return  splint_VIPERS_maskDec(r);  break;
     // case 10:
     //   return  splint_VIPERS_maskDodeca(r);
   }
@@ -190,11 +190,13 @@ int prep_VIPERS_maskMultipoles(){
 
   sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
 
+  printf("\n\nQ-multipoles: %s", filepath);
+  
   sprintf(hihiRes_filepath, "%s_hihiRes_hex.dat", filepath);
   sprintf(  hiRes_filepath, "%s_hiRes_hex.dat",   filepath);
   sprintf(  loRes_filepath, "%s_loRes_hex.dat",   filepath);    
 
-  //** Super high resolution counts for r ~ 1. **// 
+  //-- Super high resolution counts for r ~ 1. --// 
   inputfile = fopen(hihiRes_filepath, "r");
 
   line_count(inputfile, &VIPERS_mask_lineNo_hihi);
@@ -321,12 +323,12 @@ int prep_VIPERS_maskMultipoles(){
   spline(VIPERS_maskr_lo, VIPERS_maskHex_lo,  VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskHex2D_lo);
   spline(VIPERS_maskr_lo, VIPERS_maskOct_lo,  VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskOct2D_lo);
   spline(VIPERS_maskr_lo, VIPERS_maskDec_lo,  VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskDec2D_lo);
-    
+  
   // Print and calculate k-space multipoles. 
   print_windowCorrfn();
     
   prepVIPERS_kSpaceMultipole(); // for integral constraint. 
-    
+  
   return 0;
 }
 

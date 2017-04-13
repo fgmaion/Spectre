@@ -37,15 +37,31 @@ int prep_r2c_modes(regress* inst, double scaling){
   int i, jj, kk, dummy;
   
   prep_sinc_factors(scaling*fund_kz, scaling*zNy);
-   
-  // r2c returns half the modes on the direction in which overdensity changes first, i.e. x. // collapse(3)
-  // #pragma omp parallel for private(Index,dummy,k,j,i, k_x,k_y,k_z,kSq,kmodulus,mu)  shared(logk_min,logk_interval,n0,n1,nx,fund_kx,fund_ky,fund_kz,xNy,yNy,zNy) if(thread == 1)
+
+  walltime("R2C start:");
+
+  double       Sum_Li[KBIN_NO];
+  double      Sum_Li2[KBIN_NO];
+  double       mean_k[KBIN_NO];
+  
+  int    modes_perbin[KBIN_NO];
+
+  for(j=0; j<KBIN_NO; j++){
+    Sum_Li[j]       = 0.0;
+    Sum_Li2[j]      = 0.0;
+    mean_k[j]       = 0.0;
+
+    modes_perbin[j] = 0;
+  }
+  
+  // r2c returns half the modes on the direction in which overdensity changes first, i.e. x.
+  #pragma omp parallel for reduction(+: Sum_Li[:KBIN_NO], Sum_Li2[:KBIN_NO], modes_perbin[:KBIN_NO], mean_k[:KBIN_NO]) private(Index, dummy, k, j, i, kk, jj, k_x, k_y, k_z, kSq, kmodulus, mu) if(thread == 1)
   for(k=0; k<n0; k++){
-                  kk   =   k;
-    if(k > n0/2)  kk  -=  n0;
-    
     for(j=0; j<n1; j++){
-                    jj  =  j;
+      kk = k;
+      jj = j;
+
+      if(k > n0/2)  kk -= n0;
       if(j > n1/2)  jj -= n1;
       
       for(i=0; i<nx; i++){
@@ -63,37 +79,52 @@ int prep_r2c_modes(regress* inst, double scaling){
         inst->kLi[Index]                       = gsl_sf_legendre_P2(mu);  // L_2 = 0.5*(3.*mu**2 -1.); independent of Jenkins's folding. 
 
         // printf("\n%.6lf", inst->kLi[Index]);
-        
+       
         inst->kM2[Index]                       = sinc_factors[k];  // Computes \sinc(x) = \sin(\pi x) / (\pi x).
         inst->kM2[Index]                      *= sinc_factors[j];
         inst->kM2[Index]                      *= sinc_factors[i];
         
-        inst->kM2[Index]                       = pow(inst->kM2[Index], 1.0);  // Correct mass assignment of randoms; cic = 2, ngp = 1.
+        // inst->kM2[Index]                    = pow(inst->kM2[Index], 1.0);  // Correct mass assignment of randoms; cic = 2, ngp = 1.
 
         // printf("\n%.6lf", inst->kM2[Index]);
         
         dummy                                  = (int)  floor((log10(kmodulus) - logk_min)/logk_interval);
         
-        // Needs properly fixed.  Discarding zero index info.
+        // Modes < Chi sq. kmin are added to last binning element. Could be better. 
         //                                     if                                            then    else
         inst->kind[Index]                      = ((dummy >= 0) && (dummy < KBIN_NO)) ? dummy : (KBIN_NO - 1);
 
         // printf("\n%d %d %d \t %.6lf \t %.6lf \t %d", k, j, i, fund_kz, kmodulus, inst->kind[Index]);
-                
+          
         // Latest Open MP: reduction on array elements.  Each available mode has an index in the binning array.
-        inst->Sum_Li[inst->kind[Index]]       += inst->kLi[Index];  // Seems to add up to zero numerically.
-        inst->Sum_Li2[inst->kind[Index]]      += inst->kLi[Index]*inst->kLi[Index];
+        Sum_Li[inst->kind[Index]]             += inst->kLi[Index];  // Seems to add up to zero numerically.
+        Sum_Li2[inst->kind[Index]]            += inst->kLi[Index]*inst->kLi[Index];
 
         // printf("\n%.6lf", inst->Sum_Li2[inst->kind[Index]]);
         
-        inst->modes_perbin[inst->kind[Index]] += 1;
+        modes_perbin[inst->kind[Index]]       += 1;
       
-        inst->mean_modk[inst->kind[Index]]    += kmodulus;
+        mean_k[inst->kind[Index]]             += kmodulus;
         
         // printf("\n%d \t %.4lf \t %.4lf \t %d", Index, inst->kLi[Index], inst->kM2[Index], inst->kind[Index]);
       }
     }
   }
+
+  for(j=0; j<KBIN_NO; j++){
+    inst->Sum_Li[j]       = Sum_Li[j];
+
+    inst->Sum_Li2[j]      = Sum_Li2[j];
+
+    inst->modes_perbin[j] = modes_perbin[j];
+
+    inst->mean_modk[j]    = mean_k[j];
+
+    // printf("\nHERE:%lf \t %lf \t %lf \t %d", mean_k[j], Sum_Li[j], Sum_Li2[j], modes_perbin[j]);
+    // printf("\nHERE:%lf \t %lf \t %lf \t %d", inst->mean_modk[j], inst->Sum_Li[j], inst->Sum_Li2[j], inst->modes_perbin[j]);
+  }
+
+  walltime("R2C end:");
   
   for(j=0; j<KBIN_NO; j++){
     inst->mean_modk[j]  /= inst->modes_perbin[j];

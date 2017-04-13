@@ -26,6 +26,8 @@ int load_withfolding(char filepath[]){
   char foldedfilepath[200];
 
   sprintf( firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, lo_zlim, hi_zlim);
+  // sprintf( firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, lo_zlim, hi_zlim);
+
   sprintf(foldedfilepath, "%s_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, lo_zlim, hi_zlim);
 
   inputfile = fopen(firstfilepath, "r");
@@ -61,8 +63,9 @@ int load_mock(int mockNumber){
   // d0 = {1000, 10, 6}, Ps = {277.16, 243.944925, 208.99925}.  Determined from Jf_8 results.
 
   sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock_%03d", covariance_mocks_path, d0, fieldFlag, mockNumber);
-
-  printf("\n\n%s", filepath);
+  // sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock_%d", covariance_mocks_path, d0, fieldFlag, mockNumber);
+  
+  // printf("\n\n%s", filepath);
   
   if(ChiSq_kmax <= jenkins_fold_kjoin){
     // printf("\n\nLoading mock without folding");

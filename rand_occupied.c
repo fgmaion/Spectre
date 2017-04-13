@@ -53,17 +53,18 @@ int set_randoccupied(){
 
   set_cnst_nbar(); // set pt2nz and recalculate spline for inverse nbar.  
 
+  #pragma omp parallel for private(j, F, x2, z2) if(thread == 1)
   for(j=0; j<rand_number; j++){
-    // no rotation.
-    F              = gsl_rng_uniform(gsl_ran_r);  // Chi limits satisfied by construction.
-
+    // thread-safe 
+    drand48_r(&randBuffers[omp_get_thread_num()], &F);  // No rotation. Chi limits satisfied by construction. 
+    
     rand_chi[j]    = inverse_cumulative_nbar(F);
 
     x2             =  rand_chi[j]*cos(rand_ra[j])*cos(rand_dec[j]);
     z2             = -rand_chi[j]*sin(rand_dec[j]);
 
-    rand_x[j]      =      -sin(c_dec)*x2  - cos(c_dec)*z2;
-    rand_z[j]      =       cos(c_dec)*x2  - sin(c_dec)*z2;
+    rand_x[j]      = -sin(c_dec)*x2 - cos(c_dec)*z2;
+    rand_z[j]      =  cos(c_dec)*x2 - sin(c_dec)*z2;
 
     rand_y[j]      =  rand_chi[j]*sin(rand_ra[j])*cos(rand_dec[j]);
 
@@ -90,7 +91,8 @@ int set_randoccupied(){
   printf("\nx: %.1lf \t %.1lf h^-1 Mpc, dx: %.6lf h^-1 Mpc", min_x, max_x, dx);
   printf("\ny: %.1lf \t %.1lf h^-1 Mpc, dy: %.6lf h^-1 Mpc", min_y, max_y, dy);
   printf("\nz: %.1lf \t %.1lf h^-1 Mpc, dz: %.6lf h^-1 Mpc", min_z, max_z, dz);
-  
+
+  // #pragma omp parallel for private(j, xlabel, ylabel, zlabel, boxlabel) if(thread == 1)
   for(j=0; j<rand_number; j++){
     xlabel      = (int) floor((rand_x[j] - min_x)/dx);
     ylabel      = (int) floor((rand_y[j] - min_y)/dy);
@@ -113,14 +115,13 @@ int set_randoccupied(){
 
   convergence  = 100.;
 
-  //while(convergence > 5.0){
-  while(convergence > 0.01){
+  while(convergence > 0.01){   
+    // #pragma omp parallel for private(j, F, x2, z2, xlabel, ylabel, zlabel, boxlabel) if(thread == 1)
     for(j=0; j<rand_number; j++){
-      // no rotation.
-      F              = gsl_rng_uniform(gsl_ran_r);  // Chi limits satisfied by construction.
-
+      drand48_r(&randBuffers[omp_get_thread_num()], &F);
+    
       rand_chi[j]    = inverse_cumulative_nbar(F);
-
+      
       x2             =  rand_chi[j]*cos(rand_ra[j])*cos(rand_dec[j]);
       z2             = -rand_chi[j]*sin(rand_dec[j]);
 
@@ -132,22 +133,22 @@ int set_randoccupied(){
       rand_x[j]     +=  stefano_trans_x;  // Translate to fit in the box. P(k) unaffected.
       rand_y[j]     +=  stefano_trans_y;
       rand_z[j]     +=  stefano_trans_z;
-
+      
       xlabel         = (int) floor((rand_x[j] - min_x)/dx);
       ylabel         = (int) floor((rand_y[j] - min_y)/dy);
       zlabel         = (int) floor((rand_z[j] - min_z)/dz);
 
       boxlabel       = (int) xlabel + n2*ylabel + n2*n1*zlabel;
-      
+    
       if(rand_occupied[boxlabel] <  1){      
-        rand_occupied[boxlabel]  =  1;  // binary array, is surveyed or not
+        rand_occupied[boxlabel]  = 1;  // binary array, is surveyed or not
 
-        number_occupied         +=  1;
+        number_occupied         += 1;
       }
     }
-
+  
     newvol      = dx*dy*dz*number_occupied/pow(10., 9.);
-
+    
     convergence = 100.*(newvol-oldvol)/newvol;
 
     accuracy    = 100.*(truvol-newvol)/truvol;
@@ -156,7 +157,7 @@ int set_randoccupied(){
     
     oldvol = newvol;
   }
-
+  
   // print_randoccupied();
 
   // roughly 20% of rand_occupied is empty.

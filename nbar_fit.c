@@ -2,11 +2,13 @@ double CSR(double z){
   return 0.5*(1. - erf(17.465*(0.424 - z)));
 }
 
+
 double model_NzGaussian(double z, double lnA, double z0, double sigma){
   double A = exp(lnA);
 
   return A*CSR(z)*exp(-pow((z - z0)/sigma, 2.));
 }
+
 
 double leastSquares(const gsl_vector *v, void *params){
   double  lnA, z0, sigma, z_minfit; 

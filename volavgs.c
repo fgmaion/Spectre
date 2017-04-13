@@ -63,13 +63,15 @@ double calc_galavg_chi(){
 }
 
 
-double chiSq_fkpweight(double chi){
-  return chi*chi*pow((*pt2nz)(chi)*fkpPk/(1. + (*pt2nz)(chi)*fkpPk), 2.);
+double chiSq_fkpweight2(double chi){
+  double nbar = (*pt2nz)(chi);
+
+  return chi*chi*pow(nbar/(1. + nbar*fkpPk), 2.);
 }
 
 
 double calc_volavg_fkpweights(){
-  double volavg_fkpweights     =  qromb(&chiSq_fkpweight, loChi, hiChi);
+  double volavg_fkpweights = qromb(&chiSq_fkpweight2, loChi, hiChi);
 
   return volavg_fkpweights;
 }
