@@ -5,10 +5,12 @@
 #include "/home/mjw/Aux_functions/Aux_functions.c"
 
 #include "header.h"
+#include "a11_calc.h"
 #include "FFT_log.h"
 #include "header_W2.h"
 #include "header_chi2.h"
 #include "struct_regress.h"
+// #include "struct_multipoles.h"
 #include "cosmology_planck15.h"
 
 #include "AgeOftheUniverse.c"
@@ -19,32 +21,37 @@
 #include "KaiserMultipoles.c"
 #include "KaiserLorentzMultipoles.c"
 #include "FFT_log.c"
-#include "VIPERS_kwindow.c"
-#include "VIPERS_window.c"
-#include "VIPERS_jwindow.c"
+#include "viperskwindow.c"
+#include "viperswindow.c"
+#include "vipersjwindow.c"
 #include "FFTlog_vipers_clipping.c"
 #include "toymodel_pk_xi.c"
 #include "matter_pk.c"
-#include "A11_vals.c"
+#include "a11_vals.c"
+#include "a11_calc.c"
 #include "get_allkvals.c"
 #include "MultipoleCovariance_eigenvecs.c"
 #include "MultipoleCovariance.c"
 #include "ChiSq_input.c"
 #include "calc_model.c"
 #include "ChiSq_minimisation.c"
+#include "onedposteriors.c"
 #include "posteriors_1D.c"
-// #include "Alcock_Paczynski.c"
+#include "clip_icc.c"
+#include "lock_files.c"
+// #include "Alcock_Paczynski.c" // app_sig8 needs removed. 
 // #include "Ruiz.c"
 // #include "combining_clipped_fsig8.c"
 
 
 int main(int argc, char **argv){  
+  thread                    =    1;
   data_mock_flag            =    0;  // analysis of VIPERS data or mock catalogues. 
   
   sprintf(root_dir,              "/home/mjw/HOD_MockRun");
 
   sprintf(vipersHOD_dir,         "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); 
-  sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_4");
+  sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_4"); 
   sprintf(maskmultipoles_path,   "/home/mjw/HOD_MockRun/W1_Spectro_V7_4");
 
   d0                        =       atoi(argv[1]);
@@ -52,6 +59,8 @@ int main(int argc, char **argv){
   lo_zlim                   =       atof(argv[3]);   // previously 0.6<z<0.9, 0.7<z<1.1
   hi_zlim                   =       atof(argv[4]);
   ChiSq_kmax                =       atof(argv[5]);
+
+  // printf("\n%d \t %d \t %.1lf \t %.1lf \t %.2lf", d0, fieldFlag, lo_zlim, hi_zlim, ChiSq_kmax);
   
   W1area                    =              10.692;   // Nagoya v7 - overlapping Samhain v7; v6 and v7 has identical area. 
   W4area                    =               5.155;   // Don't move!
@@ -88,15 +97,15 @@ int main(int argc, char **argv){
   min_fsigma8               =      0.05;                  // Priors on the model params.  
   max_fsigma8               =      0.80;
 
-  min_velDisperse           =      0.05;                  // CHANGED FROM 0.00 13/02/2017
+  min_velDisperse           =      0.00;                  // CHANGED FROM 0.00 13/02/2017
   max_velDisperse           =      6.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
   */
   
   min_bsigma8               =      0.05;                  // 22/02/2017
-  max_bsigma8               =      1.50;                  // 
-                                                          //
-  min_fsigma8               =      0.05;                  //
-  max_fsigma8               =      1.50;
+  max_bsigma8               =      3.50;                   
+                                                          
+  min_fsigma8               =      0.05;                  
+  max_fsigma8               =      1.80;
 
   min_velDisperse           =      0.05;                  // 
   max_velDisperse           =     15.00;                  //   
@@ -112,15 +121,15 @@ int main(int argc, char **argv){
 
   paramNumber               =       3.0;  // # of fitted params. -> dof in X^2. 
 
-   Res                      =        16;  // Likelihood resolution [voxel number].
-  dRes                      =      16.0;  // Previously 16: 13/02/17
+   Res                      =        32;  // Likelihood resolution [voxel number].
+  dRes                      =      32.0;  // Previously 16: 13/02/17
 
    Res_ap                   =         1;  // Resoltuion in AP.
   dRes_ap                   =       1.0;
 
   FFTlogRes                 =       768;  // FFTlogRes = 4096;
-
-  // k range for measurements. 
+  // FFTlogRes              =      4096;
+  
   logk_min                  =      -2.0;
   logk_max                  =   0.60206;  // k = 4 hMpc^{-1}.
   
@@ -144,15 +153,12 @@ int main(int argc, char **argv){
 
   // fftw_plan_with_nthreads(omp_get_max_threads()); // Maximum number of threads to be used; use all openmp threads available. 
   
-  //-- Model calc. --//
   comovDistReshiftCalc();  // Cosmology from cosmology_planck2015.h or cosmology_valueaddedmocks.h// Selection parameters.
-
-  // inputHODPk();      //  Must match Cosmology in cosmology_planck2015.h, or cosmology_valueaddedmocks.h
-  inputLinearPk();      //  This is NOT automatically ensured.               
   
-  // assign_chisq_kmaxes(); // Problem: submatrix of A is not represented by a submatrix in A^-1.
+  // inputHODPk();         //  Must match Cosmology in cosmology_planck2015.h, or cosmology_valueaddedmocks.h
+  inputLinearPk();         //  This is NOT automatically ensured.               
   
-  prep_FFTlog_memory(); // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
+  prep_FFTlog_memory();    // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
   
   set_FFTlog(FFTlogRes, pow(10., -10.), pow(10., 14.), 1., velDispersion);  // assigns values to mono_config etc. 
   
@@ -160,54 +166,55 @@ int main(int argc, char **argv){
   
   prep_VIPERS_jmaskMultipoles();
   
-  precompute_vipers_clipping_model(FFTlogRes);  
-
-  get_allkvals(1);    // all kVals, ignoring ChiSq_kmin and ChiSq_kmax, but including folding. 
-
-  allkvals_matchup(); // Match all available kVals to FFTlog modes; not just those up to ChiSq_kmax. 
-
-  set_chiSq_intervals(); // set e.g. fsig8 interval = (max - min)/interval.
+  precompute_vipers_clipping_model(FFTlogRes);  // Computes P_R(k), W_0(r), ..., \tilde W_0(k), ..., and \tilde W_0(k) for the joint field.   
   
-  // default_params();
+  get_allkvals(1);    // all kVals, ignoring ChiSq_kmin and ChiSq_kmax, but including folding. 
+  
+  allkvals_matchup(); // Match all available kVals to FFTlog modes; not just those up to ChiSq_kmax. 
+  
+  set_chiSq_intervals(); // set e.g. fsig8 interval = (max - min)/interval.
 
+  // default_params();
   // model_compute(0, 0, 0, 0, 0);
   
-  // calc_models();  
-  
-  // -- Set up Likelihood grid -- //
   assign_LikelihoodMemory();  // Assigns memory for xdata, ydata, xtheory, ytheory, ChiSqGrid.
   
-  // set_models();
+  prep_a11(153, 1, &clipmono_amp, &clipshot_amp);
   
-  // -- Covariance matrix -- //
-  load_CovarianceMatrix(153, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock.
-  /*
-  // -- Match model to mocks --//
+  load_CovarianceMatrix(153, 1, clipshot_amp); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock. 
+
+  delete_lockfile();
+  
+  if(ChiSq_kmax == 0.2)  calc_models();
+
+  set_models();
+  
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
   
   cut_xtheory_bykmax();
   
-  // -- Calc. chi sqs. --//
   double maxL_fsig8, maxL_sigv, maxL_bsig8;
-
+  
   sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", root_dir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
-
+  
   output = fopen(filepath, "w");
-
+  
   walltime("Walltime at start of chi^2 calc.");
   
-  for(int ab=1; ab<154; ab++){
-    calc_ChiSqs(ab);
+  for(int ab=1; ab<153; ab++){
+    calc_ChiSqs(ab, clipshot_amp); // passed to load_mock.
+    
+    set_minChiSq();
+    
+    calc_onedposteriors(&maxL_fsig8, &maxL_bsig8, &maxL_sigv);
 
-    maxL_sigv  = calc_velDispPosterior();
-    maxL_fsig8 = calc_fsigma8Posterior();
-    maxL_bsig8 = calc_bsigma8Posterior();
+    printf("\n%lf \t %lf \t %lf", maxL_fsig8, maxL_bsig8, maxL_sigv);
     
     fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
   }
   
   fclose(output);
-  */
+  
   walltime("Wall time at finish");
 
   // MPI_Finalize();

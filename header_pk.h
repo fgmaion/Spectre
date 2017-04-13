@@ -7,6 +7,14 @@ char covariance_mocks_path[200];
 int    data_mock_flag;
 int    thread; // Multi-thread FFTw, but 1 means multithread useful loops aswell.
 
+int    thread_no;
+
+// -- thread safe random number streams. --//
+typedef struct drand48_data drand48_data;
+
+drand48_data* randBuffers;
+// struct drand48_data randBuffers
+
 // r2c or c2c arrays/ 
 int     fft_size;
 
@@ -76,14 +84,16 @@ int          accepted_rand = 0;
 
 double       fkp_accepted_rand = 0.0;
 
-double*      rand_ra     = NULL;
-double*      rand_dec    = NULL;
-double*      rand_chi    = NULL;
-double*      rand_x      = NULL;  // Really need x,y,z?
-double*      rand_y      = NULL;
-double*      rand_z      = NULL;
-double*      rand_weight = NULL;
-double*      rand_rng    = NULL;
+double*      rand_ra         = NULL;
+double*      rand_dec        = NULL;
+double*      rand_chi        = NULL;
+double*      rand_x          = NULL;  // Really need x,y,z?
+double*      rand_y          = NULL;
+double*      rand_z          = NULL;
+double*      rand_weight     = NULL;
+double*      rand_rng        = NULL;
+double*      clip_randweight = NULL;
+int*         rand_box        = NULL; 
 
 double bare_rand_shot, bare_gal_shot;
 

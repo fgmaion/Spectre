@@ -1,8 +1,19 @@
+int vollim_cutbyMB(double lim){
+  for(j=0; j<Vipers_Num; j++){
+    if(M_B[j] > lim){
+      Acceptanceflag[j]  = false;
+    }
+  }
+
+  return 0;
+}
+
+
 int assignAcceptance(){
   for(j=0; j<Vipers_Num; j++){
     Acceptanceflag[j]  = false;
     
-    if((lo_zlim<=gal_z[j]) && (gal_z[j]<=hi_zlim)){
+    if((lo_zlim <= gal_z[j]) && (gal_z[j] <= hi_zlim)){
       if(data_mock_flag == 1){
         if(dec[j] >= -5.97)  Acceptanceflag[j]  = true;  // dec problem in mocks; cut data to have the same boundary; should specify W4 is not cut.  
       }
@@ -45,23 +56,36 @@ int assignAcceptance_rand(){
 }
 
 
+int accepted_gal(){
+  accepted      =   0;
+
+  for(j=0; j<Vipers_Num; j++){
+    if(Acceptanceflag[j] == true){
+      accepted           += 1;
+    }
+  }
+  
+  return 0;
+}
+
+
 int alpha_calc(){
    accepted      =   0;
   daccepted_gals = 0.0;
 
   for(j=0; j<Vipers_Num; j++){
     if(Acceptanceflag[j] == true){
-      accepted         += 1;
+      accepted           += 1;
 
-      // daccepted_gals   += 1./sampling[j];
-
-      daccepted_gals   += clip_galweight[j]/sampling[j]; //  13/05/16.
+      // daccepted_gals  += 1./sampling[j];
+      daccepted_gals     += clip_galweight[j]/sampling[j]; //  13/05/16.
     }
   }
 
   alpha = 1.*daccepted_gals/accepted_rand;
   
-  printf("\nInfo: d0=% 5d;  Total number of galaxies on input: %d, accepted: %d, accepted(weighted): % 6.2lf. (1./alpha): %.9lf; FKP norm: %.6lf", d0, Vipers_Num, accepted, daccepted_gals, 1./alpha, sqrt(alpha)*bare_fkp_norm);
+  printf("\nInfo: d0=% 5d;  Total number of galaxies on input: %d, accepted: %d, accepted(weighted): % 6.2lf. (1./alpha): %.9lf; FKP norm: %.6lf", d0, Vipers_Num,
+                                                                                                                   accepted, daccepted_gals, 1./alpha, sqrt(alpha)*bare_fkp_norm);
   
   return 0;
 }

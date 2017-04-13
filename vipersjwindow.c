@@ -337,9 +337,6 @@ int prep_VIPERS_jmaskMultipoles(){
     spline(VIPERS_jmaskr_lo, VIPERS_jmaskDec_lo,  VIPERS_jmask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_jmaskDec2D_lo);
     
     print_jwindowCorrfn();
-
-    // for integral constraint.                                                                                                                                                              
-    // prepVIPERS_kSpaceMultipole();
     
     return 0;
 }

@@ -39,6 +39,7 @@ int prep_x2c(){
 
   regress_mem(&flat);
   regress_mem(&half);
+  regress_mem(&quart);
   
   walltime("Wall time after array malloc");
   

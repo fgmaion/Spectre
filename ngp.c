@@ -40,6 +40,23 @@ int ngp_assign(double x, double y, double z, double p){
       overdensity[indx + n2*indy + n1*n2*indz] += p;
 
       break;
+
+  case 2:
+    newlim     = AxisLimsArray[1][2]/(FOLDFACTOR*FOLDFACTOR);
+    nuCellSize =           xCellSize/(FOLDFACTOR*FOLDFACTOR);
+
+    x = fmod(x, newlim)/nuCellSize;
+    y = fmod(y, newlim)/nuCellSize;
+    z = fmod(z, newlim)/nuCellSize;
+
+    // same as "box label" co-ordinates.
+    indx = (int) trunc(x);
+    indy = (int) trunc(y);
+    indz = (int) trunc(z);
+
+    overdensity[indx + n2*indy + n1*n2*indz] += p;
+
+    break;
   }
     
   return 0;

@@ -21,6 +21,7 @@ double  smooth_radius;
 
 //-- Misc --//
 int     data_mock_flag;
+int     thread; // Multi-thread FFTw, but 1 means multithread useful loops aswell.
 
 int     order, nrotations, mono_order, allmono_order, all_order;
 
@@ -159,6 +160,7 @@ int           varcalc_index;
 int cnvldpk_zeropoint_index;
 
 double         clipmono_amp;
+double         clipshot_amp;
 double       clip_distcoeff;
 
 // -- Likelihood -- //

@@ -23,7 +23,6 @@ int prep_inverseCumulative_nbar(){
     // function, low limit, high limit, abs err., rel. err., max step number, workspace (memory), result, error.
     gsl_integration_qags(&F, loChi - 0.1, chi_cumulative_nbar[ii], 0, 1e-7, 1000, w, &result, &error);
 
-    // cumulative_nbar[i]  = qromb(&nbar_dV, loChi-100., chi_cumulative_nbar[i]);
     cumulative_nbar[ii]     = result;
 
     cumulative_nbar[ii]    /= norm;
