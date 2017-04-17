@@ -62,8 +62,8 @@ int main(int argc, char **argv){
 
   // printf("\n%d \t %d \t %.1lf \t %.1lf \t %.2lf", d0, fieldFlag, lo_zlim, hi_zlim, ChiSq_kmax);
   
-  W1area                    =              10.692;   // Nagoya v7 - overlapping Samhain v7; v6 and v7 has identical area. 
-  W4area                    =               5.155;   // Don't move!
+  W1area                    =              10.692;   // Nagoya v7 - overlapping Samhain v7; v6 and v7 has identical area; this is for the mocks -- with dec problem.  
+  W4area                    =               5.155;   // W1 data area is 10.763 deg^2.
 
   TotalW1W4area             =      W1area + W4area;
   

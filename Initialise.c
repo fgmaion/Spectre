@@ -49,6 +49,8 @@ int initi_dist_z(){
   hiChi                 = interp_comovingDistance(hi_zlim);
 
   printf("\n\nRedshift limits, lower bound: %.4lf \t %.4lf h^-1 Mpc, \n\t\t upper bound: %.4lf \t %.4lf h^-1 Mpc", lo_zlim, loChi, hi_zlim, hiChi);
+
+  printf("\n\nVolume: %.4lf [10^-3 (h^-1 Gpc)^3]", pow(10., 3.)*calc_vol());
   
   return 0;
 }

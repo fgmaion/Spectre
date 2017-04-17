@@ -114,14 +114,16 @@ int main(int argc, char **argv){
   
   Initialise();                                          // Initialise grid, fft params and random generation.
   
-  prep_x2c();                                            // Memory for overdensity, smooth_overdensity and H_k; either double or fftw_complex.
+  // prep_x2c();                                            // Memory for overdensity, smooth_overdensity and H_k; either double or fftw_complex.
   
-  prep_pkRegression();                                   
+  // prep_pkRegression();                                   
   
   prep_CatalogueInput_500s();                            // Requires max. number of gals of ALL mocks analysed simultaneously to be 'hard coded' in.  
   
   prep_nbar();
-  
+
+
+  /*
   load_rands_radec(1.0);
   
   prep_clipping_calc();
@@ -190,7 +192,7 @@ int main(int argc, char **argv){
       }
     }
   }
-  
+  */
   walltime("Wall time at finish");
 
   // MPI_Finalize();

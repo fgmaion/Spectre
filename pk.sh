@@ -21,8 +21,8 @@ test(){
   export mock_start=1   # not zero!
   export nmocks_perjob=1 
   export LOZ=0.6
-  export HIZ=0.8
-  export FIELDFLAG=4
+  export HIZ=0.9
+  export FIELDFLAG=1
 }
 
 test

@@ -26,7 +26,7 @@ double chisq_nbar(double chi){
 double calc_vol(){
   double result;
 
-  result = (pow(hiChi, 3.) - pow(loChi, 3.))/3.; // Vol. of sphere when stripped of 4pi steradians.  
+  result = (pow(hiChi, 3.) - pow(loChi, 3.))/3.; // Vol. of sphere when stripped of 4PI steradians.  
 
   // convert from h^-1 Mpc to Mpc. 
   // result *= pow(h, -3.);
@@ -35,8 +35,16 @@ double calc_vol(){
   // result *= 4.*pi;
 
   // VIPERS W1 area. 
-  if(fieldFlag == 1)  result *= sqdegs2steradians(W1area);  // printf("\n\nSTERADIANS: %.6lf", sqdegs2steradians(W1area));
-  if(fieldFlag == 4)  result *= sqdegs2steradians(W4area);
+  // if(fieldFlag == 1)  result *= sqdegs2steradians(W1area);  // printf("\n\nSTERADIANS: %.6lf", sqdegs2steradians(W1area));
+  // if (fieldFlag == 4)  result *= sqdegs2steradians(W4area);
+
+  // Rota et al.: ~ parent bounds.
+  // if(fieldFlag == 1)  result *= sqdegs2steradians(32.8125);  // printf("\n\nSTERADIANS: %.6lf", sqdegs2steradians(W1area));
+  // if(fieldFlag == 4)  result *= sqdegs2steradians(17.875);
+
+  // Rota et al.: ignoring gaps in a pointing, the area is 294.4 arcmin^2.  192 pointings to W1, 96 in W4.
+  if(fieldFlag == 1)  result *= sqdegs2steradians(15.701);  // printf("\n\nSTERADIANS: %.6lf", sqdegs2steradians(W1area));
+  if(fieldFlag == 4)  result *= sqdegs2steradians( 7.851);
   
   // Mpc to Gpc
   result *= pow(10., -9.);
