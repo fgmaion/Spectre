@@ -68,7 +68,7 @@ int calc_models(){
 
   // printf("\n\nCalculating models: \n");
   
-  sprintf(filepath, "%s/models/realspace_%s_d0_%d_W%d_%.1lf_%.1f_res_%d.cat", models_path, model_flag, d0, fieldFlag, lo_zlim, hi_zlim, Res);
+  sprintf(filepath, "%s/models/realspace_%s_sig8_%.3lf_d0_%d_W%d_%.1lf_%.1f_res_%d.cat", models_path, model_flag, camb_sig8, d0, fieldFlag, lo_zlim, hi_zlim, Res);
 
   output = fopen(filepath, "wb");
   
@@ -320,7 +320,9 @@ int print_model(double dfsigma8, double dbsigma8, double dvelDispersion, double 
 int set_models(){
   int ll, mm;
 
-  sprintf(filepath, "%s/models/realspace_%s_d0_%d_W%d_%.1lf_%.1f_res_%d.cat", models_path, model_flag, d0, fieldFlag, lo_zlim, hi_zlim, Res);
+  sprintf(filepath, "%s/models/realspace_%s_sig8_%.3lf_d0_%d_W%d_%.1lf_%.1f_res_%d.cat", models_path, model_flag, camb_sig8, d0, fieldFlag, lo_zlim, hi_zlim, Res);
+
+  printf("\n\nReading models: %s", filepath);
   
   inputfile = fopen(filepath, "rb");
 

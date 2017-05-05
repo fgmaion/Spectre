@@ -39,7 +39,7 @@ test(){
   rm -r /home/mjw/IO_lock/
 }
 
-## test
+test
 
 DIR="$HOME/HOD_MockRun/Scripts/"
 cd $DIR
@@ -65,7 +65,7 @@ for k in $(seq 0.2 0.2 0.8)
     
     export FILE=$outputdir"/chi2_log/chi2_d0_"$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ"_kmax_"$k".log"
       
-    ./chi2.o $d0 $FIELDFLAG $LOZ $HIZ $k > $FILE 2>&1
+    ./chi2.o $d0 $FIELDFLAG $LOZ $HIZ $k # > $FILE 2>&1
 
     if [[ $(tr -d "\r\n" < $FILE | wc -c) -eq 0 ]]; then 
       printf "\n%s" "$FILE" >> $outputdir/chi2_log/chi2_stderr.pbs

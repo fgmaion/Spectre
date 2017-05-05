@@ -87,6 +87,8 @@ double    alpha_padInterval;
 double  epsilon_padInterval;
 double        A11SqInterval;
 
+double    camb_sig8;
+
 double  min_fsigma8;
 double  max_fsigma8;
 

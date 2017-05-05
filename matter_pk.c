@@ -12,11 +12,9 @@ double splintLinearPk(double k){
   }
 }
 
-
 double linearPk_Gaussian(double k){
   return splintLinearPk(k)*exp(-0.5*pow(3.*k, 2.));
 }
-
 
 double splintHODpk(double k){
   // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec).
@@ -33,11 +31,9 @@ double splintHODpk(double k){
   }
 }
 
-
 double sigma8_integrand(double k, void* params){
   return pow(2.*pi, -3.)*splintHODpk(k)*4.*pi*k*k*spherical_tophat(k, 8.)*spherical_tophat(k, 8.);
 }
-
 
 double sigma8_calc(){
   gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
@@ -56,7 +52,6 @@ double sigma8_calc(){
   return sqrt(result);
 }
 
-
 double powerlaw(double k){
   return 2.0*pow(10., 4.)*pow(k/0.02, 4.00);
 }
@@ -70,16 +65,13 @@ int input_powerlaw_n4(){
   return 0;
 }
 
-
-int inputLinearPk(){
-  double sig8;
-  
+int inputLinearPk(){  
   sprintf(model_flag, "linear");
 
   pt2Pk = &splintLinearPk;
   
-  if((lo_zlim==0.6) && (hi_zlim<1.0))       sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/linear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
-  else if((lo_zlim==0.8) && (hi_zlim<1.3))  sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/linear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
+  if((lo_zlim==0.6) && (hi_zlim<1.0))                               sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/linear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
+  else if((lo_zlim == 0.8) || (lo_zlim == 0.9) && (lo_zlim < 1.3))  sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/linear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
 
   else{
     printf("\n\nError during input of real-space P(k) model.");
@@ -104,9 +96,9 @@ int inputLinearPk(){
   powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon); // Add power laws for k<<1 and k>>1 for sigma_8 calc.
   powerlaw_regression(pk_lineNo,    8.0,  10.0, 1., sdltk, sdltPk, &pk_hiA, &pk_hin);
 
-  sig8 = sigma8_calc();
+  camb_sig8 = sigma8_calc();
 
-  for(j=0; j<pk_lineNo; j++)  sdltPk[j] /= pow(sig8, 2.); // normalised to sigma_8 of unity. 
+  for(j=0; j<pk_lineNo; j++)  sdltPk[j] /= pow(camb_sig8, 2.); // normalised to sigma_8 of unity. 
   /*
   for(j=0; j<pk_lineNo; j++){
     if((0.02 < sdltk[j]) && (sdltk[j] < 0.4))  printf("\n%.6le \t %.6le", sdltk[j], sdltPk[j]);
@@ -126,16 +118,22 @@ int inputLinearPk(){
   return 0;
 }
 
-
 int inputHODPk(){
-  double sig8;
-
   sprintf(model_flag, "nonlinear");
 
   pt2Pk = &splintHODpk;
   
-  if((lo_zlim == 0.6) && (hi_zlim < 1.0))                           sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
-  else if((lo_zlim == 0.8) || (lo_zlim == 0.9) && (lo_zlim < 1.3))  sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
+  if((lo_zlim == 0.6) && (hi_zlim < 1.0)){
+    sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
+
+    camb_sig8 = 0.593;
+  }
+  
+  else if((lo_zlim == 0.8) || (lo_zlim == 0.9) && (lo_zlim < 1.3)){
+    sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
+
+    camb_sig8 = 0.518;
+  }
   
   else{
     printf("\n\nError for input of real-space P(k) model.");
@@ -162,9 +160,9 @@ int inputHODPk(){
   powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon);  // Add power laws for k<<1 and k>>1 for FFTlog calcs.    
   powerlaw_regression(pk_lineNo,    8.0,  10.0, 1., sdltk, sdltPk, &pk_hiA, &pk_hin);
 
-  sig8 = sigma8_calc();
+  // camb_sig8 = sigma8_calc();    // Linear sigma_8 is required.
 
-  sdltPk[j] /= pow(sig8, 2.); // normalised to unit sigma_8.
+  sdltPk[j] /= pow(camb_sig8, 2.); // normalised to unit sigma_8.
   
   spline(sdltk, sdltPk, pk_lineNo, 1.0e31, 1.0e31, sdlt2d);
 
@@ -188,7 +186,6 @@ int inputHODPk(){
   
   return 0;
 }
-
 
 int print_fsigma8(){
   double redshift;
@@ -236,11 +233,9 @@ int print_matterpk(){
     return 0;
 }*/
 
-
 double HODPk_Gaussian(double k){
     return  splintHODpk(k)*exp(-0.5*pow(3.*k, 2.));
 }
-
 
 double splint_maskedRSD_pk(double k){
     // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec). 
@@ -256,7 +251,6 @@ double splint_maskedRSD_pk(double k){
         return Interim;
     }
 }
-
 
 int set_maskedRSDpaper_pk(){
     sprintf(filepath, "%s/Data/HODTheoryPk/outdated_cosmology/cambExtendedPk_hod_20.00.dat", root_dir);
