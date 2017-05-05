@@ -1,4 +1,6 @@
 double unity(double chi){
+  (void) chi;
+
   return 1.;
 }
 
@@ -35,16 +37,16 @@ double calc_vol(){
   // result *= 4.*pi;
 
   // VIPERS W1 area. 
-  // if(fieldFlag == 1)  result *= sqdegs2steradians(W1area);  // printf("\n\nSTERADIANS: %.6lf", sqdegs2steradians(W1area));
-  // if (fieldFlag == 4)  result *= sqdegs2steradians(W4area);
+  if(fieldFlag == 1)  result *= sqdegs2steradians(W1area);  // printf("\n\nSTERADIANS: %.6lf", sqdegs2steradians(W1area));
+  if (fieldFlag == 4)  result *= sqdegs2steradians(W4area);
 
   // Rota et al.: ~ parent bounds.
   // if(fieldFlag == 1)  result *= sqdegs2steradians(32.8125);  // printf("\n\nSTERADIANS: %.6lf", sqdegs2steradians(W1area));
   // if(fieldFlag == 4)  result *= sqdegs2steradians(17.875);
 
   // Rota et al.: ignoring gaps in a pointing, the area is 294.4 arcmin^2.  192 pointings to W1, 96 in W4.
-  if(fieldFlag == 1)  result *= sqdegs2steradians(15.701);  // printf("\n\nSTERADIANS: %.6lf", sqdegs2steradians(W1area));
-  if(fieldFlag == 4)  result *= sqdegs2steradians( 7.851);
+  // if(fieldFlag == 1)  result *= sqdegs2steradians(15.701);  // printf("\n\nSTERADIANS: %.6lf", sqdegs2steradians(W1area));
+  // if(fieldFlag == 4)  result *= sqdegs2steradians( 7.851);
   
   // Mpc to Gpc
   result *= pow(10., -9.);
@@ -53,25 +55,9 @@ double calc_vol(){
 }
 
 
-double calc_volavg_chi(){
-  double vol            =  qromb(&chisq, loChi, hiChi);
+double chiSq_fkpweight2(double chi, void* p){
+  (void) p;
 
-  double volavg_chi     =  qromb(&chicubed, loChi, hiChi);
-
-  return volavg_chi/vol;
-}
-
-
-double calc_galavg_chi(){
-  double vol            =  qromb(&chisq_nbar, loChi, hiChi);
-
-  double volavg_chi     =  qromb(&chicubed_nbar, loChi, hiChi);
-
-  return volavg_chi/vol;
-}
-
-
-double chiSq_fkpweight2(double chi){
   double nbar = (*pt2nz)(chi);
 
   return chi*chi*pow(nbar/(1. + nbar*fkpPk), 2.);
@@ -79,7 +65,16 @@ double chiSq_fkpweight2(double chi){
 
 
 double calc_volavg_fkpweights(){
-  double volavg_fkpweights = qromb(&chiSq_fkpweight2, loChi, hiChi);
+  // Calculate cumulative nbar and splint its inverse.
+  gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
 
-  return volavg_fkpweights;
+  double result, error;
+
+  gsl_function F;
+
+  F.function = &chiSq_fkpweight2;
+
+  gsl_integration_qags(&F, loChi, hiChi, 0, 1e-7, 1000, w, &result, &error);
+  
+  return result;
 }

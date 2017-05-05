@@ -1,4 +1,4 @@
-int cic_assign(int rand_ordelta, double x, double y, double z, double p){
+int cic_assign(double x, double y, double z, double p){
   // Assigns an object at (x, y, z) into a 3D density grid with weight p using Cloud-in-Cell assignment. 
   // e.g xCellSize is the cell size in the x direction.  
 
@@ -7,7 +7,7 @@ int cic_assign(int rand_ordelta, double x, double y, double z, double p){
   
   double                   dx, dy, dz;
   double hx0, hy0, hz0, hx1, hy1, hz1;
-
+ 
   x = (x - AxisLimsArray[0][2])/xCellSize;
   y = (y - AxisLimsArray[0][1])/yCellSize;
   z = (z - AxisLimsArray[0][0])/zCellSize;

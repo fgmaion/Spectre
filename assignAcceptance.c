@@ -9,20 +9,41 @@ int vollim_cutbyMB(double lim){
 }
 
 
-int assignAcceptance(){
+int set_zcut(){
+  int number = 0;
+
   for(j=0; j<Vipers_Num; j++){
     Acceptanceflag[j]  = false;
     
     if((lo_zlim <= gal_z[j]) && (gal_z[j] <= hi_zlim)){
-      if(data_mock_flag == 1){
-        if(dec[j] >= -5.97)  Acceptanceflag[j]  = true;  // dec problem in mocks; cut data to have the same boundary; should specify W4 is not cut.  
-      }
-
-      else{
         Acceptanceflag[j]  = true;
+
+        number            +=    1;    
+    }
+  }
+
+  printf("\n\nGalaxies after z cut: %d -> %d", Vipers_Num, number);
+  
+  return 0;
+}
+
+
+int set_deccut(){
+  int number  = 0;
+  
+  for(j=0; j<Vipers_Num; j++){
+    if(Acceptanceflag[j] == true){
+      number += 1;
+
+      if(dec[j] <= -5.97){
+        Acceptanceflag[j]  = false;  // dec problem in mocks; cut data to have the same boundary; should specify W4 is not cut.
+
+        number            -=     1;
       }
     }
   }
+
+  printf("\n\nGalaxies after dec cut: %d -> %d", Vipers_Num, number);
   
   return 0;
 }

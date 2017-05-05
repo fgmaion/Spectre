@@ -50,12 +50,8 @@ double sigma8_calc(){
 
   gsl_integration_qags(&F, 0.0, 200., 0, 1e-7, 1000, w, &result, &error);
 
-  double Interim;
-
-  Interim = qromb(&sigma8_integrand, 0.0000001, 200.);
-
   // double precision handles %.15lf for initialisation, e.g. p = PI.
-  printf("\n\nsig_8: %.10lf (GSL) \t %.10lf (NR)", sqrt(result), sqrt(Interim));
+  printf("\n\nsig_8: %.10lf (GSL)", sqrt(result));
 
   return sqrt(result);
 }
@@ -138,15 +134,16 @@ int inputHODPk(){
 
   pt2Pk = &splintHODpk;
   
-  // sprintf(filepath, "%s/Data/500s/EisensteinHu_halofit_pk_%.2f.dat", root_dir, z_eff);    
-  if((lo_zlim == 0.6) && (hi_zlim < 1.0))       sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
-  else if((lo_zlim == 0.8) && (lo_zlim < 1.3))  sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
+  if((lo_zlim == 0.6) && (hi_zlim < 1.0))                           sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
+  else if((lo_zlim == 0.8) || (lo_zlim == 0.9) && (lo_zlim < 1.3))  sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
   
   else{
     printf("\n\nError for input of real-space P(k) model.");
 
     exit(EXIT_FAILURE);
   }
+
+  printf("\n\nLoading %s", filepath);
   
   inputfile  = fopen(filepath, "r");
     
@@ -167,8 +164,8 @@ int inputHODPk(){
 
   sig8 = sigma8_calc();
 
-  for(j=0; j<pk_lineNo; j++)  sdltPk[j] /= pow(sig8, 2.); // normalised to unit sigma_8.
-
+  sdltPk[j] /= pow(sig8, 2.); // normalised to unit sigma_8.
+  
   spline(sdltk, sdltPk, pk_lineNo, 1.0e31, 1.0e31, sdlt2d);
 
   powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon); // Add power laws for k<<1 and k>>1 for FFTlog calcs.
@@ -186,6 +183,8 @@ int inputHODPk(){
   // ln(a);                                                                                                                         
   // printf("\n\nz_eff: %.2f.  sigma_8(z_eff): %.4f. f(z_eff): %.4f. f(z_eff)*sigma_8(z_eff): %.4f.", 0.75, 0.593, f_Om_545(log(1./(1. + 0.75))), 0.593*f_Om_545(log(1./(1. + 0.75))));
   // printf("\nz_eff: %.2f.  sigma_8(z_eff): %.4f. f(z_eff): %.4f. f(z_eff)*sigma_8(z_eff): %.4f.", 1.05, 0.518, f_Om_545(log(1./(1. + 1.05))), 0.518*f_Om_545(log(1./(1. + 1.05))));
+
+  // for(j=0; j<pk_lineNo; j++)  printf("\n %.6le \t %.6le", sdltk[j], splintHODpk(sdltk[j] + 0.01));
   
   return 0;
 }

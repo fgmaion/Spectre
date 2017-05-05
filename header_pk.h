@@ -27,6 +27,7 @@ double* smooth_overdensity;
 fftw_complex* H_k;
 
 //-- embedding volume --// 
+double    lopad;
 double    TotalVolume         = 0.0;
 double    TotalSurveyedVolume = 0.0;
 
@@ -183,7 +184,7 @@ int     comovDistReshiftCalc();  // Prototyping should use voids, e.g. comovDist
 double  SolidAngleCalc(double decLowerBound, double decUpperBound, double raInterval);
 
 double  invert_StefanoBasis(double centreRA, double centreDec, double* xval, double* yval, double* zval);
-int     StefanoRotated(int Number, double centreRA, double centreDec, double xCoors[], double yCoors[], double zCoors[]);
+int     StefanoRotated(int Number, double centreDec, double xCoors[], double yCoors[], double zCoors[]);
 
 int     load_fastread_randomCats(int rand_number);
 
@@ -203,5 +204,8 @@ int     JenkinsFold(double original[], int lenArray, int axis);
 int     ApplyJenkins();
 
 int     PkCalc();
+int     print_nbarshot();
+
+int     set_rand_rng(void);
 
 // -- Pointers -- //

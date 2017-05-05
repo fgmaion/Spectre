@@ -8,8 +8,8 @@ int set_minChiSq(){
         // printf("\nchi sq: %.6lf", ChiSqGrid[k][j][i][00][00]);
         // printf("\nthread id = %d", omp_get_thread_num());
         
-        if(ChiSqGrid[k][j][i][00][00] < minChiSq){
-          minChiSq    = ChiSqGrid[k][j][i][00][00];
+        if(ChiSqGrid[k][j][i][0][0] < minChiSq){
+          minChiSq    = ChiSqGrid[k][j][i][0][0];
 
           minX2_fsig8 = min_fsigma8     + fsigma8Interval*k;
           minX2_bsig8 = min_bsigma8     + bsigma8Interval*k;

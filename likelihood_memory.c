@@ -1,20 +1,11 @@
 int assign_chisq_kmaxes(){
-  // [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
-
-  ChiSq_nkmaxes = 8;
+  ChiSq_nkmaxes  = 8;
 
   ChiSq_ikmaxes  = (int *)     malloc(8*sizeof(int));
   ChiSq_kmaxes   = (double *)  malloc(8*sizeof(double));
-  
-  ChiSq_kmaxes[0]  = 0.1;
-  ChiSq_kmaxes[1]  = 0.2;
-  ChiSq_kmaxes[2]  = 0.3;
-  ChiSq_kmaxes[3]  = 0.4;
-  ChiSq_kmaxes[4]  = 0.5;
-  ChiSq_kmaxes[5]  = 0.6;
-  ChiSq_kmaxes[6]  = 0.7;
-  ChiSq_kmaxes[7]  = 0.8;
 
+  for(j=0; j<8; j++)  ChiSq_kmaxes[j] = 0.1*(1 + j);  
+  
   // for(j=0; j<ChiSq_nkmaxes; j++)  printf("\nChi. sq. k_max: %.4lf", ChiSq_kmaxes[j]);  
     
   return 0;
@@ -87,7 +78,7 @@ int assign_LikelihoodMemory(){
 
 
 int assignCovMat(int mocks){
-  // Multipoles is a [CatalogNumber][hiMultipoleOrder][kBinNumb] object, where [x][][] corresponds to mock number, [][x][] corresponds to x e [Mono, Quad, Hex], [][][x] mid or mean k bin.
+  // Multipoles is a [CatalogNumber][kBinNumb] object, where [x][][] corresponds to mock number, [][x][] corresponds to x e [Mono, Quad, Hex], [][][x] mid or mean k bin.
    Multipoles                = (double **) malloc(mocks*sizeof(*Multipoles));
   dMultipoles                = (double **) malloc(mocks*sizeof(*dMultipoles));  // Decorrelated multipole moments measurements
         
@@ -123,19 +114,19 @@ int prep_FFTlog_memory(){
   pk_mu_prefactor  = malloc(FFTlogRes*sizeof(double));
   pk_mu_postfactor = malloc(FFTlogRes*sizeof(double));
 
-  FFTlog_Pk  = malloc(FFTlogRes*sizeof(double)); // Input P(k) interpolated to k's used by FFTlog calc.
-  FFTlog_W0  = malloc(FFTlogRes*sizeof(double)); // W_0(r) evaluated at FFTlog rvals.
-  FFTlog_W2  = malloc(FFTlogRes*sizeof(double));
-  FFTlog_W4  = malloc(FFTlogRes*sizeof(double));
-  FFTlog_W6  = malloc(FFTlogRes*sizeof(double));
+  FFTlog_Pk        = malloc(FFTlogRes*sizeof(double));  // Input P(k) interpolated to k's used by FFTlog calc.
+  FFTlog_W0        = malloc(FFTlogRes*sizeof(double));  // W_0(r) evaluated at FFTlog rvals.
+  FFTlog_W2        = malloc(FFTlogRes*sizeof(double));
+  FFTlog_W4        = malloc(FFTlogRes*sizeof(double));
+  FFTlog_W6        = malloc(FFTlogRes*sizeof(double));
 
-  FFTlog_W0_joint = malloc(FFTlogRes*sizeof(double)); // Joint W_0(r) evaluated at FFTlog rvals.
-  FFTlog_W2_joint = malloc(FFTlogRes*sizeof(double));
-  FFTlog_W4_joint = malloc(FFTlogRes*sizeof(double));
-  FFTlog_W6_joint = malloc(FFTlogRes*sizeof(double));
+  FFTlog_W0_joint  = malloc(FFTlogRes*sizeof(double)); // Joint W_0(r) evaluated at FFTlog rvals.
+  FFTlog_W2_joint  = malloc(FFTlogRes*sizeof(double));
+  FFTlog_W4_joint  = malloc(FFTlogRes*sizeof(double));
+  FFTlog_W6_joint  = malloc(FFTlogRes*sizeof(double));
 
-  FFTlog_Wk0 = malloc(FFTlogRes*sizeof(double)); // \tilde W_0(k) evaluated at FFTlog rvals.
-  FFTlog_Wk2 = malloc(FFTlogRes*sizeof(double)); // \tilde W_2(k) evaluated at FFTlog rvals.
+  FFTlog_Wk0       = malloc(FFTlogRes*sizeof(double)); // \tilde W_0(k) evaluated at FFTlog rvals.
+  FFTlog_Wk2       = malloc(FFTlogRes*sizeof(double)); // \tilde W_2(k) evaluated at FFTlog rvals.
   
   return 0;
 }

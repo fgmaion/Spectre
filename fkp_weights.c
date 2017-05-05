@@ -44,6 +44,8 @@ int calc_bare_fkpweights(){
 
 
 double veff_integrand(double chi, void* p){
+  (void) p;
+
   double nbar;
 
   nbar  = (*pt2nz)(chi);

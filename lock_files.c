@@ -1,7 +1,6 @@
 int delete_lockfile(){
-  int  status = 0; 
+  int    status = 0; 
 
-  char lockfile_path[200];
   char   sys_command[200];
 
   sprintf(sys_command, "rm -r /home/mjw/IO_lock;");

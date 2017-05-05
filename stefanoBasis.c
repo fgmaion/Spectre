@@ -1,11 +1,11 @@
-int StefanoBasis(int Num, double ra[], double dec[], double rDist[], double xCoor[], double yCoor[], double zCoor[]){
+int StefanoBasis(int Num, double ra[], double dec[], double xCoor[], double yCoor[], double zCoor[]){
   printf("\n\nAngular limits of galaxies: %.4lf < ra < %.4lf, %.4lf < dec < %.4lf", AcceptedMin(ra,  Acceptanceflag, Vipers_Num),  AcceptedMax(ra, Acceptanceflag, Vipers_Num),
                                                                                     AcceptedMin(dec, Acceptanceflag, Vipers_Num), AcceptedMax(dec, Acceptanceflag, Vipers_Num));  
   // Reflection applied in coordinate calc.  
   // StefanoReflection(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
   
   // Rotate the input co-ordinates such that the ra direction is aligned more or less with the y axis, dec direction with x, and redshift along z.
-  StefanoRotated(Vipers_Num, CentreRA, CentreDec, xCoor, yCoor, zCoor);
+  StefanoRotated(Num, CentreDec, xCoor, yCoor, zCoor);
   
   printf("\n\nGalaxies: accepted, inverted, rotated & translated");
 
@@ -59,18 +59,13 @@ double invert_StefanoBasis(double centreRA, double centreDec, double* xval, doub
 }
 
 
-int StefanoReflection(int Number, double centreRA, double centreDec, double xCoors[], double yCoors[], double zCoors[]){
-  for(j=0; j<Number; j++)  zCoors[j] *= -1.0;  // inversion through the xy plane.
-  
-  return 0;
-}
-
-
-int StefanoRotated(int Number, double centreRA, double centreDec, double xCoors[], double yCoors[], double zCoors[]){
+int StefanoRotated(int Number, double centreDec, double xCoors[], double yCoors[], double zCoors[]){
   double      x2, z2;
-  double c_ra, c_dec;
 
-  c_ra    =  centreRA*(pi/180.);
+  // double     c_ra;
+  // c_ra    =  centreRA*(pi/180.);
+
+  double       c_dec;
   c_dec   = centreDec*(pi/180.);
   
   // basis formed by: normal spherical co-ordinates subject to inversion through xy plane, then R1 and finally R2.

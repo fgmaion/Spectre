@@ -325,7 +325,7 @@ int prep_VIPERS_maskMultipoles(){
   spline(VIPERS_maskr_lo, VIPERS_maskDec_lo,  VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskDec2D_lo);
   
   // Print and calculate k-space multipoles. 
-  print_windowCorrfn();
+  // print_windowCorrfn();
     
   prepVIPERS_kSpaceMultipole(); // for integral constraint. 
   

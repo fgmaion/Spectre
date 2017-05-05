@@ -143,7 +143,7 @@ int set_FFTlog(int FFTlogRes, double loval, double hival, double beta, double ve
 
 
 int precompute_vipers_clipping_model(int FFTlogRes){
-  prep_kaiserLorentSpline();
+  // prep_kaiserLorentSpline();
 
   for(j=0; j<FFTlogRes; j++){    
     FFTlog_Pk[j]         = (*pt2Pk)(mono_config->krvals[j][0]);  // normalised to sigma_8 = 1.
@@ -160,6 +160,8 @@ int precompute_vipers_clipping_model(int FFTlogRes){
     FFTlog_W2_joint[j]   = splint_VIPERS_jmaskMultipoles(mono_config->krvals[j][1], 2);
     FFTlog_W4_joint[j]   = splint_VIPERS_jmaskMultipoles(mono_config->krvals[j][1], 4);
     FFTlog_W6_joint[j]   = splint_VIPERS_jmaskMultipoles(mono_config->krvals[j][1], 6);
+
+    // if(j % 10 == 0)  printf("\n%.6lf %.6lf %.6lf %.6lf %.6lf", FFTlog_Pk[j], FFTlog_W0[j], FFTlog_W2[j], FFTlog_Wk0[j], FFTlog_Wk2[j]);
   }
 
   for(i=0; i<mono_config->N;   i++){
@@ -315,7 +317,7 @@ return 0;
 int FFTlog_updatepk(FFTLog_config *mono, FFTLog_config *quad, FFTLog_config *hex, double beta, double velDispersion){
   int klo = 0; // kaiser Lorentz D^2 assumes 1000 element array.
 
-  double   ks;
+  double                           ks;
   double mu_0, mu_2, mu_4, mu_6, mu_8;
 
   for(i=0; i<mono->N; i++){

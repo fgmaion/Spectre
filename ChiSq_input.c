@@ -99,8 +99,10 @@ int load_mock(int mockNumber){
 int load_data(void){
   // sprintf(filepath, "%s/W1_Spectro_V7_2/data_v1.7/pk/d0_%d/W%d/data", root_dir, d0, fieldFlag);
   // sprintf(filepath, "%s/W1_Spectro_V7_2/data_v1.7/pk/old_d0_%d/W%d/data", root_dir, d0, fieldFlag);
-  sprintf(filepath, "%s/W1_Spectro_V7_3/data_v1.7/pk/d0_%d/W%d/data", root_dir, d0, fieldFlag);
+  // sprintf(filepath, "%s/W1_Spectro_V7_3/data_v1.7/pk/d0_%d/W%d/data", root_dir, d0, fieldFlag);
 
+  sprintf(filepath, "%s/data_v1.7/pk/d0_%d/W%d/data", covariance_mocks_path, d0, fieldFlag);
+  
   if(ChiSq_kmax <= jenkins_fold_kjoin){
     printf("\n\nLoading data without folding");
 
@@ -127,12 +129,5 @@ int load_data(void){
     else if(d0 ==    4.)  for(j=0; j<mono_order; j++) xdata[j] -= 177.75;
   }
   */
-  return 0;
-}
-  
-
-int set_meanmultipoles(){
-  for(j=0; j<order; j++) xdata[j] = MeanMultipoles[j];  
-  
   return 0;
 }

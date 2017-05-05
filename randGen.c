@@ -86,7 +86,7 @@ int randoms_maskGen(){
 
 
 int randoms_maskGen_GriddingError(){   
-    double xx, yy, zz, xerr, yerr, zerr; 
+    double xerr, yerr, zerr; 
     
     double scale;
     

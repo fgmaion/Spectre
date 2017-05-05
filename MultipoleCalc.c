@@ -18,6 +18,8 @@ int nosort_MultipoleCalc(regress* inst){
   rand_shot = bare_rand_shot*alpha;
   
   printf("\n\nShot noise: randoms %.4lf, galaxies %.4lf", rand_shot, gal_shot);
+
+  print_nbarshot();
   
   // clear arrays. 
   for(k=0; k<KBIN_NO; k++){
@@ -44,8 +46,8 @@ int nosort_MultipoleCalc(regress* inst){
 
         pk                           = pow(H_k[Index][0], 2.) + pow(H_k[Index][1], 2.);
 
-        // pk                       -= rand_shot;
-        // pk                       -=  gal_shot;  // Fit for constant shotnoise of galaxies when clipping
+        // pk                          -= rand_shot;
+        // pk                          -=  gal_shot;  // Fit for constant shotnoise of galaxies when clipping
 
         Sum_Pi[inst->kind[Index]]   += pk;
         Sum_PiLi[inst->kind[Index]] += pk*inst->kLi[Index];
@@ -78,8 +80,10 @@ int nosort_MultipoleCalc(regress* inst){
 
 
 int print_multipoles(regress* inst){
-  // sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/pk/d0_%d/W%d/mock_%03d_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, d0, fieldFlag, loopCount, lo_zlim, hi_zlim, 2*fold);
-  sprintf(filepath, "%s/W1_Spectro_V7_4/mocks_v1.7/pk/mask_pk/W%d/mock_%03d_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, fieldFlag, loopCount, lo_zlim, hi_zlim, 2*fold);
+  // sprintf(filepath, "%s/W1_Spectro_V7_5/mocks_v1.7/pk/mask_pk/W%d/mock_%03d_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, fieldFlag, loopCount, lo_zlim, hi_zlim, 2*fold);
+
+  if(data_mock_flag == 0) sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock_%03d_zlim_%.1lf_%.1lf_Jf_%d.dat", outputdir, d0, fieldFlag, loopCount, lo_zlim, hi_zlim, 2*fold);
+  if(data_mock_flag == 1) sprintf(filepath, "%s/data_v1.7/pk/d0_%d/W%d/data_zlim_%.1lf_%.1lf_Jf_%d.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim, 2*fold);
   
   output = fopen(filepath, "w");
 
@@ -89,5 +93,24 @@ int print_multipoles(regress* inst){
   
   fclose(output);
   
+  return 0;
+}
+
+int print_nbarshot(){
+  double  gal_shot = 0.0;
+  double rand_shot = 0.0;
+
+  gal_shot  =  bare_gal_shot/alpha;  // update with alpha factors.
+  rand_shot = bare_rand_shot*alpha;
+
+  if(data_mock_flag == 0) sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/mock_%03d_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, loopCount, lo_zlim, hi_zlim);
+  if(data_mock_flag == 1) sprintf(filepath, "%s/data_v1.7/pk_derivedprops/d0_%d/W%d/data_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
+
+  output = fopen(filepath, "w");
+
+  fprintf(output, "%le \t %le \n", gal_shot, rand_shot);
+
+  fclose(output);
+
   return 0;
 }

@@ -1,14 +1,16 @@
 int get_allkvals(int start){
   char   firstfilepath[200];
   char  foldedfilepath[200];
-
+  
   sprintf(filepath,      "%s/mocks_v1.7/pk/d0_%d/W%d/mock",   covariance_mocks_path, d0, fieldFlag);
   
   sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
   //sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
-  
-  inputfile  = fopen(firstfilepath, "r");
-  
+
+  inputfile = fopen(firstfilepath, "r");
+
+  if(inputfile == NULL)  printf("\n\n%s does not exist. Exiting", filepath);
+    
   line_count(inputfile, &lineNo);
   
   for(i=0; i<lineNo; i++){

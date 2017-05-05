@@ -43,7 +43,7 @@ njobs=$(echo $njobs | perl -nl -MPOSIX -e 'print floor($_);')
 
 echo "Optimum number of jobs: "$njobs "(for 8 proc per job)"
 
-nmocks=154
+nmocks=153
 nruns=4 # two fields, two z-slices. 
 
 njobs_perrun=$(python -c "import math; print int(math.floor($njobs/4))")

@@ -1,12 +1,11 @@
 int fft_qellk(regress* inst){    
   double      x2, z2;
-  double c_ra, c_dec;
+  double       c_dec;
   
   walltime("Start of Q2_ell(k) calc.");
 
   for(j=0; j<n0*n1*n2; j++)  overdensity[j] = 0.0;
 
-  c_ra    =  CentreRA*(pi/180.);
   c_dec   = CentreDec*(pi/180.);
   
   for(int kk=0; kk<5; kk++){

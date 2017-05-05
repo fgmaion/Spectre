@@ -1,4 +1,6 @@
 double vollim_nz(double chi){
+  (void) chi;
+
   return accepted/(pow(10., 9.)*calc_vol()); // Mpc^3
 }
 

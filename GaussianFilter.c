@@ -1,7 +1,7 @@
 int prep_filterfactors(void){
-  double xNy = pi/dx;
-  double yNy = pi/dy;
-  double zNy = pi/dz;
+  double xNy     = pi/dx;
+  double yNy     = pi/dy;
+  double zNy     = pi/dz;
 
   double funda_x = 2.*pi*pow(n2, -1.)*pow(dx, -1.);
   double funda_y = 2.*pi*pow(n1, -1.)*pow(dy, -1.);
@@ -15,10 +15,12 @@ int prep_filterfactors(void){
       k_z = funda_z*k;
       k_y = funda_y*j;
 
-      if(k_z > zNy)  k_z -= n0*funda_z;
-      if(k_y > yNy)  k_y -= n1*funda_y;
+      if(k_z > zNy)    k_z -= n0*funda_z;
+      if(k_y > yNy)    k_y -= n1*funda_y;
 
       for(i=0; i<nx; i++){
+        if(k_x > xNy)  k_x -= n2*funda_x;
+
         k_x   = funda_x*i;
 
         Index = k*n1*nx + j*nx + i;

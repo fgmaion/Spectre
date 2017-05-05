@@ -628,7 +628,7 @@ int ensemble_fsig8(int mockNumber, int start, int totalCats){
         // sprintf(filepath, "%s/W1_Spectro_V7_1/mocks_fsig8/d0_1000/kmax_%.1lf/mock_%d_256_pk_d0_1000.00_fsig8.dat", root_dir, ChiSq_kmax, start+rand);
         // sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mock_%d_%.1lf_%.1lf.dat", root_dir, (int) ceil(appliedClippingThreshold), fieldFlag, ChiSq_kmax, start+jjj, lo_zlim, hi_zlim);
 	// sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/fsig8/true_nbar/d0_%d/W%d/kmax_%.1lf/mock_%d_%.1lf_%.1lf.dat", root_dir, (int) ceil(appliedClippingThreshold), fieldFlag, ChiSq_kmax, start+jjj, lo_zlim, hi_zlim);
-	sprintf(filepath, "%s/W1_Spectro_V7_3/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mock_%d_%.1lf_%.1lf_snipCorrected.dat", root_dir, (int) ceil(appliedClippingThreshold), fieldFlag, ChiSq_kmax, start+jjj, lo_zlim, hi_zlim);
+        sprintf(filepath, "%s/W1_Spectro_V7_3/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mock_%d_%.1lf_%.1lf_snipCorrected.dat", root_dir, (int) ceil(appliedClippingThreshold), fieldFlag, ChiSq_kmax, start+jjj, lo_zlim, hi_zlim);
 
         output = fopen(filepath, "w");
 

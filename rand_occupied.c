@@ -39,17 +39,17 @@ int print_randoccupied(){
 
 int set_randoccupied(){
   double      x2, z2;
-  double c_ra, c_dec;
-
-  c_ra    =  CentreRA*(pi/180.);
+  
+  // double        c_ra;
+  // c_ra    =  CentreRA*(pi/180.);
+  
+  double       c_dec;
   c_dec   = CentreDec*(pi/180.);
     
   number_occupied = 0;
   
   // Surveyed volume need only be done once; no rotation required.
-  rand_occupied = malloc(n2*n1*n0*sizeof(*rand_occupied));
-
-  for(j=0; j<n0*n1*n2; j++)  rand_occupied[j] = 0;
+  rand_occupied = calloc(n2*n1*n0, sizeof(*rand_occupied));
 
   set_cnst_nbar(); // set pt2nz and recalculate spline for inverse nbar.  
 
@@ -115,7 +115,7 @@ int set_randoccupied(){
 
   convergence  = 100.;
 
-  while(convergence > 0.01){   
+  while(convergence > 1.0){   
     // #pragma omp parallel for private(j, F, x2, z2, xlabel, ylabel, zlabel, boxlabel) if(thread == 1)
     for(j=0; j<rand_number; j++){
       drand48_r(&randBuffers[omp_get_thread_num()], &F);
@@ -149,7 +149,7 @@ int set_randoccupied(){
   
     newvol      = dx*dy*dz*number_occupied/pow(10., 9.);
     
-    convergence = 100.*(newvol-oldvol)/newvol;
+    convergence = 100.*(newvol-oldvol)/oldvol;
 
     accuracy    = 100.*(truvol-newvol)/truvol;
 

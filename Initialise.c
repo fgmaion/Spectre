@@ -42,16 +42,26 @@ int init_cell_info(){
 }
 
 
-int initi_dist_z(){
-  comovDistReshiftCalc(); // Cosmology determined by inclusion of cosmology_planck2015.h or cosmology_valueaddedmocks.h
-
-  loChi                 = interp_comovingDistance(lo_zlim);
-  hiChi                 = interp_comovingDistance(hi_zlim);
-
-  printf("\n\nRedshift limits, lower bound: %.4lf \t %.4lf h^-1 Mpc, \n\t\t upper bound: %.4lf \t %.4lf h^-1 Mpc", lo_zlim, loChi, hi_zlim, hiChi);
-
-  printf("\n\nVolume: %.4lf [10^-3 (h^-1 Gpc)^3]", pow(10., 3.)*calc_vol());
+int init_dist_z(){
+  chi_zcalc(); // Cosmology determined by inclusion of cosmology_planck2015.h or cosmology_valueaddedmocks.h
   
+  printf("\n\nRedshift limits, lower bound: %.6lf\t%.10lf h^-1 Mpc (%.10lf Mpc), \n\t\t upper bound: %.6lf\t%.10lf h^-1 Mpc (%.10lf Mpc)", lo_zlim, loChi, loChi/h, hi_zlim, hiChi, hiChi/h);
+
+  printf("\n\nVolume surveyed: %.10lf [10^-3 (h^-1 Gpc)^3]", pow(10., 3.)*calc_vol());
+  
+  return 0;
+}
+
+
+double check_radialextent(double lochi, double hichi, double lopad){
+  double radial_extent = hichi - lochi;
+
+  printf("\n\nRadial extent: %.3lf [h^-1 Mpc]", radial_extent);
+
+  if(radial_extent > (lopad + AxisLimsArray[1][0] - AxisLimsArray[0][0])){
+    return 1;
+  }
+
   return 0;
 }
 
@@ -72,7 +82,7 @@ int init_fftgrid(){
 int Initialise(){
   init_gsl_randgen();
 
-  initi_dist_z();
+  init_dist_z();
 
   init_padding();
     

@@ -33,7 +33,7 @@ int load_rands_radec(double sampling){
 }
 
 
-int set_rand_rng(){
+int set_rand_rng(void){
   for(j=0; j<rand_number; j++)  rand_rng[j] = gsl_rng_uniform(gsl_ran_r);
 
   return 0;
@@ -59,12 +59,14 @@ int rand_newchi_newbasis(void){
 
   // printf("\n\nNew basis for randoms.");
   
-  double  F, cos_dec;
+  double     cos_dec;
 
   double      x2, z2;
-  double c_ra, c_dec;
+
+  // double        c_ra;
+  // c_ra    =  CentreRA*(pi/180.);
   
-  c_ra    =  CentreRA*(pi/180.);
+  double       c_dec;
   c_dec   = CentreDec*(pi/180.);
   
   #pragma omp parallel for private(j, cos_dec, x2, z2) if(thread == 1)
@@ -195,7 +197,7 @@ int load_ascii_randomCats(double sampling){
   line_count(inputfile, &rand_number);          // Provide line count to save time.                                                                                                                                                                                                                                                                                                
   lowerSampling_randomisedCatalogue(sampling);  // assumes catalogue order is random.                                                                                                       
                                                                                                                                                                                              
-  for(j=0; j<rand_number; j++)   fscanf(inputfile, "%le \t %le \t %*le \t %*le \t %*le \t %*le \n", &rand_ra[j], &rand_dec[j]);                                                                                                                                                                                                                                                       
+  for(j=0; j<rand_number; j++)   fscanf(inputfile, "%le \t %le \t %*e \t %*e \t %*e \t %*e \n", &rand_ra[j], &rand_dec[j]);                                                                                                                                                                                                                                                       
   fclose(inputfile);                                                                                                                                                                     
 
   // cut_rand_bydec();

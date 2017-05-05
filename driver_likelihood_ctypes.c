@@ -43,8 +43,10 @@
 // #include "combining_clipped_fsig8.c"
 
 
-int main(int argc, char** argv){  
-  thread                    =                           1;
+int get_main(int set_d0, int set_fieldFlag, double set_lo_zlim, double set_hi_zlim, double set_ChiSq_kmax){  
+  thread                    =    1;
+  data_mock_flag            =    0;  // analysis of VIPERS data or mock catalogues. 
+
   outputdir                 =         getenv("outputdir");
   
   sprintf(root_dir,                              "/home/mjw/HOD_MockRun");
@@ -53,18 +55,18 @@ int main(int argc, char** argv){
   sprintf(maskmultipoles_path,   "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
   sprintf(models_path,                                         outputdir);
   
-  d0                        =       atoi(argv[1]);
-  fieldFlag                 =       atoi(argv[2]);
-  lo_zlim                   =       atof(argv[3]);   // previously 0.6<z<0.9, 0.7<z<1.1
-  hi_zlim                   =       atof(argv[4]);
-  ChiSq_kmax                =       atof(argv[5]);
+  d0                        =               set_d0;
+  fieldFlag                 =        set_fieldFlag;
+  lo_zlim                   =          set_lo_zlim;   
+  hi_zlim                   =          set_hi_zlim;
+  ChiSq_kmax                =       set_ChiSq_kmax;
 
   // printf("\n%d \t %d \t %.1lf \t %.1lf \t %.2lf", d0, fieldFlag, lo_zlim, hi_zlim, ChiSq_kmax);
   
   W1area                    =              10.692;   // Nagoya v7 - overlapping Samhain v7; v6 and v7 has identical area; this is for the mocks -- with dec problem.  
-  W4area                    =               5.155;   // W1 data area is 10.763 deg^2.
+  W4area                    =               5.155;   // W1 data area is 10.763 deg^2; W2 is 5.155
 
-  TotalW1W4area             =     W1area + W4area;
+  TotalW1W4area             =      W1area + W4area;
   
   if(fieldFlag == 1){
     LowerRAlimit            =     30.175;            // Navgoya v6 + Samhain 
@@ -78,8 +80,8 @@ int main(int argc, char** argv){
     fracArea                = W1area/TotalW1W4area;
   }
   
-  else if(fieldFlag == 4){
-    LowerRAlimit            =    330.046;            
+  else if(fieldFlag ==4){
+    LowerRAlimit            =    330.046; // Really parent boundary limits. 
     UpperRAlimit            =    335.389;
     CentreRA                =    332.638;
   
@@ -115,13 +117,13 @@ int main(int argc, char** argv){
   min_epsilon_pad           =   -0.0001;
   max_epsilon_pad           =    0.0001;
  
-  min_A11Sq                 =      0.99;  // distinct from linear bias due to spectral distortion. 
+  min_A11Sq                 =      0.99;                  // distinct from bias due to spectral distortion. 
   max_A11Sq                 =      1.01;
 
   paramNumber               =       3.0;  // # of fitted params. -> dof in X^2. 
 
-   Res                      =        32;  // Likelihood resolution [voxel number].
-  dRes                      =      32.0;  // Previously 16: 13/02/17
+   Res                      =         2;  // Likelihood resolution [voxel number].
+  dRes                      =       2.0;  // Previously 16: 13/02/17
 
    Res_ap                   =         1;  // Resoltuion in AP.
   dRes_ap                   =       1.0;
@@ -136,8 +138,8 @@ int main(int argc, char** argv){
 
   hiMultipoleOrder          =         2;  // Fit monopole (1) or mono + quad (2).
   jenkins_fold_kjoin        =       0.4;  // k at which P(k) switches from unfolded to folded.     
-  modkMax                   =      1.00;  
-
+  modkMax                   =      1.00;
+  
   smooth_radius             =       2.0;
    
   CatalogNumber             =       152;
@@ -151,12 +153,12 @@ int main(int argc, char** argv){
 
   // fftw_plan_with_nthreads(omp_get_max_threads()); // Maximum number of threads to be used; use all openmp threads available. 
   
-  chi_zcalc();              // Cosmology from cosmology_planck2015.h or cosmology_valueaddedmocks.h; Selection parameters.
+  chi_zcalc();             // Cosmology from cosmology_planck2015.h or cosmology_valueaddedmocks.h// Selection parameters.
   
-  inputHODPk();             //  Must match Cosmology in cosmology_planck2015.h, or cosmology_valueaddedmocks.h
-  // inputLinearPk();       //  This is NOT automatically ensured.               
+  inputHODPk();            //  Must match Cosmology in cosmology_planck2015.h, or cosmology_valueaddedmocks.h
+  // inputLinearPk();      //  This is NOT automatically ensured.               
   
-  prep_FFTlog_memory();     // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
+  prep_FFTlog_memory();    // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
   
   set_FFTlog(FFTlogRes, pow(10., -10.), pow(10., 14.), 1., velDispersion);  // assigns values to mono_config etc. 
   
@@ -166,74 +168,86 @@ int main(int argc, char** argv){
   
   precompute_vipers_clipping_model(FFTlogRes);  // Computes P_R(k), W_0(r), ..., \tilde W_0(k), ..., and \tilde W_0(k) for the joint field.   
   
-  get_allkvals(1);         // all kVals, ignoring ChiSq_kmin and ChiSq_kmax, but including folding. 
+  get_allkvals(1);    // all kVals, ignoring ChiSq_kmin and ChiSq_kmax, but including folding. 
   
-  allkvals_matchup();      // Match all available kVals to FFTlog modes; not just those up to ChiSq_kmax. 
+  allkvals_matchup(); // Match all available kVals to FFTlog modes; not just those up to ChiSq_kmax. 
   
-  set_chiSq_intervals();   // set e.g. fsig8 interval = (max - min)/interval.
+  set_chiSq_intervals(); // set e.g. fsig8 interval = (max - min)/interval.
   
   // default_params();
-
   // model_compute(0, 0, 0, 0, 0);
   
   assign_LikelihoodMemory();  // Assigns memory for xdata, ydata, xtheory, ytheory, ChiSqGrid.
   
   get_mocksshotnoise();
   
-  // get_mocksclippedamplitudes();
+  // get_mocksclippedamplitudes();  
   
-  load_CovarianceMatrix(CatalogNumber, 1);
+  load_CovarianceMatrix(CatalogNumber, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock. 
   
-  prewhitenCov();  // Pre-whiten data and covariance.
-
-  Covariance_eigenVecs(CatalogNumber);
+  // delete_lockfile();
+    
+  prep_dlnPR_dlnk();
   
-  delete_lockfile();
-  
-  // prep_dlnPR_dlnk();
-
-  set_clippingvars(1.0);
-  
-  if(ChiSq_kmax == 0.2)  calc_models();
+  calc_models();
   
   set_models();
   
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
     
+  prewhitenCov();  // Pre-whiten data and covariance.
+  
+  Covariance_eigenVecs(CatalogNumber);
+  
   cut_xtheory_bykmax();
   
   double maxL_fsig8, maxL_sigv, maxL_bsig8;
-
-  for(data_mock_flag=0; data_mock_flag<2; data_mock_flag++){
-    if(data_mock_flag == 0)  sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
-    if(data_mock_flag == 1)  sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
   
-    output = fopen(filepath, "w");
+  // sprintf(filepath, "%s/W1_Spectro_V7_5/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", root_dir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
   
-    walltime("Walltime at start of chi^2 calc.");
+  // output = fopen(filepath, "w");
   
-    for(int ab=1; ab<CatalogNumber; ab++){
-      calc_ChiSqs(ab); // passed to load_mock.
-      
-      set_minChiSq();
+  walltime("Walltime at start of chi^2 calc.");
+  
+  for(int ab=1; ab<1; ab++){
+    calc_ChiSqs(ab); // passed to load_mock.
     
-      calc_onedposteriors(&maxL_fsig8, &maxL_bsig8, &maxL_sigv);
-      
-      printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
-      
-      fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
-      
-      if(data_mock_flag == 1)  break;
-    }
-  
-    fclose(output);
+    // set_minChiSq();
+    
+    // calc_onedposteriors(&maxL_fsig8, &maxL_bsig8, &maxL_sigv);
+
+    // printf("\n%lf \t %lf \t %lf", maxL_fsig8, maxL_bsig8, maxL_sigv);
+    
+    // fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
   }
+  
+  // fclose(output);
+  /*
+  prep_ctype_ChiSq();
+    
+  calc_ChiSq(0.50, 0.75, 5.0, 0.01);
+  */
   
   walltime("Wall time at finish");
 
   // MPI_Finalize();
   
   printf("\n\n");
+
+  return 0;
+}
+
+
+int main(int argc, char** argv){
+  (void) argc;
+
+  d0           =       atoi(argv[1]);
+  fieldFlag    =       atoi(argv[2]);
+  lo_zlim      =       atof(argv[3]);
+  hi_zlim      =       atof(argv[4]);
+  ChiSq_kmax   =       atof(argv[5]);
+
+  get_main(d0, fieldFlag, lo_zlim, hi_zlim, ChiSq_kmax);  
   
-  exit(EXIT_SUCCESS);
+  return 0;
 }

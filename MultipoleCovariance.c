@@ -5,7 +5,7 @@ int initialiseCovariance(int mocks){
     for(k=0; k<order; k++){
       Interim = 0.0;
 
-      for(i=0; i<mocks; i++)  Interim += dMultipoles[i][j]*dMultipoles[i][k]/mocks;
+      for(i=0; i<mocks; i++)  Interim += dMultipoles[i][j]*dMultipoles[i][k]/(mocks - 1);
 
       gsl_matrix_set(Covariance, j, k, Interim);
     }
@@ -30,7 +30,7 @@ int prewhitenCov(void){
 }
 
 
-int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[], double shot_amp){
+int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
   char     Nthfilepath[200];
   char   firstfilepath[200];
 
@@ -77,9 +77,9 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[], 
 
     fclose(inputfile);
   }
-
+  
   for(kk=0; kk<mocks; kk++){
-    for(ii=0; ii<mono_order; ii++)  Multipoles[ii][kk] -=  shot_amp; // uses fold factor of 4.0 currently; subtract off monopole.
+    for(ii=0; ii<mono_order; ii++)  Multipoles[kk][ii] -=  shotnoise_instances[kk]; // uses fold factor of 4.0 currently; subtract off monopole.
   }
   
   for(k=0; k<order; k++){
@@ -157,7 +157,6 @@ int get_kindices(int start, char filepath[]){
 
   fclose(inputfile);
 
-
   mono_order = (jenkins_foldIndex_unfoldedfile - chiSq_kminIndex) + (chiSq_kmaxIndex - jenkins_foldIndex_foldedfile);
   order      = mono_order*hiMultipoleOrder;
   
@@ -223,7 +222,7 @@ int get_kmaxes(int mocks, int start, char filepath[]){                          
 }
 
 
-int load_CovarianceMatrix_withfolding(int mocks, int start, char filepath[], double shot_amp){
+int load_CovarianceMatrix_withfolding(int mocks, int start, char filepath[]){
   get_kindices(start, filepath);
   
   assignCovMat(mocks);
@@ -231,10 +230,8 @@ int load_CovarianceMatrix_withfolding(int mocks, int start, char filepath[], dou
   get_Multipoles(mocks, start, filepath);
   
   // get_kmaxes(mocks, start, filepath);                                                                                                                                       
-  
   for(kk=0; kk<mocks; kk++){
-    for(ii=0; ii<mono_order; ii++)  Multipoles[ii][kk] -=  shot_amp; // uses fold factor of 4.0 currently; subtract off monopole.  
-    // for(ii=0; ii<order;      ii++)  Multipoles[ii][kk] *=    sq_amp;
+    for(ii=0; ii<mono_order; ii++)  Multipoles[kk][ii] -= shotnoise_instances[kk];      // uses fold factor of 4.0 currently; subtract off monopole.
   }
   
   for(k=0; k<order; k++){
@@ -258,7 +255,7 @@ int load_CovarianceMatrix_withfolding(int mocks, int start, char filepath[], dou
 }
 
 
-int load_CovarianceMatrix(int mocks, int start, double shot_amp){
+int load_CovarianceMatrix(int mocks, int start){
   assign_chisq_kmaxes();
   
   sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock", covariance_mocks_path, d0, fieldFlag);
@@ -266,22 +263,14 @@ int load_CovarianceMatrix(int mocks, int start, double shot_amp){
   if(ChiSq_kmax <= jenkins_fold_kjoin){
     printf("\n\nLoading covariance without folding: %s", filepath);
 
-    load_CovarianceMatrix_withoutfolding(mocks, start, filepath, shot_amp);
+    load_CovarianceMatrix_withoutfolding(mocks, start, filepath);
   }
 
   else{
     printf("\n\nLoading covariance with folding: %s", filepath);
 
-    load_CovarianceMatrix_withfolding(mocks, start, filepath, shot_amp);
+    load_CovarianceMatrix_withfolding(mocks, start, filepath);
   }
-  
-  prewhitenCov();  // Pre-whiten data and covariance.
-
-  // fprintf_Cov();
-
-  // fprintf_meanMultipoes();
-
-  Covariance_eigenVecs(mocks);  
   
   return 0;
 }

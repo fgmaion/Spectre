@@ -2,6 +2,7 @@
 char         vipersHOD_dir[200];
 char   maskmultipoles_path[200];
 char covariance_mocks_path[200];
+char           models_path[200];
 
 double fracArea; // W%d/Total area fraction. 
 
@@ -48,6 +49,14 @@ double  modkMax;
 double logk_min, logk_max, logk_interval;
 
 int*   fftlog_indices;
+
+// -- shot noise -- //
+int                shot_ninstance;
+double*       shotnoise_instances;
+
+// -- clipping suppression -- //
+int         suppression_ninstance;
+double*     suppression_instances;
 
 // -- Jenkins -- //
 int     jenkins_foldIndex_foldedfile;
@@ -150,18 +159,14 @@ double* FFTlog_Wk2;
 double mono_epsilonCorrection_1, mono_epsilonCorrection_2;  // Alcock-Paczynski, epsilon dependent correction terms.
 double quad_epsilonCorrection_1, quad_epsilonCorrection_2;
 
-double* spline_lnk; // spline of dln P_R by d lnk. 
 double* dlnPR_dlnk;
-double* dlnPR_dlnk_2D;
-
 
 // -- Clipping correction -- //
 int           varcalc_index;
 int cnvldpk_zeropoint_index;
 
-double         clipmono_amp;
-double         clipshot_amp;
 double       clip_distcoeff;
+double         clipmono_amp;
 
 // -- Likelihood -- //
 double  app_sigma8;
@@ -220,8 +225,15 @@ double AP_P4(double kprime, double beta, double sigma, double epsilon, double lo
 double ChiSqEval();
 double ChiSqEval_ap();
 
+int    pk_mu(FFTLog_config* fc);
+
+int    FFTLog_initialise_mask(FFTLog_config *fc);
+
+int    apmultipoles(FFTLog_config *mono, FFTLog_config *quad, FFTLog_config *hex, double beta, double velDispersion, double alpha, double epsilon);
 
 // -- Posteriors -- //
 double calc_fsigma8Posterior();
 double calc_bsigma8Posterior();
 double calc_velDispPosterior();
+
+

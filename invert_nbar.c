@@ -1,4 +1,6 @@
 double nbar_dV(double chi, void* p){ // gsl function prototype is 
+  (void) p; // compiler warning no-op. 
+
   return pow(chi, 2.)*(*pt2nz)(chi);
 }
 
@@ -8,8 +10,6 @@ int prep_inverseCumulative_nbar(){
   gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
 
   double norm, error, result;
-
-  double alpha = 1.0;
 
   gsl_function F;
 

@@ -77,9 +77,9 @@ int printf_kMask_multipoles(){
 
 
 int prepVIPERS_kSpaceMultipole(){
-  printf("\n\nPrinting k-space window multipoles.");
+  // printf("\n\nPrinting k-space window multipoles.");
   
-  printf_kMask_multipoles();
+  // printf_kMask_multipoles();
 
   sprintf(filepath, "%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim,hi_zlim);
 

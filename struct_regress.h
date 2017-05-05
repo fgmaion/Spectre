@@ -19,4 +19,7 @@ struct Regress{
 } flat, half, quart;
 
   typedef struct Regress regress;
+
+int   regress_mem(regress* inst);
+
 #endif

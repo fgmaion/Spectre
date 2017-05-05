@@ -50,8 +50,7 @@ int prep_r2c_modes(regress* inst, double scaling){
     Sum_Li[j]       = 0.0;
     Sum_Li2[j]      = 0.0;
     mean_k[j]       = 0.0;
-
-    modes_perbin[j] = 0;
+    modes_perbin[j] =   0;
   }
   
   // r2c returns half the modes on the direction in which overdensity changes first, i.e. x.
@@ -78,13 +77,12 @@ int prep_r2c_modes(regress* inst, double scaling){
         // switch from index to updating pointer by one.
         inst->kLi[Index]                       = gsl_sf_legendre_P2(mu);  // L_2 = 0.5*(3.*mu**2 -1.); independent of Jenkins's folding. 
 
-        // printf("\n%.6lf", inst->kLi[Index]);
-       
+        // printf("\n%.6lf", inst->kLi[Index]);       
         inst->kM2[Index]                       = sinc_factors[k];  // Computes \sinc(x) = \sin(\pi x) / (\pi x).
         inst->kM2[Index]                      *= sinc_factors[j];
         inst->kM2[Index]                      *= sinc_factors[i];
         
-        // inst->kM2[Index]                    = pow(inst->kM2[Index], 1.0);  // Correct mass assignment of randoms; cic = 2, ngp = 1.
+        inst->kM2[Index]                       = pow(inst->kM2[Index], 1.0);  // Correct mass assignment of randoms; cic = 2, ngp = 1.
 
         // printf("\n%.6lf", inst->kM2[Index]);
         
