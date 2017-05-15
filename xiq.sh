@@ -30,14 +30,19 @@ test(){
     ## Interactive run with: qsub -I -o $outputdir/chi2_log/chi2_stdout.pbs -e $outputdir/chi2_log/chi2_stderr.pbs chi2.sh
     export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_7
     export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_2
-    export LOZ=0.6
-    export HIZ=0.9
-    export FIELDFLAG=1
+    export LOZ=0.5
+    export HIZ=0.8
+    export FIELDFLAG=4
     export d0=1000
-    export NBINS=15280
-    export RES=0
+    export RES=3
     
-    gcc -w -O2 -fopenmp -o xi_q.o Scripts/driver_Qmultipoles.c -lfftw3 -lm  -lgsl -lgslcblas -D "NBINS=${NBINS}"
+    MAX_LOGS=(2. 20. 2000. 2. 20. 2000.)
+    MAX_LOG=${MAX_LOGS[$RES]}
+
+    ## NLOGBINS IN R x NLINBINS IN MU (20).
+    export NBINS=$(python -c "from math import ceil, log10; print int(20*ceil((log10($MAX_LOG) - log10(0.001))/log10(1.01)))")
+    
+    gcc -w -O2 -fopenmp -o xiq.o Scripts/driver_Qmultipoles.c -lfftw3 -lm  -lgsl -lgslcblas -D "NBINS=${NBINS}"
     
     rm -r /home/mjw/IO_lock/
 }
@@ -58,7 +63,7 @@ set_lock
 
 export FILE=$outputdir"/xiq_log/xiq_W"$FIELDFLAG"_"$LOZ"_"$HIZ"_"$RES".log"
 
-./xi_q.o $FIELDFLAG $LOZ $HIZ $RES # > $FILE 2>&1
+./xiq.o $FIELDFLAG $LOZ $HIZ $RES > $FILE 2>&1
 
 if [[ $(tr -d "\r\n" < $FILE | wc -c) -eq 0 ]]; then
     printf "\n%s" "$FILE" >> $outputdir/xiq_log/xiq_stderr.pbs

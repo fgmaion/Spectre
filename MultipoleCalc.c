@@ -18,11 +18,9 @@ int nosort_MultipoleCalc(regress* inst, int mock_start){
   rand_shot = bare_rand_shot*alpha;
   
   printf("\n\nShot noise: randoms %.4lf, galaxies %.4lf", rand_shot, gal_shot);
-  /*
-  if(fold == 0){
-    print_nbarshot(mock_start);
-  }
-  */
+  
+  print_nbarshot(mock_start);
+  
   // clear arrays. 
   for(k=0; k<KBIN_NO; k++){
     inst->Monopole[k]   = 0.0;
@@ -98,7 +96,7 @@ int print_multipoles(regress* inst){
 }
 
 int trash_nbarshot_file(int start){
-  int    status = 0;
+  int          status = 0;
   char   sys_command[200];
   
   if(data_mock_flag == 0) sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/nbarshotnoise_mocks_%d_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, start, lo_zlim, hi_zlim);
@@ -109,33 +107,33 @@ int trash_nbarshot_file(int start){
   status = system(sys_command);
 
   if(status == 0){
-    printf("\n\nTrashed nbar shotnoise file.");
+    printf("\n\nTrashed nbar shotnoise file: %s", filepath);
   }
 
   else{
-    printf("\n\nFailed to trash nbar shotnoise file.");
+    printf("\n\nFailed to trash nbar shotnoise file: %s", filepath);
   }
   
   return 0;
 }
 
 int print_nbarshot(int start){
-  double  gal_shot = 0.0;
-  double rand_shot = 0.0;
+  if(fold == 0){
+    double  gal_shot = 0.0;
+    double rand_shot = 0.0;
 
-  gal_shot  =  bare_gal_shot/alpha;  // update with alpha factors.
-  rand_shot = bare_rand_shot*alpha;
+    gal_shot  =  bare_gal_shot/alpha;  // update with alpha factors.
+    rand_shot = bare_rand_shot*alpha;
   
-  if(data_mock_flag == 0) sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/nbarshotnoise_mocks_%d_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, start, lo_zlim, hi_zlim);
-  if(data_mock_flag == 1) sprintf(filepath, "%s/data_v1.7/pk_derivedprops/d0_%d/W%d/nbarshotnoise_data_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
+    if(data_mock_flag == 0) sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/nbarshotnoise_mocks_%d_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, start, lo_zlim, hi_zlim);
+    if(data_mock_flag == 1) sprintf(filepath, "%s/data_v1.7/pk_derivedprops/d0_%d/W%d/nbarshotnoise_data_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
 
-  printf("\n\n%s", filepath);
-  
-  output = fopen(filepath, "a");
+    output = fopen(filepath, "a");
 
-  fprintf(output, "%le \t %le \n", gal_shot, rand_shot);
+    fprintf(output, "%d \t %le \t %le \n", loopCount, gal_shot, rand_shot);
+      
+    fclose(output);
+  }
 
-  fclose(output);
-  
   return 0;
 }

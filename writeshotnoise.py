@@ -10,7 +10,7 @@ args   = sys.argv
 zs     = [0.75, 1.05]
 fsig8s = [0.4907, 0.4570]
 
-for c, d0 in enumerate([1000, 10, 6, 4]):
+for c, d0 in enumerate([1000]): # , 10, 6, 4]):
   for a, field in enumerate(["W1", "W4"]):
     for b, lo_z in enumerate([np.float(args[1]), np.float(args[2])]):
       hi_z   = lo_z + np.float(args[3])

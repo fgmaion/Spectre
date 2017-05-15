@@ -1,4 +1,4 @@
-#define   KBIN_NO 12          
+#define   KBIN_NO     40  // 12          
 #define   FOLDFACTOR 2.0       
  
 #include "/home/mjw/Aux_functions/header.h"
@@ -127,7 +127,7 @@ int main(int argc, char **argv){
 
     for(loopCount=atoi(argv[4]); loopCount <= mock_end; loopCount++){            
       sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
-
+      
       if(data_mock_flag == 1){
         DataInput();            // includes ESR input.
       }

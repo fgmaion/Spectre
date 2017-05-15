@@ -55,18 +55,16 @@ int randWindow_pairCount(){
     
     printf("\n\nCounting RR pairs.");
     
-    bruteforce_nonodes(rr_0, rr_2, rr_4, rr_6, rr_8, rr_10, rr_meanr, rr_meanmu, point_rands, point_rands, rand_number, rand_number, 1);
-
-    // findSuitableNodePairs_bruteforcePairCount(rr_0, rr_2, rr_4, rr_6, rr_8, rr_10, rr_meanr, rr_meanmu, randTree, randTree, 1);
+    // bruteforce_nonodes(rr_0, rr_2, rr_4, rr_6, rr_8, rr_10, rr_meanr, rr_meanmu, point_rands, point_rands, rand_number, rand_number, 1);
+    findSuitableNodePairs_bruteforcePairCount(rr_0, rr_2, rr_4, rr_6, rr_8, rr_10, rr_meanr, rr_meanmu, randTree, randTree, 1);
 
     postprocess_pairs(rr_0, rr_2, rr_4, rr_6, rr_8, rr_10, rr_meanr, rr_meanmu, randTree, randTree, 1);
     
-    xiMonopole(rr_0,  rr_meanmu, xi0);  // monopole calc. of *weighted* pairs.
-    xiMonopole(rr_2,  rr_meanmu, xi2);  // PREVIOUSLY gg_meanmu.
-    xiMonopole(rr_4,  rr_meanmu, xi4);
-    xiMonopole(rr_6,  rr_meanmu, xi6);
-    xiMonopole(rr_8,  rr_meanmu, xi8);  // masked RSD work.
-    // xiMonopole(rr_10, rr_meanmu, xi10);
+    xiMonopole(rr_0,  rr_meanmu,  xi0);  // monopole calc. of *weighted* pairs.
+    xiMonopole(rr_2,  rr_meanmu,  xi2);  // PREVIOUSLY gg_meanmu.
+    xiMonopole(rr_4,  rr_meanmu,  xi4);
+    xiMonopole(rr_6,  rr_meanmu,  xi6);
+    xiMonopole(rr_8,  rr_meanmu,  xi8);  // masked RSD work.
     
     print_xiMultipoles();
     

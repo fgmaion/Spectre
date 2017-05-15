@@ -41,36 +41,42 @@ int initi_dist_z(){
   return 0;
 }
 
-int set_file_paths(char survey[]){
-  sprintf(surveyType, survey, fieldFlag, fkpPk, lo_zlim, hi_zlim);
+int set_file_paths(char survey[], int count_res){
+  if(count_res < 3){  
+    sprintf(surveyType, survey, fieldFlag, fkpPk, lo_zlim, hi_zlim);
+  }
 
+  else{
+    sprintf(surveyType, survey, fkpPk, lo_zlim, hi_zlim);
+  }
+  
   return 0;
 }
 
 int set_outputfiles(count_res){
   switch(count_res){
   case 0:
-    set_file_paths("Ql_W%d_Nag_v7_specweight_nbar_Pfkp_%.0lf_%.1f_%.1f_hihiRes_hex");
+    set_file_paths("Ql_W%d_Nag_v7_specweight_nbar_Pfkp_%.0lf_%.1f_%.1f_hihiRes_hex", 0);
     break;
 
   case 1:
-    set_file_paths("Ql_W%d_Nag_v7_specweight_nbar_Pfkp_%.0lf_%.1f_%.1f_hiRes_hex");
+    set_file_paths("Ql_W%d_Nag_v7_specweight_nbar_Pfkp_%.0lf_%.1f_%.1f_hiRes_hex",   1);
     break;
 
   case 2:
-    set_file_paths("Ql_W%d_Nag_v7_specweight_nbar_Pfkp_%.0lf_%.1f_%.1f_loRes_hex");
+    set_file_paths("Ql_W%d_Nag_v7_specweight_nbar_Pfkp_%.0lf_%.1f_%.1f_loRes_hex",   2);
     break;
 
   case 3:
-    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_hihiRes_hex");
+    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_hihiRes_hex", 3);
     break;
 
   case 4:
-    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_hiRes_hex");
+    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_hiRes_hex",   4);
     break;
 
   case 5:
-    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_loRes_hex");
+    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_loRes_hex",   5);
     break;
   }
 
@@ -78,13 +84,13 @@ int set_outputfiles(count_res){
 }
 
 int main(int argc, char **argv){
-  int           count_res;
-  double    sampling_frac;
+  int              count_res;
+  double       sampling_frac;
 
-  double dilution = 0.001;
+  double    dilution =  1.00;
   
-  double       max_logs[6] = {log10(2.0), log10(20.0), log10(200.0), log10(2.0), log10(20.0), log10(200.0)}; 
-  double sampling_fracs[6] = {1.00, 0.10, 0.01, 1.000, 0.004, 0.005};
+  double       max_logs[6]  = {log10(2.0), log10(20.0), log10(2000.0), log10(2.0), log10(20.0), log10(2000.0)}; 
+  double sampling_fracs[6]  = {1.00, 0.10, 0.01, 1.000, 0.004, 0.005};
 
   thread                    =                                   1;
   outputdir                 =                 getenv("outputdir");
@@ -100,7 +106,7 @@ int main(int argc, char **argv){
   maxlog                    =                 max_logs[count_res];
   sampling_frac             =  dilution*sampling_fracs[count_res];
 
-  // Comoving number density, n(z), measurement. Change to equal increments in volume?
+  // Comoving number density, n(z), measurement. Change to equal increments in (effective) volume?
   chi_interval              =     16.00;
   
   // Change from 150 to match Stefano's 100.
@@ -118,7 +124,7 @@ int main(int argc, char **argv){
   zerolog  =                             log10(0.001);
   logbinsz =                             log10( 1.01);    // previously 1.4, must be >1.0 otherwise log gives 0. or -ve.
   nlogbins =  (int) ceil((maxlog - zerolog)/logbinsz);
-
+  
   // linear binning in mu. 
   zerolin  =                                     0.00;
   maxlin   =                                     1.00;
@@ -128,7 +134,7 @@ int main(int argc, char **argv){
 
 
   start_walltime();
-
+  
   printf_branch();
 
   init_gsl_randgen();
@@ -148,9 +154,9 @@ int main(int argc, char **argv){
   prep_inverseCumulative_nbar();
   
   set_outputfiles(count_res);
-
+  
   load_homogeneous_rands_window(sampling_frac, count_res); // load randoms with sampling sampling_frac.
-
+  
   delete_lockfile();
   
   assignMemory_xi();
