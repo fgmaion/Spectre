@@ -8,7 +8,7 @@ int rotate_ra(void){
   
 
 int load_rands_radec(double sampling){
-  rand_number = accepted_rand = (int) ceil(1382582*sampling);  // Hard coded catalogue row number.
+  rand_number = accepted_rand = (int) ceil(1382582*sampling);  // Hard coded catalogue max row number.
     
   assign_randmemory();
     
@@ -60,13 +60,9 @@ int rand_newchi_newbasis(void){
   // printf("\n\nNew basis for randoms.");
   
   double     cos_dec;
-
-  double      x2, z2;
-
-  // double        c_ra;
-  // c_ra    =  CentreRA*(pi/180.);
-  
+  double      x2, z2;  
   double       c_dec;
+  
   c_dec   = CentreDec*(pi/180.);
   
   #pragma omp parallel for private(j, cos_dec, x2, z2) if(thread == 1)

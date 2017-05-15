@@ -55,7 +55,7 @@ Node* buildTree(Particle *particleSet, int N){
   for(j=0; j<NDIM; j++) xmin[j] *= 0.99;
   for(j=0; j<NDIM; j++) xmax[j] *= 1.01;
   
-  // Decide which dimension to split along first, seems to be trying to choose the Dimension with the largest input range. fixed.
+  // Decide which dimension to split along first, seems to be trying to choose the dimension with the largest input range. fixed.
   tree_labelCount = firstSplitDim  = 0;
   
   // Beginning new tree, first node at level zero. 

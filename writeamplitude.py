@@ -1,4 +1,4 @@
-import os 
+import os, sys 
 import numpy   as np
 import pandas  as pd
 from   scipy.optimize import minimize_scalar
@@ -6,7 +6,8 @@ from   scipy.optimize import minimize_scalar
 root   = os.environ['outputdir']
 mocks  = 152
 
-dz     = 0.3
+args   = sys.argv
+
 zs     = [0.75, 1.05]
 fsig8s = [0.4907, 0.4570]
 
@@ -14,8 +15,8 @@ def cost_function(amp, unclipped, clipped):
     return np.sum((unclipped - amp*clipped)**2.)
 
 for a, field in enumerate(["W1", "W4"]):
-    for b, lo_z in enumerate([0.6, 0.9]):
-        hi_z     = lo_z + dz
+    for b, lo_z in enumerate([np.float(args[1]), np.float(args[2])]):
+        hi_z   = lo_z + np.float(args[3])
 
         filename = root + "/mocks_v1.7/pk_derivedprops/d0_%d/%s/shotnoise_zlim_%.1lf_%.1lf.dat" % (1000, field, lo_z, hi_z)
         shot     = np.loadtxt(filename)
@@ -35,7 +36,7 @@ for a, field in enumerate(["W1", "W4"]):
 
         np.savetxt(root + "/mocks_v1.7/pk_derivedprops/d0_%d/%s/suppression_zlim_%.1lf_%.1lf.dat" % (1000, field, lo_z, hi_z), np.ones(mocks), fmt="%.6le")
         
-        for c, d0 in enumerate([10]):                            
+        for c, d0 in enumerate([10, 6, 4]):                            
             filename = root + "/mocks_v1.7/pk_derivedprops/d0_%d/%s/shotnoise_zlim_%.1lf_%.1lf.dat" % (d0, field, lo_z, hi_z)
             shot     = np.loadtxt(filename)
 

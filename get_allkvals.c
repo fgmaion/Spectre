@@ -5,8 +5,8 @@ int get_allkvals(int start){
   sprintf(filepath,      "%s/mocks_v1.7/pk/d0_%d/W%d/mock",   covariance_mocks_path, d0, fieldFlag);
   
   sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
-  //sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
-
+  // sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
+  
   inputfile = fopen(firstfilepath, "r");
 
   if(inputfile == NULL)  printf("\n\n%s does not exist. Exiting", filepath);
@@ -27,7 +27,7 @@ int get_allkvals(int start){
   
   // file with folded measurements.
   sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
-  //sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
+  // sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
   
   inputfile  = fopen(foldedfilepath, "r");
 
@@ -58,7 +58,7 @@ int get_allkvals(int start){
   fclose(inputfile);
   
   sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;
-  //sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;  
+  // sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;  
 
   inputfile = fopen(foldedfilepath, "r");
   

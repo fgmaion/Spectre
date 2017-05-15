@@ -70,8 +70,11 @@ int inputLinearPk(){
 
   pt2Pk = &splintLinearPk;
   
-  if((lo_zlim==0.6) && (hi_zlim<1.0))                               sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/linear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
-  else if((lo_zlim == 0.8) || (lo_zlim == 0.9) && (lo_zlim < 1.3))  sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/linear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
+  if((lo_zlim == 0.6) && (hi_zlim == 0.8))                          sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/linear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
+  else if ((lo_zlim == 0.6) && (hi_zlim == 0.9))                    sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/linear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
+
+  else if((lo_zlim == 0.8) && (hi_zlim == 1.0))                     sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/linear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
+  else if((lo_zlim == 0.9) && (hi_zlim == 1.2))                     sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/linear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
 
   else{
     printf("\n\nError during input of real-space P(k) model.");
@@ -123,18 +126,30 @@ int inputHODPk(){
 
   pt2Pk = &splintHODpk;
   
-  if((lo_zlim == 0.6) && (hi_zlim < 1.0)){
+  if((lo_zlim == 0.6) && (hi_zlim == 0.8)){
+    sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
+
+    camb_sig8 = 0.593;
+  }
+
+  else if ((lo_zlim == 0.6) && (hi_zlim == 0.9)){
     sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
 
     camb_sig8 = 0.593;
   }
   
-  else if((lo_zlim == 0.8) || (lo_zlim == 0.9) && (lo_zlim < 1.3)){
+  else if ((lo_zlim == 0.8) && (hi_zlim == 1.0)){
     sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
 
     camb_sig8 = 0.518;
   }
-  
+
+  else if ((lo_zlim == 0.9) && (hi_zlim == 1.2)){
+    sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
+
+    camb_sig8 = 0.518;
+  }
+    
   else{
     printf("\n\nError for input of real-space P(k) model.");
 
@@ -155,33 +170,24 @@ int inputHODPk(){
     
   fclose(inputfile);
     
-  spline(sdltk, sdltPk, pk_lineNo, 1.0e31, 1.0e31, sdlt2d);
+  // spline(sdltk, sdltPk, pk_lineNo, 1.0e31, 1.0e31, sdlt2d);
         
-  powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon);  // Add power laws for k<<1 and k>>1 for FFTlog calcs.    
-  powerlaw_regression(pk_lineNo,    8.0,  10.0, 1., sdltk, sdltPk, &pk_hiA, &pk_hin);
+  // powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon);  // Add power laws for k<<1 and k>>1 for FFTlog calcs.    
+  // powerlaw_regression(pk_lineNo,    8.0,  10.0, 1., sdltk, sdltPk, &pk_hiA, &pk_hin);
 
   // camb_sig8 = sigma8_calc();    // Linear sigma_8 is required.
 
-  sdltPk[j] /= pow(camb_sig8, 2.); // normalised to unit sigma_8.
+  for(j=0; j<pk_lineNo; j++)  sdltPk[j] /= pow(camb_sig8, 2.); // normalised to unit sigma_8.
   
   spline(sdltk, sdltPk, pk_lineNo, 1.0e31, 1.0e31, sdlt2d);
 
   powerlaw_regression(pk_lineNo, 0.0001, 0.001, 1., sdltk, sdltPk, &pk_loA, &pk_lon); // Add power laws for k<<1 and k>>1 for FFTlog calcs.
   powerlaw_regression(pk_lineNo,    8.0,  10.0, 1., sdltk, sdltPk, &pk_hiA, &pk_hin);
   
-  // aexp       = 1./(1. + z_eff);  
-  
-  // P(z) = pow(b*sig8/sig8_fid, 2.)*P(0)
-  // assuming linear p(k).
-    
   // Value added mocks cosmology.   
   // if((lo_zlim==0.6) && (hi_zlim<1.0))       app_sigma8 = 0.638897; // CHANGED FROM app_sigma8 = 0.593 ON 22 Mar 17;  
   // else if((lo_zlim==0.8) && (hi_zlim<1.3))  app_sigma8 = 0.550554; // CHANGED FROM app_sigma8 = 0.518 ON 22 Mar 17;
   
-  // ln(a);                                                                                                                         
-  // printf("\n\nz_eff: %.2f.  sigma_8(z_eff): %.4f. f(z_eff): %.4f. f(z_eff)*sigma_8(z_eff): %.4f.", 0.75, 0.593, f_Om_545(log(1./(1. + 0.75))), 0.593*f_Om_545(log(1./(1. + 0.75))));
-  // printf("\nz_eff: %.2f.  sigma_8(z_eff): %.4f. f(z_eff): %.4f. f(z_eff)*sigma_8(z_eff): %.4f.", 1.05, 0.518, f_Om_545(log(1./(1. + 1.05))), 0.518*f_Om_545(log(1./(1. + 1.05))));
-
   // for(j=0; j<pk_lineNo; j++)  printf("\n %.6le \t %.6le", sdltk[j], splintHODpk(sdltk[j] + 0.01));
   
   return 0;

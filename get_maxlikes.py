@@ -63,7 +63,6 @@ def lnprob4D(x):
 
   return lp + calc_ChiSq(c_double(x[0]), c_double(x[1]), c_double(x[2]), c_double(x[3]))
           
-
 outputdir =          os.environ['outputdir']
 FIELD     =   np.int(os.environ['FIELDFLAG'])
 D0        =   np.int(os.environ['d0'])
@@ -71,7 +70,7 @@ LOZ       = np.float(os.environ['LOZ'])
 HIZ       = np.float(os.environ['HIZ'])
 KMAX      = np.float(os.environ['KMAX'])
 
-mockNum   = 152
+mockNum   = 153
 
 print D0, FIELD, LOZ, HIZ, KMAX
 
@@ -81,15 +80,16 @@ likelihood.get_main(D0, FIELD, c_double(LOZ), c_double(HIZ), c_double(KMAX))
 ## Reset k remapping between FFTlog and mock (to kmax).
 likelihood.prep_ctype_ChiSq();
 
-print "Chi sq. result: %.6lf" % likelihood.calc_ChiSq(c_double(0.5), c_double(1.0), c_double(7.), c_double(0.01))
+print "Chi sq. result: %.6lf" % likelihood.calc_ChiSq(c_double(0.5), c_double(0.8), c_double(8.), c_double(0.01))
 
 results = []
 
 x03     = np.array([0.5, 0.85, 7.0]) 
 x04     = np.array([0.5, 0.85, 8.0, 0.01])
 
-for i in xrange(1, mockNum, 1):    
-    likelihood.get_ydata(i, 0)
+# for i in xrange(1, mockNum, 1):    
+for i in xrange(1, 2, 1):  ## model that best matches the mean. 
+    likelihood.get_ydata(i, 2)
 
     result = minimize(chiSq_3D, x03, method='Nelder-Mead', tol=1e-6)
     # result = minimize(chiSq_4D, x04, method='Nelder-Mead', tol=1e-6)
@@ -103,12 +103,15 @@ meanlike = [maxlike[:,i].mean() for i in range(3)]
 
 print "\n\nMean values: (fs8, bs8, sp) = (%.4lf, %.4lf, %.4lf)" % (meanlike[0], meanlike[1], meanlike[2])
 
+'''
 header=""
 
 for i in meanlike:
     header=header + r"%.6lf  " % i
     
 np.savetxt(outputdir + "/maxlikes/maxlike_points_W%d_%.1lf_%.1lf_d0_%d.dat" % (FIELD, LOZ, HIZ, D0), maxlike, fmt='%.6e', header=header)
+'''
 
 ## print models. 
 likelihood.print_model(c_double(meanlike[0]), c_double(meanlike[1]), c_double(meanlike[2]), c_double(0.00))
+

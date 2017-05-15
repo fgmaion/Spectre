@@ -1,13 +1,13 @@
 #include "qSortCompare.c"
 
-int PkCalc(regress* inst){
+int PkCalc(regress* inst, int mock_start){
   walltime("Wall time before FFT");
 
   fftw_execute(plan);
 
   walltime("Wall time after FFT");
 
-  nosort_MultipoleCalc(inst);
+  nosort_MultipoleCalc(inst, mock_start);
 
   print_multipoles(inst);
   
@@ -101,7 +101,6 @@ int prep_r2c_modes(regress* inst, double scaling){
         // printf("\n%.6lf", inst->Sum_Li2[inst->kind[Index]]);
         
         modes_perbin[inst->kind[Index]]       += 1;
-      
         mean_k[inst->kind[Index]]             += kmodulus;
         
         // printf("\n%d \t %.4lf \t %.4lf \t %d", Index, inst->kLi[Index], inst->kM2[Index], inst->kind[Index]);
@@ -111,11 +110,8 @@ int prep_r2c_modes(regress* inst, double scaling){
 
   for(j=0; j<KBIN_NO; j++){
     inst->Sum_Li[j]       = Sum_Li[j];
-
     inst->Sum_Li2[j]      = Sum_Li2[j];
-
     inst->modes_perbin[j] = modes_perbin[j];
-
     inst->mean_modk[j]    = mean_k[j];
 
     // printf("\nHERE:%lf \t %lf \t %lf \t %d", mean_k[j], Sum_Li[j], Sum_Li2[j], modes_perbin[j]);
@@ -126,7 +122,6 @@ int prep_r2c_modes(regress* inst, double scaling){
   
   for(j=0; j<KBIN_NO; j++){
     inst->mean_modk[j]  /= inst->modes_perbin[j];
-
     inst->detA[j]        = inst->modes_perbin[j]*inst->Sum_Li2[j] - inst->Sum_Li[j]*inst->Sum_Li[j];
 
     // printf("\n%d \t %.4lf \t %.4lf \t %.4lf \t %.4lf", inst->modes_perbin[j], inst->mean_modk[j], inst->Sum_Li[j], inst->Sum_Li2[j], inst->detA[j]);

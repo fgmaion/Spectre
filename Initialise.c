@@ -4,7 +4,7 @@ int init_gsl_randgen(){
   gsl_ran_T = gsl_rng_default;
   gsl_ran_r = gsl_rng_alloc(gsl_ran_T);  // returns a pointer to a newly-created instance of a random number generator of type T        
 
-  // seed buffers needed for random number generation of each thread. 
+  // seed buffers needed for random number generation for each thread. 
   randBuffers = malloc(omp_get_max_threads()*sizeof(*randBuffers));
                        
   for(j=0; j<omp_get_max_threads(); j++)  srand48_r((long) j, &randBuffers[j]);

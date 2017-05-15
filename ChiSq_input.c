@@ -2,7 +2,8 @@ int load_withoutfolding(char filepath[]){
   char  firstfilepath[200];
 
   sprintf( firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, lo_zlim, hi_zlim);
-
+  // sprintf( firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, lo_zlim, hi_zlim);
+  
   inputfile = fopen(firstfilepath, "r");
 
   for(i=0; i<chiSq_kmaxIndex; i++){

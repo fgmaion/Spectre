@@ -12,22 +12,21 @@ double    maxlin;
 int     nlinbins;
 double  linbinsz;
 
-char filename[200];
+char    filename[200];
 
-int   indi; 
-int   indj;
+int     indi; 
+int     indj;
 
-int   bruteforceCount = 0;
+int     bruteforceCount = 0;
 
-double pairCount = 0.0;
+double  pairCount = 0.0;
 
-int   Nmin   =  100;      // Minimum number of particles which a Node can contain, should be > 1.
+int     Nmin = 1000;  // Minimum number of particles which a Node can contain, should be > 1; previously 100.
+int     sortDim, treelevel;
+int     NLeft, NRight;
 
-int   sortDim, treelevel;
-int   NLeft, NRight;
-
-int   tree_N, firstSplitDim, tree_labelCount;
-int   pairwisepdf_pairCount=0;
+int     tree_N, firstSplitDim, tree_labelCount;
+int     pairwisepdf_pairCount=0;
   
 double SplitValue;
 
@@ -102,13 +101,10 @@ int    print_dr();
 
 int    print_xiMultipoles();
 
-int    CountPairs_rMu(double **C0, double **C2, double **C4, double **C6, double **C8, double **C10, double **r, double **mu, Node* firstTree, Node* secndTree, int sameTree);
-
-int    findSuitableNodePairs_bruteforcePairCount(double **C0, double **C2,  double **C4, double **C6, double **C8, double **C10, double **r, double **mu, Node *node1, Node *node2, int sameTree);
-
-int    bruteforceCountpairs_betweenChildren(double **C0, double **C2, double **C4, double **C6, double **C8, double **C10, double **r, double **mu, Node *node1, Node *node2, int sameTree);
-
-int    bruteforce_nonodes(double **C0, double **C2, double **C4, double **C6, double **C8, double **C10, double **r, double **mu, Particle* cat, Particle* cat2, int N, int N2, int sameTree);
+int    postprocess_pairs(double* C0, double* C2, double* C4, double* C6, double* C8, double* C10, double* r, double* mu, Node* firstTree, Node* secndTree, int sameTree);
+int    findSuitableNodePairs_bruteforcePairCount(double* C0, double* C2, double* C4, double* C6, double* C8, double* C10, double* r, double* mu, Node* node1, Node* node2, int sameTree);
+int    bruteforceCountpairs_betweenChildren(double* C0, double* C2, double* C4, double* C6, double* C8, double* C10, double* r, double* mu, Node* node1, Node* node2, int sameTree);
+int    bruteforce_nonodes(double* C0, double* C2, double* C4, double* C6, double* C8, double* C10, double* r, double* mu, Particle* cat, Particle* cat2, int N, int N2, int sameTree);
 
 int    assignLeafValues(Particle cat[], double xCoors[], double yCoors[], double zCoors[], double disp[], int N);
 

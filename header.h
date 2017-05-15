@@ -93,6 +93,7 @@ double pk_loA;
 //-- VIPERS --//
 int          fieldFlag;
 double   TotalW1W4area;
+double        fracArea; // WX/Total area fraction.
 
 double  W1area;
 double  W4area;

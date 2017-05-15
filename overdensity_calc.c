@@ -1,9 +1,9 @@
 int boxCoordinates(double xCoor[], double yCoor[], double zCoor[], int rowNumber){
-    xlabel                  = (int) trunc((xCoor[rowNumber] - AxisLimsArray[0][2])/xCellSize);    
-    ylabel                  = (int) trunc((yCoor[rowNumber] - AxisLimsArray[0][1])/yCellSize);
-    zlabel                  = (int) trunc((zCoor[rowNumber] - AxisLimsArray[0][0])/zCellSize);
+    xlabel           = (int) trunc((xCoor[rowNumber] - AxisLimsArray[0][2])/xCellSize);    
+    ylabel           = (int) trunc((yCoor[rowNumber] - AxisLimsArray[0][1])/yCellSize);
+    zlabel           = (int) trunc((zCoor[rowNumber] - AxisLimsArray[0][0])/zCellSize);
     
-    boxlabel                = (int)                         xlabel + n2*ylabel + n2*n1*zlabel;
+    boxlabel         = (int)                         xlabel + n2*ylabel + n2*n1*zlabel;
 
     return boxlabel;
 }
@@ -61,4 +61,3 @@ void shuffle(double *array, int n){
     array[i] = tmp;
   }
 }
-

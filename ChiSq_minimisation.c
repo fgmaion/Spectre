@@ -127,11 +127,11 @@ int calc_ChiSqs(int mockNumber){
     }
     
     // printf("\n\nChi sq. input.");
-
+    
     if(data_mock_flag == 0){
       for(j=0; j<mono_order; j++)  xdata[j] -= shotnoise_instances[mockNumber - 1]; 
     }
-
+    
     if(data_mock_flag == 1){
       double shot = get_datashotnoise();
 
@@ -159,7 +159,7 @@ int calc_ChiSqs(int mockNumber){
     
     // printf("\n\nChi sq. calc:");
 
-    // #pragma omp parallel for private(kk, jj, ii, ll, mm, nn, fsigma8, bsigma8, velDispersion)
+    // Data races currently: #pragma omp parallel for private(kk, jj, ii, ll, mm, nn, fsigma8, bsigma8, velDispersion)
     for(jj=0; jj<Res; jj++){    
       fsigma8 = min_fsigma8 + fsigma8Interval*jj;
 
@@ -185,12 +185,12 @@ int calc_ChiSqs(int mockNumber){
               for(nn=0; nn<order; nn++){
                 // ChiSqGrid[jj][kk][ii][ll][mm] += pow(xdata[nn] - xtheory[jj][kk][ii][ll][mm][nn], 2.)*pow(gsl_matrix_get(sigma_norm, nn, nn), 2.);
                 
-                ChiSqGrid[jj][kk][ii][ll][mm] += pow(ydata[nn] - ytheory[jj][kk][ii][ll][mm][nn], 2.)/gsl_vector_get(eval, nn);
+                ChiSqGrid[jj][kk][ii][ll][mm] += pow(ydata[nn] - ytheory[jj][kk][ii][ll][mm][nn], 2.)/gsl_vector_get(eval, nn);                
 
-                // ChiSqGrid[jj][kk][ii][ll][mm] *= (1. - (order + 1)/(CatalogNumber - 1.)); // Hartlap et al. correction. 
+                ChiSqGrid[jj][kk][ii][ll][mm] *= (1. - (order + 1)/(CatalogNumber - 1.)); // Hartlap et al. correction.
               }
 
-              // printf("\n%.2lf \t %.2lf \t %.2lf \t %.6le", fsigma8, velDispersion, bsigma8,  ChiSqGrid[jj][kk][ii][ll][mm]);
+              // printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  ChiSqGrid[jj][kk][ii][ll][mm]);
             }
           }
         }
@@ -228,6 +228,7 @@ int prep_ctype_ChiSq(){
 int get_ydata(int mockNumber, int data_mock_flag){
   if      (data_mock_flag == 0)  load_mock(mockNumber);
   else if (data_mock_flag == 1)  load_data();
+  else if (data_mock_flag == 2)  set_meanMultipoles();
   else{
     printf("\n\nChi sq. input is invalid.");
   }

@@ -1,6 +1,5 @@
 // Path to relevant directories. 
 char         vipersHOD_dir[200];
-char   maskmultipoles_path[200];
 char covariance_mocks_path[200];
 
 // Misc. //

@@ -38,18 +38,15 @@ int print_randoccupied(){
 
 
 int set_randoccupied(){
-  double      x2, z2;
-  
-  // double        c_ra;
-  // c_ra    =  CentreRA*(pi/180.);
-  
+  double      x2, z2;  
   double       c_dec;
-  c_dec   = CentreDec*(pi/180.);
-    
+
   number_occupied = 0;
   
+  c_dec           = CentreDec*(pi/180.);
+  
   // Surveyed volume need only be done once; no rotation required.
-  rand_occupied = calloc(n2*n1*n0, sizeof(*rand_occupied));
+  rand_occupied   = calloc(n2*n1*n0, sizeof(*rand_occupied));
 
   set_cnst_nbar(); // set pt2nz and recalculate spline for inverse nbar.  
 

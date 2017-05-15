@@ -1,6 +1,6 @@
-#define  KBIN_NO 20          
-#define  FOLDFACTOR 4.0
-
+#define   KBIN_NO 12          
+#define   FOLDFACTOR 2.0       
+ 
 #include "/home/mjw/Aux_functions/header.h"
 #include "/home/mjw/Aux_functions/Aux_functions.c"
 
@@ -36,7 +36,7 @@
 #include "assign_binnedpk_memory.c"
 #include "lock_files.c"
 // #include "fftw_qlr.c"
-#include "fftw_qlk.c"
+// #include "fftw_qlk.c"
 
 
 int main(int argc, char **argv){  
@@ -69,8 +69,8 @@ int main(int argc, char **argv){
     nz_smoothRadius         =      100.; 
   }
 
-  lopad                     =      20.0;
-  fkpPk                     =    8000.0;                    // [h^-1 Mpc]^3.
+  lopad                     =      50.0;                    // stefano_trans_z set such that lo_zlim boundary is lopad [h^-1 Mpc] from embeeded volume boundary.
+  fkpPk                     =    8000.0;                    // [h^-1 Mpc]^3.  Stefano: 4000 [h^-1 Mpc]^3.
 
   fft_size                  =       512;                    // Worker 46 works up to 1024. 
   
@@ -92,7 +92,7 @@ int main(int argc, char **argv){
   set_angularlimits(0, fieldFlag);                       // Cut data to mock limits.
   
   Initialise();                                          // Initialise grid, fft params and random generation.
-
+  
   check_radialextent(loChi, hiChi, lopad);
   
   stefano_trans_z = -loChi + lopad;                      // Translate lower limit to close to edge of box.
@@ -101,7 +101,7 @@ int main(int argc, char **argv){
   
   prep_pkRegression();                                   // set k binning interval arrays. 
   
-  prep_CatalogueInput_500s();                            // Max. number of gals of ALL mocks analysed simultaneously is 'hard coded' in.  
+  prep_CatalogueInput_500s();                            // Max. number of gals of ALL mocks (& data) analysed simultaneously is 'hard coded'.  
   
   prep_nbar();                                           // assign memory and zero e.g. bins of number of galaxies per chi. 
 
@@ -123,7 +123,9 @@ int main(int argc, char **argv){
   walltime("All prep. done");
 
   for(data_mock_flag = 0; data_mock_flag < 2; data_mock_flag++){ // analysis of VIPERS data and mock catalogues.
-    for(loopCount=atoi(argv[4]); loopCount<mock_end; loopCount++){            
+    trash_nbarshot_file(atoi(argv[4]));
+
+    for(loopCount=atoi(argv[4]); loopCount <= mock_end; loopCount++){            
       sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
 
       if(data_mock_flag == 1){
@@ -134,8 +136,7 @@ int main(int argc, char **argv){
         CatalogueInput_500s();  // mocks 1 to 153 are independent. 
       }
 
-      set_zcut();               // applies z cut
-      
+      set_zcut();               // applies z cut      
       set_deccut();             // applies (problem) dec cut in mocks to data.
     
       // vollim_cutbyMB(-20.5);
@@ -144,12 +145,12 @@ int main(int argc, char **argv){
     
       // print_xy();
 
-      spline_nbar(0);  // new <n(z)> for each mock. arg 1: bool for smoothed + reflected 2-field avg., arg 2: 'truth' i.e. mock avg.
+      spline_nbar(0);           // new <n(z)> for each mock. arg 1: bool for smoothed + reflected 2-field avg., arg 2: 'truth' i.e. mock avg.
       
-      pt2nz = &interp_nz; // Gaussian smoothed galaxy counts. 
+      pt2nz = &interp_nz;       // Gaussian smoothed galaxy counts. 
       // pt2nz = &vollim_nz;
     
-      accepted_gal(); // count number of accepted galaxies.
+      accepted_gal();           // count number of accepted galaxies.
     
       prep_inverseCumulative_nbar();
       
@@ -165,28 +166,28 @@ int main(int argc, char **argv){
     
       // fft_qellk(&flat);
         
-      calc_bare_fkpweights(); // fkp_weights in units of alpha. 
+      calc_bare_fkpweights();   // fkp_weights in units of alpha. 
     
       printf("\n\n");
     
-      for(int m=0; m<5; m++){
+      for(int m=4; m<5; m++){
         d0 = d0s[m];
       
         set_clipping_weights(); // unity weights for d0=1000, else load. 
-      
+        
         alpha_calc();
             
         for(fold=0; fold<3; fold++){
           calc_overdensity();
         
-          PkCalc(&set[fold]);
+          PkCalc(&set[fold], atoi(argv[4]));
         }
       }
     
       if(data_mock_flag == 1) break;
     }
   }
-
+  
   walltime("Wall time at finish");
   
   // MPI_Finalize();

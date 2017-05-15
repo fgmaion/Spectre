@@ -5,15 +5,22 @@ int model_compute(int aa, int bb, int cc, int dd, int ee){
  
   FFTlog_updatepk(mono_config, quad_config, hex_config, fsigma8/bsigma8, velDispersion);
   // apmultipoles(mono_config, quad_config, hex_config, fsigma8/bsigma8, velDispersion, alpha_pad, epsilon_pad);
-  
+  /*
+  for(j=0; j<mono_config->N; j++){
+    if((0.01 < mono_config->krvals[j][0]) && (mono_config->krvals[j][0] < 1.0)){
+      printf("\n%.3lf \t %.3lf \t %.3lf", mono_config->krvals[j][0], mono_config->pk[j][0], quad_config->pk[j][0]);
+    }
+  }
+  */
   xi_mu(mono_config);  // Transform to correlation function. 
   xi_mu(quad_config);  
   xi_mu( hex_config);
   
   varCalc(mono_config, &variance);
   
-  // Can openmp loops. mono_config updated by clip_mono.
-  // clip_p0p2(clipmono_config, clipquad_config, mono_config, quad_config, zero_config, zero_config, u0, variance);
+  if(d0 < 1000){
+    clip_p0p2(clipmono_config, clipquad_config, mono_config, quad_config, zero_config, zero_config, u0, variance);
+  }
   
   cnvldmonoCorr_joint(convlmonoCorr, mono_config, quad_config, hex_config);
   

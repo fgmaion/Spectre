@@ -1,7 +1,7 @@
 int set_minChiSq(){
   minChiSq = pow(10., 12.);
 
-  #pragma omp parallel for reduction(min : minChiSq) if(thread == 1)
+  // Data races currently:  #pragma omp parallel for private(k, j, i) reduction(min : minChiSq) if(thread == 1)
   for(k=0; k<Res; k++){
     for(j=0; j<Res; j++){
       for(i=0; i<Res; i++){        
@@ -9,10 +9,10 @@ int set_minChiSq(){
         // printf("\nthread id = %d", omp_get_thread_num());
         
         if(ChiSqGrid[k][j][i][0][0] < minChiSq){
-          minChiSq    = ChiSqGrid[k][j][i][0][0];
+          minChiSq    =            ChiSqGrid[k][j][i][0][0];
 
           minX2_fsig8 = min_fsigma8     + fsigma8Interval*k;
-          minX2_bsig8 = min_bsigma8     + bsigma8Interval*k;
+          minX2_bsig8 = min_bsigma8     + bsigma8Interval*j;
           minX2_sigp  = min_velDisperse +   sigmaInterval*i;
         }
       }

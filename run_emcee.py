@@ -99,7 +99,7 @@ print result.x
 ## necessary?
 np.seterr(invalid='warn')
 
-ndim, nwalkers, nburn, nsteps = 4, 450, 10, 50
+ndim, nwalkers, nburn, nsteps = 4, 45, 10, 50
 
 seed = 1
 np.random.seed(seed)
@@ -151,9 +151,9 @@ if pool.is_master():
  
     getdist_format = np.column_stack((np.ones(len(lnprob)), np.array(lnpriors), lnprob, samples))
 
-    np.savetxt(outputdir+'/emcee_log/xxx_%d.txt' % seed, getdist_format, fmt='%.3lf', header="Mean acceptance: " + str(meanacceptance)+",  Autocorrelation times: " + str(autocorrelationtimes))
+    np.savetxt(outputdir+'/emcee_log/data_W%d_zlim_%.1lf_%.1lf_kmax_%.1lf_chain_%d.txt' % (FIELD, LOZ, HIZ, KMAX, seed), getdist_format, fmt='%.3lf', header="Mean acceptance: " + str(meanacceptance)+",  Autocorrelation times: " + str(autocorrelationtimes))
     
     fig = corner.corner(samples, labels=["$f \sigma_8$", "$b \sigma_8$", "$\sigma_p$", "$\epsilon$"])
-    fig.savefig(outputdir + "/plots/triangle.pdf")
+    fig.savefig(outputdir + "/plots/data_W%d_zlim_%.1lf_%.1lf_kmax_%.1lf_triangle.pdf")
 
 pool.close()

@@ -1,5 +1,4 @@
-#define  KBIN_NO 20
-#define  FOLDFACTOR 2.0
+#define  KBIN_NO 12
 
 #include "/home/mjw/Aux_functions/header.h"
 #include "/home/mjw/Aux_functions/Aux_functions.c"
@@ -14,6 +13,7 @@
 
 #include "AgeOftheUniverse.c"
 #include "linearGrowthRate.c"
+#include "angular_limits.c"
 #include "chi_zcalc.c"
 #include "assign_binnedpk_memory.c"
 #include "likelihood_memory.c"
@@ -28,6 +28,7 @@
 #include "matter_pk.c"
 #include "get_pkderivedprops.c"
 #include "get_allkvals.c"
+#include "super_vipers.c"
 #include "MultipoleCovariance_eigenvecs.c"
 #include "MultipoleCovariance.c"
 #include "ChiSq_input.c"
@@ -46,58 +47,32 @@
 int main(int argc, char** argv){  
   thread                    =                           1;
   outputdir                 =         getenv("outputdir");
-  
+  maskmultipoles_path       =        getenv("mask_Qldir");
+   
   sprintf(root_dir,                              "/home/mjw/HOD_MockRun");
   sprintf(vipersHOD_dir,         "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); 
-  sprintf(covariance_mocks_path,                               outputdir); 
-  sprintf(maskmultipoles_path,   "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
   sprintf(models_path,                                         outputdir);
+
+  sprintf(covariance_mocks_path,                               outputdir);
+  // sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
   
-  d0                        =       atoi(argv[1]);
-  fieldFlag                 =       atoi(argv[2]);
-  lo_zlim                   =       atof(argv[3]);   // previously 0.6<z<0.9, 0.7<z<1.1
-  hi_zlim                   =       atof(argv[4]);
-  ChiSq_kmax                =       atof(argv[5]);
+  d0                        =               atoi(argv[1]);
+  fieldFlag                 =               atoi(argv[2]);
+  lo_zlim                   =               atof(argv[3]);   // previously 0.6<z<0.9, 0.7<z<1.1
+  hi_zlim                   =               atof(argv[4]);
+  ChiSq_kmax                =               atof(argv[5]);
 
   // printf("\n%d \t %d \t %.1lf \t %.1lf \t %.2lf", d0, fieldFlag, lo_zlim, hi_zlim, ChiSq_kmax);
-  
-  W1area                    =              10.692;   // Nagoya v7 - overlapping Samhain v7; v6 and v7 has identical area; this is for the mocks -- with dec problem.  
-  W4area                    =               5.155;   // W1 data area is 10.763 deg^2.
-
-  TotalW1W4area             =     W1area + W4area;
-  
-  if(fieldFlag == 1){
-    LowerRAlimit            =     30.175;            // Navgoya v6 + Samhain 
-    UpperRAlimit            =     38.797;            // data:
-    CentreRA                =     34.492;            // W1area = 10.763; W4area = 5.155;
-
-    LowerDecLimit           =     -5.970;     
-    UpperDecLimit           =     -4.171;     
-    CentreDec               =     -5.091; 
-
-    fracArea                = W1area/TotalW1W4area;
-  }
-  
-  else if(fieldFlag == 4){
-    LowerRAlimit            =    330.046;            
-    UpperRAlimit            =    335.389;
-    CentreRA                =    332.638;
-  
-    LowerDecLimit           =      0.862;     
-    UpperDecLimit           =     2.3696;     
-    CentreDec               =      1.583; 
-    
-    fracArea                = W4area/TotalW1W4area;
-  }
   /*
-  min_bsigma8               =      0.55;                  // FOR GRANETT 2D POSTERIOR.
-  max_bsigma8               =      0.85;                  // Previously 0.2 < b \sig_8 < 1.6
+  // Old priors. 
+  min_bsigma8               =      0.05;                  // FOR GRANETT 2D POSTERIOR.
+  max_bsigma8               =      1.00;                  // Previously 0.2 < b \sig_8 < 1.6
                                                           // 0.05 < b s8 < 1.0 (13/02/17)   
-  min_fsigma8               =      0.00;                  // Priors on the model params.  
+  min_fsigma8               =      0.05;                  // Priors on the model params.  
   max_fsigma8               =      0.80;
 
   min_velDisperse           =      0.00;                  // CHANGED FROM 0.00 13/02/2017
-  max_velDisperse           =      7.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
+  max_velDisperse           =      6.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
   */
   
   min_bsigma8               =      0.05;                
@@ -140,16 +115,18 @@ int main(int argc, char** argv){
 
   smooth_radius             =       2.0;
    
-  CatalogNumber             =       152;
+  CatalogNumber             =       153;
 
   
   start_walltime();
 
   printf_branch();
-  
+
   // fftw_init_threads();
 
   // fftw_plan_with_nthreads(omp_get_max_threads()); // Maximum number of threads to be used; use all openmp threads available. 
+
+  set_angularlimits(0, fieldFlag);                   // Cut data to mock limits.
   
   chi_zcalc();              // Cosmology from cosmology_planck2015.h or cosmology_valueaddedmocks.h; Selection parameters.
   
@@ -180,12 +157,14 @@ int main(int argc, char** argv){
   
   get_mocksshotnoise();
   
-  // get_mocksclippedamplitudes();
+  get_mocksclippedamplitudes();
   
   load_CovarianceMatrix(CatalogNumber, 1);
   
   prewhitenCov();  // Pre-whiten data and covariance.
 
+  // scale_Cov(CatalogNumber);
+  
   Covariance_eigenVecs(CatalogNumber);
   
   delete_lockfile();
@@ -194,7 +173,8 @@ int main(int argc, char** argv){
 
   set_clippingvars(1.0);
   
-  if(ChiSq_kmax == 0.2)  calc_models();
+  // if(ChiSq_kmax == 0.2)
+  calc_models();
   
   set_models();
   
@@ -209,14 +189,14 @@ int main(int argc, char** argv){
     if(data_mock_flag == 1)  sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
   
     output = fopen(filepath, "w");
-  
+    
     walltime("Walltime at start of chi^2 calc.");
-  
+
     for(int ab=1; ab<CatalogNumber; ab++){
-      calc_ChiSqs(ab); // passed to load_mock.
+      calc_ChiSqs(ab);
       
       set_minChiSq();
-    
+      
       calc_onedposteriors(&maxL_fsig8, &maxL_bsig8, &maxL_sigv);
       
       printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
@@ -225,7 +205,7 @@ int main(int argc, char** argv){
       
       if(data_mock_flag == 1)  break;
     }
-  
+    
     fclose(output);
   }
   

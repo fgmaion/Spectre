@@ -12,7 +12,7 @@ int Fisher_matrix_fap(double dbsigma8, double dvelDispersion){
   }
 
   else{
-    printf("\n\nChange z limits for forecast");
+    printf("\n\nChange z limits for forecast.");
   }
   
   int         nn;

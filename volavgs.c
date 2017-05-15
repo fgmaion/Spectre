@@ -38,7 +38,7 @@ double calc_vol(){
 
   // VIPERS W1 area. 
   if(fieldFlag == 1)  result *= sqdegs2steradians(W1area);  // printf("\n\nSTERADIANS: %.6lf", sqdegs2steradians(W1area));
-  if (fieldFlag == 4)  result *= sqdegs2steradians(W4area);
+  if(fieldFlag == 4)  result *= sqdegs2steradians(W4area);
 
   // Rota et al.: ~ parent bounds.
   // if(fieldFlag == 1)  result *= sqdegs2steradians(32.8125);  // printf("\n\nSTERADIANS: %.6lf", sqdegs2steradians(W1area));

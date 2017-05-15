@@ -1,6 +1,6 @@
 int prep_filterfactors(void){
-  double xNy     = pi/dx;
-  double yNy     = pi/dy;
+  double xNy     = pi/dx; // Clipping weight grid has higher resolution than that for P(k) estimates.
+  double yNy     = pi/dy; // CellSize > dx.
   double zNy     = pi/dz;
 
   double funda_x = 2.*pi*pow(n2, -1.)*pow(dx, -1.);

@@ -1,5 +1,4 @@
 #define  KBIN_NO 20
-#define  FOLDFACTOR 2.0
 
 #include "/home/mjw/Aux_functions/header.h"
 #include "/home/mjw/Aux_functions/Aux_functions.c"
@@ -17,6 +16,7 @@
 #include "AgeOftheUniverse.c"
 #include "linearGrowthRate.c"
 #include "chi_zcalc.c"
+#include "angular_limits.c"
 #include "assign_binnedpk_memory.c"
 #include "likelihood_memory.c"
 #include "KaiserMultipoles.c"
@@ -50,9 +50,9 @@ int main(int argc, char** argv){
   thread                    =    1;
   data_mock_flag            =    0;  // analysis of VIPERS data or mock catalogues. 
 
-  outputdir                 =         getenv("outputdir");
+  outputdir                 =                         getenv("outputdir");
   
-  sprintf(root_dir,              "/home/mjw/HOD_MockRun");
+  sprintf(root_dir,                              "/home/mjw/HOD_MockRun");
   sprintf(vipersHOD_dir,         "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); 
   sprintf(covariance_mocks_path,                               outputdir); 
   sprintf(maskmultipoles_path,   "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
@@ -64,37 +64,10 @@ int main(int argc, char** argv){
   hi_zlim                   =       atof(argv[4]);
   ChiSq_kmax                =       atof(argv[5]);
   
-
   // printf("\n%d \t %d \t %.1lf \t %.1lf \t %.2lf", d0, fieldFlag, lo_zlim, hi_zlim, ChiSq_kmax);
-  
-  W1area                    =              10.692;   // Nagoya v7 - overlapping Samhain v7; v6 and v7 has identical area; this is for the mocks -- with dec problem.  
-  W4area                    =               5.155;   // W1 data area is 10.763 deg^2; W2 is 5.155
 
-  TotalW1W4area             =      W1area + W4area;
+  set_angularlimits(0, fieldFlag);
   
-  if(fieldFlag == 1){
-    LowerRAlimit            =     30.175;            // Navgoya v6 + Samhain 
-    UpperRAlimit            =     38.797;            // data:
-    CentreRA                =     34.492;            // W1area = 10.763; W4area = 5.155;
-
-    LowerDecLimit           =     -5.970;     
-    UpperDecLimit           =     -4.171;     
-    CentreDec               =     -5.091; 
-
-    fracArea                = W1area/TotalW1W4area;
-  }
-  
-  else if(fieldFlag ==4){
-    LowerRAlimit            =    330.046; // Really parent boundary limits. 
-    UpperRAlimit            =    335.389;
-    CentreRA                =    332.638;
-  
-    LowerDecLimit           =      0.862;     
-    UpperDecLimit           =     2.3696;     
-    CentreDec               =      1.583; 
-    
-    fracArea                = W4area/TotalW1W4area;
-  }
   /*
   min_bsigma8               =      0.55;                  // FOR GRANETT 2D POSTERIOR.
   max_bsigma8               =      0.85;                  // Previously 0.2 < b \sig_8 < 1.6

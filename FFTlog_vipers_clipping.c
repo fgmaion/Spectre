@@ -315,11 +315,11 @@ return 0;
 
 
 int FFTlog_updatepk(FFTLog_config *mono, FFTLog_config *quad, FFTLog_config *hex, double beta, double velDispersion){
-  int klo = 0; // kaiser Lorentz D^2 assumes 1000 element array.
+  int klo = 0; // kaiser Lorbsigma8entz D^2 assumes 1000 element array.
 
   double                           ks;
   double mu_0, mu_2, mu_4, mu_6, mu_8;
-
+  
   for(i=0; i<mono->N; i++){
     ks   = mono->krvals[i][0]*velDispersion;
     

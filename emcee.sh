@@ -18,7 +18,7 @@ test(){
   rm -r /home/mjw/IO_lock/
 }
 
-test
+#test
 
 DIR="$HOME/HOD_MockRun/Scripts/"
 cd $DIR

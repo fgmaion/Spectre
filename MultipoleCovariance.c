@@ -6,7 +6,7 @@ int initialiseCovariance(int mocks){
       Interim = 0.0;
 
       for(i=0; i<mocks; i++)  Interim += dMultipoles[i][j]*dMultipoles[i][k]/(mocks - 1);
-
+      
       gsl_matrix_set(Covariance, j, k, Interim);
     }
   }
@@ -271,56 +271,28 @@ int load_CovarianceMatrix(int mocks, int start){
 
     load_CovarianceMatrix_withfolding(mocks, start, filepath);
   }
+
+  printCov();
+
+  print_meanMultipoes();
   
   return 0;
 }
 
+int printCov(){
+  sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/cov_zlim_%.1lf_%.1lf_kmax_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim, ChiSq_kmax);
 
-int fprintf_meanMultipoes(){
-  char meanmultipoles_filepath[200];
+  output = fopen(filepath, "w");
 
-  if(ChiSq_kmax >= 0.799){
-    sprintf(meanmultipoles_filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/mean_multipoles/d0_%d/W%d/meanmultipoles_zlim_%.1lf_%.1lf_old.dat", root_dir, d0, fieldFlag, lo_zlim, hi_zlim);  
-      
-    output = fopen(meanmultipoles_filepath, "w"); 
-
-    for(k=0; k<mono_order; k++)  fprintf(output, "%e \t %e \t %e \t %e \t %e \n", kVals[k], MeanMultipoles[k], sqrt(gsl_matrix_get(Covariance, k, k)), 
-					                                                              MeanMultipoles[k + mono_order], sqrt(gsl_matrix_get(Covariance, k+mono_order, k+mono_order)));
-
-    fclose(output);
-  }    
-
-  return 0;
-}
-
-
-int fprintf_Cov(){
-  char cov_filepath[200];
-    
-  if(ChiSq_kmax >= 0.799){
-    sprintf(cov_filepath, "%s/W1_Spectro_V7_3/mocks_v1.7/cov_W%d_%.1lf_%.1lf_d0_%d", root_dir, fieldFlag, lo_zlim, hi_zlim, d0);
-
-    printf("\n\n%s", cov_filepath);
-      
-    output = fopen(cov_filepath, "w"); 
-      
-    for(j=0; j<order; j++){
-      for(k=0; k<order; k++){        
-        fprintf(output, "%e \t", gsl_matrix_get(Covariance, j, k));                  
-      }
-      
-      fprintf(output, "\n");
+  for(j=0; j<order; j++){
+    for(k=0; k<order; k++){
+      fprintf(output, "%e \t", gsl_matrix_get(Covariance, j, k));
     }
     
-    fclose(output);
+    fprintf(output, "\n");
   }
-
-  return 0;
-}
-
-
-int scale_Cov(int N){
-  for(j=0; j<order; j++)  gsl_matrix_set(sigma_norm, j, j, sqrt((double) N)*gsl_matrix_get(sigma_norm, j, j));
+  
+  fclose(output);
 
   return 0;
 }

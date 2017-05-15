@@ -1,10 +1,8 @@
-// Path to relevant directories.  
+// Path to relevant directories.
+char*       maskmultipoles_path;
 char         vipersHOD_dir[200];
-char   maskmultipoles_path[200];
 char covariance_mocks_path[200];
 char           models_path[200];
-
-double fracArea; // W%d/Total area fraction. 
 
 //-- VIPERS --//
 double  lo_zlim, loChi;
@@ -19,6 +17,7 @@ double  LowerDecLimit;
 //-- Clipping --//
 int     d0;
 double  smooth_radius;
+double  mean_suppression;
 
 //-- Misc --//
 int     data_mock_flag;

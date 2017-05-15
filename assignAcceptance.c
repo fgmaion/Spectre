@@ -35,7 +35,7 @@ int set_deccut(){
     if(Acceptanceflag[j] == true){
       number += 1;
 
-      if(dec[j] <= -5.97){
+      if((fieldFlag == 1) && (dec[j] <= -5.97)){
         Acceptanceflag[j]  = false;  // dec problem in mocks; cut data to have the same boundary; should specify W4 is not cut.
 
         number            -=     1;
@@ -78,7 +78,7 @@ int assignAcceptance_rand(){
 
 
 int accepted_gal(){
-  accepted      =   0;
+  accepted =   0;
 
   for(j=0; j<Vipers_Num; j++){
     if(Acceptanceflag[j] == true){

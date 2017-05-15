@@ -1,6 +1,6 @@
 int set_angularlimits(int dataormock, int fieldFlag){
-  if(dataormock == 0){ // mock
-    W1area                    =     10.692;                 // Nagoya v6 spectroscopic mask (& Samhain).
+  if(dataormock == 0){                                      // mock
+    W1area                    =     10.692;                 // Nagoya v7 - overlapping Samhain v7; v6 and v7 has identical area; this is for the mocks -- with dec problem.
     W4area                    =      5.155;                 // Dec cut at -5.97 in the mocks;   
 
     if(fieldFlag == 1){
@@ -13,7 +13,7 @@ int set_angularlimits(int dataormock, int fieldFlag){
       CentreDec               =     -5.091;                
     }
 
-    else if (fieldFlag ==4){
+    else if (fieldFlag == 4){
       LowerRAlimit            =    330.046;                 
       UpperRAlimit            =    335.389;
       CentreRA                =    332.638;
@@ -28,7 +28,7 @@ int set_angularlimits(int dataormock, int fieldFlag){
     }
   }
 
-  else if(dataormock == 1){ // data
+  else if(dataormock == 1){                                 // data
     W1area                    =      10.763;                
     W4area                    =       5.155;                
 
@@ -61,7 +61,15 @@ int set_angularlimits(int dataormock, int fieldFlag){
     return 1;
   }
 
-  TotalW1W4area               = W1area + W4area;            // Required for <n(z)> calculation.
+  TotalW1W4area              = W1area + W4area;            // Required for <n(z)> calculation.
+
+  if(fieldFlag == 1){
+    fracArea                 = W1area/TotalW1W4area;
+  }
+
+  else if(fieldFlag == 4){
+    fracArea                 = W4area/TotalW1W4area;
+  }
   
   return  0;
 }

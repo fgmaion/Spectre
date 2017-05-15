@@ -13,7 +13,7 @@ int grow_galTree(){
   
   galTree  = buildTree(point_gals,   Vipers_Num);
 
-  galTree->label  = 0;
+  galTree->label = 0;
 
   // nodes_printParticles_print();
   
