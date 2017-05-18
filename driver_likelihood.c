@@ -54,8 +54,8 @@ int main(int argc, char** argv){
   sprintf(vipersHOD_dir,         "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); 
   sprintf(models_path,                                         outputdir);
   
-  // sprintf(covariance_mocks_path,                               outputdir);
-  sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
+  sprintf(covariance_mocks_path,                               outputdir);
+  // sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
   
   d0                        =               atoi(argv[1]);
   fieldFlag                 =               atoi(argv[2]);
@@ -64,7 +64,8 @@ int main(int argc, char** argv){
   ChiSq_kmax                =               atof(argv[5]);
 
   // printf("\n%d \t %d \t %.1lf \t %.1lf \t %.2lf", d0, fieldFlag, lo_zlim, hi_zlim, ChiSq_kmax);
-  
+
+  /*
   // Old priors. 
   min_bsigma8               =      0.05;                  // FOR GRANETT 2D POSTERIOR.
   max_bsigma8               =      1.00;                  // Previously 0.2 < b \sig_8 < 1.6
@@ -74,8 +75,8 @@ int main(int argc, char** argv){
 
   min_velDisperse           =      0.00;                  // CHANGED FROM 0.00 13/02/2017
   max_velDisperse           =      6.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
+  */
   
-  /*
   min_bsigma8               =      0.05;                
   max_bsigma8               =      3.50;                   
                                                           
@@ -84,7 +85,6 @@ int main(int argc, char** argv){
 
   min_velDisperse           =      0.05;                   
   max_velDisperse           =     15.00;                     
-  */
   
   min_alpha_pad             =    0.9999;
   max_alpha_pad             =    1.0001;
@@ -136,6 +136,8 @@ int main(int argc, char** argv){
   // inputLinearPk();       //  This is NOT automatically ensured.               
 
   // camb_call(0, 1.05);    // nonlinear/linear flag, redshift. 
+
+  get_mocksshotnoise();
   
   prep_FFTlog_memory();     // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
   
@@ -154,8 +156,6 @@ int main(int argc, char** argv){
   set_chiSq_intervals();      // set e.g. fsig8 interval = (max - min)/interval.
     
   assign_LikelihoodMemory();  // Assigns memory for xdata, ydata, xtheory, ytheory, ChiSqGrid.
-  
-  get_mocksshotnoise();
   
   // get_mocksclippedamplitudes();
   
@@ -206,6 +206,7 @@ int main(int argc, char** argv){
     fclose(output);
   }
   */
+  
   default_params();
 
   model_compute(0, 0, 0, 0, 0);

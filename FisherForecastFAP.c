@@ -13,6 +13,8 @@ int Fisher_matrix_fap(double dbsigma8, double dvelDispersion){
 
   else{
     printf("\n\nChange z limits for forecast.");
+
+    return 1;
   }
   
   int         nn;
@@ -28,19 +30,16 @@ int Fisher_matrix_fap(double dbsigma8, double dvelDispersion){
   double shifts[4] = { 1.02,   0.98,    1.04,    0.96};
   double   amps[4] = {2./3., -2./3., -1./12., +1./12.};
 
-  double                F, FAP;
-  
-  double FAP_fid75  = 0.953300;  // fiducial 
-  double FAP_fid105 = 1.456636;  // fiducial
-  
+  double     F, FAP;
+    
   double dmodel_dparam[nparam][order];
-
-  prep_ctype_ChiSq(); // matches kvals in each mock multipoles to FFTlog. 
   
   for(i=0; i<nparam; i++){    
     for(j=0; j<order; j++)  dmodel_dparam[i][j] = 0.0;
   }
 
+  prep_ctype_ChiSq();
+  
   // Calculate parameter derivatives with five point stencil. 
   for(int jjj=0; jjj<nparam; jjj++){
     for(int iii=0; iii<npoint; iii++){
@@ -54,7 +53,7 @@ int Fisher_matrix_fap(double dbsigma8, double dvelDispersion){
       velDispersion    =         sparams[2];
       FAP              =         sparams[3];
 
-      F                =      FAP_fid75/FAP; 
+      F                =           dFAP/FAP; 
       
       epsilon_pad      = pow(F, 1./3.) - 1.;  // F    = (1. + epsilon)**3.     
       alpha_pad        =                1.0; 

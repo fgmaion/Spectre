@@ -3,30 +3,27 @@ int model_compute(int aa, int bb, int cc, int dd, int ee){
   double fieldArea    = 0.0;
   double cnvldpk_zero = 0.0;
  
-  FFTlog_updatepk(mono_config, quad_config, hex_config, fsigma8/bsigma8, velDispersion);
-  // apmultipoles(mono_config, quad_config, hex_config, fsigma8/bsigma8, velDispersion, alpha_pad, epsilon_pad);
+  // FFTlog_updatepk(mono_config, quad_config, hex_config, fsigma8/bsigma8, velDispersion);
+  apmultipoles(mono_config, quad_config, hex_config, fsigma8/bsigma8, velDispersion, alpha_pad, epsilon_pad);
 
-  for(j=0; j<mono_config->N; j++){
-    if((0.01 < mono_config->krvals[j][0]) && (mono_config->krvals[j][0] < 1.0)){
-      printf("\n%.4lf \t %.4lf \t %.4lf", mono_config->krvals[j][0], mono_config->pk[j][0], quad_config->pk[j][0]);
-    }
-  }
-  
   xi_mu(mono_config);  // Transform to correlation function. 
   xi_mu(quad_config);  
   xi_mu( hex_config);
-  
+  /*
   varCalc(mono_config, &variance);
   
   if(d0 < 1000){
     clip_p0p2(clipmono_config, clipquad_config, mono_config, quad_config, zero_config, zero_config, u0, variance);
   }
+  */
   
-  cnvldmonoCorr_joint(convlmonoCorr, mono_config, quad_config, hex_config);
+  cnvldmonoCorr_joint(convlmonoCorr, mono_config, quad_config, hex_config, zero_config);  // last arg. for shot noise contribution to P_*(0) as given by shot_config
   
   pk_mu(convlmonoCorr);
   
   cnvldpk_zero = convlmonoCorr->pk[cnvldpk_zeropoint_index][0];  // zero point determined for P'(0) for the joint fields. 
+
+  printf("\n\nConvolved P(k) zero point: %.4lf", cnvldpk_zero);
   
   cnvldmonoCorr(convlmonoCorr, mono_config, quad_config, hex_config, zero_config, zero_config, zero_config);
   cnvldquadCorr(convlquadCorr, mono_config, quad_config, hex_config, zero_config, zero_config, zero_config);
@@ -45,6 +42,12 @@ int model_compute(int aa, int bb, int cc, int dd, int ee){
   }
   
   printf("\n\nModel eval.");
+
+  for(j=0; j<mono_config->N; j++){
+    if((0.01 < mono_config->krvals[j][0]) && (mono_config->krvals[j][0] < 1.0)){
+      printf("\n%.4lf \t %.4lf \t %.4lf", convlmonoCorr->krvals[j][0], convlmonoCorr->pk[j][0], convlquadCorr->pk[j][0]);
+    }
+  }
   
   return 0;
 }

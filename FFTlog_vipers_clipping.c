@@ -100,9 +100,44 @@ int FFTLog_initialise_mask(FFTLog_config *fc){
   return 0;
 }
 
+int FFTLog_initialise_shot(FFTLog_config *fc){
+  double transformOrder;
+
+  double logrmin  = log(fc->min);
+  double logrmax  = log(fc->max);
+
+  double dlogr    = (logrmax - logrmin)/(double)fc->N;
+  double logrc    = (logrmax + logrmin)/2.0;
+
+  double nc       = (double)(fc->N + 1)/2.0 -1;
+
+  double logkc    = log(fc->kr) - logrc;
+
+  transformOrder  = fc->mu - 0.5;
+
+  for(i=0; i<fc->N; i++){
+    fc->krvals[i][0]  = exp(logkc + ((double)i-nc)*dlogr);
+    fc->krvals[i][1]  = exp(logrc + ((double)i-nc)*dlogr);
+
+    if((0.01 < fc->krvals[i][0]) && (fc->krvals[i][0] < 1.0)){
+      fc->pk[i][0]    = mean_shot;
+    }
+    
+    // purely real.  Set P(k) to obtain xi(r) by inverse Hankel transform.
+    fc->pk[i][1]      = 0.0;
+
+    // purely real.  Set xi(r) to obtain P(k) by Hankel transform.
+    fc->xi[i][0]      = 0.0;
+    fc->xi[i][1]      = 0.0;
+  }
+
+  return 0;
+}
+
 
 int set_FFTlog(int FFTlogRes, double loval, double hival, double beta, double velDispersion){
   zero_config      = FFTLog_init(FFTlogRes, loval, hival, 0.0, 0 + 0.5);
+  shot_config      = FFTLog_init(FFTlogRes, loval, hival, 0.0, 0 + 0.5);
   mono_config      = FFTLog_init(FFTlogRes, loval, hival, 0.0, 0 + 0.5);
   quad_config      = FFTLog_init(FFTlogRes, loval, hival, 0.0, 2 + 0.5);
   hex_config       = FFTLog_init(FFTlogRes, loval, hival, 0.0, 4 + 0.5);
@@ -118,10 +153,12 @@ int set_FFTlog(int FFTlogRes, double loval, double hival, double beta, double ve
   
   FFTLog_zeroInput(zero_config, 0.0, 0.0);
 
-  FFTLog_initialise( mono_config,      beta, velDispersion);
-  FFTLog_initialise( quad_config,      beta, velDispersion);
-  FFTLog_initialise(  hex_config,      beta, velDispersion);
-  FFTLog_initialise(  oct_config,      beta, velDispersion);
+  FFTLog_initialise_shot(shot_config); // S
+
+  FFTLog_initialise(mono_config,       beta, velDispersion);
+  FFTLog_initialise(quad_config,       beta, velDispersion);
+  FFTLog_initialise( hex_config,       beta, velDispersion);
+  FFTLog_initialise( oct_config,       beta, velDispersion);
 
   FFTLog_initialise(clipmono_config,   beta, velDispersion);
   FFTLog_initialise(clipquad_config,   beta, velDispersion);
@@ -180,6 +217,8 @@ int precompute_vipers_clipping_model(int FFTlogRes){
     }
   }
 
+  xi_mu(shot_config); // set shot noise xi. 
+  
   return 0;
 }
 
@@ -262,12 +301,13 @@ int clip_p0p2(FFTLog_config* clip_p0, FFTLog_config* clip_p2, FFTLog_config* mon
 }
 
 
-int cnvldmonoCorr_joint(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad, FFTLog_config* hex){
-  // Convolved monopole calculation to 2nd order. updated via bailey.c
+int cnvldmonoCorr_joint(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad, FFTLog_config* hex, FFTLog_config* shot){
+  // Convolved monopole calculation to 2nd order. updated via bailey.c. Shot noise adds to large scale power. 
   for(i=0; i<mono->N; i++){
-    cnvld->xi[i][0]   =          mono->xi[i][0]*FFTlog_W0_joint[i]; // calculation to 2nd order; updated via bailey.c
+    cnvld->xi[i][0]   =         (mono->xi[i][0] + shot->xi[i][0])*FFTlog_W0_joint[i]; // calculation to 2nd order; updated via bailey.c
+
     cnvld->xi[i][0]  +=  (1./5.)*quad->xi[i][0]*FFTlog_W2_joint[i];
-    cnvld->xi[i][0]  +=  (1./9.)*hex->xi[i][0]*FFTlog_W4_joint[i];
+    cnvld->xi[i][0]  +=   (1./9.)*hex->xi[i][0]*FFTlog_W4_joint[i];
   }
 
   return 0;
@@ -277,16 +317,12 @@ int cnvldmonoCorr_joint(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config
 int cnvldmonoCorr(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad, FFTLog_config* hex, FFTLog_config* oct, FFTLog_config* dec, FFTLog_config* dodeca){
   // Convolved monopole calculation to 2nd order. updated via bailey.c
   for(i=0; i<mono->N; i++){
-    cnvld->xi[i][0]   =          mono->xi[i][0]*FFTlog_W0[i]; // calculation to 2nd order; updated via bailey.c
-
-    cnvld->xi[i][0]  +=  (1./5.)*quad->xi[i][0]*FFTlog_W2[i];
-
-    cnvld->xi[i][0]  +=  (1./9.)*hex->xi[i][0]*FFTlog_W4[i];
+    cnvld->xi[i][0]  =          mono->xi[i][0]*FFTlog_W0[i]; // calculation to 2nd order; updated via bailey.c
+    cnvld->xi[i][0] +=  (1./5.)*quad->xi[i][0]*FFTlog_W2[i];
+    cnvld->xi[i][0] +=   (1./9.)*hex->xi[i][0]*FFTlog_W4[i];
 
     // cnvld->xi[i][0]  +=  (1./13.)*oct->xi[i][0]*(*pt2maskMultipoles)(mono->krvals[i][1], 6);
-
     // cnvld->xi[i][0]  +=  (1./17.)*dec->xi[i][0]*(*pt2maskMultipoles)(mono->krvals[i][1], 8);
-
     // cnvld->xi[i][0]  +=  (1./21.)*dodeca->xi[i][0]*(*pt2maskMultipoles)(mono->krvals[i][1], 10);
   }
 
@@ -298,21 +334,26 @@ int cnvldquadCorr(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad
   // Convolved quadrupole calculation to 2nd order. updated via bailey.c
   for(i=0; i<mono->N; i++){
     cnvld->xi[i][0]  = mono->xi[i][0]*FFTlog_W2[i];
-
     cnvld->xi[i][0] += quad->xi[i][0]*(FFTlog_W0[i]+(2./7.)*FFTlog_W2[i]+(2./7.)*FFTlog_W4[i]);
+    cnvld->xi[i][0] +=  hex->xi[i][0]*((2./7.)*FFTlog_W2[i]+(100./693.)*FFTlog_W4[i]+(25./143.)*FFTlog_W6[i]);
+    
+    // cnvld->xi[i][0] += oct->xi[i][0]*((25./143.)*(*pt2maskMultipoles)(mono->krvals[i][1], 4)+(14./143.)*(*pt2maskMultipoles)(mono->krvals[i][1], 6)+(28./221.)*(*pt2maskMultipoles)(mono->krvals[i][1], 8));
 
-    cnvld->xi[i][0] += hex->xi[i][0]*((2./7.)*FFTlog_W2[i]+(100./693.)*FFTlog_W4[i]+(25./143.)*FFTlog_W6[i]);
-
-    // cnvld->xi[i][0] += oct->xi[i][0]*((25./143.)*(*pt2maskMultipoles)(mono->krvals[i][1], 4)+(14./143.)*(*pt2maskMultipoles)(mono->krvals[i][1], 6)+(28./221.)*(*pt2maskMultipoles)(mono->kr\
-    vals[i][1], 8));
-
-// cnvld->xi[i][0]+= dec->xi[i][0]*((28./221.)*(*pt2maskMultipoles)(mono->krvals[i][1], 6)+(24./323.)*(*pt2maskMultipoles)(mono->krvals[i][1], 8)+(225./2261.)*(*pt2maskMultipoles)(mono->k\
-rvals[i][1], 10));
+// cnvld->xi[i][0]+= dec->xi[i][0]*((28./221.)*(*pt2maskMultipoles)(mono->krvals[i][1], 6)+(24./323.)*(*pt2maskMultipoles)(mono->krvals[i][1], 8)+(225./2261.)*(*pt2maskMultipoles)(mono->krvals[i][1], 10));
 }
 
 return 0;
 }
 
+int addshotnoise(FFTLog_config *mono, double shotlevel){
+  for(i=0; i<mono->N; i++){
+    if((0.01 < mono_config->krvals[i][0]) && (mono_config->krvals[i][0] < 1.0)){
+      mono->pk[i][0] += shotlevel;
+    }
+  }
+  
+  return 0;
+}
 
 int FFTlog_updatepk(FFTLog_config *mono, FFTLog_config *quad, FFTLog_config *hex, double beta, double velDispersion){
   int klo = 0; // kaiser Lorbsigma8entz D^2 assumes 1000 element array.

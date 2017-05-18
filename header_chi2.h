@@ -17,6 +17,7 @@ double  LowerDecLimit;
 //-- Clipping --//
 int     d0;
 double  smooth_radius;
+double  mean_shot;
 double  mean_suppression;
 
 //-- Misc --//

@@ -190,8 +190,9 @@ int calc_ChiSqs(int mockNumber){
     return  0;
 }
 
-
 int prep_ctype_ChiSq(){
+  // match all order order modes to FFTlog modes. 
+
   double     diff;
   double min_diff;
 
@@ -210,7 +211,7 @@ int prep_ctype_ChiSq(){
       }
     }
   }
-  
+
   return 0;
 }
 

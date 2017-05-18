@@ -8,17 +8,18 @@
 #PBS -o /home/mjw/HOD_MockRun/W1_Spectro_V7_7/fisher/Fisher_stdout.pbs 
 
 test(){
-    export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_7
+    export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_7.1
+    export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_2
     export LOZ=0.6
     export HIZ=0.9
-    export FIELDFLAG=1
+    export FIELDFLAG=4
     export d0=1000
     export KMAX=0.8
     
     rm -r /home/mjw/IO_lock/
 }
 
-# test 
+test 
 
 DIR="$HOME/HOD_MockRun/Scripts/"
 cd $DIR

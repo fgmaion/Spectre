@@ -9,6 +9,8 @@ int set_clippingvars(double sq_amp){
 }
 
 int get_mocksshotnoise(){  
+  mean_shot = 0.0;
+
   sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/shotnoise_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
   
   inputfile = fopen(filepath, "r");
@@ -21,7 +23,13 @@ int get_mocksshotnoise(){
 
   shotnoise_instances = malloc(shot_ninstance*sizeof(*shotnoise_instances));
    
-  for(j=0; j<shot_ninstance; j++)  fscanf(inputfile, "%*d    %*lf    %lf\n", &shotnoise_instances[j]);
+  for(j=0; j<shot_ninstance; j++){
+    fscanf(inputfile, "%*d    %*lf    %lf\n", &shotnoise_instances[j]);
+
+    mean_shot += shotnoise_instances[j];
+  }
+
+  mean_shot /= shot_ninstance;
   
   fclose(inputfile);
 

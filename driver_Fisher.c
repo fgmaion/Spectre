@@ -1,4 +1,4 @@
-#define  KBIN_NO 20
+#define  KBIN_NO 40 // 12
 
 #include "/home/mjw/Aux_functions/header.h"
 #include "/home/mjw/Aux_functions/Aux_functions.c"
@@ -9,9 +9,7 @@
 #include "header_chi2.h"
 #include "struct_regress.h"
 // #include "struct_multipoles.h"
-// #include "cosmology_planck15.h"
-// #include "cosmology_planck15_hiOm.h"
-#include "cosmology_planck15_lowOm.h"
+#include "cosmology_planck15.h"
 
 #include "AgeOftheUniverse.c"
 #include "linearGrowthRate.c"
@@ -30,6 +28,7 @@
 #include "matter_pk.c"
 #include "get_pkderivedprops.c"
 #include "get_allkvals.c"
+#include "super_vipers.c"
 #include "MultipoleCovariance_eigenvecs.c"
 #include "MultipoleCovariance.c"
 #include "ChiSq_input.c"
@@ -43,19 +42,19 @@
 #include "FisherForecast.c"
 #include "FisherForecastFAP.c"
 #include "Ruiz.c"
+#include "camb_call.c"
 // #include "combining_clipped_fsig8.c"
 
 
 int main(int argc, char** argv){
-  thread                    =    1;
-  data_mock_flag            =    0;  // analysis of VIPERS data or mock catalogues. 
-
+  thread                    =                                           1;
+  
   outputdir                 =                         getenv("outputdir");
+  maskmultipoles_path       =                        getenv("mask_Qldir");
   
   sprintf(root_dir,                              "/home/mjw/HOD_MockRun");
   sprintf(vipersHOD_dir,         "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); 
   sprintf(covariance_mocks_path,                               outputdir); 
-  sprintf(maskmultipoles_path,   "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
   sprintf(models_path,                                         outputdir);
   
   d0                        =       atoi(argv[1]);
@@ -63,10 +62,6 @@ int main(int argc, char** argv){
   lo_zlim                   =       atof(argv[3]);
   hi_zlim                   =       atof(argv[4]);
   ChiSq_kmax                =       atof(argv[5]);
-  
-  // printf("\n%d \t %d \t %.1lf \t %.1lf \t %.2lf", d0, fieldFlag, lo_zlim, hi_zlim, ChiSq_kmax);
-
-  set_angularlimits(0, fieldFlag);
   
   /*
   min_bsigma8               =      0.55;                  // FOR GRANETT 2D POSTERIOR.
@@ -115,23 +110,31 @@ int main(int argc, char** argv){
 
   hiMultipoleOrder          =         2;  // Fit monopole (1) or mono + quad (2).
   jenkins_fold_kjoin        =       0.4;  // k at which P(k) switches from unfolded to folded.     
-  modkMax                   =      1.00;  
+  modkMax                   =      1.00;
+  
   smooth_radius             =       2.0;
    
   CatalogNumber             =       152;
+
   
   start_walltime();
-
+  
   printf_branch();
   
   // fftw_init_threads();
 
   // fftw_plan_with_nthreads(omp_get_max_threads()); // Maximum number of threads to be used; use all openmp threads available. 
   
+  set_angularlimits(0, fieldFlag);
+  
   chi_zcalc();             // Cosmology from cosmology_planck2015.h or cosmology_valueaddedmocks.h// Selection parameters.
   
   inputHODPk();            //  Must match Cosmology in cosmology_planck2015.h, or cosmology_valueaddedmocks.h
   // inputLinearPk();      //  This is NOT automatically ensured.               
+
+  // camb_call(0, 1.05);   // nonlinear/linear flag, redshift.
+
+  get_mocksshotnoise();
   
   prep_FFTlog_memory();    // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
   
@@ -148,14 +151,9 @@ int main(int argc, char** argv){
   allkvals_matchup(); // Match all available kVals to FFTlog modes; not just those up to ChiSq_kmax. 
   
   set_chiSq_intervals(); // set e.g. fsig8 interval = (max - min)/interval.
-  
-  // default_params();
-  // model_compute(0, 0, 0, 0, 0);
-  
+
   assign_LikelihoodMemory();  // Assigns memory for xdata, ydata, xtheory, ytheory, ChiSqGrid.
-
-  get_mocksshotnoise();
-
+  
   // get_mocksclippedamplitudes();
   
   load_CovarianceMatrix(CatalogNumber, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock. 
@@ -163,20 +161,25 @@ int main(int argc, char** argv){
   // delete_lockfile();
 
   prep_dlnPR_dlnk();
+
+  // set_clippingvars(1.0);
   
   calc_models();
+
+  kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
   
   set_models();
-  
-  kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
 
   // Ruiz_locus();
 
-  Fisher_matrix(0.75, 5.0); // Fiducial bias and velocity disperison
-  // Fisher_matrix_fap(0.75, 5.0); // Fiducial bias and velocity disperison 
+  // Fisher_matrix(0.75, 5.0);  // Fiducial bias and velocity disperison
+  Fisher_matrix_fap(0.75, 6.0); // Fiducial bias and velocity disperison 
+  
+  // default_params();
+  // model_compute(0, 0, 0, 0, 0);   
   
   walltime("Wall time at finish");
-
+  
   // MPI_Finalize();
   
   printf("\n\n");

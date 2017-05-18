@@ -1,5 +1,6 @@
 #define ODD 0
 #define EVEN 1
+
 #define PARITY(a) (a)%2 ? ODD : EVEN
 #define FFTLog_SWAP(a,b) {FFTLog_TMP = (a); (a) = (b); (b) = FFTLog_TMP;}
 
@@ -9,7 +10,6 @@ typedef struct FFTLog_complex{
   double amp;
   double arg;
 }  FFTLog_complex;
-
 
 typedef struct FFTLog_config{
   int N;
@@ -52,12 +52,14 @@ int FastLegendre_setInput(FFTLog_config *fc_mono, FFTLog_config *fc_quad, FFTLog
 // FFTLog_config *fc;
 
 FFTLog_config*  octupole_config;
+FFTLog_config*      shot_config;
 FFTLog_config*      mono_config;
 FFTLog_config*      quad_config;
 FFTLog_config*      zero_config;
 FFTLog_config*       hex_config;
 FFTLog_config*       oct_config;
 FFTLog_config*       dec_config;
+
 
 FFTLog_config*   mono_config_ap;
 FFTLog_config*   quad_config_ap;
