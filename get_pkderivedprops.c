@@ -12,12 +12,16 @@ int get_mocksshotnoise(){
   sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/shotnoise_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
   
   inputfile = fopen(filepath, "r");
+
+  fscanf(inputfile, "%*[^\n]\n", NULL); // skip one line (hashed comment)
   
-  line_count(inputfile, &shot_ninstance);
+  line_count(inputfile, &shot_ninstance); 
+
+  fscanf(inputfile, "%*[^\n]\n", NULL); // skip one line (hashed comment)
 
   shotnoise_instances = malloc(shot_ninstance*sizeof(*shotnoise_instances));
    
-  for(j=0; j<shot_ninstance; j++)  fscanf(inputfile, "%lf \n", &shotnoise_instances[j]);
+  for(j=0; j<shot_ninstance; j++)  fscanf(inputfile, "%*d    %*lf    %lf\n", &shotnoise_instances[j]);
   
   fclose(inputfile);
 

@@ -23,6 +23,7 @@
 #include "nbar.c"
 #include "invert_nbar.c"
 #include "load_mask.c"
+#include "get_zeff.c"
 // #include "nbar_smooth.c"
 #include "fkp_weights.c"
 #include "rand_occupied.c"
@@ -104,11 +105,13 @@ int main(int argc, char **argv){
   prep_CatalogueInput_500s();                            // Max. number of gals of ALL mocks (& data) analysed simultaneously is 'hard coded'.  
   
   prep_nbar();                                           // assign memory and zero e.g. bins of number of galaxies per chi. 
-
+  
   load_rands_radec(1.0);
+
+  get_zeff();
   
   delete_lockfile();
-  
+  /*
   prep_clipping_calc();
   
   prep_r2c_modes(&flat,                    1.0); // unfolded.
@@ -123,8 +126,8 @@ int main(int argc, char **argv){
   walltime("All prep. done");
 
   for(data_mock_flag = 0; data_mock_flag < 2; data_mock_flag++){ // analysis of VIPERS data and mock catalogues.
-    trash_nbarshot_file(atoi(argv[4]));
-
+    trash_nbarshot_file(atoi(argv[4])); // internal loop over d0. 
+    
     for(loopCount=atoi(argv[4]); loopCount <= mock_end; loopCount++){            
       sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
       
@@ -187,7 +190,7 @@ int main(int argc, char **argv){
       if(data_mock_flag == 1) break;
     }
   }
-  
+  */
   walltime("Wall time at finish");
   
   // MPI_Finalize();

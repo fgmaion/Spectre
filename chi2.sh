@@ -41,7 +41,7 @@ test(){
   gcc -std=gnu11 -w -O2 -o chi2.o Scripts/driver_likelihood.c -lfftw3 -lm -lgsl -lgslcblas -fopenmp
 }
 
-## test
+test
 
 DIR="$HOME/HOD_MockRun/Scripts/"
 cd $DIR
@@ -53,8 +53,8 @@ export GSL_RNG_TYPE=taus
 export OMP_NUM_THREADS=8 # Threads = allocated processors.
 cd .. 
 
-# for k in 0.6
-for k in $(seq 0.2 0.2 0.8)
+for k in 0.6
+#for k in $(seq 0.2 0.2 0.8)
   do
     echo "Analysing k_max of $k"  
 
@@ -62,16 +62,18 @@ for k in $(seq 0.2 0.2 0.8)
     
     export FILE=$outputdir"/chi2_log/chi2_d0_"$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ"_kmax_"$k".log"
       
-    ./chi2.o $d0 $FIELDFLAG $LOZ $HIZ $k > $FILE 2>&1
+    ./chi2.o $d0 $FIELDFLAG $LOZ $HIZ $k #> $FILE 2>&1
 
+    ## rm -r /home/mjw/IO_lock/ ## For testing. 
+    
     #if [$? -neq 0]
     #then
     #    rm -r /home/mjw/IO_lock/
     #fi
     
-    if [[ $(tr -d "\r\n" < $FILE | wc -c) -eq 0 ]]; then 
-      printf "\n%s" "$FILE" >> $outputdir/chi2_log/chi2_stderr.pbs
-    else
-        date >> $FILE
-    fi
+    #if [[ $(tr -d "\r\n" < $FILE | wc -c) -eq 0 ]]; then 
+    #  printf "\n%s" "$FILE" >> $outputdir/chi2_log/chi2_stderr.pbs
+    #else
+    #    date >> $FILE
+    #fi
 done

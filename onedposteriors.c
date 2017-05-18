@@ -26,18 +26,18 @@ int set_minChiSq(){
 
 
 double calc_onedposteriors(double* maxL_fsig8, double* maxL_bsig8, double* maxL_sigv){
-  double   bpost_norm = -99.; // norm of bsig8 posterior. 
-  double   fpost_norm = -99.; // norm of fsig8 posterior.
-  double   spost_norm = -99.; // norm of sigma posterior. 
+  double   sigp_post[Res];
+  double  bsig8_post[Res];
+  double  fsig8_post[Res];
   
   int     bpost_peak_ind = 0;
   int     fpost_peak_ind = 0;
   int     spost_peak_ind = 0;
-  
-  double   sigp_post[Res];
-  double  bsig8_post[Res];
-  double  fsig8_post[Res];
-   
+ 
+  double   bpost_norm = -99.; // norm of bsig8 posterior. 
+  double   fpost_norm = -99.; // norm of fsig8 posterior.
+  double   spost_norm = -99.; // norm of sigma posterior. 
+     
   for(k=0; k<Res; k++){
      sigp_post[k] = 0.0;
     fsig8_post[k] = 0.0;
@@ -52,12 +52,6 @@ double calc_onedposteriors(double* maxL_fsig8, double* maxL_bsig8, double* maxL_
         ChiSqGrid[k][j][i][0][0] = exp(-ChiSqGrid[k][j][i][0][0]/2.);  // Turn into likelihood.
       }
     }
-  }
-
-  for(k=0; k<Res; k++){
-    fsig8_post[k] = 0.0;
-    bsig8_post[k] = 0.0;
-     sigp_post[k] = 0.0;
   }
 
   #pragma omp parallel for reduction(+: fsig8_post[:Res], bsig8_post[:Res], sigp_post[:Res]) private(k, j, i) if(thread == 1)

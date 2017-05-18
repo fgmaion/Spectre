@@ -5,13 +5,13 @@ int model_compute(int aa, int bb, int cc, int dd, int ee){
  
   FFTlog_updatepk(mono_config, quad_config, hex_config, fsigma8/bsigma8, velDispersion);
   // apmultipoles(mono_config, quad_config, hex_config, fsigma8/bsigma8, velDispersion, alpha_pad, epsilon_pad);
-  /*
+
   for(j=0; j<mono_config->N; j++){
     if((0.01 < mono_config->krvals[j][0]) && (mono_config->krvals[j][0] < 1.0)){
-      printf("\n%.3lf \t %.3lf \t %.3lf", mono_config->krvals[j][0], mono_config->pk[j][0], quad_config->pk[j][0]);
+      printf("\n%.4lf \t %.4lf \t %.4lf", mono_config->krvals[j][0], mono_config->pk[j][0], quad_config->pk[j][0]);
     }
   }
-  */
+  
   xi_mu(mono_config);  // Transform to correlation function. 
   xi_mu(quad_config);  
   xi_mu( hex_config);
@@ -33,7 +33,7 @@ int model_compute(int aa, int bb, int cc, int dd, int ee){
   
   pk_mu(convlmonoCorr);
   pk_mu(convlquadCorr);
-
+  
   // double kmask_norm = get_kMask_norm();  
   // printf("\n\nKMASK NORM RATIO: %.9lf", kmask_norm*9.599*pow(10., -2.)/(cnvldpk_zero*fracArea));
   
@@ -43,7 +43,9 @@ int model_compute(int aa, int bb, int cc, int dd, int ee){
 
     // printf("\n%.6lf \t %.6lf", convlmonoCorr->pk[j][0], convlquadCorr->pk[j][0]);
   }
-
+  
+  printf("\n\nModel eval.");
+  
   return 0;
 }
 

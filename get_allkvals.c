@@ -46,11 +46,9 @@ int get_allkvals(int start){
   allmono_order = jenkins_foldIndex_unfoldedfile + lineNo - jenkins_foldIndex_foldedfile;
 
   all_order     = 2*allmono_order;
-  
-    
+     
   all_kVals     = (double  *) malloc(allmono_order*sizeof(*all_kVals));
-
-  
+ 
   inputfile  = fopen(firstfilepath, "r");
 
   for(i=0; i<jenkins_foldIndex_unfoldedfile; i++)  fscanf(inputfile, "%le \t %*le \t %*le \t %*d \n", &all_kVals[i]);
@@ -80,7 +78,7 @@ int allkvals_matchup(){
   double     diff;
   double min_diff;
 
-  fftlog_indices = realloc(fftlog_indices, allmono_order*sizeof(*fftlog_indices));
+  allfftlog_indices = realloc(allfftlog_indices, allmono_order*sizeof(*allfftlog_indices));
 
   for(i=0; i<allmono_order; i++){
     min_diff = pow(10., 99.);
@@ -91,7 +89,7 @@ int allkvals_matchup(){
       if(diff<min_diff){
         min_diff = diff;
 
-        fftlog_indices[i]  = j;
+        allfftlog_indices[i]  = j;
       }
     }
   }

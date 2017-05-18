@@ -47,7 +47,8 @@ double  modkMax;
 
 double logk_min, logk_max, logk_interval;
 
-int*   fftlog_indices;
+int*     fftlog_indices;
+int*  allfftlog_indices;
 
 // -- shot noise -- //
 int                shot_ninstance;

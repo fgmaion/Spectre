@@ -98,20 +98,26 @@ int print_multipoles(regress* inst){
 int trash_nbarshot_file(int start){
   int          status = 0;
   char   sys_command[200];
+
+  int     d0s[5] = {2, 4, 6, 10, 1000};
   
-  if(data_mock_flag == 0) sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/nbarshotnoise_mocks_%d_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, start, lo_zlim, hi_zlim);
-  if(data_mock_flag == 1) sprintf(filepath, "%s/data_v1.7/pk_derivedprops/d0_%d/W%d/nbarshotnoise_data_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
+  for(i=0; i<5; i++){
+    d0 = d0s[i];
+    
+    if(data_mock_flag == 0) sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/nbarshotnoise_mocks_%d_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, start, lo_zlim, hi_zlim);
+    if(data_mock_flag == 1) sprintf(filepath, "%s/data_v1.7/pk_derivedprops/d0_%d/W%d/nbarshotnoise_data_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
 
-  sprintf(sys_command, "rm -f %s;", filepath);
+    sprintf(sys_command, "rm -f %s;", filepath);
+    
+    status = system(sys_command);
 
-  status = system(sys_command);
-
-  if(status == 0){
-    printf("\n\nTrashed nbar shotnoise file: %s", filepath);
-  }
-
-  else{
-    printf("\n\nFailed to trash nbar shotnoise file: %s", filepath);
+    if(status == 0){
+      printf("\n\nTrashed nbar shotnoise file: %s", filepath);
+    }
+    
+    else{
+      printf("\n\nFailed to trash nbar shotnoise file: %s", filepath);
+    }
   }
   
   return 0;

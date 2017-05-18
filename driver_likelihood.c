@@ -1,4 +1,4 @@
-#define  KBIN_NO 12
+#define  KBIN_NO 40 // 12
 
 #include "/home/mjw/Aux_functions/header.h"
 #include "/home/mjw/Aux_functions/Aux_functions.c"
@@ -41,6 +41,7 @@
 // #include "FisherForecast.c"
 #include "FisherForecastFAP.c"
 #include "Ruiz.c"
+#include "camb_call.c"
 // #include "combining_clipped_fsig8.c"
 
 
@@ -52,9 +53,9 @@ int main(int argc, char** argv){
   sprintf(root_dir,                              "/home/mjw/HOD_MockRun");
   sprintf(vipersHOD_dir,         "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); 
   sprintf(models_path,                                         outputdir);
-
-  sprintf(covariance_mocks_path,                               outputdir);
-  // sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
+  
+  // sprintf(covariance_mocks_path,                               outputdir);
+  sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
   
   d0                        =               atoi(argv[1]);
   fieldFlag                 =               atoi(argv[2]);
@@ -63,7 +64,7 @@ int main(int argc, char** argv){
   ChiSq_kmax                =               atof(argv[5]);
 
   // printf("\n%d \t %d \t %.1lf \t %.1lf \t %.2lf", d0, fieldFlag, lo_zlim, hi_zlim, ChiSq_kmax);
-  /*
+  
   // Old priors. 
   min_bsigma8               =      0.05;                  // FOR GRANETT 2D POSTERIOR.
   max_bsigma8               =      1.00;                  // Previously 0.2 < b \sig_8 < 1.6
@@ -73,8 +74,8 @@ int main(int argc, char** argv){
 
   min_velDisperse           =      0.00;                  // CHANGED FROM 0.00 13/02/2017
   max_velDisperse           =      6.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
-  */
   
+  /*
   min_bsigma8               =      0.05;                
   max_bsigma8               =      3.50;                   
                                                           
@@ -83,6 +84,7 @@ int main(int argc, char** argv){
 
   min_velDisperse           =      0.05;                   
   max_velDisperse           =     15.00;                     
+  */
   
   min_alpha_pad             =    0.9999;
   max_alpha_pad             =    1.0001;
@@ -95,8 +97,8 @@ int main(int argc, char** argv){
 
   paramNumber               =       3.0;  // # of fitted params. -> dof in X^2. 
 
-   Res                      =        32;  // Likelihood resolution [voxel number].
-  dRes                      =      32.0;  // Previously 16: 13/02/17
+   Res                      =        16;  // Likelihood resolution [voxel number].
+  dRes                      =      16.0;  // Previously 16: 13/02/17
 
    Res_ap                   =         1;  // Resoltuion in AP.
   dRes_ap                   =       1.0;
@@ -132,6 +134,8 @@ int main(int argc, char** argv){
   
   inputHODPk();             //  Must match Cosmology in cosmology_planck2015.h, or cosmology_valueaddedmocks.h
   // inputLinearPk();       //  This is NOT automatically ensured.               
+
+  // camb_call(0, 1.05);    // nonlinear/linear flag, redshift. 
   
   prep_FFTlog_memory();     // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
   
@@ -143,21 +147,17 @@ int main(int argc, char** argv){
   
   precompute_vipers_clipping_model(FFTlogRes);  // Computes P_R(k), W_0(r), ..., \tilde W_0(k), ..., and \tilde W_0(k) for the joint field.   
   
-  get_allkvals(1);         // all kVals, ignoring ChiSq_kmin and ChiSq_kmax, but including folding. 
+  get_allkvals(1);            // all kVals, ignoring ChiSq_kmin and ChiSq_kmax, but including folding. 
   
-  allkvals_matchup();      // Match all available kVals to FFTlog modes; not just those up to ChiSq_kmax. 
+  allkvals_matchup();         // Match all available kVals to FFTlog modes; not just those up to ChiSq_kmax. 
   
-  set_chiSq_intervals();   // set e.g. fsig8 interval = (max - min)/interval.
-  
-  // default_params();
-
-  // model_compute(0, 0, 0, 0, 0);
-  
+  set_chiSq_intervals();      // set e.g. fsig8 interval = (max - min)/interval.
+    
   assign_LikelihoodMemory();  // Assigns memory for xdata, ydata, xtheory, ytheory, ChiSqGrid.
   
   get_mocksshotnoise();
   
-  get_mocksclippedamplitudes();
+  // get_mocksclippedamplitudes();
   
   load_CovarianceMatrix(CatalogNumber, 1);
   
@@ -169,22 +169,19 @@ int main(int argc, char** argv){
   
   delete_lockfile();
   
-  // prep_dlnPR_dlnk();
+  prep_dlnPR_dlnk();
 
-  set_clippingvars(1.0);
+  // set_clippingvars(1.0);
   
-  // if(ChiSq_kmax == 0.2)
-  calc_models();
+  if(ChiSq_kmax == 0.2)  calc_models();
+  
+  kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
   
   set_models();
   
-  kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
-    
-  cut_xtheory_bykmax();
-  
   double maxL_fsig8, maxL_sigv, maxL_bsig8;
-
-  for(data_mock_flag=0; data_mock_flag<2; data_mock_flag++){
+  /*
+  for(data_mock_flag=0; data_mock_flag<1; data_mock_flag++){
     if(data_mock_flag == 0)  sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
     if(data_mock_flag == 1)  sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
   
@@ -208,6 +205,10 @@ int main(int argc, char** argv){
     
     fclose(output);
   }
+  */
+  default_params();
+
+  model_compute(0, 0, 0, 0, 0);
   
   walltime("Wall time at finish");
 

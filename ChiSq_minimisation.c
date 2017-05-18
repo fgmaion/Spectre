@@ -1,11 +1,11 @@
 int default_params(){
-  fsigma8       = 0.14;
-  A11Sq         = 1.00;
-  velDispersion = 6.00;
-  bsigma8       = 0.82;
-  epsilon_pad   = 0.00;
-  alpha_pad     = 1.00;
-
+  fsigma8       = 0.753125;
+  A11Sq         = 1.000000;
+  velDispersion = 5.625000;
+  bsigma8       = 0.940625;
+  epsilon_pad   = 0.000000;
+  alpha_pad     = 1.000000;
+  
   // set_u0();
 
   return 0;
@@ -60,31 +60,24 @@ int kvals_matchup(){
 }
 
 
-int calc_models(){
-  int aa, bb, cc, dd, ee, klo;
-
-  // input_check();
-  // prep_dlnPR_dlnk();   
-
-  // printf("\n\nCalculating models: \n");
-  
+int calc_models(){  
   sprintf(filepath, "%s/models/realspace_%s_sig8_%.3lf_d0_%d_W%d_%.1lf_%.1f_res_%d.cat", models_path, model_flag, camb_sig8, d0, fieldFlag, lo_zlim, hi_zlim, Res);
 
   output = fopen(filepath, "wb");
   
-  for(aa=0; aa<Res; aa++){    
+  for(int aa=0; aa<Res; aa++){    
     fsigma8 = min_fsigma8 + fsigma8Interval*aa;
 
-    for(bb=0; bb<Res; bb++){
+    for(int bb=0; bb<Res; bb++){
       bsigma8 = min_bsigma8 + bsigma8Interval*bb;
 
-      for(cc=0; cc<Res; cc++){
+      for(int cc=0; cc<Res; cc++){
         velDispersion = min_velDisperse + sigmaInterval*cc;
 
-        for(dd=0; dd<Res_ap; dd++){
+        for(int dd=0; dd<Res_ap; dd++){
           alpha_pad = min_alpha_pad + alpha_padInterval*dd;
           
-          for(ee=0; ee<Res_ap; ee++){
+          for(int ee=0; ee<Res_ap; ee++){
             epsilon_pad = min_epsilon_pad + epsilon_padInterval*ee;
             
             alpha_pad   = 1.0;
@@ -94,15 +87,12 @@ int calc_models(){
             
             model_compute(aa, bb, cc, dd, ee);  // updates convlmonoCorr, convlquadCorr 
             
-            for(j=0; j<allmono_order; j++)  fwrite(&convlmonoCorr->pk[fftlog_indices[j]][0], sizeof(double), 1, output);
-            for(j=0; j<allmono_order; j++)  fwrite(&convlquadCorr->pk[fftlog_indices[j]][0], sizeof(double), 1, output);
+            for(j=0; j<allmono_order; j++)  fwrite(&convlmonoCorr->pk[allfftlog_indices[j]][0], sizeof(double), 1, output);
+            for(j=0; j<allmono_order; j++)  fwrite(&convlquadCorr->pk[allfftlog_indices[j]][0], sizeof(double), 1, output);
 
             // printf("\n\nNew model.");
 
-            // for(j=0; j<allmono_order; j++)  printf("%.6le \t %.6le \n", convlmonoCorr->pk[fftlog_indices[j]][0], convlquadCorr->pk[fftlog_indices[j]][0]);
-            
-            // fwrite(xtheory[aa][bb][cc][dd][ee], sizeof(double),  order,   output);
-            // fwrite(ytheory[aa][bb][cc][dd][ee], sizeof(double),  order,   output);
+            // for(j=0; j<allmono_order; j++)  printf("\n%.6le \t %.6le", convlmonoCorr->pk[allfftlog_indices[j]][0], convlquadCorr->pk[allfftlog_indices[j]][0]);
           }
         }
       }
@@ -187,10 +177,10 @@ int calc_ChiSqs(int mockNumber){
                 
                 ChiSqGrid[jj][kk][ii][ll][mm] += pow(ydata[nn] - ytheory[jj][kk][ii][ll][mm][nn], 2.)/gsl_vector_get(eval, nn);                
 
-                ChiSqGrid[jj][kk][ii][ll][mm] *= (1. - (order + 1)/(CatalogNumber - 1.)); // Hartlap et al. correction.
+                // ChiSqGrid[jj][kk][ii][ll][mm] *= (1. - (order + 1)/(CatalogNumber - 1.)); // Hartlap et al. correction.
               }
 
-              // printf("\n%.2lf \t %.2lf \t %.2lf \t %.2lf", fsigma8, velDispersion, bsigma8,  ChiSqGrid[jj][kk][ii][ll][mm]);
+              // printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf", fsigma8, velDispersion, bsigma8,  ChiSqGrid[jj][kk][ii][ll][mm]);
             }
           }
         }
@@ -319,8 +309,9 @@ int print_model(double dfsigma8, double dbsigma8, double dvelDispersion, double 
 
 
 int set_models(){
-  int ll, mm;
-
+  int    ll, mm, nn;
+  double store[Res][Res][Res][Res_ap][Res_ap][all_order];
+  
   sprintf(filepath, "%s/models/realspace_%s_sig8_%.3lf_d0_%d_W%d_%.1lf_%.1f_res_%d.cat", models_path, model_flag, camb_sig8, d0, fieldFlag, lo_zlim, hi_zlim, Res);
 
   printf("\n\nReading models: %s", filepath);
@@ -338,10 +329,18 @@ int set_models(){
       for(ii=0; ii<Res; ii++){ // sigma_p
         for(ll=0;ll<Res_ap; ll++){ // alpha_pad
           for(mm=0; mm<Res_ap; mm++){ // epsilon_pad
-            fread(xtheory[jj][kk][ii][ll][mm], sizeof(double), all_order, inputfile); // load mono and quad; size of all mono order, i.e. no ChiSq_kmax cut.
+            fread(store[jj][kk][ii][ll][mm], sizeof(double), all_order, inputfile); // load mono and quad; size of all mono order, i.e. no ChiSq_kmax cut.
 
-            // printf("\n\nNew model.");
+            for(j=0; j<all_order; j++) xtheory[jj][kk][ii][ll][mm][j] = 0.0;        // Clean
+
+            for(j=0; j<mono_order; j++){
+              xtheory[jj][kk][ii][ll][mm][j]              = store[jj][kk][ii][ll][mm][fftlog_indices[j]];
+              xtheory[jj][kk][ii][ll][mm][j + mono_order] = store[jj][kk][ii][ll][mm][fftlog_indices[j] + allmono_order];
+
+              // printf("\n%.6le \t %.6le", xtheory[jj][kk][ii][ll][mm][j], xtheory[jj][kk][ii][ll][mm][j + mono_order]);
+            }
             
+            // printf("\n\nNew model.");           
             // for(j=0; j<all_order; j++)  printf("\n%.6le \t %.6le", xtheory[jj][kk][ii][ll][mm][j], xtheory[jj][kk][ii][ll][mm][j + allmono_order]);
           }
         }
@@ -351,56 +350,6 @@ int set_models(){
 
   fclose(inputfile);
     
-  return 0;
-}
-
-
-int cut_xtheory_bykmax(){
-  int ll, mm, nn;
-
-  double spare[Res][Res][Res][Res_ap][Res_ap][all_order];
-  
-  for(jj=0; jj<Res; jj++){ // fsigma8
-    for(kk=0; kk<Res; kk++){ // bsigma8
-      for(ii=0; ii<Res; ii++){ // velDispersion
-        for(ll=0;ll<Res_ap; ll++){ // alpha_pad
-          for(mm=0; mm<Res_ap; mm++){ // epsilon_pad
-
-            for(j=0; j<all_order; j++)  spare[jj][kk][ii][ll][mm][j] = 0.0;
-            
-            for(j=0; j<mono_order; j++){
-              spare[jj][kk][ii][ll][mm][j]              = xtheory[jj][kk][ii][ll][mm][fftlog_indices[j]];
-              spare[jj][kk][ii][ll][mm][j + mono_order] = xtheory[jj][kk][ii][ll][mm][fftlog_indices[j] + allmono_order]; 
-            }
-          }
-        }
-      }
-    }
-  }
-
-  
-  for(jj=0; jj<Res; jj++){ // fsigma8
-    for(kk=0; kk<Res; kk++){ // bsigma8
-      for(ii=0; ii<Res; ii++){ // velDispersion
-        for(ll=0;ll<Res_ap; ll++){ // alpha_pad
-          for(mm=0; mm<Res_ap; mm++){ // epsilon_pad
-
-            for(j=0; j<all_order; j++) xtheory[jj][kk][ii][ll][mm][0] = 0.0; // NaN
-
-            // printf("\n\nNew model.");
-            
-            for(j=0; j<mono_order; j++){
-              xtheory[jj][kk][ii][ll][mm][j]              = spare[jj][kk][ii][ll][mm][j];
-              xtheory[jj][kk][ii][ll][mm][j + mono_order] = spare[jj][kk][ii][ll][mm][j + mono_order];
-
-              // printf("\n%.6le \t %.6le", xtheory[jj][kk][ii][ll][mm][j], xtheory[jj][kk][ii][ll][mm][j + mono_order]);
-            }
-          }
-        }
-      }
-    }
-  }
-  
   return 0;
 }
 

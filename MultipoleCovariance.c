@@ -35,7 +35,8 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
   char   firstfilepath[200];
 
   sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
-
+  // sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
+  
   printf("\n\n%s", firstfilepath);
 
   inputfile  = fopen(firstfilepath, "r");
@@ -64,7 +65,8 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
   // Be careful with 0 or 1 for the mock numbering.
   for(k=0; k<mocks; k++){
     sprintf(Nthfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, k + start, lo_zlim, hi_zlim);   //  Be careful with 0 or 1 for initial mock.
-
+    // sprintf(Nthfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, k + start, lo_zlim, hi_zlim);
+    
     inputfile = fopen(Nthfilepath, "r");
 
     for(i=0; i<chiSq_kmaxIndex; i++){
@@ -134,7 +136,7 @@ int get_kindices(int start, char filepath[]){
   printf("\n\nk for switching to folded measurement: %.3lf (%d)", jenkins_fold_kjoin, jenkins_foldIndex_unfoldedfile);
 
   // again, but for folded measurement.
-  sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
+  sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_4.dat", filepath, start, lo_zlim, hi_zlim);
   // sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
   
   inputfile  = fopen(foldedfilepath, "r");
@@ -184,7 +186,7 @@ int get_Multipoles(int mocks, int start, char filepath[]){
 
     fclose(inputfile);
 
-    sprintf(Nfoldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, k + start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;
+    sprintf(Nfoldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_4.dat", filepath, k + start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;
     // sprintf(Nfoldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, k + start, lo_zlim, hi_zlim);
     
     inputfile = fopen(Nfoldedfilepath, "r");

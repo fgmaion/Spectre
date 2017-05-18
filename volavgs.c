@@ -60,11 +60,11 @@ double chiSq_fkpweight2(double chi, void* p){
 
   double nbar = (*pt2nz)(chi);
 
-  return chi*chi*pow(nbar/(1. + nbar*fkpPk), 2.);
+  return chi*chi*pow(nbar*fkpPk/(1. + nbar*fkpPk), 2.);
 }
 
 
-double calc_volavg_fkpweights(){
+double calc_volavg_fkpweights2(){
   // Calculate cumulative nbar and splint its inverse.
   gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
 
