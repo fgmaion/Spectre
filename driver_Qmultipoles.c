@@ -113,7 +113,7 @@ int main(int argc, char **argv){
   nz_smoothRadius           =     100.0;
 
   // FKP p(k) of interest;
-  fkpPk                     =    8000.0;            // [h^-1 Mpc]^3.
+  fkpPk                     =    4000.0;            // [h^-1 Mpc]^3.
 
   CatalogNumber             =       153;
       

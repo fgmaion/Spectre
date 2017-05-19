@@ -1,4 +1,4 @@
-#define   KBIN_NO     40  // 12          
+#define   KBIN_NO     12          
 #define   FOLDFACTOR 2.0       
  
 #include "/home/mjw/Aux_functions/header.h"
@@ -71,7 +71,7 @@ int main(int argc, char **argv){
   }
 
   lopad                     =      50.0;                    // stefano_trans_z set such that lo_zlim boundary is lopad [h^-1 Mpc] from embeeded volume boundary.
-  fkpPk                     =    8000.0;                    // [h^-1 Mpc]^3.  Stefano: 4000 [h^-1 Mpc]^3.
+  fkpPk                     =    4000.0;                    // [h^-1 Mpc]^3.  Stefano: 4000 [h^-1 Mpc]^3.
 
   fft_size                  =       512;                    // Worker 46 works up to 1024. 
   
@@ -111,7 +111,7 @@ int main(int argc, char **argv){
   get_zeff();
   
   delete_lockfile();
-  /*
+  
   prep_clipping_calc();
   
   prep_r2c_modes(&flat,                    1.0); // unfolded.
@@ -190,7 +190,7 @@ int main(int argc, char **argv){
       if(data_mock_flag == 1) break;
     }
   }
-  */
+  
   walltime("Wall time at finish");
   
   // MPI_Finalize();

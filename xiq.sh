@@ -2,8 +2,8 @@
 #PBS -N xiq_run
 #PBS -V
 #PBS -p 1023
-#PBS -l nodes=1:ppn=8
-#PBS -l walltime=12:00:00                                                                                      
+#PBS -l nodes=1:ppn=4
+#PBS -l walltime=48:00:00                                                                                      
 
 set_lock(){
     locked=1
@@ -56,7 +56,7 @@ export BRANCH=$(git symbolic-ref --short HEAD) # current Git branch
 export GSL_RNG_SEED=123
 export GSL_RNG_TYPE=taus
 
-export OMP_NUM_THREADS=8 # Threads = allocated processors.
+export OMP_NUM_THREADS=4 # Threads = allocated processors.
 cd ..
 
 set_lock

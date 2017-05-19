@@ -12,12 +12,15 @@ args   = sys.argv
 zs     = [0.75, 1.05]
 fsig8s = [0.4907, 0.4570]
 
+lo_zs  = np.array([np.float(args[1]), np.float(args[2])])
+hi_zs  = np.array([np.float(args[3]), np.float(args[4])])
+
 def cost_function(amp, unclipped, clipped):
     return np.sum((unclipped - amp*clipped)**2.)
 
 for a, field in enumerate(["W1", "W4"]):
-    for b, lo_z in enumerate([np.float(args[1]), np.float(args[2])]):
-        hi_z   = lo_z + np.float(args[3])
+    for b, lo_z in enumerate(lo_zs):
+        hi_z   = hi_zs[b]
 
         filename = root + "/mocks_v1.7/pk_derivedprops/d0_%d/%s/shotnoise_zlim_%.1lf_%.1lf.dat" % (1000, field, lo_z, hi_z)
         shot     = np.loadtxt(filename)[:,1]

@@ -1,7 +1,7 @@
 #PBS -S /bin/bash
 #PBS -N pk_run
 #PBS -V 
-#PBS -l nodes=1:ppn=8
+#PBS -l nodes=1:ppn=4
 #PBS -l walltime=0:100:00
 #PBS -l mem=5MB
 #PBS -p 1023   
@@ -28,7 +28,7 @@ set_lock(){
 DIR="/home/mjw/HOD_MockRun/Scripts/"
 cd $DIR
 
-export OMP_NUM_THREADS=8 # Threads = processors.
+export OMP_NUM_THREADS=4 # Threads = processors.
 export BRANCH=$(git symbolic-ref --short HEAD) # current Git branch
 
 export GSL_RNG_TYPE="taus"
@@ -50,7 +50,7 @@ test(){
   gcc -O2 -Wall -pedantic -Wextra -std=gnu11 -o pk.o Scripts/driver_pk_d0.c -fopenmp -lfftw3_omp -lfftw3 -lm  -lgsl -lgslcblas
 }
 
-test
+## test
 
 set_lock
 
@@ -59,7 +59,7 @@ date >> $outputdir/pk_log/"pk_W"$FIELDFLAG"_"$LOZ"_"$HIZ"_"$mock_start".log"
 # /home/ert/local/bin/valgrind --tool=memcheck --leak-check=full /home/mjw/HOD_MockRun/pk.o $FIELDFLAG $LOZ $HIZ $mock_start $nmocks_perjob
 # /home/ert/local/bin/valgrind --tool=massif --stacks=yes
 
-./pk.o $FIELDFLAG $LOZ $HIZ $mock_start $nmocks_perjob # >> $outputdir/pk_log/"pk_W"$FIELDFLAG"_"$LOZ"_"$HIZ"_"$mock_start".log" 2>&1
+./pk.o $FIELDFLAG $LOZ $HIZ $mock_start $nmocks_perjob >> $outputdir/pk_log/"pk_W"$FIELDFLAG"_"$LOZ"_"$HIZ"_"$mock_start".log" 2>&1
 
 #if [$? -neq 0]
 #then
