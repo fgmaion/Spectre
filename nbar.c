@@ -38,13 +38,13 @@ int spline_nbar(int truth){
       }
 	        
       if(truth==1){
-        // ** PARENT **
+        // PARENT: redshift errors? answer probably no. 
         sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/nbar_100_smoothedCounts/nbar_smooth_0.0_Nagoya_v7_Samhain_parent_mocks_avg_twofield_avg.dat", root_dir);
       }
      }
     
     if(data_mock_flag == 1){  // analysis on data.
-      // Post Stefano comparison. Smoothed counts, normalised to joint field galaxy count.
+      // Post Stefano comparison. Smoothed counts, normalised to joint-field galaxy count.
       sprintf(filepath, "%s/W1_Spectro_V7_2/data_v1.7/nbar_100_smoothedCounts/nbar_smooth_%.1lf_Nagoya_v7_Samhain_twofield_avg.dat", root_dir, nz_smoothRadius); 
     }
 

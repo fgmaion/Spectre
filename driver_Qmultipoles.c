@@ -87,7 +87,7 @@ int main(int argc, char **argv){
   int              count_res;
   double       sampling_frac;
 
-  double    dilution =  1.00;
+  double    dilution =  0.01;
   
   double       max_logs[6]  = {log10(2.0), log10(20.0), log10(2000.0), log10(2.0), log10(20.0), log10(2000.0)}; 
   double sampling_fracs[6]  = {1.00, 0.10, 0.01, 1.000, 0.004, 0.005};
@@ -136,7 +136,7 @@ int main(int argc, char **argv){
   start_walltime();
   
   printf_branch();
-
+  
   init_gsl_randgen();
 
   initi_dist_z();

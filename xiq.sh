@@ -2,8 +2,8 @@
 #PBS -N xiq_run
 #PBS -V
 #PBS -p 1023
-#PBS -l nodes=1:ppn=4
-#PBS -l walltime=48:00:00                                                                                      
+#PBS -l nodes=1:ppn=16
+#PBS -l walltime=24:00:00                                                                                      
 
 set_lock(){
     locked=1
@@ -27,14 +27,18 @@ set_lock(){
 }
 
 test(){
-    ## Interactive run with: qsub -I -o $outputdir/chi2_log/chi2_stdout.pbs -e $outputdir/chi2_log/chi2_stderr.pbs chi2.sh
-    export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_7
+    export version=9
+    export oldversion="/home/mjw/HOD_MockRun/W1_Spectro_V7_"`expr $version - 1`
+
+    export outputdir="/home/mjw/HOD_MockRun/W1_Spectro_V7_"$version
     export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_2
+    
+    ## Interactive run with: qsub -I -o $outputdir/chi2_log/chi2_stdout.pbs -e $outputdir/chi2_log/chi2_stderr.pbs chi2.sh
     export LOZ=0.5
-    export HIZ=0.8
-    export FIELDFLAG=4
+    export HIZ=0.7
+    export FIELDFLAG=1
     export d0=1000
-    export RES=3
+    export RES=2
     
     MAX_LOGS=(2. 20. 2000. 2. 20. 2000.)
     MAX_LOG=${MAX_LOGS[$RES]}
@@ -56,7 +60,7 @@ export BRANCH=$(git symbolic-ref --short HEAD) # current Git branch
 export GSL_RNG_SEED=123
 export GSL_RNG_TYPE=taus
 
-export OMP_NUM_THREADS=4 # Threads = allocated processors.
+export OMP_NUM_THREADS=16 # Threads = allocated processors.
 cd ..
 
 set_lock
