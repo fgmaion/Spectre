@@ -1,6 +1,11 @@
+int assign_rand_radecmemory(){
+  rand_ra         = (double *) realloc(rand_ra,  rand_number*sizeof(*rand_ra));
+  rand_dec        = (double *) realloc(rand_dec, rand_number*sizeof(*rand_dec));
+
+  return 0;
+}
+
 int assign_randmemory(){
-    rand_ra         = (double *) realloc(rand_ra,  rand_number*sizeof(*rand_ra));
-    rand_dec        = (double *) realloc(rand_dec, rand_number*sizeof(*rand_dec));
     rand_chi        = (double *) realloc(rand_chi, rand_number*sizeof(*rand_chi));
 
     rand_x          = (double *) realloc(rand_x,   rand_number*sizeof(*rand_x));
@@ -16,7 +21,6 @@ int assign_randmemory(){
     
     return 0;
 }
-
 
 int randoms_maskGen(){   
     rand_number = 600000;

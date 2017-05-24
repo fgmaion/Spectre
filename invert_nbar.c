@@ -4,7 +4,6 @@ double nbar_dV(double chi, void* p){ // gsl function prototype is
   return pow(chi, 2.)*(*pt2nz)(chi);
 }
 
-
 int prep_inverseCumulative_nbar(){
   // Calculate cumulative nbar and splint its inverse.
   gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
@@ -34,7 +33,6 @@ int prep_inverseCumulative_nbar(){
 
   return 0;
 }
-
 
 double inverse_cumulative_nbar(double arg){
   // if F is the cumulative distribution of nbar.

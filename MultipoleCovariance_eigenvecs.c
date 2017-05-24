@@ -47,9 +47,9 @@ int Covariance_eigenVecs(int mocks){
     }
     
     if(eval_j<0.0){
-    printf("\nError: covariance is symmetric and non-negative definite. eigenvalues should be real and positive. This is not the case");
+      printf("\nError: covariance is symmetric and non-negative definite. eigenvalues should be real and positive. This is not the case");
         
-    return 1;
+      exit(EXIT_FAILURE);
     }
     }*/
     

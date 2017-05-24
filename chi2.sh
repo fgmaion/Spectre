@@ -2,8 +2,8 @@
 #PBS -N chi2_run
 #PBS -V
 #PBS -p 1023
-#PBS -l nodes=1:ppn=8                                                                                     
-#PBS -l walltime=00:90:00
+#PBS -l nodes=1:ppn=1                                                                                     
+#PBS -l walltime=00:30:00
 #PBS -l mem=5MB
 
 set_lock(){
@@ -30,15 +30,15 @@ set_lock(){
 test(){
   ## Interactive run with: qsub -I -o $outputdir/chi2_log/chi2_stdout.pbs -e $outputdir/chi2_log/chi2_stderr.pbs chi2.sh
   export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_7.1
-  export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_2
-  export LOZ=0.9
+  export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_8
+  export LOZ=0.7
   export HIZ=1.2
   export FIELDFLAG=1
   export d0=1000
 
   rm -r /home/mjw/IO_lock/
 
-  gcc -std=gnu11 -w -O2 -o chi2.o Scripts/driver_likelihood.c -lfftw3 -lm -lgsl -lgslcblas -fopenmp
+  gcc -std=gnu11 -o chi2.o Scripts/driver_likelihood.c -lfftw3 -lm -lgsl -lgslcblas -fopenmp
 }
 
 test
@@ -50,7 +50,7 @@ export BRANCH=$(git symbolic-ref --short HEAD) # current Git branch
 export GSL_RNG_SEED=123
 export GSL_RNG_TYPE=taus
 
-export OMP_NUM_THREADS=8 # Threads = allocated processors.
+export OMP_NUM_THREADS=1 # Threads = allocated processors.
 cd .. 
 
 for k in 0.6

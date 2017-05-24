@@ -24,7 +24,7 @@ int set_angularlimits(int dataormock, int fieldFlag){
     }
 
     else{
-      return 1;
+      exit(EXIT_FAILURE);
     }
   }
 
@@ -53,12 +53,12 @@ int set_angularlimits(int dataormock, int fieldFlag){
     }
 
     else{
-      return 1;
+      exit(EXIT_FAILURE);
     }
   }
 
   else{
-    return 1;
+    exit(EXIT_FAILURE);
   }
 
   TotalW1W4area              = W1area + W4area;            // Required for <n(z)> calculation.

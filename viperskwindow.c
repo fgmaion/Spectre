@@ -11,7 +11,6 @@ double splint_VIPERS_kSpaceMono(double k){
   }
 }
 
-
 double splint_VIPERS_kSpaceQuad(double k){
   if(k<0.0001)   return 0.0;
   if(k>1.0000)   return 0.0;
@@ -24,7 +23,6 @@ double splint_VIPERS_kSpaceQuad(double k){
     return Interim;
   }
 }
-
 
 double get_kMask_norm(){
   //  Hankel transform pair counts of the window.
@@ -46,7 +44,6 @@ double get_kMask_norm(){
   return norm;
 }
 
-
 int printf_kMask_multipoles(){  
   double norm;  // norm = 4.700981*1.823239*pow(10., 6.);
 
@@ -59,8 +56,8 @@ int printf_kMask_multipoles(){
   pk_mu(mono_config);
   pk_mu(quad_config);
 
-  
-  sprintf(filepath,"%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+  sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_4000_%.1lf_%.1lf_thread_0", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);  
+//sprintf(filepath,"%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
 
   output = fopen(filepath, "w");
 
@@ -75,13 +72,11 @@ int printf_kMask_multipoles(){
   return 0;
 }
 
+int prepVIPERS_kSpaceMultipole(){  
+  printf_kMask_multipoles();
 
-int prepVIPERS_kSpaceMultipole(){
-  // printf("\n\nPrinting k-space window multipoles.");
-  
-  // printf_kMask_multipoles();
-
-  sprintf(filepath, "%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim,hi_zlim);
+  sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_4000_%.1lf_%.1lf_thread_0", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+//sprintf(filepath, "%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim,hi_zlim);
 
   inputfile = fopen(filepath, "r");
 

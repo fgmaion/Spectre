@@ -6,26 +6,24 @@
  * -------------------------------------------------------------------------    */
 
 double minimum_twodoubles(double first, double second){
-    if(first<=second){ 
-        return first;
-    }
+  if(first<=second){ 
+    return first;
+  }
     
-    else{ 
-        return second;
-    }
+  else{ 
+    return second;
+  }
 }
-
 
 double maximum_twodoubles(double first, double second){
-    if(first>=second){ 
-        return first;
-    }
+  if(first>=second){ 
+      return first;
+  }
     
-    else{ 
-        return second;
-    }
+  else{ 
+    return second;
+  }
 }
-
 
 Node* buildTree(Particle *particleSet, int N){  
   // Computes the range of x, y and z co-ordinates for given set and assigns to xmin[3], xmax[3].
@@ -34,18 +32,18 @@ Node* buildTree(Particle *particleSet, int N){
     
   // Initialise xmin, xmax with first particle info.
   for(j=0; j<NDIM; j++){
-      xmin[j] = particleSet[0].x[j];
-	  xmax[j] = particleSet[0].x[j];
+    xmin[j] = particleSet[0].x[j];
+    xmax[j] = particleSet[0].x[j];
   }
   
   // printf("\n\n");
   
   for(i=1; i<N; i++){
     for(j=0; j<NDIM; j++){
-        // printf("%e \t", particleSet[i].x[j]);        
-        
-        xmin[j] = minimum_twodoubles(particleSet[i].x[j], xmin[j]);    // MIN(particleSet[i].x[j], xmin[j]);
-	    xmax[j] = maximum_twodoubles(particleSet[i].x[j], xmax[j]);    // MAX(particleSet[i].x[j], xmax[j]);
+      // printf("%e \t", particleSet[i].x[j]);        
+      
+      xmin[j] = minimum_twodoubles(particleSet[i].x[j], xmin[j]);    // MIN(particleSet[i].x[j], xmin[j]);
+      xmax[j] = maximum_twodoubles(particleSet[i].x[j], xmax[j]);    // MAX(particleSet[i].x[j], xmax[j]);
     }
     
     // printf("\n");
@@ -82,38 +80,36 @@ Node* buildTree(Particle *particleSet, int N){
   return createNode(particleSet, N, firstSplitDim, xmin, xmax);
 }
 
-
 int switchSplit(int N, int* NLeft, int* NRight){
-    switch(N%2){
-      case 0:
-      // Even number of particles, split evenly left and right
-        *NLeft  = N/2;
-        *NRight = N/2;
+  switch(N%2){
+  case 0:
+    // Even number of particles, split evenly left and right
+    *NLeft  = N/2;
+    *NRight = N/2;
         
-        return 0;
+    return 0;
         
-      case 1:
-      // Odd number of particles, split N-1 particles evenly, add extra particle to left hand side. 
-        *NLeft  = (N+1)/2;
-        *NRight = (N-1)/2;
+  case 1:
+    // Odd number of particles, split N-1 particles evenly, add extra particle to left hand side. 
+    *NLeft  = (N+1)/2;
+    *NRight = (N-1)/2;
     
-        return 0;
-    }
+    return 0;
+  }
 }
 
-
 int printSorted(Particle *particleSet, int N, int NLeft, int NRight, double SplitValue){
-    printf("\n\nN: %d, N left: %d, N right: %d, split value: %e", N, NLeft, NRight, SplitValue);
-
-    for(j=0; j<NLeft; j++)  printf("\n%d \t %d \t %e", j, particleSet[j].index, particleSet[j].x[sortDim]);
-
-    printf("\n\n");
+  printf("\n\nN: %d, N left: %d, N right: %d, split value: %e", N, NLeft, NRight, SplitValue);
+  
+  for(j=0; j<NLeft; j++)  printf("\n%d \t %d \t %e", j, particleSet[j].index, particleSet[j].x[sortDim]);
+  
+  printf("\n\n");
+  
+  for(j=NLeft; j<N; j++)  printf("\n%d \t %d \t %e", j, particleSet[j].index, particleSet[j].x[sortDim]);
     
-    for(j=NLeft; j<N; j++)  printf("\n%d \t %d \t %e", j, particleSet[j].index, particleSet[j].x[sortDim]);
-
-    printf("\n\n");
-
-    return 0;
+  printf("\n\n");
+  
+  return 0;
 }
 
 /* ------------------------------------------------------------------------- *
@@ -152,28 +148,28 @@ Node* createNode(Particle *particleSet, int N, int SplitDim, double xmin[NDIM], 
     result->xmin[j]   = xmin[j];
     result->xmax[j]   = xmax[j];
   }
-    
+  
   // Less than Nmin particles, don't subdivide.
   if(N<=Nmin){
-      result->Left        = NULL;
-      result->Right       = NULL;
-      
-      result->NLeft       =    0;
-      result->NRight      =    0;
-      
-      result->Children    =    0;
-      
-      result->SplitValue  = pow(10., 99.);  // No further split.
+    result->Left        = NULL;
+    result->Right       = NULL;
+    
+    result->NLeft       =    0;
+    result->NRight      =    0;
+    
+    result->Children    =    0;
+    
+    result->SplitValue  = pow(10., 99.);  // No further split.
   } 
   
   else{
     // Children!
     // Contains the info on all particles grouped to be 'left' after the first split. Similarly for the right hand side. 
-
+    
     result->Children    =      1;
-
+    
     sortDim = SplitDim;
-
+    
     // Arrange particles by their co-ordinate along dimenion sortDim.
     qsort(particleSet, N, sizeof(particleSet[0]), sortby_position_alongDim_splitDim);
     
@@ -181,13 +177,13 @@ Node* createNode(Particle *particleSet, int N, int SplitDim, double xmin[NDIM], 
     
     result->NLeft       =  NLeft;
     result->NRight      = NRight;
-  
+    
     // Split value is the co-ordinate along dimension Split Dimension for which there are Nleft particles to the left, Nright particles to the right. Half value bewteen the rightmost left particle
     // and the leftmost right particle. 
     SplitValue          = 0.5*(particleSet[NLeft-1].x[SplitDim] + particleSet[NLeft].x[SplitDim]); 
-  
+    
     // printSorted(particleSet, N, NLeft, NRight, SplitValue);
-  
+    
     result->SplitValue  = SplitValue;
     
     double rmax[NDIM], rmin[NDIM], lmax[NDIM], lmin[NDIM];
@@ -197,11 +193,11 @@ Node* createNode(Particle *particleSet, int N, int SplitDim, double xmin[NDIM], 
     
     // Limits, initially same as the parent but ..
     for(j=0; j<NDIM; j++){
-        rmin[j] = xmin[j];
-        rmax[j] = xmax[j];
-        
-        lmin[j] = xmin[j];
-        lmax[j] = xmax[j];
+      rmin[j] = xmin[j];
+      rmax[j] = xmax[j];
+      
+      lmin[j] = xmin[j];
+      lmax[j] = xmax[j];
     }
     
     // Limits.
@@ -210,13 +206,13 @@ Node* createNode(Particle *particleSet, int N, int SplitDim, double xmin[NDIM], 
     
     // printf("\n%e \t %e \t %e \t %e \t %e \t %e", lmin[0], lmin[1], lmin[2], lmax[0], lmax[1], lmax[2]);        
     // printf("\n%e \t %e \t %e \t %e \t %e \t %e", rmin[0], rmin[1], rmin[2], rmax[0], rmax[1], rmax[2]);
-
+    
     // printf("\n\nBoundary particles: %e \t %e", particleSet[NLeft-1].x[SplitDim], particleSet[NLeft].x[SplitDim]);
     
     // printf("\n\n\n\n");
     
     if(SplitDim==firstSplitDim){
-        treelevel += 1;
+      treelevel += 1;
     }
     
     // Nice, recursive call.  Having split along one dimension, repeat along the next. 
@@ -228,47 +224,44 @@ Node* createNode(Particle *particleSet, int N, int SplitDim, double xmin[NDIM], 
   return result;
 }
 
-
 Node* Create_toyChildNode(double xlo, double ylo, double zlo, double xhi, double yhi, double zhi){
-    Node *toyNode = (Node *) malloc(sizeof(Node));
-
-    toyNode->N    = 50;               // Number of particles in Node.
+  Node *toyNode = (Node *) malloc(sizeof(Node));
   
-    toyNode->particle    = &point_gals[50];
-    
-    // Limits
-    toyNode->xmin[0]   = xlo;
-    toyNode->xmin[1]   = ylo;
-    toyNode->xmin[2]   = zlo;
-    
-    toyNode->xmax[0]   = xhi;
-    toyNode->xmax[1]   = yhi;
-    toyNode->xmax[2]   = zhi;
-    
-    toyNode->Left          = NULL;
-    toyNode->Right         = NULL;
-      
-    toyNode->NLeft         =    0;
-    toyNode->NRight        =    0;
-      
-    toyNode->Children      =    0;
-      
-    toyNode->SplitValue    = pow(10., 99.);  // No further split. 
+  toyNode->N    = 50;               // Number of particles in Node.
   
-    return toyNode;
+  toyNode->particle    = &point_gals[50];
+    
+  // Limits
+  toyNode->xmin[0]   = xlo;
+  toyNode->xmin[1]   = ylo;
+  toyNode->xmin[2]   = zlo;
+  
+  toyNode->xmax[0]   = xhi;
+  toyNode->xmax[1]   = yhi;
+  toyNode->xmax[2]   = zhi;
+    
+  toyNode->Left          = NULL;
+  toyNode->Right         = NULL;
+      
+  toyNode->NLeft         =    0;
+  toyNode->NRight        =    0;
+  
+  toyNode->Children      =    0;
+  
+  toyNode->SplitValue    = pow(10., 99.);  // No further split. 
+  
+  return toyNode;
 }
-
 
 int sortby_position_alongDim_splitDim(const void *a, const void *b){
-    if((*(Particle *)a).x[sortDim] >= (*(Particle *)b).x[sortDim]){  
-        return  1;
-    }
-    
-    else{
-        return -1;
-    }
+  if((*(Particle *)a).x[sortDim] >= (*(Particle *)b).x[sortDim]){  
+    return  1;
+  }
+  
+  else{
+    return -1;
+  }
 }
-
 
 double log10_minimum_modDisplacementBetweenNodes(Node *node1, Node *node2){  
   double dr2 = 0.0;
@@ -276,26 +269,25 @@ double log10_minimum_modDisplacementBetweenNodes(Node *node1, Node *node2){
   // Sum of (minimum) projected distances^2
   // contribution to |displacement| is zero for a given dimension if the nodes overlap.
   for(i=0; i<NDIM; i++){
-      // 2  left of 1
-      if(node1->xmin[i] > node2->xmax[i]){       
-          dr2   += pow(node1->xmin[i] - node2->xmax[i], 2.);
-      }  
+    // 2  left of 1
+    if(node1->xmin[i] > node2->xmax[i]){       
+      dr2   += pow(node1->xmin[i] - node2->xmax[i], 2.);
+    }  
         
-      // 2 right of 1
-      else if(node2->xmin[i] > node1->xmax[i]){  
-          dr2   += pow(node2->xmin[i] - node1->xmax[i], 2.);
-      }
+    // 2 right of 1
+    else if(node2->xmin[i] > node1->xmax[i]){  
+      dr2   += pow(node2->xmin[i] - node1->xmax[i], 2.);
+    }
   
-      // overlap
-      else{ 
-          dr2   += 0.;
-      }
+    // overlap
+    else{ 
+      dr2   += 0.;
+    }
   }  
   
   // log_10(0.) will return inf. 
   return 0.5*log10(maximum_twodoubles(dr2, pow(10., -99.)));
 }
-
 
 double log10_maximum_modDisplacementBetweenNodes(Node *node1, Node *node2){
   double dr2 = 0.0;
@@ -305,7 +297,6 @@ double log10_maximum_modDisplacementBetweenNodes(Node *node1, Node *node2){
   
   return 0.5*log10(dr2);
 }
-
 
 int free_tree(Node *t){
   free(t->particle);

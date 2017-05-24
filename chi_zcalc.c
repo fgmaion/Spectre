@@ -17,19 +17,19 @@ double z_chi_integrand(double z, void* p){
 }
 
 double interp_comovingDistance(double z){
-  double Interim;
+  double result;
 
-  splint(z_Array, ComovingDistance_z, z_ComovingDistance_2derivatives, 1000, z, &Interim);
+  splint(z_Array, ComovingDistance_z, z_ComovingDistance_2derivatives, 1000, z, &result);
 
-  return Interim;  // Returns comoving distance at redshift z in h^-1 Mpc.
+  return result;  // Returns comoving distance at redshift z in h^-1 Mpc.
 }
 
 double interp_inverseComovingDistance(double r){
-  double Interim;
+  double result;
 
-  splint(ComovingDistance_z, z_Array, ComovingDistance_z_2derivatives, 1000, r, &Interim);
+  splint(ComovingDistance_z, z_Array, ComovingDistance_z_2derivatives, 1000, r, &result);
 
-  return Interim;  // Returns z at comoving distance, [h^-1 Mpc].
+  return result;  // Returns z at comoving distance, [h^-1 Mpc].
 }
 
 

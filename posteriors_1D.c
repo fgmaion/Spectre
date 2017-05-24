@@ -151,9 +151,9 @@ int Calc_fsigma8_68conf(int maxLikeIndex, double* error){
             
             // printf("\n\n95 limits %.4e, prob: %.4e", confidence_95, Prob);
             
-	    *error = i*fsigma8Interval;
-
-            return 1;
+            *error = i*fsigma8Interval;
+        
+            exit(EXIT_FAILURE);
         }
     }
     

@@ -8,11 +8,11 @@ int rand_chiReassignment(){
   // With nbar specified according to interp_nz(chi), assign chi for randoms such that they satisfy this bar.
   // Achieved with the transformation method, see pg. 287 of NR and smooth_nbar.c
 
-  double     cos_dec;
+  double  cos_dec;
   
   printf("\n\nRandoms chi reassignment.");
 
-  #pragma omp parallel for private(j, cos_dec) if (thread == 1)
+  // #pragma omp parallel for private(j, cos_dec) if(thread == 1)
   for(j=0; j<rand_number; j++){
     rand_chi[j]    = inverse_cumulative_nbar(rand_rng[j]);
 
@@ -21,9 +21,9 @@ int rand_chiReassignment(){
 
     cos_dec        = cos(rand_dec[j]);
       
-    rand_x[j]      =  rand_chi[j]*cos(rand_ra[j])*cos_dec;
-    rand_y[j]      =  rand_chi[j]*sin(rand_ra[j])*cos_dec;
-    rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);           // Stefano reflection included.
+    rand_x[j]      = rand_chi[j]*cos(rand_ra[j])*cos_dec;
+    rand_y[j]      = rand_chi[j]*sin(rand_ra[j])*cos_dec;
+    rand_z[j]      = rand_chi[j]*sin(rand_dec[j]);
 
     rand_weight[j] = 1./(1. + (*pt2nz)(rand_chi[j])*fkpPk);   // rand fkp weights.
   }
@@ -81,17 +81,18 @@ int load_homogeneous_rands_window(double sampling, int count_res){
     else{
       printf("\n\nFile not found: %s", filepath);
 
-      return 1;
+      exit(EXIT_FAILURE);
     }
   }
   
   else{
     sprintf(filepath, "%s/W1_Spectro_V7_2/randoms/randoms_W1W4_xyz_%.1lf_%.1lf_Nagoya_v6_Samhain_BIGSHUF.dat", root_dir, 0.6, 0.9);       // joint field
+
     if(strcmp(filepath, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2/randoms/randoms_W1W4_xyz_0.6_0.9_Nagoya_v6_Samhain_BIGSHUF.dat") == 0) rand_number = 53264429;     // Data: 50829
     else{
       printf("\n\nFile not found: %s", filepath);
 
-      return 1;
+      exit(EXIT_FAILURE);
     }
   }
 
@@ -101,18 +102,44 @@ int load_homogeneous_rands_window(double sampling, int count_res){
   
   walltime("Wall time at start of mask loading.");
 
-  assign_randmemory();
+  assign_rand_radecmemory();
 
+  assign_randmemory();
+  
   walltime("Wall time at end of mask loading.");
 
   // load_ascii_randomCats(rand_number);  
   load_fastread_randomCats(rand_number);
-
+  
   // make_fastread_randomCats(rand_number); 
   
   set_rand_rng();
   
   rand_chiReassignment();
      
+  return 0;
+}
+
+int load_maskfits(double sampling, int count_res){
+  if(count_res<3) sprintf(filepath, "/home/mjw/venice-4.0.2/nagoya_v6_samhain_W%d_all_deccut.fits", fieldFlag);
+
+  else{
+    sprintf(filepath, "/home/mjw/venice-4.0.2/nagoya_v6_samhain_W1W4_all_deccut.fits");          
+  }
+
+  walltime("Wall time at start of mask loading.");
+  
+  read_maskfits(filepath, sampling);  // rand_number set by nrows.
+  
+  printf("\n\nMask: %s with sampling %.2lf has %d randoms", filepath, sampling, rand_number);
+  
+  assign_randmemory();
+
+  walltime("Wall time at end of mask loading.");
+  
+  set_rand_rng();
+
+  rand_chiReassignment();
+  
   return 0;
 }

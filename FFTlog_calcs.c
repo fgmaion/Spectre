@@ -825,49 +825,6 @@ int VIPERS_mask_cnvldpk(){
 }
 
 
-int printf_kMask_multipoles(){
-    //  Hankel transform pair counts of the window. 
-    int cnvldpknorm;
-
-    FFTlogRes = 4096;
-    
-    pt2maskMultipoles = &splint_VIPERS_maskMultipoles;
-    
-    // Currently beta is set by hand in the input P(k) function. 
-    FFTlog_memory(FFTlogRes, pow(10., -10.), pow(10., 14.), beta, velDispersion);
-    
-    // correlation_fns already assigned to the window in FFTlog_memory. 
-    pk_mu(mono_config);    
-    pk_mu(quad_config);
-        
-    double norm = 0.0;
-    // norm = 4.700981*1.823239*pow(10., 6.);
-        
-    for(j=0; j<mono_config->N; j++){
-        if(mono_config->krvals[j][0] > 0.0001){
-            norm = mono_config->pk[j][0];
-        
-            break;
-        }
-    }
-       
-    
-    sprintf(filepath, "%s/W1_Spectro_V7_4/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", root_dir, fieldFlag, 
-                                                                                                                                                  lo_zlim, hi_zlim);    
-    output = fopen(filepath, "w");
-    
-    for(j=0; j<mono_config->N; j++){  
-        if((mono_config->krvals[j][0] > 0.0001) && (mono_config->krvals[j][0] < 100.)){
-            fprintf(output, "%e \t %e \t %e \n", mono_config->krvals[j][0], mono_config->pk[j][0]/norm, quad_config->pk[j][0]/norm);
-        }
-    }
-    
-    fclose(output);
-    
-    return 0; 
-}
-
-
 int Edinburgh_PDRA(){
     FFTlogRes     =      4068; 
     

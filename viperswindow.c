@@ -188,7 +188,8 @@ int prep_VIPERS_maskMultipoles(){
   char   hiRes_filepath[200];
   char hihiRes_filepath[200];
 
-  sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+  sprintf(filepath, "%s/Qmultipoles/Ql_W%d_Nag_v7_specweight_nbar_Pfkp_4000_%.1lf_%.1lf_thread_0", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+  // sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
 
   printf("\n\nQ-multipoles: %s", filepath);
   
@@ -221,7 +222,7 @@ int prep_VIPERS_maskMultipoles(){
   }
 
   fclose(inputfile);
-    
+  
   scaleandnormalise(VIPERS_mask_lineNo_hihi, VIPERS_maskr_hihi, VIPERS_maskMono_hihi, VIPERS_maskQuad_hihi, VIPERS_maskHex_hihi, VIPERS_maskOct_hihi, VIPERS_maskDec_hihi, &mask_monopolenorm_hihi, VIPERS_maskMono2D_hihi, VIPERS_maskQuad2D_hihi, VIPERS_maskHex2D_hihi, VIPERS_maskOct2D_hihi, VIPERS_maskDec2D_hihi);
  
   hiRes_hihiRes_join = VIPERS_maskr_hihi[VIPERS_mask_lineNo_hihi - 1];  // Set the r at which the really high resolution will join the high resolution counts.
@@ -325,7 +326,7 @@ int prep_VIPERS_maskMultipoles(){
   spline(VIPERS_maskr_lo, VIPERS_maskDec_lo,  VIPERS_mask_lineNo_lo, 1.0e31, 1.0e31, VIPERS_maskDec2D_lo);
   
   // Print and calculate k-space multipoles. 
-  // print_windowCorrfn();
+  print_windowCorrfn();
     
   prepVIPERS_kSpaceMultipole(); // for integral constraint. 
   

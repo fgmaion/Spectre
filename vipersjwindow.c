@@ -30,7 +30,6 @@ double splint_VIPERS_jmaskMono(double r){
   }
 }
 
-
 double splint_VIPERS_jmaskQuad(double r){
   if(r<0.2)   return 0.;
   if(r>900.0) return 0.;
@@ -59,7 +58,6 @@ double splint_VIPERS_jmaskQuad(double r){
     return Interim;
   }
 }
-
 
 double splint_VIPERS_jmaskHex(double r){
   if(r<0.5)   return 0.;
@@ -90,7 +88,6 @@ double splint_VIPERS_jmaskHex(double r){
   }
 }
 
-
 double splint_VIPERS_jmaskMultipoles(double r, int transformOrder){
   switch(transformOrder){
     case 0:
@@ -101,7 +98,6 @@ double splint_VIPERS_jmaskMultipoles(double r, int transformOrder){
       return  splint_VIPERS_jmaskHex(r);
   }
 }
-
 
 int print_jwindowCorrfn(){
   double r;
@@ -123,13 +119,13 @@ int print_jwindowCorrfn(){
   return 0;
 }
 
-
 int prep_VIPERS_jmaskMultipoles(){
     char   loRes_filepath[200];
     char   hiRes_filepath[200];
     char hihiRes_filepath[200];
 
-    sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W1W4_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, lo_zlim, hi_zlim);
+    sprintf(filepath, "%s/Qmultipoles/Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_4000.00_%.1lf_%.1lf_thread_0", maskmultipoles_path, lo_zlim, hi_zlim);
+    // sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W1W4_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, lo_zlim, hi_zlim);
 
     sprintf(hihiRes_filepath, "%s_hihiRes_hex.dat", filepath);
     sprintf(  hiRes_filepath, "%s_hiRes_hex.dat",   filepath);
@@ -166,8 +162,8 @@ int prep_VIPERS_jmaskMultipoles(){
     VIPERS_jmaskDec2D_hihi    = realloc( VIPERS_jmaskDec2D_hihi,  VIPERS_jmask_lineNo_hihi*sizeof(double));
         
     for(j=0; j<VIPERS_jmask_lineNo_hihi; j++){  
-	fscanf(inputfile, "%le \t %le \t %le \t %le \t %le \t %le \n", &VIPERS_jmaskr_hihi[j], &VIPERS_jmaskMono_hihi[j], &VIPERS_jmaskQuad_hihi[j], &VIPERS_jmaskHex_hihi[j], 
-                                                                                                                          &VIPERS_jmaskOct_hihi[j],  &VIPERS_jmaskDec_hihi[j]);
+      fscanf(inputfile, "%le \t %le \t %le \t %le \t %le \t %le \n", &VIPERS_jmaskr_hihi[j], &VIPERS_jmaskMono_hihi[j], &VIPERS_jmaskQuad_hihi[j],  &VIPERS_jmaskHex_hihi[j], 
+                                                                                                                         &VIPERS_jmaskOct_hihi[j],  &VIPERS_jmaskDec_hihi[j]);
     }
 
     fclose(inputfile);

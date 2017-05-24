@@ -137,7 +137,7 @@ int main(int argc, char** argv){
 
   // camb_call(0, 1.05);    // nonlinear/linear flag, redshift. 
 
-  get_mocksshotnoise();
+  // get_mocksshotnoise();
   
   prep_FFTlog_memory();     // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
   
@@ -145,8 +145,8 @@ int main(int argc, char** argv){
   
   prep_VIPERS_maskMultipoles();
   
-  prep_VIPERS_jmaskMultipoles();
-  
+  // prep_VIPERS_jmaskMultipoles();
+  /*
   precompute_vipers_clipping_model(FFTlogRes);  // Computes P_R(k), W_0(r), ..., \tilde W_0(k), ..., and \tilde W_0(k) for the joint field.   
   
   get_allkvals(1);            // all kVals, ignoring ChiSq_kmin and ChiSq_kmax, but including folding. 
@@ -180,7 +180,7 @@ int main(int argc, char** argv){
   set_models();
   
   double maxL_fsig8, maxL_sigv, maxL_bsig8;
-  /*
+  
   for(data_mock_flag=0; data_mock_flag<1; data_mock_flag++){
     if(data_mock_flag == 0)  sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
     if(data_mock_flag == 1)  sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
@@ -205,12 +205,11 @@ int main(int argc, char** argv){
     
     fclose(output);
   }
-  */
   
   default_params();
 
   model_compute(0, 0, 0, 0, 0);
-  
+  */
   walltime("Wall time at finish");
 
   // MPI_Finalize();

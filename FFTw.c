@@ -89,7 +89,7 @@ int prep_r2c_modes(regress* inst, double scaling){
         dummy                                  = (int)  floor((log10(kmodulus) - logk_min)/logk_interval);
         
         // Modes < Chi sq. kmin are added to last binning element. Could be better. 
-        //                                     if                                            then    else
+        //                                     if                                      then     else
         inst->kind[Index]                      = ((dummy >= 0) && (dummy < KBIN_NO)) ? dummy : (KBIN_NO - 1);
 
         // printf("\n%d %d %d \t %.6lf \t %.6lf \t %d", k, j, i, fund_kz, kmodulus, inst->kind[Index]);

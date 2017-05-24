@@ -47,7 +47,7 @@ test(){
 
   rm -r /home/mjw/IO_lock/
 
-  gcc -O2 -Wall -pedantic -Wextra -std=gnu11 -o pk.o Scripts/driver_pk_d0.c -fopenmp -lfftw3_omp -lfftw3 -lm  -lgsl -lgslcblas
+  gcc -Wall -pedantic -Wextra -std=gnu11 -o pk.o Scripts/driver_pk_d0.c -fopenmp -lfftw3_omp -lfftw3 -lm  -lgsl -lgslcblas
 }
 
 ## test

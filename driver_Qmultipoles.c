@@ -6,6 +6,7 @@
 #include "header_pk.h"
 #include "header_W2.h"
 #include "libkdtree.h"
+#include "fitsio.h"
 #include "angular_limits.c"
 #include "chi_zcalc.c"
 #include "invert_nbar.c"
@@ -22,6 +23,7 @@
 #include "buildTree.c"
 #include "libkdtree.c"
 #include "randGen.c"
+#include "fitsio.c"
 
 
 int init_gsl_randgen(){
@@ -43,40 +45,40 @@ int initi_dist_z(){
 
 int set_file_paths(char survey[], int count_res){
   if(count_res < 3){  
-    sprintf(surveyType, survey, fieldFlag, fkpPk, lo_zlim, hi_zlim);
+    sprintf(surveyType, survey, fieldFlag, fkpPk, lo_zlim, hi_zlim, thread);
   }
 
   else{
-    sprintf(surveyType, survey, fkpPk, lo_zlim, hi_zlim);
+    sprintf(surveyType, survey, fkpPk, lo_zlim, hi_zlim, thread);
   }
   
   return 0;
 }
 
-int set_outputfiles(count_res){
+int set_outputfiles(int count_res){
   switch(count_res){
   case 0:
-    set_file_paths("Ql_W%d_Nag_v7_specweight_nbar_Pfkp_%.0lf_%.1f_%.1f_hihiRes_hex", 0);
+    set_file_paths("Ql_W%d_Nag_v7_specweight_nbar_Pfkp_%.0lf_%.1f_%.1f_thread_%d_hihiRes_hex", 0);
     break;
 
   case 1:
-    set_file_paths("Ql_W%d_Nag_v7_specweight_nbar_Pfkp_%.0lf_%.1f_%.1f_hiRes_hex",   1);
+    set_file_paths("Ql_W%d_Nag_v7_specweight_nbar_Pfkp_%.0lf_%.1f_%.1f_thread_%d_hiRes_hex",   1);
     break;
 
   case 2:
-    set_file_paths("Ql_W%d_Nag_v7_specweight_nbar_Pfkp_%.0lf_%.1f_%.1f_loRes_hex",   2);
+    set_file_paths("Ql_W%d_Nag_v7_specweight_nbar_Pfkp_%.0lf_%.1f_%.1f_thread_%d_loRes_hex",   2);
     break;
 
   case 3:
-    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_hihiRes_hex", 3);
+    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_thread_%d_hihiRes_hex", 3);
     break;
 
   case 4:
-    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_hiRes_hex",   4);
+    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_thread_%d_hiRes_hex",   4);
     break;
 
   case 5:
-    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_loRes_hex",   5);
+    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_loRes_thread_%d_hex",   5);
     break;
   }
 
@@ -87,12 +89,12 @@ int main(int argc, char **argv){
   int              count_res;
   double       sampling_frac;
 
-  double    dilution =  0.01;
+  double    dilution =   1.0;
   
-  double       max_logs[6]  = {log10(2.0), log10(20.0), log10(2000.0), log10(2.0), log10(20.0), log10(2000.0)}; 
+  double       max_logs[6]  = {log10(2.0), log10(20.0), log10(2000.0), log10(2.0), log10(20.0), log10(4000.0)}; 
   double sampling_fracs[6]  = {1.00, 0.10, 0.01, 1.000, 0.004, 0.005};
 
-  thread                    =                                   1;
+  thread                    =                                   0;
   outputdir                 =                 getenv("outputdir");
   
   sprintf(root_dir,                      "/home/mjw/HOD_MockRun");
@@ -122,15 +124,12 @@ int main(int argc, char **argv){
   
   // Correlation fn's, logarithmic binning in r. 
   zerolog  =                             log10(0.001);
-  logbinsz =                             log10( 1.01);    // previously 1.4, must be >1.0 otherwise log gives 0. or -ve.
-  nlogbins =  (int) ceil((maxlog - zerolog)/logbinsz);
+  logbinsz =                              log10(1.01);    // previously 1.4, must be >1.0 otherwise log gives 0. or -ve.
   
   // linear binning in mu. 
   zerolin  =                                     0.00;
   maxlin   =                                     1.00;
   linbinsz =                                     0.05;
-
-  nlinbins =  (int) ceil((maxlin - zerolin)/linbinsz);
 
 
   start_walltime();
@@ -155,7 +154,9 @@ int main(int argc, char **argv){
   
   set_outputfiles(count_res);
   
-  load_homogeneous_rands_window(sampling_frac, count_res); // load randoms with sampling sampling_frac.
+  load_maskfits(sampling_frac, count_res);
+  
+  // load_homogeneous_rands_window(sampling_frac, count_res); // load randoms with sampling sampling_frac.
   
   delete_lockfile();
   
