@@ -11,8 +11,8 @@ int rand_chiReassignment(){
   double  cos_dec;
   
   printf("\n\nRandoms chi reassignment.");
-
-  // #pragma omp parallel for private(j, cos_dec) if(thread == 1)
+  
+  #pragma omp parallel for private(j, cos_dec) if(thread == 1)
   for(j=0; j<rand_number; j++){
     rand_chi[j]    = inverse_cumulative_nbar(rand_rng[j]);
 
@@ -27,7 +27,7 @@ int rand_chiReassignment(){
 
     rand_weight[j] = 1./(1. + (*pt2nz)(rand_chi[j])*fkpPk);   // rand fkp weights.
   }
-    
+
   return 0;
 }
 
@@ -121,6 +121,7 @@ int load_homogeneous_rands_window(double sampling, int count_res){
 }
 
 int load_maskfits(double sampling, int count_res){
+  // e.g. nagoya_v6_samhain_W1W4_all_deccut.fits
   if(count_res<3) sprintf(filepath, "/home/mjw/venice-4.0.2/nagoya_v6_samhain_W%d_all_deccut.fits", fieldFlag);
 
   else{

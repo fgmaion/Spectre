@@ -145,7 +145,7 @@ int main(int argc, char** argv){
   
   prep_VIPERS_maskMultipoles();
   
-  // prep_VIPERS_jmaskMultipoles();
+  prep_VIPERS_jmaskMultipoles();
   /*
   precompute_vipers_clipping_model(FFTlogRes);  // Computes P_R(k), W_0(r), ..., \tilde W_0(k), ..., and \tilde W_0(k) for the joint field.   
   
@@ -166,9 +166,9 @@ int main(int argc, char** argv){
   // scale_Cov(CatalogNumber);
   
   Covariance_eigenVecs(CatalogNumber);
-  
+  */
   delete_lockfile();
-  
+  /*
   prep_dlnPR_dlnk();
 
   // set_clippingvars(1.0);

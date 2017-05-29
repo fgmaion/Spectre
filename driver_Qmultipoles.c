@@ -24,6 +24,7 @@
 #include "libkdtree.c"
 #include "randGen.c"
 #include "fitsio.c"
+#include "kdtree_qsnapshot.c"
 
 
 int init_gsl_randgen(){
@@ -78,7 +79,7 @@ int set_outputfiles(int count_res){
     break;
 
   case 5:
-    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_loRes_thread_%d_hex",   5);
+    set_file_paths("Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_%.0f_%.1f_%.1f_thread_%d_loRes_hex",   5);
     break;
   }
 
@@ -89,12 +90,14 @@ int main(int argc, char **argv){
   int              count_res;
   double       sampling_frac;
 
-  double    dilution =   1.0;
+  double      dilution = 0.0001;
+
+  // Randoms in cats. are W1: 2.5196772 x 10^7; W4: 1.2147352 x 10^7; W1+W4: 6.2245045 x 10^7.
   
   double       max_logs[6]  = {log10(2.0), log10(20.0), log10(2000.0), log10(2.0), log10(20.0), log10(4000.0)}; 
-  double sampling_fracs[6]  = {1.00, 0.10, 0.01, 1.000, 0.004, 0.005};
-
-  thread                    =                                   0;
+  double sampling_fracs[6]  = {1.00, 0.30, 0.01, 1.00, 0.20, 0.01}; // 1.00, 0.10, 0.01, 1.000, 0.004, 0.005
+  
+  thread                    =                                   1;
   outputdir                 =                 getenv("outputdir");
   
   sprintf(root_dir,                      "/home/mjw/HOD_MockRun");
@@ -123,13 +126,13 @@ int main(int argc, char **argv){
   data_mock_flag            =         0;
   
   // Correlation fn's, logarithmic binning in r. 
-  zerolog  =                             log10(0.001);
-  logbinsz =                              log10(1.01);    // previously 1.4, must be >1.0 otherwise log gives 0. or -ve.
+  zerolog  =               log10(0.001);
+  logbinsz =               log10(1.050);    // previously 1.01 and befor that 1.4. must be > 1.0 otherwise log gives 0. or -ve.
   
   // linear binning in mu. 
-  zerolin  =                                     0.00;
-  maxlin   =                                     1.00;
-  linbinsz =                                     0.05;
+  zerolin  =                      0.000;
+  maxlin   =                      1.000;
+  linbinsz =                      0.025;    // previously 0.05
 
 
   start_walltime();
@@ -142,20 +145,19 @@ int main(int argc, char **argv){
   
   UniverseAge();
 
-  set_angularlimits(0, fieldFlag); // assumes data cut to mock limits.
+  set_angularlimits(0, fieldFlag); // assumes data/randoms cut to mock limits.
   
   prep_nbar();
   
-  spline_nbar(1);     // 306 mock avg; load nbar jointly estimated from W1 and W4, with 150 h^-1 Mpc smoothing and reflection.  
+  spline_nbar(1);                  // 306 mock avg; load nbar jointly estimated from W1 and W4, with 150 h^-1 Mpc smoothing and reflection.  
 
-  pt2nz = &interp_nz; // Gaussian smoothed galaxy counts.
+  pt2nz = &interp_nz;              // Gaussian smoothed galaxy counts.
 
   prep_inverseCumulative_nbar();
   
   set_outputfiles(count_res);
   
   load_maskfits(sampling_frac, count_res);
-  
   // load_homogeneous_rands_window(sampling_frac, count_res); // load randoms with sampling sampling_frac.
   
   delete_lockfile();

@@ -74,6 +74,12 @@ int inputHODPk(){
     camb_sig8 = 0.518;
   }
 
+  else if ((lo_zlim == 0.5) && (hi_zlim == 0.7)){
+    sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.593_z_0.75.dat", root_dir);
+
+    camb_sig8 = 0.593;
+  }
+  
   else if ((lo_zlim == 0.7) && (hi_zlim == 1.2)){
     sprintf(filepath, "%s/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.518_z_1.05.dat", root_dir);
 

@@ -89,7 +89,7 @@ int main(int argc, char **argv){
   fftw_init_threads();
   
   fftw_plan_with_nthreads(omp_get_max_threads());        // Maximum number of threads to be used; use all openmp threads available.  
-
+  /*
   set_angularlimits(0, fieldFlag);                       // Cut data to mock limits.
   
   Initialise();                                          // Initialise grid, fft params and random generation.
@@ -103,7 +103,7 @@ int main(int argc, char **argv){
   prep_pkRegression();                                   // set k binning interval arrays. 
   
   prep_CatalogueInput_500s();                            // Max. number of gals of ALL mocks (& data) analysed simultaneously is 'hard coded'.  
-  
+  */
   prep_nbar();                                           // assign memory and zero e.g. bins of number of galaxies per chi. 
   
   load_rands_radec(1.0);

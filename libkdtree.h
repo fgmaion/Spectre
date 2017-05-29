@@ -16,9 +16,9 @@ Particle* point_gals;
 Particle* point_rands;
 
 typedef struct Node{
-  int              N;
-  int          label;
-  int      treelevel;
+  long             N;
+  long         label;
+  long     treelevel;
   int       SplitDim;
   int       Children;
 
@@ -31,9 +31,10 @@ typedef struct Node{
   void*         Left;
   void*        Right;
 
-  int          NLeft;
-  int         NRight;
+  long         NLeft;
+  long        NRight;
 } Node;
+
 
 Node*    galTree;
 Node*    randTree;
@@ -55,14 +56,14 @@ char     filename[200];
 int      indi; 
 int      indj;
 
-int      nodeone_progresscount=0;
-int      nodetwo_progresscount=0;
+long     nodeone_progresscount=0;
+long     nodetwo_progresscount=0;
 
 int      bruteforceCount = 0;
 
 double   pairCount = 0.0;
 
-int      Nmin = 400;  // Minimum number of particles which a Node can contain, should be > 1; previously 100.
+int      Nmin      = 1000;  // Minimum number of particles which a node can contain, should be > 1; previously 100.
 int      sortDim, treelevel;
 int      NLeft, NRight;
 

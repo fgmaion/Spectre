@@ -122,8 +122,8 @@ int findSuitableNodePairs_bruteforcePairCount(double* n, double* wn, double* r, 
       
       postprocesspairs(n, wn, r, mu, node1, node2);
       
-      nodeone_progresscount = node1->label + (int) floor(tree_labelCount/20.);
-      nodetwo_progresscount = node2->label + (int) floor(tree_labelCount/20.);
+      nodeone_progresscount = node1->label + (long) floor(tree_labelCount/20.);
+      nodetwo_progresscount = node2->label + (long) floor(tree_labelCount/20.);
     }
     
     // Given two nodes, is their maximum displacement smaller than the smallest bin? is their minimum displacement larger than the largest bin -> don't bother counting pairs. 
@@ -165,7 +165,6 @@ int bruteforceCountpairs_betweenChildren(double* n, double* wn, double* r, doubl
   
   // Only called for children.      
   if((sameTree == 1) && (node1->label == node2->label)){  // Same tree, same child. count distinct pairs.
-   // #pragma omp parallel for reduction(+: n[:NBINS], wn[:NBINS], r[:NBINS], mu[:NBINS]) private(ii, jj, log10_r, pair_mu, indi, indj, weight, Index) if(thread==1)
    for(ii=0; ii<node1->N; ii++){
       for(jj=ii+1; jj<node2->N; jj++){
         log10_r                = log10_particleSeparation(node1->particle[ii], node2->particle[jj]); 
@@ -196,7 +195,7 @@ int bruteforceCountpairs_betweenChildren(double* n, double* wn, double* r, doubl
   }	    
   
   else{
-    // #pragma omp parallel for reduction(+: n[:NBINS], wn[:NBINS], r[:NBINS], mu[:NBINS]) private(ii, jj, log10_r, pair_mu, indi, indj, weight, Index) if(thread==1) 
+    #pragma omp parallel for reduction(+: n[:NBINS], wn[:NBINS], r[:NBINS], mu[:NBINS]) private(ii, jj, log10_r, pair_mu, indi, indj, weight, Index) if(thread==1) 
     for(ii=0; ii<node1->N; ii++){      // Either different tree, or different children with node1 > node2. all pairs are distinct at this point.
       for(jj=0; jj<node2->N; jj++){
         log10_r               = log10_particleSeparation(node1->particle[ii], node2->particle[jj]); 
@@ -315,7 +314,6 @@ int bruteforce_nonodes(double* C0, double* C2, double* C4, double* C6, double* C
   return 0;
 }
 
-
 double log10_particleSeparation(Particle a, Particle b){
   double r2 = 0.0;
 
@@ -328,6 +326,6 @@ double log10_particleSeparation(Particle a, Particle b){
 }
 
 double pair_zmu(Particle a, Particle b, double log10r){    
-  // assuming z is the polar axis, return |cos(theta)| of pair separation.
+  // assuming z is the polar axis, return |cos(theta)| of pair.
   return fabs(b.x[2] - a.x[2])*pow(10., -log10r);
 }

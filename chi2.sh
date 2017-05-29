@@ -3,7 +3,7 @@
 #PBS -V
 #PBS -p 1023
 #PBS -l nodes=1:ppn=1                                                                                     
-#PBS -l walltime=00:30:00
+#PBS -l walltime=00:10:00
 #PBS -l mem=5MB
 
 set_lock(){
@@ -29,10 +29,10 @@ set_lock(){
 
 test(){
   ## Interactive run with: qsub -I -o $outputdir/chi2_log/chi2_stdout.pbs -e $outputdir/chi2_log/chi2_stderr.pbs chi2.sh
-  export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_7.1
-  export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_8
-  export LOZ=0.7
-  export HIZ=1.2
+  export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9
+  export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9
+  export LOZ=0.5
+  export HIZ=0.7
   export FIELDFLAG=1
   export d0=1000
 
@@ -41,7 +41,7 @@ test(){
   gcc -std=gnu11 -o chi2.o Scripts/driver_likelihood.c -lfftw3 -lm -lgsl -lgslcblas -fopenmp
 }
 
-test
+## test
 
 DIR="$HOME/HOD_MockRun/Scripts/"
 cd $DIR
@@ -62,7 +62,7 @@ for k in 0.6
     
     export FILE=$outputdir"/chi2_log/chi2_d0_"$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ"_kmax_"$k".log"
       
-    ./chi2.o $d0 $FIELDFLAG $LOZ $HIZ $k #> $FILE 2>&1
+    ./chi2.o $d0 $FIELDFLAG $LOZ $HIZ $k > $FILE 2>&1
 
     ## rm -r /home/mjw/IO_lock/ ## For testing. 
     

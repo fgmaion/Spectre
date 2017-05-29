@@ -334,8 +334,8 @@ int cnvldquadCorr(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad
   // Convolved quadrupole calculation to 2nd order. updated via bailey.c
   for(i=0; i<mono->N; i++){
     cnvld->xi[i][0]  = mono->xi[i][0]*FFTlog_W2[i];
-    cnvld->xi[i][0] += quad->xi[i][0]*(FFTlog_W0[i]+(2./7.)*FFTlog_W2[i]+(2./7.)*FFTlog_W4[i]);
-    cnvld->xi[i][0] +=  hex->xi[i][0]*((2./7.)*FFTlog_W2[i]+(100./693.)*FFTlog_W4[i]+(25./143.)*FFTlog_W6[i]);
+    cnvld->xi[i][0] += quad->xi[i][0]*(FFTlog_W0[i] + (2./7.)*FFTlog_W2[i] + (2./7.)*FFTlog_W4[i]);
+    cnvld->xi[i][0] +=  hex->xi[i][0]*((2./7.)*FFTlog_W2[i] + (100./693.)*FFTlog_W4[i] + (25./143.)*FFTlog_W6[i]);
     
     // cnvld->xi[i][0] += oct->xi[i][0]*((25./143.)*(*pt2maskMultipoles)(mono->krvals[i][1], 4)+(14./143.)*(*pt2maskMultipoles)(mono->krvals[i][1], 6)+(28./221.)*(*pt2maskMultipoles)(mono->krvals[i][1], 8));
 
