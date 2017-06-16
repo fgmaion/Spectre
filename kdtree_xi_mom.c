@@ -1,45 +1,31 @@
-int check_nbins(){
-  if(nlogbins*nlinbins != NBINS){
-    printf("\n\nNBINS error: NBINS= %d but should be %d", NBINS, nlogbins*nlinbins);
-
-    exit(EXIT_FAILURE);
-  }
-
-  else{
-    return 0;
-  }
-}
-
 int assignMemory_xi(){
   point_rands = (Particle *) realloc(point_rands, rand_number*sizeof(Particle));
 
-  nlogbins    = (int)        ceil((maxlog - zerolog)/logbinsz);
-  nlinbins    = (int)        ceil((maxlin - zerolin)/linbinsz);
-
-  check_nbins(); // check NBINS against nlogbins and nlinbins. 
+  nlogbins    = (int)        ceil((maxlog  - zerolog)/logbinsz);
+  nlinbins    = (int)        ceil((maxlin  - zerolin)/linbinsz);
   
   // mu^n + FKP weighted pair counts. 
-  rr_0        = (double *) calloc(nlogbins*nlinbins, sizeof(double)); 
-  rr_2        = (double *) calloc(nlogbins*nlinbins, sizeof(double));
-  rr_4        = (double *) calloc(nlogbins*nlinbins, sizeof(double));
-  rr_6        = (double *) calloc(nlogbins*nlinbins, sizeof(double));
-  rr_8        = (double *) calloc(nlogbins*nlinbins, sizeof(double));
-  rr_10       = (double *) calloc(nlogbins*nlinbins, sizeof(double));
+  rr_0        = (double *)   calloc(nlogbins*nlinbins, sizeof(double)); 
+  rr_2        = (double *)   calloc(nlogbins*nlinbins, sizeof(double));
+  rr_4        = (double *)   calloc(nlogbins*nlinbins, sizeof(double));
+  rr_6        = (double *)   calloc(nlogbins*nlinbins, sizeof(double));
+  rr_8        = (double *)   calloc(nlogbins*nlinbins, sizeof(double));
+  rr_10       = (double *)   calloc(nlogbins*nlinbins, sizeof(double));
 
-  rr_meann    = (double *) calloc(nlogbins*nlinbins, sizeof(double));
-  rr_meanwn   = (double *) calloc(nlogbins*nlinbins, sizeof(double)); 
-  rr_meanr    = (double *) calloc(nlogbins*nlinbins, sizeof(double));
-  rr_meanmu   = (double *) calloc(nlogbins*nlinbins, sizeof(double));
+  rr_meann    = (double *)   calloc(nlogbins*nlinbins, sizeof(double));
+  rr_meanwn   = (double *)   calloc(nlogbins*nlinbins, sizeof(double)); 
+  rr_meanr    = (double *)   calloc(nlogbins*nlinbins, sizeof(double));
+  rr_meanmu   = (double *)   calloc(nlogbins*nlinbins, sizeof(double));
     
-  xi0         = (double *) calloc(nlogbins, sizeof(*xi0));
-  xi2         = (double *) calloc(nlogbins, sizeof(*xi2));
-  xi4         = (double *) calloc(nlogbins, sizeof(*xi4));
-  xi6         = (double *) calloc(nlogbins, sizeof(*xi6));
-  xi8         = (double *) calloc(nlogbins, sizeof(*xi8));
-  xi10        = (double *) calloc(nlogbins, sizeof(*xi10));
+  xi0         = (double *)   calloc(nlogbins, sizeof(*xi0));
+  xi2         = (double *)   calloc(nlogbins, sizeof(*xi2));
+  xi4         = (double *)   calloc(nlogbins, sizeof(*xi4));
+  xi6         = (double *)   calloc(nlogbins, sizeof(*xi6));
+  xi8         = (double *)   calloc(nlogbins, sizeof(*xi8));
+  xi10        = (double *)   calloc(nlogbins, sizeof(*xi10));
 
-  logrbins    = (double *) calloc(nlogbins, sizeof(*logrbins));
-  pairsperbin = (int    *) calloc(nlogbins, sizeof(*pairsperbin));
+  logrbins    = (double *)   calloc(nlogbins, sizeof(*logrbins));
+  pairsperbin = (int    *)   calloc(nlogbins, sizeof(*pairsperbin));
               
   return 0;
 }
@@ -109,7 +95,7 @@ int postprocesspairs(double* n, double* wn, double* r, double* wmu, Node* node1,
 
   double C0[NBINS], C2[NBINS], C4[NBINS], C6[NBINS], C8[NBINS], C10[NBINS]; // mu^n weighted pair counts.
   double P0[NBINS], P2[NBINS], P4[NBINS], P6[NBINS], P8[NBINS], P10[NBINS];  
-
+  
   for(i=0; i<nlogbins; i++){
     for(j=0; j<nlinbins; j++){
        Index      = j + nlinbins*i;
@@ -160,18 +146,17 @@ int postprocesspairs(double* n, double* wn, double* r, double* wmu, Node* node1,
   for(j=0; j<nlogbins; j++)  fprintf(output, "%.4le \t %.4le \t %.4le \t %.4le \t %.4le \t %.4le \n", logrbins[j], xi0[j], xi2[j], xi4[j], xi6[j], xi8[j]);
 
   fclose(output);
-
+  
   // Save raw counts. 
   sprintf(filepath, "%s/Qmultipoles/%s_raw.dat", outputdir, surveyType);
 
   output = fopen(filepath, "w");
 
-  fprintf(output, "## Walltime: %.2lf seconds; Progress: %.6lf \%; number of nodes in tree: %ld; current nodes: %ld \t %ld \n", getRealTime() - begin, progress,
-                                                                                                                                tree_labelCount, node1->label, node2->label);
+  fprintf(output, "## Walltime: %.2lf seconds; Progress: %.6lf \%; number of nodes in tree: %ld; current nodes: %ld \t %ld \n", getRealTime() - begin, progress, tree_labelCount, node1->label, node2->label);
 
   fprintf(output, "## number of pairs; sum over pairs of weights; sum over pairs of weighted r, sum over pairs of weighted mu. \n");
   
-  for(j=0; j<NBINS; j++)  fprintf(output, "%.4le \t %.4le \t %.4le \t %.4le \n", n[j], wn[j], r[j], wmu[j]);
+  for(j=0; j<NBINS; j++)  fprintf(output, "%.8le \t %.8le \t %.8le \t %.8le \n", n[j], wn[j], r[j], wmu[j]);
 
   // Comparison to brute force. 
   // for(j=0; j<NBINS; j++)  fprintf(output, "%.4le \t %.4le \t %.4le \t %.4le \t %.4le \n", n[j], C0[j], C2[j], C4[j], C6[j]);
@@ -200,14 +185,14 @@ int randWindow_pairCount(){
   grow_randTree();
     
   printf("\n\nCounting RR pairs.");
-    
+
+  // get_qsnapshot(rr_meann, rr_meanwn, rr_meanr, rr_meanmu, randTree, randTree);
+  
   // bruteforce_nonodes(rr_0, rr_2, rr_4, rr_6, rr_8, rr_10, rr_meanr, rr_meanmu, point_rands, point_rands, rand_number, rand_number, 1);
   // postprocesspairs_nonodes(rr_0, rr_2, rr_4, rr_6, rr_8, rr_10, rr_meanr, rr_meanmu, randTree, randTree, 1);
-
-  // findSuitableNodePairs_bruteforcePairCount(rr_meann, rr_meanwn, rr_meanr, rr_meanmu, randTree, randTree, 1);
-  // postprocesspairs(rr_meann, rr_meanwn, rr_meanr, rr_meanmu, randTree, randTree);
-
-  get_qsnapshot(rr_meann, rr_meanwn, rr_meanr, rr_meanmu, randTree, randTree);
+  
+  findSuitableNodePairs_bruteforcePairCount(rr_meann, rr_meanwn, rr_meanr, rr_meanmu, randTree, randTree, 1);
+  postprocesspairs(rr_meann, rr_meanwn, rr_meanr, rr_meanmu, randTree, randTree);
   
   return 0;
 }

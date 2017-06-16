@@ -14,7 +14,7 @@ int Fisher_matrix_fap(double dbsigma8, double dvelDispersion){
   else{
     printf("\n\nChange z limits for forecast.");
 
-    return 1;
+    exit(EXIT_FAILURE);
   }
   
   int         nn;
@@ -37,8 +37,6 @@ int Fisher_matrix_fap(double dbsigma8, double dvelDispersion){
   for(i=0; i<nparam; i++){    
     for(j=0; j<order; j++)  dmodel_dparam[i][j] = 0.0;
   }
-
-  prep_ctype_ChiSq();
   
   // Calculate parameter derivatives with five point stencil. 
   for(int jjj=0; jjj<nparam; jjj++){
@@ -58,7 +56,7 @@ int Fisher_matrix_fap(double dbsigma8, double dvelDispersion){
       epsilon_pad      = pow(F, 1./3.) - 1.;  // F    = (1. + epsilon)**3.     
       alpha_pad        =                1.0; 
  
-      model_compute(0, 0, 0, 0, 0);
+      model_compute(0, 0, 0, 0, 0, 0);
 
       for(j=0; j<mono_order; j++)  dmodel_dparam[jjj][j]              += amps[iii]*convlmonoCorr->pk[fftlog_indices[j]][0]/dtheta;
       for(j=0; j<mono_order; j++)  dmodel_dparam[jjj][j + mono_order] += amps[iii]*convlquadCorr->pk[fftlog_indices[j]][0]/dtheta;

@@ -76,6 +76,10 @@ int set_randoccupied(){
   safe_round(arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number), 10., &min_x, &max_x);
   safe_round(arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number), 10., &min_y, &max_y);
   safe_round(arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number), 10., &min_z, &max_z);
+
+  // Original box limits. 
+  min_x =   0.0; min_y =   0.0;  min_z =   0.0;
+  max_x = 800.0; max_y = 800.0;  max_z = 800.0;
   
   dx    = (max_x - min_x)/n2;  dy    = (max_y - min_y)/n1;  dz    = (max_z - min_z)/n0;
   
@@ -153,6 +157,9 @@ int set_randoccupied(){
     printf("\nExact volume: %.6lf (h^-1 Gpc)^3; randoms estimate: %.6lf (h^-1 Gpc)^3; %+.6lf percent convergence; %+.6lf percent accuracy", truvol, newvol, convergence, accuracy);
     
     oldvol = newvol;
+
+    // Add escape. 
+    // convergence = 0.01;
   }
   
   // print_randoccupied();

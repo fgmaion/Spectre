@@ -42,7 +42,7 @@ int CatalogueInput_500s(){
     printf("\n\nOpening catalogue: %s", filepath);
     
     inputfile   = fopen(filepath, "r");
-
+    
     line_count(inputfile, &Vipers_Num);
     
     for(j=0; j<Vipers_Num; j++){  

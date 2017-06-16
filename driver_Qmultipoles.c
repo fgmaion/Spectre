@@ -87,12 +87,10 @@ int set_outputfiles(int count_res){
 }
 
 int main(int argc, char **argv){
-  int              count_res;
-  double       sampling_frac;
+  int               count_res;
+  double        sampling_frac;
 
-  double      dilution = 0.0001;
-
-  // Randoms in cats. are W1: 2.5196772 x 10^7; W4: 1.2147352 x 10^7; W1+W4: 6.2245045 x 10^7.
+  double      dilution = 0.01;
   
   double       max_logs[6]  = {log10(2.0), log10(20.0), log10(2000.0), log10(2.0), log10(20.0), log10(4000.0)}; 
   double sampling_fracs[6]  = {1.00, 0.30, 0.01, 1.00, 0.20, 0.01}; // 1.00, 0.10, 0.01, 1.000, 0.004, 0.005
@@ -108,7 +106,7 @@ int main(int argc, char **argv){
   hi_zlim                   =                       atof(argv[3]);
   count_res                 =                       atoi(argv[4]);
 
-  maxlog                    =                 max_logs[count_res];
+  maxlog                    =                       log10(4000.0); // max_logs[count_res];
   sampling_frac             =  dilution*sampling_fracs[count_res];
 
   // Comoving number density, n(z), measurement. Change to equal increments in (effective) volume?
@@ -118,7 +116,7 @@ int main(int argc, char **argv){
   nz_smoothRadius           =     100.0;
 
   // FKP p(k) of interest;
-  fkpPk                     =    4000.0;            // [h^-1 Mpc]^3.
+  fkpPk                     =    8000.0;            // [h^-1 Mpc]^3.
 
   CatalogNumber             =       153;
       
@@ -163,7 +161,7 @@ int main(int argc, char **argv){
   delete_lockfile();
   
   assignMemory_xi();
-
+  
   randWindow_pairCount();  
   
   walltime("Wall time at finish");

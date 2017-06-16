@@ -1,8 +1,7 @@
 int default_params(){
-  fsigma8       = 0.753125;
-  A11Sq         = 1.000000;
-  velDispersion = 5.625000;
-  bsigma8       = 0.940625;
+  fsigma8       = 0.050000;
+  velDispersion = 2.250000;
+  bsigma8       = 0.762500;
   epsilon_pad   = 0.000000;
   alpha_pad     = 1.000000;
   
@@ -10,7 +9,6 @@ int default_params(){
 
   return 0;
 }
-
 
 int bestfit_params(){
   fsigma8       = minX2_fsig8;
@@ -21,7 +19,6 @@ int bestfit_params(){
   
   return 0;
 }
-
 
 int set_chiSq_intervals(){
     fsigma8Interval       = (max_fsigma8     - min_fsigma8)/dRes;
@@ -34,7 +31,6 @@ int set_chiSq_intervals(){
     
     return 0;
 }
-
 
 int kvals_matchup(){
   double     diff;
@@ -58,7 +54,6 @@ int kvals_matchup(){
   
   return 0;
 }
-
 
 int calc_models(){  
   sprintf(filepath, "%s/models/realspace_%s_sig8_%.3lf_d0_%d_W%d_%.1lf_%.1f_res_%d.cat", models_path, model_flag, camb_sig8, d0, fieldFlag, lo_zlim, hi_zlim, Res);
@@ -85,7 +80,7 @@ int calc_models(){
 
             // printf("\nfsig8, bsig8, sigv: %.4lf \t %.4lf \t %.4lf", fsigma8, bsigma8, velDispersion);
             
-            model_compute(aa, bb, cc, dd, ee);  // updates convlmonoCorr, convlquadCorr 
+            model_compute(aa, bb, cc, dd, ee, 0);  // updates convlmonoCorr, convlquadCorr 
             
             for(j=0; j<allmono_order; j++)  fwrite(&convlmonoCorr->pk[allfftlog_indices[j]][0], sizeof(double), 1, output);
             for(j=0; j<allmono_order; j++)  fwrite(&convlquadCorr->pk[allfftlog_indices[j]][0], sizeof(double), 1, output);
@@ -103,7 +98,6 @@ int calc_models(){
   
   return 0;
 }
-
 
 int calc_ChiSqs(int mockNumber){    
     int ll, mm, nn;
@@ -123,12 +117,15 @@ int calc_ChiSqs(int mockNumber){
     }
     
     if(data_mock_flag == 1){
-      double shot = get_datashotnoise();
+      get_datashotnoise();         // assigns to mean_shot. 
 
-      for(j=0; j<mono_order; j++)  xdata[j] -= shot;
+      for(j=0; j<mono_order; j++)  xdata[j] -= mean_shot;
     }
     
+    // set_oldshotnoise();
+    
     // set_meanmultipoles();
+    
     // scale_Cov(130);
     
     for(j=0; j<order; j++){
@@ -180,7 +177,7 @@ int calc_ChiSqs(int mockNumber){
                 // ChiSqGrid[jj][kk][ii][ll][mm] *= (1. - (order + 1)/(CatalogNumber - 1.)); // Hartlap et al. correction.
               }
 
-              // printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf", fsigma8, velDispersion, bsigma8,  ChiSqGrid[jj][kk][ii][ll][mm]);
+              // printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf", fsigma8, bsigma8, velDispersion, ChiSqGrid[jj][kk][ii][ll][mm]);
             }
           }
         }
@@ -190,9 +187,36 @@ int calc_ChiSqs(int mockNumber){
     return  0;
 }
 
-int prep_ctype_ChiSq(){
-  // match all order order modes to FFTlog modes. 
+int get_ydata(int mockNumber, int data_mock_flag){
+  if      (data_mock_flag == 0)  load_mock(mockNumber);
+  else if (data_mock_flag == 1)  load_data();
+  else if (data_mock_flag == 2)  set_meanMultipoles();
+  else{
+    printf("\n\nChi sq. input is invalid.");
+  }
+  /*
+  if(data_mock_flag == 0){
+    for(j=0; j<mono_order; j++)  xdata[j] -= shotnoise_instances[mockNumber - 1];
+  }
 
+  if(data_mock_flag == 1){
+    double shot = get_datashotnoise();
+
+    for(j=0; j<mono_order; j++)  xdata[j] -= shot;
+  }
+  */
+  for(j=0; j<order; j++){
+    ydata[j] = 0.0;  // new zero mean, unit variance, decorrelated variables.
+     
+    gsl_matrix_get_col(col, evec, j);
+
+    for(k=0; k<order; k++)  ydata[j] += gsl_vector_get(col, k)*gsl_matrix_get(sigma_norm, k, k)*xdata[k];
+  }
+  
+  return 0;
+}
+
+int ctypeskvals_matchup(){
   double     diff;
   double min_diff;
 
@@ -211,42 +235,9 @@ int prep_ctype_ChiSq(){
       }
     }
   }
-
-  return 0;
-}
-
-
-int get_ydata(int mockNumber, int data_mock_flag){
-  if      (data_mock_flag == 0)  load_mock(mockNumber);
-  else if (data_mock_flag == 1)  load_data();
-  else if (data_mock_flag == 2)  set_meanMultipoles();
-  else{
-    printf("\n\nChi sq. input is invalid.");
-  }
-
-  // printf("\n\nChi sq. input.");
-
-  if(data_mock_flag == 0){
-    for(j=0; j<mono_order; j++)  xdata[j] -= shotnoise_instances[mockNumber - 1];
-  }
-
-  if(data_mock_flag == 1){
-    double shot = get_datashotnoise();
-
-    for(j=0; j<mono_order; j++)  xdata[j] -= shot;
-  }
- 
-  for(j=0; j<order; j++){
-     ydata[j] = 0.0;  // new zero mean, unit variance, decorrelated variables.
-
-    gsl_matrix_get_col(col, evec, j);
-
-    for(k=0; k<order; k++)  ydata[j] += gsl_vector_get(col, k)*gsl_matrix_get(sigma_norm, k, k)*xdata[k];
-  }
   
   return 0;
 }
-
 
 double calc_ChiSq(double dfsigma8, double dbsigma8, double dvelDispersion, double depsilon){     
     int nn;
@@ -256,9 +247,13 @@ double calc_ChiSq(double dfsigma8, double dbsigma8, double dvelDispersion, doubl
     velDispersion = dvelDispersion;
     epsilon_pad   =       depsilon;
     alpha_pad     =            1.0;
-            
-    model_compute(0, 0, 0, 0, 0);
 
+    // ctypeskvals_matchup();
+    
+    // get_ydata(10, 0);
+    
+    model_compute(0, 0, 0, 0, 0, 0);
+    
     for(j=0; j<mono_order; j++)  xtheory[0][0][0][0][0][j]              = convlmonoCorr->pk[fftlog_indices[j]][0];
     for(j=0; j<mono_order; j++)  xtheory[0][0][0][0][0][j + mono_order] = convlquadCorr->pk[fftlog_indices[j]][0];
     
@@ -277,7 +272,6 @@ double calc_ChiSq(double dfsigma8, double dbsigma8, double dvelDispersion, doubl
     return -ChiSq/2.;
 }
 
-
 int print_model(double dfsigma8, double dbsigma8, double dvelDispersion, double depsilon){
   int nn;
 
@@ -287,8 +281,9 @@ int print_model(double dfsigma8, double dbsigma8, double dvelDispersion, double 
   epsilon_pad   =       depsilon;
   alpha_pad     =            1.0;
 
-  model_compute(0, 0, 0, 0, 0);
+  model_compute(0, 0, 0, 0, 0, 0);
 
+  
   sprintf(filepath, "%s/maxlikes/mean_maxlikes_model_W%d_%.1lf_%.1lf_d0_%d.dat", outputdir, fieldFlag, lo_zlim, hi_zlim, d0);
 
   output = fopen(filepath, "w");
@@ -308,7 +303,6 @@ int print_model(double dfsigma8, double dbsigma8, double dvelDispersion, double 
   return 0;
 }
 
-
 int set_models(){
   int    ll, mm, nn;
   double store[Res][Res][Res][Res_ap][Res_ap][all_order];
@@ -319,10 +313,8 @@ int set_models(){
   
   inputfile = fopen(filepath, "rb");
 
-  if(inputfile == NULL){
+  while((inputfile = fopen(filepath, "r")) == NULL){
     calc_models();
-  
-    inputfile = fopen(filepath, "rb");
   }
   
   for(jj=0; jj<Res; jj++){ // f sigma8
@@ -354,12 +346,11 @@ int set_models(){
   return 0;
 }
 
-
 int test_chiSq(){
   // default_params();
   bestfit_params();
     
-  model_compute(0, 0, 0, 0, 0);
+  model_compute(0, 0, 0, 0, 0, 0);
 
   sprintf(filepath, "%s/W1_Spectro_V7_4/model.dat", root_dir);
   

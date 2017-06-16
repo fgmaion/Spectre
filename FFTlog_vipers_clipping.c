@@ -2,7 +2,6 @@ double C_n(double x, int n){                                                // (
   return pow(HermitePolynomial(x, n-1), 2.)*exp(-2.*x*x)/(pi*pow(2., n)*gsl_sf_gamma(n + 2));
 }
 
-
 int FFTLog_zeroInput(FFTLog_config *fc, double beta, double velDispersion){
   double transformOrder;
 
@@ -36,7 +35,6 @@ int FFTLog_zeroInput(FFTLog_config *fc, double beta, double velDispersion){
   return 0;
 }
 
-
 int FFTLog_initialise(FFTLog_config *fc, double beta, double velDispersion){
   double transformOrder;
 
@@ -68,7 +66,6 @@ int FFTLog_initialise(FFTLog_config *fc, double beta, double velDispersion){
   return 0;
 }
 
-
 int FFTLog_initialise_mask(FFTLog_config *fc){
   double transformOrder;
 
@@ -83,7 +80,7 @@ int FFTLog_initialise_mask(FFTLog_config *fc){
   double logkc    = log(fc->kr) - logrc;
 
   transformOrder  = fc->mu - 0.5;
-
+  
   for(i=0; i<fc->N; i++){
     fc->krvals[i][0]  = exp(logkc + ((double)i-nc)*dlogr);
     fc->krvals[i][1]  = exp(logrc + ((double)i-nc)*dlogr);
@@ -134,7 +131,6 @@ int FFTLog_initialise_shot(FFTLog_config *fc){
   return 0;
 }
 
-
 int set_FFTlog(int FFTlogRes, double loval, double hival, double beta, double velDispersion){
   zero_config      = FFTLog_init(FFTlogRes, loval, hival, 0.0, 0 + 0.5);
   shot_config      = FFTLog_init(FFTlogRes, loval, hival, 0.0, 0 + 0.5);
@@ -142,18 +138,18 @@ int set_FFTlog(int FFTlogRes, double loval, double hival, double beta, double ve
   quad_config      = FFTLog_init(FFTlogRes, loval, hival, 0.0, 2 + 0.5);
   hex_config       = FFTLog_init(FFTlogRes, loval, hival, 0.0, 4 + 0.5);
   oct_config       = FFTLog_init(FFTlogRes, loval, hival, 0.0, 6 + 0.5);
-
+  
   clipmono_config  = FFTLog_init(FFTlogRes, loval, hival, 0.0, 0 + 0.5);
   clipquad_config  = FFTLog_init(FFTlogRes, loval, hival, 0.0, 2 + 0.5);
-
+  
   convlmonoCorr    = FFTLog_init(FFTlogRes, loval, hival, 0.0, 0 + 0.5);
   convlquadCorr    = FFTLog_init(FFTlogRes, loval, hival, 0.0, 2 + 0.5);
   convlhexCorr     = FFTLog_init(FFTlogRes, loval, hival, 0.0, 4 + 0.5);
-
+  
   
   FFTLog_zeroInput(zero_config, 0.0, 0.0);
 
-  FFTLog_initialise_shot(shot_config); // S
+  FFTLog_initialise_shot(shot_config); 
 
   FFTLog_initialise(mono_config,       beta, velDispersion);
   FFTLog_initialise(quad_config,       beta, velDispersion);
@@ -185,12 +181,12 @@ int precompute_vipers_clipping_model(int FFTlogRes){
   for(j=0; j<FFTlogRes; j++){    
     FFTlog_Pk[j]         = (*pt2Pk)(mono_config->krvals[j][0]);  // normalised to sigma_8 = 1.
 
-    FFTlog_W0[j]         = splint_VIPERS_maskMultipoles(mono_config->krvals[j][1], 0); // splint W_0(r).
+    FFTlog_W0[j]         = splint_VIPERS_maskMultipoles(mono_config->krvals[j][1], 0);  // splint W_0(r).
     FFTlog_W2[j]         = splint_VIPERS_maskMultipoles(mono_config->krvals[j][1], 2);
     FFTlog_W4[j]         = splint_VIPERS_maskMultipoles(mono_config->krvals[j][1], 4);
     FFTlog_W6[j]         = splint_VIPERS_maskMultipoles(mono_config->krvals[j][1], 6);
 
-    FFTlog_Wk0[j]        = splint_VIPERS_kSpaceMono(mono_config->krvals[j][0]);  // splint \tilde W_0(k)
+    FFTlog_Wk0[j]        = splint_VIPERS_kSpaceMono(mono_config->krvals[j][0]);         // splint \tilde W_0(k)
     FFTlog_Wk2[j]        = splint_VIPERS_kSpaceQuad(mono_config->krvals[j][0]);
 
     FFTlog_W0_joint[j]   = splint_VIPERS_jmaskMultipoles(mono_config->krvals[j][1], 0); // splint joint-field W_0(r).
@@ -356,7 +352,7 @@ int addshotnoise(FFTLog_config *mono, double shotlevel){
 }
 
 int FFTlog_updatepk(FFTLog_config *mono, FFTLog_config *quad, FFTLog_config *hex, double beta, double velDispersion){
-  int klo = 0; // kaiser Lorbsigma8entz D^2 assumes 1000 element array.
+  int    klo = 0; // kaiser Lorbsigma8entz D^2 assumes 1000 element array.
 
   double                           ks;
   double mu_0, mu_2, mu_4, mu_6, mu_8;
@@ -369,13 +365,7 @@ int FFTlog_updatepk(FFTLog_config *mono, FFTLog_config *quad, FFTLog_config *hex
     mu_4 = muOrderFour(ks);
     mu_6 = muOrderSix(ks);   
     mu_8 = muOrderEight(ks); 
-    /*
-    mu_0 = seqsp_kLmu(ks, 0, &klo);
-    mu_2 = seqsp_kLmu(ks, 2, &klo);
-    mu_4 = seqsp_kLmu(ks, 4, &klo);
-    mu_6 = seqsp_kLmu(ks, 6, &klo);
-    mu_8 = seqsp_kLmu(ks, 8, &klo);  
-    */
+
     mono->pk[i][0] = FFTlog_Pk[i]*pow(bsigma8, 2.)*(mu_0 + 2.*beta*mu_2 + beta*beta*mu_4);
     quad->pk[i][0] = FFTlog_Pk[i]*pow(bsigma8, 2.)*((5./2.)*(-mu_0 + mu_2*(3. - 2.*beta) + mu_4*(-beta*beta + 6.*beta) + 3.*beta*beta*mu_6));
      hex->pk[i][0] = FFTlog_Pk[i]*pow(bsigma8, 2.)*((9./8.)*(35.*beta*beta*mu_8  + 10.*beta*(7. -3.*beta)*mu_6 + (35. - 60.*beta + 3.*beta*beta)*mu_4 + 6.*(beta - 5.)*mu_2 + 3.*mu_0));

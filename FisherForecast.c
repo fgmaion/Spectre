@@ -16,8 +16,6 @@ int Fisher_matrix(double dbsigma8, double dvelDispersion){
   int         nn;
   int nparam = 3;
   int npoint = 4;
-
-  prep_ctype_ChiSq();
   
   double  dtheta; 
   

@@ -11,6 +11,8 @@ const double gamma_GR           =    0.545;
 const double gamma_DGP          =  11./16.;
 
 // z - comoving distance data points for interpolation.
+double                           z_eff;
+
 double                   z_Array[1000];
 double        ComovingDistance_z[1000];
 

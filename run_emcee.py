@@ -57,7 +57,8 @@ def lnprob3D(x):
 
 def lnprob4D(x):
   lp = lnprior4D(x)
-
+  lp = 0.0;
+  
   if not np.isfinite(lp):
     return np.inf
 
@@ -71,24 +72,23 @@ LOZ       = np.float(os.environ['LOZ'])
 HIZ       = np.float(os.environ['HIZ'])
 KMAX      = np.float(os.environ['KMAX'])
 
-mockNum   = 152
+mockNum   = 153
 
 # all Python types except integers, strings and unicode strings have to be wrapped to corresponding ctypes type. 
 likelihood.get_main(D0, FIELD, c_double(LOZ), c_double(HIZ), c_double(KMAX))
+likelihood.get_ydata(1, 1) ## load data
+likelihood.ctypeskvals_matchup()  ## Reset k remapping between FFTlog and mock (to kmax).
 
-## Reset k remapping between FFTlog and mock (to kmax).
-likelihood.prep_ctype_ChiSq();
+result    = -2.*likelihood.calc_ChiSq(c_double(0.5), c_double(0.7), c_double(7.), c_double(0.01))
 
-print "Chi sq. result: %.6lf" % likelihood.calc_ChiSq(c_double(0.5), c_double(1.0), c_double(7.), c_double(0.01))
+print "Chi sq. result: %.6lf" % result
 
 results = []
 
 x03     = np.array([0.5, 0.85, 7.0]) 
 x04     = np.array([0.5, 0.85, 8.0, 0.01])
 
-likelihood.get_ydata(0, 1)
-
-# result = minimize(chiSq_3D, x03, method='Nelder-Mead', tol=1e-6)
+#result = minimize(chiSq_3D, x03, method='Nelder-Mead', tol=1e-6)
 result = minimize(chiSq_4D, x04, method='Nelder-Mead', tol=1e-6)
     
 results.append(result.x)
@@ -96,12 +96,12 @@ results.append(result.x)
 print
 print result.x 
     
-## necessary?
-np.seterr(invalid='warn')
+np.seterr(invalid='warn')  ## necessary?
 
-ndim, nwalkers, nburn, nsteps = 4, 45, 10, 50
+ndim, nwalkers, nburn, nsteps = 4, 400, 200, 200
 
 seed = 1
+
 np.random.seed(seed)
 
 # Choose an initial set of positions for the walkers.
@@ -148,12 +148,13 @@ if pool.is_master():
 
     for i in xrange(0, length, 1):    
         lnpriors.extend([lnprior4D(samples[i,:])])
- 
+
     getdist_format = np.column_stack((np.ones(len(lnprob)), np.array(lnpriors), lnprob, samples))
 
     np.savetxt(outputdir+'/emcee_log/data_W%d_zlim_%.1lf_%.1lf_kmax_%.1lf_chain_%d.txt' % (FIELD, LOZ, HIZ, KMAX, seed), getdist_format, fmt='%.3lf', header="Mean acceptance: " + str(meanacceptance)+",  Autocorrelation times: " + str(autocorrelationtimes))
     
     fig = corner.corner(samples, labels=["$f \sigma_8$", "$b \sigma_8$", "$\sigma_p$", "$\epsilon$"])
-    fig.savefig(outputdir + "/plots/data_W%d_zlim_%.1lf_%.1lf_kmax_%.1lf_triangle.pdf")
+    fig.savefig(outputdir + "/plots/data_W%d_zlim_%.1lf_%.1lf_kmax_%.1lf_triangle.pdf" % (FIELD, LOZ, HIZ, KMAX))
 
 pool.close()
+

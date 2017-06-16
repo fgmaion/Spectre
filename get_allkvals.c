@@ -6,11 +6,17 @@ int get_allkvals(int start){
   
   sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
   // sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
+
+  printf("\n\n%s", firstfilepath);
   
   inputfile = fopen(firstfilepath, "r");
 
-  if(inputfile == NULL)  printf("\n\n%s does not exist. Exiting", filepath);
-    
+  if(inputfile == NULL){
+    printf("\n\n%s does not exist. Exiting", firstfilepath);
+
+    exit(EXIT_FAILURE);
+  }
+  
   line_count(inputfile, &lineNo);
   
   for(i=0; i<lineNo; i++){

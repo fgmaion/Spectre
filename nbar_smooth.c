@@ -178,7 +178,7 @@ int smoothed_nbar_calc(double kernel_width, int reflect){
             
             Nchi[Index]      +=  clip_galweight[j]/sampling[j]; 
             
-	    if((loChi <= rDist[j]) && (rDist[j] <= hiChi))  norm +=  clip_galweight[j]/sampling[j];
+            if((loChi <= rDist[j]) && (rDist[j] <= hiChi))  norm +=  clip_galweight[j]/sampling[j];
 
             if((reflect == 1) &&  ((rDist[j] - minr) < kernel_width))  reflect_down(minr, j, Index);
             if((reflect == 1) &&  ((maxr - rDist[j]) < kernel_width))    reflect_up(maxr, j, Index);
@@ -199,13 +199,12 @@ int smoothed_nbar_calc(double kernel_width, int reflect){
     // Remove reflected galaxies. 
     for(j=0; j<chibin_no; j++){
       if((reflect == 1) && (chibins[j] > maxr) || (chibins[j] < minr)){  
-	nbar[j] = 0.0;
-	
-	Nchi[j] = 0.0;
+        nbar[j] = 0.0;
+        Nchi[j] = 0.0;
       }
     }
 
-    // assuming the surveyed volume is a fair sample -> \sum_g 1/ESR in the volume should be \int <n> d3x. Rescale <n> such that this is the case,                                                                                          
+    // assuming the surveyed volume is a fair sample -> \sum_g 1/ESR in the volume should be \int <n> d3x. Rescale <n> such that this is the case,
     // this imposes the integral constraint. Calculate renormalisation, \int <n> dV = N_W1 + N_W4, ESR corrected.  1% correction. 
     double result = 0.0;
 

@@ -1,4 +1,4 @@
-#define  KBIN_NO 40 // 12
+#define  KBIN_NO 40
 
 #include "/home/mjw/Aux_functions/header.h"
 #include "/home/mjw/Aux_functions/Aux_functions.c"
@@ -25,7 +25,8 @@
 #include "vipersjwindow.c"
 #include "FFTlog_vipers_clipping.c"
 #include "toymodel_pk_xi.c"
-#include "matter_pk.c"
+#include "linear_pk.c"
+#include "nonlinear_pk.c"
 #include "get_pkderivedprops.c"
 #include "get_allkvals.c"
 #include "super_vipers.c"
@@ -47,6 +48,9 @@
 
 int main(int argc, char** argv){  
   thread                    =                           1;
+
+  z_eff                     =        atof(getenv("ZEFF"));
+
   outputdir                 =         getenv("outputdir");
   maskmultipoles_path       =        getenv("mask_Qldir");
    
@@ -55,17 +59,14 @@ int main(int argc, char** argv){
   sprintf(models_path,                                         outputdir);
   
   sprintf(covariance_mocks_path,                               outputdir);
-  // sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
-  
+  // sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3"); // W1_Spectro_V7_2
+   
   d0                        =               atoi(argv[1]);
   fieldFlag                 =               atoi(argv[2]);
   lo_zlim                   =               atof(argv[3]);   // previously 0.6<z<0.9, 0.7<z<1.1
   hi_zlim                   =               atof(argv[4]);
   ChiSq_kmax                =               atof(argv[5]);
 
-  // printf("\n%d \t %d \t %.1lf \t %.1lf \t %.2lf", d0, fieldFlag, lo_zlim, hi_zlim, ChiSq_kmax);
-
-  /*
   // Old priors. 
   min_bsigma8               =      0.05;                  // FOR GRANETT 2D POSTERIOR.
   max_bsigma8               =      1.00;                  // Previously 0.2 < b \sig_8 < 1.6
@@ -75,16 +76,17 @@ int main(int argc, char** argv){
 
   min_velDisperse           =      0.00;                  // CHANGED FROM 0.00 13/02/2017
   max_velDisperse           =      6.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
-  */
-  
-  min_bsigma8               =      0.05;                
-  max_bsigma8               =      3.50;                   
-                                                          
-  min_fsigma8               =      0.05;                  
-  max_fsigma8               =      1.80;
 
-  min_velDisperse           =      0.05;                   
-  max_velDisperse           =     15.00;                     
+  /*                                                                                                                                                   
+  min_bsigma8               =      0.05;                                                                                                                
+  max_bsigma8               =      3.50;                                                                                                               
+                                                                                                                                                        
+  min_fsigma8               =      0.00;                                                                                                                
+  max_fsigma8               =      1.80;                                                                                                               
+
+  min_velDisperse           =      0.00;                                                                                                                
+  max_velDisperse           =     15.00;                                                                                                                
+  */
   
   min_alpha_pad             =    0.9999;
   max_alpha_pad             =    1.0001;
@@ -104,7 +106,7 @@ int main(int argc, char** argv){
   dRes_ap                   =       1.0;
 
   FFTlogRes                 =       768;  // FFTlogRes = 4096;
-  // FFTlogRes              =      4096;
+  //FFTlogRes               =      4096;
   
   logk_min                  =      -2.0;
   logk_max                  =   0.60206;  // k = 4 hMpc^{-1}.
@@ -116,37 +118,36 @@ int main(int argc, char** argv){
   modkMax                   =      1.00;  
 
   smooth_radius             =       2.0;
-   
+
+  // Regression to ~ May 2016 -> Catalog number to 305; change file paths of mocks (covariance and chi sq input) and Qmultipoles. Change init_covariance.
   CatalogNumber             =       153;
 
   
   start_walltime();
 
   printf_branch();
-
+  
   // fftw_init_threads();
 
   // fftw_plan_with_nthreads(omp_get_max_threads()); // Maximum number of threads to be used; use all openmp threads available. 
 
   set_angularlimits(0, fieldFlag);                   // Cut data to mock limits.
   
-  chi_zcalc();              // Cosmology from cosmology_planck2015.h or cosmology_valueaddedmocks.h; Selection parameters.
+  chi_zcalc();              
   
-  inputHODPk();             //  Must match Cosmology in cosmology_planck2015.h, or cosmology_valueaddedmocks.h
-  // inputLinearPk();       //  This is NOT automatically ensured.               
-
-  // camb_call(0, 1.05);    // nonlinear/linear flag, redshift. 
-
-  // get_mocksshotnoise();
+  // nonlinear_pk();             
+  linear_pk();       
   
-  prep_FFTlog_memory();     // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
+  get_mocksshotnoise();
+  
+  prep_FFTlog_memory();       // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
   
   set_FFTlog(FFTlogRes, pow(10., -10.), pow(10., 14.), 1., velDispersion);  // assigns values to mono_config etc. 
   
   prep_VIPERS_maskMultipoles();
   
   prep_VIPERS_jmaskMultipoles();
-  /*
+  
   precompute_vipers_clipping_model(FFTlogRes);  // Computes P_R(k), W_0(r), ..., \tilde W_0(k), ..., and \tilde W_0(k) for the joint field.   
   
   get_allkvals(1);            // all kVals, ignoring ChiSq_kmin and ChiSq_kmax, but including folding. 
@@ -157,46 +158,54 @@ int main(int argc, char** argv){
     
   assign_LikelihoodMemory();  // Assigns memory for xdata, ydata, xtheory, ytheory, ChiSqGrid.
   
-  // get_mocksclippedamplitudes();
+  get_mocksclippedamplitudes();
+
+  set_clippingvars();
+  // set_oldclippingvars();
   
   load_CovarianceMatrix(CatalogNumber, 1);
   
   prewhitenCov();  // Pre-whiten data and covariance.
-
+  
   // scale_Cov(CatalogNumber);
   
   Covariance_eigenVecs(CatalogNumber);
-  */
-  delete_lockfile();
-  /*
-  prep_dlnPR_dlnk();
-
-  // set_clippingvars(1.0);
   
+  delete_lockfile();
+  
+  prep_dlnPR_dlnk();
+    
   if(ChiSq_kmax == 0.2)  calc_models();
   
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
   
   set_models();
-  
+    
   double maxL_fsig8, maxL_sigv, maxL_bsig8;
   
   for(data_mock_flag=0; data_mock_flag<1; data_mock_flag++){
-    if(data_mock_flag == 0)  sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
-    if(data_mock_flag == 1)  sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
-  
+    if(data_mock_flag == 0){
+      sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
+    }
+
+    if(data_mock_flag == 1){
+      sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
+    }
+    
     output = fopen(filepath, "w");
     
     walltime("Walltime at start of chi^2 calc.");
 
     for(int ab=1; ab<CatalogNumber; ab++){
+    // for(int ab=1; ab<2; ab++){
       calc_ChiSqs(ab);
       
       set_minChiSq();
       
       calc_onedposteriors(&maxL_fsig8, &maxL_bsig8, &maxL_sigv);
-      
-      printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
+
+      // maximum likelihood of one-dim posteriors and of entire parameter space. 
+      printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf", maxL_fsig8, maxL_bsig8, maxL_sigv, minX2_fsig8, minX2_bsig8, minX2_sigp);
       
       fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
       
@@ -208,8 +217,10 @@ int main(int argc, char** argv){
   
   default_params();
 
-  model_compute(0, 0, 0, 0, 0);
-  */
+  model_compute(0, 0, 0, 0, 0, 1);
+  
+  // jointfield_cnvldmodel();
+  
   walltime("Wall time at finish");
 
   // MPI_Finalize();

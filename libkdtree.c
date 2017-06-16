@@ -117,46 +117,46 @@ int print_nodeLimits(Node *node){
 }
 
 int findSuitableNodePairs_bruteforcePairCount(double* n, double* wn, double* r, double* mu, Node* node1, Node* node2, int sameTree){
-    if((node1->label >= nodeone_progresscount) && (node2->label >= nodetwo_progresscount)){      
-      printf("\n%d \t %d", node1->label, node2->label);
+  if((node1->label >= nodeone_progresscount) && (node2->label >= nodetwo_progresscount)){      
+    printf("\n%d \t %d", node1->label, node2->label);
       
-      postprocesspairs(n, wn, r, mu, node1, node2);
+    postprocesspairs(n, wn, r, mu, node1, node2);
       
-      nodeone_progresscount = node1->label + (long) floor(tree_labelCount/20.);
-      nodetwo_progresscount = node2->label + (long) floor(tree_labelCount/20.);
-    }
+    nodeone_progresscount = node1->label + (long) floor(tree_labelCount/20.);
+    nodetwo_progresscount = node2->label + (long) floor(tree_labelCount/20.);
+  }
     
-    // Given two nodes, is their maximum displacement smaller than the smallest bin? is their minimum displacement larger than the largest bin -> don't bother counting pairs. 
-    // Otherwise, brute force count between the nodes. 
+  // Given two nodes, is their maximum displacement smaller than the smallest bin? is their minimum displacement larger than the largest bin
+  // Don't bother counting pairs. Otherwise, brute force count between the nodes. 
+  if((log10_minimum_modDisplacementBetweenNodes(node1, node2) > 1.01*maxlog))   return 0;
     
-    if((log10_maximum_modDisplacementBetweenNodes(node1, node2) < 0.99*zerolog))  return 0; 
-    if((log10_minimum_modDisplacementBetweenNodes(node1, node2) > 1.01*maxlog))   return 0;
+  // Only count distinct pairs, given two different children, take node1 >= node2 for instance. 
+  if((sameTree == 1) && (node1->Children == 0) && (node2->Children == 0) && (node1->label < node2->label)) return 0;
+
+  // if((node1->label < nodeone_savedcount) && (node2->label < nodetwo_savedcount))  return 0; // fast forward to saved counts.
+  
+  // Both node 1 and node 2 are leaves, their sub-divisons contain less than Nmin particles. Brute force count pairs between node 1 and node 2.        
+  if((node1->Children == 0) && (node2->Children == 0))  return bruteforceCountpairs_betweenChildren(n, wn, r, mu, node1, node2, sameTree);
     
-    // Only count distinct pairs, given two different children, take node1>=node2 for instance. 
-    if((sameTree == 1) && (node1->Children == 0) && (node2->Children == 0) && (node1->label<node2->label)) return 0;
-    
-    // Both node 1 and node 2 are leaves, their sub-divisons contain less than 200 particles. Brute force count pairs between node 1 and node 2.        
-    if((node1->Children == 0) && (node2->Children == 0))  return bruteforceCountpairs_betweenChildren(n, wn, r, mu, node1, node2, sameTree);
-    
-    else{
-	    if((node1->Children == 0)){
-	      // node 1 is a leaf, node 2 is not. Sub-divide node 2 and reevaluate for its children. 
-	      findSuitableNodePairs_bruteforcePairCount(n, wn, r, mu, node1,  node2->Left,  sameTree);
-	      findSuitableNodePairs_bruteforcePairCount(n, wn, r, mu, node1,  node2->Right, sameTree);
+  else{
+    if((node1->Children == 0)){
+      // node 1 is a leaf, node 2 is not. Sub-divide node 2 and reevaluate for its children. 
+      findSuitableNodePairs_bruteforcePairCount(n, wn, r, mu, node1,  node2->Left,  sameTree);
+      findSuitableNodePairs_bruteforcePairCount(n, wn, r, mu, node1,  node2->Right, sameTree);
 	        
-	      return 0;
-	    } 
+      return 0;
+    } 
 	
-	    else{
-	      // last scenario.. node 2 might still be a leaf, node 1 is not. Sub-divide node 1 and reevaluate for its children. 
-	      findSuitableNodePairs_bruteforcePairCount(n, wn, r, mu, node1->Left,  node2, sameTree);
-	      findSuitableNodePairs_bruteforcePairCount(n, wn, r, mu, node1->Right, node2, sameTree);
+    else{
+      // last scenario.. node 2 might still be a leaf, node 1 is not. Sub-divide node 1 and reevaluate for its children. 
+      findSuitableNodePairs_bruteforcePairCount(n, wn, r, mu, node1->Left,  node2, sameTree);
+      findSuitableNodePairs_bruteforcePairCount(n, wn, r, mu, node1->Right, node2, sameTree);
 	    
-	      return 0;
-	    }
+      return 0;
     }
+  }
     
-    return 0;
+  return 0;
 }
 
 int bruteforceCountpairs_betweenChildren(double* n, double* wn, double* r, double* mu, Node *node1, Node *node2, int sameTree){   
@@ -174,7 +174,7 @@ int bruteforceCountpairs_betweenChildren(double* n, double* wn, double* r, doubl
           
           indi                 = (int) floor(  (log10_r - zerolog)/logbinsz);  // logarithmic binning in r.	      
           indj                 = (int) floor(  (pair_mu - zerolin)/linbinsz);  // linear binning in mu.
-       
+          
           if((indi < nlogbins) && (indj < nlinbins) && (indi >= 0) && (indj >= 0)){                      
             weight             = node1->particle[ii].weight*node2->particle[jj].weight;
 
@@ -205,7 +205,7 @@ int bruteforceCountpairs_betweenChildren(double* n, double* wn, double* r, doubl
           
           indi                = (int) floor(  (log10_r - zerolog)/logbinsz);  // logarithmic binning in r.	    
           indj                = (int) floor(  (pair_mu - zerolin)/linbinsz);  // linear binning in mu.
-       
+          
           if((indi<nlogbins) && (indj<nlinbins) && (indi>=0) && (indj >=0)){                      
             weight             = node1->particle[ii].weight*node2->particle[jj].weight;
 

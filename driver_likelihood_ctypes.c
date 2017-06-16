@@ -1,4 +1,4 @@
-#define  KBIN_NO 12
+#define  KBIN_NO 40
 
 #include "/home/mjw/Aux_functions/header.h"
 #include "/home/mjw/Aux_functions/Aux_functions.c"
@@ -25,7 +25,8 @@
 #include "vipersjwindow.c"
 #include "FFTlog_vipers_clipping.c"
 #include "toymodel_pk_xi.c"
-#include "matter_pk.c"
+#include "linear_pk.c"
+#include "nonlinear_pk.c"
 #include "get_pkderivedprops.c"
 #include "get_allkvals.c"
 #include "super_vipers.c"
@@ -41,20 +42,24 @@
 // #include "FisherForecast.c"
 #include "FisherForecastFAP.c"
 #include "Ruiz.c"
+#include "camb_call.c"
 // #include "combining_clipped_fsig8.c"
 
 
 int get_main(int set_d0, int set_fieldFlag, double set_lo_zlim, double set_hi_zlim, double set_ChiSq_kmax){  
   thread                    =    1;
-  data_mock_flag            =    0;  // analysis of VIPERS data or mock catalogues. 
+  data_mock_flag            =    1;  // analysis of VIPERS data or mock catalogues. 
 
+  z_eff                     =        atof(getenv("ZEFF"));
   outputdir                 =         getenv("outputdir");
   maskmultipoles_path       =        getenv("mask_Qldir");
   
   sprintf(root_dir,                              "/home/mjw/HOD_MockRun");
   sprintf(vipersHOD_dir,         "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); 
-  sprintf(covariance_mocks_path,                               outputdir); 
   sprintf(models_path,                                         outputdir);
+
+  // sprintf(covariance_mocks_path,                               outputdir);
+  sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
   
   d0                        =               set_d0;
   fieldFlag                 =        set_fieldFlag;
@@ -62,17 +67,17 @@ int get_main(int set_d0, int set_fieldFlag, double set_lo_zlim, double set_hi_zl
   hi_zlim                   =          set_hi_zlim;
   ChiSq_kmax                =       set_ChiSq_kmax;
 
-  /*
-  min_bsigma8               =      0.55;                  // FOR GRANETT 2D POSTERIOR.
-  max_bsigma8               =      0.85;                  // Previously 0.2 < b \sig_8 < 1.6
+  
+  min_bsigma8               =      0.05;                  // FOR GRANETT 2D POSTERIOR.
+  max_bsigma8               =      1.00;                  // Previously 0.2 < b \sig_8 < 1.6
                                                           // 0.05 < b s8 < 1.0 (13/02/17)   
   min_fsigma8               =      0.00;                  // Priors on the model params.  
   max_fsigma8               =      0.80;
 
   min_velDisperse           =      0.00;                  // CHANGED FROM 0.00 13/02/2017
   max_velDisperse           =      7.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
-  */
   
+  /*
   min_bsigma8               =      0.05;                
   max_bsigma8               =      3.50;                   
                                                           
@@ -81,7 +86,7 @@ int get_main(int set_d0, int set_fieldFlag, double set_lo_zlim, double set_hi_zl
 
   min_velDisperse           =      0.05;                   
   max_velDisperse           =     15.00;                     
-  
+  */
   min_alpha_pad             =    0.9999;
   max_alpha_pad             =    1.0001;
 
@@ -93,8 +98,8 @@ int get_main(int set_d0, int set_fieldFlag, double set_lo_zlim, double set_hi_zl
 
   paramNumber               =       3.0;  // # of fitted params. -> dof in X^2. 
 
-   Res                      =         2;  // Likelihood resolution [voxel number].
-  dRes                      =       2.0;  // Previously 16: 13/02/17
+   Res                      =         1;  // Likelihood resolution [voxel number].
+  dRes                      =       1.0;  // Previously 16: 13/02/17
 
    Res_ap                   =         1;  // Resoltuion in AP.
   dRes_ap                   =       1.0;
@@ -112,8 +117,9 @@ int get_main(int set_d0, int set_fieldFlag, double set_lo_zlim, double set_hi_zl
   modkMax                   =      1.00;
   
   smooth_radius             =       2.0;
-   
-  CatalogNumber             =       153;
+
+  // Regression to ~ May 2016 -> Catalog number to 305; change file paths of mocks (covariance and chi sq input) and Qmultipoles. Change init_covariance.
+  CatalogNumber             =       305; // 153 
 
   
   start_walltime();
@@ -126,10 +132,12 @@ int get_main(int set_d0, int set_fieldFlag, double set_lo_zlim, double set_hi_zl
 
   set_angularlimits(0, fieldFlag);                   // Cut data to mock limits.
   
-  chi_zcalc();             // Cosmology from cosmology_planck2015.h or cosmology_valueaddedmocks.h// Selection parameters.
+  chi_zcalc();            
   
-  inputHODPk();            //  Must match Cosmology in cosmology_planck2015.h, or cosmology_valueaddedmocks.h
-  // inputLinearPk();      //  This is NOT automatically ensured.               
+  nonlinear_pk();
+  // linear_pk(); 
+  
+  // get_mocksshotnoise();
   
   prep_FFTlog_memory();    // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
   
@@ -147,40 +155,35 @@ int get_main(int set_d0, int set_fieldFlag, double set_lo_zlim, double set_hi_zl
   
   set_chiSq_intervals(); // set e.g. fsig8 interval = (max - min)/interval.
   
-  // default_params();
-  // model_compute(0, 0, 0, 0, 0);
-  
   assign_LikelihoodMemory();  // Assigns memory for xdata, ydata, xtheory, ytheory, ChiSqGrid.
-  
-  get_mocksshotnoise();
   
   // get_mocksclippedamplitudes();  
   
-  load_CovarianceMatrix(CatalogNumber, 1); // LOADING FROM W1_SPECTRO_V7_3.  Number of mocks, starting mock. 
+  load_CovarianceMatrix(CatalogNumber, 1);
   
-  // delete_lockfile();
+  delete_lockfile();
     
   prep_dlnPR_dlnk();
 
-  set_clippingvars(1.0);
+  // set_clippingvars(1.0);
   
   calc_models();
+
+  kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
   
   set_models();
-  
-  kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
     
   prewhitenCov();  // Pre-whiten data and covariance.
 
-  scale_Cov(CatalogNumber);
+  // scale_Cov(CatalogNumber);
   
   Covariance_eigenVecs(CatalogNumber);
 
   delete_lockfile();
   
-  cut_xtheory_bykmax();
+  // default_params();
   
-  double maxL_fsig8, maxL_sigv, maxL_bsig8;
+  // model_compute(0, 0, 0, 0, 0); 
   
   walltime("Wall time at finish");
 

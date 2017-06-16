@@ -131,13 +131,28 @@ int print_nbarshot(int start){
     gal_shot  =  bare_gal_shot/alpha;  // update with alpha factors.
     rand_shot = bare_rand_shot*alpha;
   
-    if(data_mock_flag == 0) sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/nbarshotnoise_mocks_%d_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, start, lo_zlim, hi_zlim);
-    if(data_mock_flag == 1) sprintf(filepath, "%s/data_v1.7/pk_derivedprops/d0_%d/W%d/nbarshotnoise_data_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
+    if(data_mock_flag == 0){
+      sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/nbarshotnoise_mocks_%d_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, start, lo_zlim, hi_zlim);
 
-    output = fopen(filepath, "a");
+      output = fopen(filepath, "a");
 
-    fprintf(output, "%d \t %le \t %le \n", loopCount, gal_shot, rand_shot);
+      fprintf(output, "%d \t %le \t %le \n", loopCount, gal_shot, rand_shot);
+    }
       
+    else if(data_mock_flag == 1){
+      sprintf(filepath, "%s/data_v1.7/pk_derivedprops/d0_%d/W%d/nbarshotnoise_data_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
+
+      output = fopen(filepath, "w");
+    
+      fprintf(output, "%le \t %le \n", gal_shot, rand_shot);
+    }
+    
+    else{
+      printf("\n\nNo dice.");
+
+      exit(EXIT_FAILURE);
+    }
+    
     fclose(output);
   }
 

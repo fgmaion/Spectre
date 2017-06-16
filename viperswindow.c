@@ -47,7 +47,7 @@ double splint_VIPERS_maskQuad(double r){
 
 
 double splint_VIPERS_maskHex(double r){
-  if(r<0.5)   return 0.;
+  if(r<0.2)   return 0.;
   if(r>900.0) return 0.;
         
   if(r<hiRes_hihiRes_join){
@@ -71,7 +71,7 @@ double splint_VIPERS_maskHex(double r){
 
 
 double splint_VIPERS_maskOct(double r){
-  if(r<1.0)   return 0.;
+  if(r<  0.5) return 0.;
   if(r>900.0) return 0.;
     
   if(r<hiRes_hihiRes_join){
@@ -95,7 +95,7 @@ double splint_VIPERS_maskOct(double r){
 
 
 double splint_VIPERS_maskDec(double r){
-  if(r<  1.0) return 0.;
+  if(r<  0.5) return 0.;
   if(r>900.0) return 0.;
     
   if(r<hiRes_hihiRes_join){
@@ -189,7 +189,7 @@ int prep_VIPERS_maskMultipoles(){
   char   hiRes_filepath[200];
   char hihiRes_filepath[200];
 
-  sprintf(filepath, "%s/Qmultipoles/Ql_W%d_Nag_v7_specweight_nbar_Pfkp_4000_%.1lf_%.1lf_thread_1", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+  sprintf(filepath, "%s/Qmultipoles/Ql_W%d_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
   // sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
 
   printf("\n\nQ-multipoles: %s", filepath);
@@ -200,7 +200,8 @@ int prep_VIPERS_maskMultipoles(){
 
   //-- Super high resolution counts for r ~ 1. --// 
   inputfile = fopen(hihiRes_filepath, "r");
-  
+
+  // line_count(inputfile, &VIPERS_mask_lineNo_hihi);
   linecount_header(inputfile, 1, &VIPERS_mask_lineNo_hihi);
   
   VIPERS_maskr_hihi        = realloc(VIPERS_maskr_hihi, VIPERS_mask_lineNo_hihi*sizeof(double));
@@ -228,9 +229,11 @@ int prep_VIPERS_maskMultipoles(){
   scaleandnormalise(VIPERS_mask_lineNo_hihi, VIPERS_maskr_hihi, VIPERS_maskMono_hihi, VIPERS_maskQuad_hihi, VIPERS_maskHex_hihi, VIPERS_maskOct_hihi, VIPERS_maskDec_hihi, &mask_monopolenorm_hihi, VIPERS_maskMono2D_hihi, VIPERS_maskQuad2D_hihi, VIPERS_maskHex2D_hihi, VIPERS_maskOct2D_hihi, VIPERS_maskDec2D_hihi);
  
   hiRes_hihiRes_join = VIPERS_maskr_hihi[VIPERS_mask_lineNo_hihi - 1];  // Set the r at which the really high resolution will join the high resolution counts.  
+
   //-- High resolution counts --//
   inputfile = fopen(hiRes_filepath, "r");
 
+  // line_count(inputfile, &VIPERS_mask_lineNo_hi);
   linecount_header(inputfile, 1, &VIPERS_mask_lineNo_hi);
     
   VIPERS_maskr_hi        = realloc(VIPERS_maskr_hi,    VIPERS_mask_lineNo_hi*sizeof(double));
@@ -252,7 +255,7 @@ int prep_VIPERS_maskMultipoles(){
   for(j=0; j<VIPERS_mask_lineNo_hi; j++)  fscanf(inputfile, "%le \t %le \t %le \t %le \t %le \t %le \n", &VIPERS_maskr_hi[j], &VIPERS_maskMono_hi[j], &VIPERS_maskQuad_hi[j], &VIPERS_maskHex_hi[j], &VIPERS_maskOct_hi[j], &VIPERS_maskDec_hi[j]);
     
   fclose(inputfile);
-
+  
   for(j=0; j<VIPERS_mask_lineNo_hi; j++){
     VIPERS_maskMono_hi[j] /= pow(VIPERS_maskr_hi[j], 3.);
     VIPERS_maskQuad_hi[j] /= pow(VIPERS_maskr_hi[j], 3.);
@@ -282,6 +285,7 @@ int prep_VIPERS_maskMultipoles(){
   //-- Low resolution counts --//
   inputfile = fopen(loRes_filepath, "r");
 
+  // line_count(inputfile, &VIPERS_mask_lineNo_lo);
   linecount_header(inputfile, 1, &VIPERS_mask_lineNo_lo);
     
   VIPERS_maskr_lo        = realloc(VIPERS_maskr_lo, VIPERS_mask_lineNo_lo*sizeof(double));
@@ -338,6 +342,8 @@ int prep_VIPERS_maskMultipoles(){
 
 int lowRes_amplitudeCalc(int Nhi, int Nlo, double rmin, double rmax, double rhi[], double rlo[], double Dhi[], double Dlo[], double* norm){
   // Least squares fit for amplitude factor of low resolution, between lo and high res in the range rmin to rmax.
+  // e.g. lowRes_amplitudeCalc(VIPERS_mask_lineNo_hihi, VIPERS_mask_lineNo_hi, 1., 1.5, VIPERS_maskr_hihi, VIPERS_maskr_hi, VIPERS_maskMono_hihi, VIPERS_maskMono_hi, &mask_monopolenorm_hi);
+  
   double sum_DiFi       = 0.0;
   double sum_FiFi       = 0.0;
         

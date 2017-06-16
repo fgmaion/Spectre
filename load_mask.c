@@ -9,7 +9,9 @@ int rotate_ra(void){
 
 int load_rands_radec(double sampling){
   rand_number = accepted_rand = (int) ceil(1382582*sampling);  // Hard coded catalogue max row number.
-    
+
+  assign_rand_radecmemory();
+  
   assign_randmemory();
     
   // load_ascii_randomCats(sampling);    

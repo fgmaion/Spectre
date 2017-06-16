@@ -1,6 +1,8 @@
 double splint_VIPERS_jmaskMono(double r){
   if(r<0.15)   return 1.;
-  if(r>4000.)  return 0.;
+  if(r>900.)   return 0.;
+
+  //if(r>4000.)  return 0.;
 
   if(r<jhiRes_hihiRes_join){
     double Interim;
@@ -32,7 +34,9 @@ double splint_VIPERS_jmaskMono(double r){
 
 double splint_VIPERS_jmaskQuad(double r){
   if(r<0.2)    return 0.;
-  if(r>4000.0) return 0.;
+  if(r>900.0)  return 0.;
+
+  //if(r>4000.0) return 0.;
 
   if(r<jhiRes_hihiRes_join){
     double Interim;
@@ -60,7 +64,7 @@ double splint_VIPERS_jmaskQuad(double r){
 }
 
 double splint_VIPERS_jmaskHex(double r){
-  if(r<0.5)    return 0.;
+  if(r<0.2)    return 0.;
   if(r>4000.0) return 0.;
 
   if(r<jhiRes_hihiRes_join){
@@ -83,6 +87,64 @@ double splint_VIPERS_jmaskHex(double r){
     double Interim;
 
     splint(VIPERS_jmaskr_lo, VIPERS_jmaskHex_lo, VIPERS_jmaskHex2D_lo, VIPERS_jmask_lineNo_lo, r, &Interim);
+
+    return Interim;
+  }
+}
+
+double splint_VIPERS_jmaskOct(double r){
+  if(r<0.2)    return 0.;
+  if(r>4000.0) return 0.;
+
+  if(r<jhiRes_hihiRes_join){
+    double Interim;
+
+    splint(VIPERS_jmaskr_hihi, VIPERS_jmaskOct_hihi, VIPERS_jmaskOct2D_hihi, VIPERS_jmask_lineNo_hihi, r, &Interim);
+
+    return Interim;
+  }
+
+  else if(r<jloRes_highRes_join){
+    double Interim;
+
+    splint(VIPERS_jmaskr_hi, VIPERS_jmaskOct_hi, VIPERS_jmaskOct2D_hi, VIPERS_jmask_lineNo_hi, r, &Interim);
+
+    return Interim;
+  }
+
+  else{
+    double Interim;
+
+    splint(VIPERS_jmaskr_lo, VIPERS_jmaskOct_lo, VIPERS_jmaskOct2D_lo, VIPERS_jmask_lineNo_lo, r, &Interim);
+
+    return Interim;
+  }
+}
+
+double splint_VIPERS_jmaskDec(double r){
+  if(r<0.2)    return 0.;
+  if(r>4000.0) return 0.;
+
+  if(r<jhiRes_hihiRes_join){
+    double Interim;
+
+    splint(VIPERS_jmaskr_hihi, VIPERS_jmaskDec_hihi, VIPERS_jmaskDec2D_hihi, VIPERS_jmask_lineNo_hihi, r, &Interim);
+
+    return Interim;
+  }
+
+  else if(r<jloRes_highRes_join){
+    double Interim;
+
+    splint(VIPERS_jmaskr_hi, VIPERS_jmaskDec_hi, VIPERS_jmaskDec2D_hi, VIPERS_jmask_lineNo_hi, r, &Interim);
+
+    return Interim;
+  }
+
+  else{
+    double Interim;
+
+    splint(VIPERS_jmaskr_lo, VIPERS_jmaskDec_lo, VIPERS_jmaskDec2D_lo, VIPERS_jmask_lineNo_lo, r, &Interim);
 
     return Interim;
   }
@@ -117,7 +179,7 @@ int print_jwindowCorrfn(){
   for(j=0; j<nbins; j++){
     r = pow(10., zerolog + j*logbinsz);
     
-    fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \n", r,  splint_VIPERS_jmaskMono(r), splint_VIPERS_jmaskQuad(r), splint_VIPERS_jmaskHex(r));
+    fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", r,  splint_VIPERS_jmaskMono(r), splint_VIPERS_jmaskQuad(r), splint_VIPERS_jmaskHex(r), splint_VIPERS_jmaskOct(r), splint_VIPERS_jmaskDec(r));
   }
 
   fclose(output);
@@ -132,7 +194,7 @@ int prep_VIPERS_jmaskMultipoles(){
   char   hiRes_filepath[200];
   char hihiRes_filepath[200];
   
-  sprintf(filepath, "%s/Qmultipoles/Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_4000_%.1lf_%.1lf_thread_1", maskmultipoles_path, lo_zlim, hi_zlim);
+  sprintf(filepath, "%s/Qmultipoles/Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1", maskmultipoles_path, lo_zlim, hi_zlim);
   // sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W1W4_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, lo_zlim, hi_zlim);
 
   printf("\n\nJoint Q-multipoles: %s", filepath);
@@ -144,7 +206,8 @@ int prep_VIPERS_jmaskMultipoles(){
   // Super high resolution: very large number density of pairs counting for r ~ 1. 
   inputfile = fopen(hihiRes_filepath, "r");
 
-  linecount_header(inputfile, 1, &VIPERS_jmask_lineNo_hihi);
+  line_count(inputfile, &VIPERS_jmask_lineNo_hihi);
+  // linecount_header(inputfile, 1, &VIPERS_jmask_lineNo_hihi);
   
   // Memory allocation
   VIPERS_jmaskr_hihi        = realloc( VIPERS_jmaskr_hihi,      VIPERS_jmask_lineNo_hihi*sizeof(double));
@@ -204,7 +267,8 @@ int prep_VIPERS_jmaskMultipoles(){
     
   // High resolution
   inputfile = fopen(hiRes_filepath, "r");
-  
+
+  // line_count(inputfile, &VIPERS_jmask_lineNo_hi);
   linecount_header(inputfile, 1, &VIPERS_jmask_lineNo_hi);
     
   // Memory allocation
@@ -264,7 +328,8 @@ int prep_VIPERS_jmaskMultipoles(){
                                                 
   // Low resolution on larger scales.
   inputfile = fopen(loRes_filepath, "r");
-  
+
+  // line_count(inputfile, &VIPERS_jmask_lineNo_lo);
   linecount_header(inputfile, 1, &VIPERS_jmask_lineNo_lo);
     
   // Memory allocation

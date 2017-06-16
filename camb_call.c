@@ -11,7 +11,7 @@ int check_environmentvars(void){
 }
 
 int camb_call(int dononlinear, double redshift){
-  int         status = 0;
+  int         status =  0;
   double camb_sigma8 = 0.;
   
   char   sys_command[200];
@@ -35,7 +35,7 @@ int camb_call(int dononlinear, double redshift){
   sprintf(set_Hub, "HUBBLE=%.2lf", 100.*h);
    putenv(set_Hub);
 
-  sprintf(set_redshift, "REDSHIFT=%.2lf", redshift);
+  sprintf(set_redshift, "REDSHIFT=%.3lf", redshift);
    putenv(set_redshift);
       
   // Issue CAMB call; uses sed to set var in params.ini and runs. 
@@ -46,7 +46,7 @@ int camb_call(int dononlinear, double redshift){
   if(status==1){
     printf("\n\nCamb call failed.");
 
-    return 1;
+    exit(EXIT_FAILURE);
   }
           
   return 0;

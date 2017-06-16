@@ -223,7 +223,7 @@ int read_maskfits(char filepath[], double sampling){
 
     rand_number = (int) floor(nrows*sampling);
         
-    rand_ra     = calloc(rand_number, sizeof(*rand_ra));
+    rand_ra     = calloc(rand_number, sizeof(*rand_ra)); // sizeof(double).
     rand_dec    = calloc(rand_number, sizeof(*rand_dec));
     
     fits_read_col(fptr, TDOUBLE, 1, 1, 1, rand_number, &doublenull, rand_ra,  &anynul, &status);

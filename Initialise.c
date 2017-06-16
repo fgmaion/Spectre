@@ -17,7 +17,7 @@ int init_padding(){
   n0 = n1 = n2 = fft_size;
     
   AxisLimsArray[0][0]       =        0.0;      // Embedding volume for P(k) measurement. Stefano basis.
-  AxisLimsArray[1][0]       =      800.0;
+  AxisLimsArray[1][0]       =      800.0;      // required for 0.7 < z < 1.2; previously 800. 
 
   AxisLimsArray[0][1]       =        0.0;
   AxisLimsArray[1][1]       =      800.0;      // h^-1 Mpc
@@ -56,12 +56,12 @@ int init_dist_z(){
 double check_radialextent(double lochi, double hichi, double lopad){
   double radial_extent = hichi - lochi;
 
-  printf("\n\nRadial extent: %.3lf [h^-1 Mpc]", radial_extent);
-
+  printf("\n\nRadial extent: %.3lf [h^-1 Mpc] \n", radial_extent);
+  
   if(radial_extent > (lopad + AxisLimsArray[1][0] - AxisLimsArray[0][0])){
-    return 1;
+    exit(EXIT_FAILURE);
   }
-
+  
   return 0;
 }
 

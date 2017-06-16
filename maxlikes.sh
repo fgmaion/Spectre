@@ -7,10 +7,11 @@
 
 test(){
   ## Interactive run with: qsub -I -o $outputdir/maxlikes/maxlikes_stdout.pbs -e $outputdir/maxlikes/maxlikes_stderr.pbs maxlikes.sh
-  export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_7
-  export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_2
-  export LOZ=0.6
-  export HIZ=0.9
+  export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9
+  export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9
+  export LOZ=0.5
+  export HIZ=0.7
+  export ZEFF=0.607
   export FIELDFLAG=1
   export d0=1000
   export KMAX=0.8

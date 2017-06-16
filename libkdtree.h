@@ -59,6 +59,9 @@ int      indj;
 long     nodeone_progresscount=0;
 long     nodetwo_progresscount=0;
 
+long     nodeone_savedcount=0;
+long     nodetwo_savedcount=0;
+
 int      bruteforceCount = 0;
 
 double   pairCount = 0.0;

@@ -56,8 +56,8 @@ int printf_kMask_multipoles(){
   pk_mu(mono_config);
   pk_mu(quad_config);
 
-  sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_4000_%.1lf_%.1lf_thread_1.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);  
-//sprintf(filepath,"%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+  sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_4000_%.1lf_%.1lf_thread_1.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+  // sprintf(filepath,"%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
 
   output = fopen(filepath, "w");
 
@@ -76,7 +76,7 @@ int prepVIPERS_kSpaceMultipole(){
   printf_kMask_multipoles();
 
   sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_4000_%.1lf_%.1lf_thread_1.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
-//sprintf(filepath, "%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim,hi_zlim);
+  // sprintf(filepath, "%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim,hi_zlim);
 
   inputfile = fopen(filepath, "r");
 

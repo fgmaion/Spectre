@@ -14,7 +14,6 @@ int PkCalc(regress* inst, int mock_start){
   return 0;
 }
 
-
 int prep_sinc_factors(double fund_k, double kNy){
   int kk;
   
@@ -32,7 +31,6 @@ int prep_sinc_factors(double fund_k, double kNy){
   return 0;
 }
 
-
 int prep_r2c_modes(regress* inst, double scaling){  
   int i, jj, kk, dummy;
   
@@ -40,16 +38,16 @@ int prep_r2c_modes(regress* inst, double scaling){
 
   walltime("R2C start:");
 
+  double       mean_k[KBIN_NO];
   double       Sum_Li[KBIN_NO];
   double      Sum_Li2[KBIN_NO];
-  double       mean_k[KBIN_NO];
   
   int    modes_perbin[KBIN_NO];
 
   for(j=0; j<KBIN_NO; j++){
+    mean_k[j]       = 0.0;
     Sum_Li[j]       = 0.0;
     Sum_Li2[j]      = 0.0;
-    mean_k[j]       = 0.0;
     modes_perbin[j] =   0;
   }
   
@@ -82,7 +80,7 @@ int prep_r2c_modes(regress* inst, double scaling){
         inst->kM2[Index]                      *= sinc_factors[j];
         inst->kM2[Index]                      *= sinc_factors[i];
         
-        inst->kM2[Index]                       = pow(inst->kM2[Index], 1.0);  // Correct mass assignment of randoms; cic = 2, ngp = 1.
+        inst->kM2[Index]                       = pow(inst->kM2[Index], 2.0);  // Correct mass assignment of randoms; cic = 2, ngp = 1.
 
         // printf("\n%.6lf", inst->kM2[Index]);
         
