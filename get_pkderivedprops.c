@@ -24,9 +24,10 @@ int get_mocksshotnoise(){
   fscanf(inputfile, "%*[^\n]\n", NULL); // skip one line (hashed comment)
    
   for(j=0; j<shot_ninstance; j++){
-    fscanf(inputfile, "%*d    %lf    %*lf\n", &shotnoise_instances[j]);
-
-    printf("\n%d \t %lf", j, shotnoise_instances[j]);
+    fscanf(inputfile, "%*d    %*lf    %lf\n", &shotnoise_instances[j]); // Without clipping, <n> estimate. 
+    // fscanf(inputfile, "%*d    %lf    %*lf\n", &shotnoise_instances[j]); // With clipping, high-k estimate.
+    
+    // printf("\n%d \t %lf", j, shotnoise_instances[j]);
     
     mean_shot += shotnoise_instances[j];
   }
@@ -82,16 +83,25 @@ int get_mocksclippedamplitudes(){
   return 0;
 }
 
-int get_datashotnoise(){
+int get_datashotnoise(){  
   sprintf(filepath, "%s/data_v1.7/pk_derivedprops/d0_%d/W%d/shotnoise_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
-
+  
   inputfile = fopen(filepath, "r");
 
-  fscanf(inputfile, "%.6lf \t %*.6lf \n", &mean_shot);
+  if(inputfile == NULL){
+    printf("\n\nError retrieving data shot noise.");
 
+    exit(EXIT_FAILURE);
+  }
+
+  fscanf(inputfile, "%*[^\n]\n", NULL); // skip one line (hashed comment)
+  
+  fscanf(inputfile, "%*lf \t %lf \n", &mean_shot);  // Without clipping, <n> estimate.
+  // fscanf(inputfile, "%lf \t %*lf \n", &mean_shot);  // With clipping, high-k estimate.
+  
   fclose(inputfile);
 
-  printf("\n\nMean shot noise: %.4lf", mean_shot);
+  printf("\n\nData mean shot noise (%s): %.4lf", filepath, mean_shot);
   
   return 0;
 }
@@ -112,10 +122,10 @@ int get_dataclippedamplitude(){
 
 int set_oldclippingvars(){
   if(data_mock_flag == 0){ // mocks
-      if(d0      == 1000.)  mean_suppression    =  1.00;
-      else if(d0 ==   10.)  mean_suppression    =  1.30;
-      else if(d0 ==    6.)  mean_suppression    =  1.85;
-      else                  mean_suppression    =  3.00;
+    if(d0      == 1000.)  mean_suppression    =  1.00;
+    else if(d0 ==   10.)  mean_suppression    =  1.30;
+    else if(d0 ==    6.)  mean_suppression    =  1.85;
+    else                  mean_suppression    =  3.00;
   }
 
   if(data_mock_flag == 1){ // data
@@ -141,7 +151,7 @@ int set_oldclippingvars(){
   return 0;
 }
 
-int set_oldshotnoise(){
+int set_oldshotnoise(){ // Clipping. 
   if(data_mock_flag == 0){ // mocks
     if(fieldFlag == 1){
       if(d0      == 1000.)  for(j=0; j<mono_order; j++) xdata[j] -= 277.16;   // Correct monopole.

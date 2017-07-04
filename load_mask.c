@@ -6,7 +6,6 @@ int rotate_ra(void){
   return 0;
 }
   
-
 int load_rands_radec(double sampling){
   rand_number = accepted_rand = (int) ceil(1382582*sampling);  // Hard coded catalogue max row number.
 
@@ -34,13 +33,11 @@ int load_rands_radec(double sampling){
   return 0;
 }
 
-
 int set_rand_rng(void){
   for(j=0; j<rand_number; j++)  rand_rng[j] = gsl_rng_uniform(gsl_ran_r);
 
   return 0;
 }
-
 
 int set_cnst_nbar(void){
   // Reassign randoms to have constant \bar n(z); this will (much) better sample high z tail.
@@ -50,7 +47,6 @@ int set_cnst_nbar(void){
   
   return 0;
 }
-
 
 int rand_newchi_newbasis(void){
   // With nbar specified according to interp_nz(chi), assign chi for randoms such that they satisfy this bar.
@@ -104,7 +100,6 @@ int rand_newchi_newbasis(void){
   return 0;
 }
 
-
 int assign_randbox(){
   for(j=0; j<rand_number; j++){
     xlabel     = (int)  floor((rand_x[j] - min_x)/dx);
@@ -117,13 +112,11 @@ int assign_randbox(){
   return 0;
 }
 
-
 int lowerSampling_randomisedCatalogue(double sampling){
   rand_number = (int) ceil(rand_number*sampling);
 
   return 0;
 }
-
 
 int make_fastread_randomCats(void){
   //  Output ra and dec only, in binary. assumes loaded already. 
@@ -141,7 +134,6 @@ int make_fastread_randomCats(void){
   return 0;
 }
 
-
 int load_fastread_randomCats(int rand_number){  
   sprintf(filepath, "%s/W1_Spectro_V7_4/randoms/randoms_W%d_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag);
 
@@ -155,11 +147,9 @@ int load_fastread_randomCats(int rand_number){
   return 0;
 }
 
-
 double cmpfunc(const void* a, const void* b){
   return ( *(double*) a - *(double*) b);
 }
-
 
 int cut_rand_bydec(){
   // Sorting only needs to be done once, ever.
@@ -184,7 +174,6 @@ int cut_rand_bydec(){
   return 0;
 }
 
-
 int load_ascii_randomCats(double sampling){
   sprintf(filepath, "%s/W1_Spectro_V7_2/randoms/randoms_W%d_xyz_%.1lf_%.1lf_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag, 0.6, 0.9);  // redshifts reassigned below.                 
                                                                                                                                                                                             
@@ -203,7 +192,6 @@ int load_ascii_randomCats(double sampling){
   return 0;
 }
 
-
 int del_lockfile(){
   // Delete lockfile if necessary, e.g. for AP MCMC.                                                                                                        
   char*       lockfile_path;                                                                                                                               
@@ -221,50 +209,3 @@ int del_lockfile(){
 
   return 0;
 }
-
-/*
-int load_maskedRSDpaper_mask(double sampling){
-    sprintf(filepath, "%s/Data/maskedRSD_draftwork/randoms_W1_Nagoya_xyz_0.7_0.8_gridded.cat", root_dir);
-
-    inputfile   = fopen(filepath, "r");
-
-    ch          = 0;
-    rand_number = 0;
-
-    do{
-        ch = fgetc(inputfile);
-        
-        if(ch == '\n')
-            rand_number += 1;
-    } while(ch != EOF);
-
-    printf("\n\n%d randoms number", rand_number);
-
-    rewind(inputfile);
-
-    lowerSampling_randomisedCatalogue(sampling);
-
-    assign_randmemory();
-
-    for(j=0; j<rand_number; j++)   fscanf(inputfile, "%le \t %le \t %le \n", &rand_x[j], &rand_y[j], &rand_z[j]);
-    
-    fclose(inputfile);
-    
-    printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));
-    printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));
-    printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));
-    
-    for(j=0; j<n0*n1*n2; j++)  surveyMask[j] = 0.0;
-    
-    for(j=0; j<rand_number; j++){
-        boxlabel = boxCoordinates(rand_x, rand_y, rand_z, j);
-    
-        surveyMask[boxlabel] = 1.;
-    }
-        
-    for(j=0; j<rand_number; j++)  rand_weight[j] = 1.;
-
-    sprintf(filepath, "");
-
-    return 0;
-}*/

@@ -206,14 +206,14 @@ int precompute_vipers_clipping_model(int FFTlogRes){
   }
 
   for(i=0; i<mono_config->N;   i++){
-    if((mono_config->krvals[i][0]) >= pow(10., -3.)){
+    if((mono_config->krvals[i][0]) >= 0.005){
       cnvldpk_zeropoint_index = i; // index where k>0.001; assume this is pk(0).
 
       break;
     }
   }
 
-  xi_mu(shot_config); // set shot noise xi. 
+  // xi_mu(shot_config); // set shot noise xi. 
   
   return 0;
 }
@@ -297,15 +297,33 @@ int clip_p0p2(FFTLog_config* clip_p0, FFTLog_config* clip_p2, FFTLog_config* mon
 }
 
 
-int cnvldmonoCorr_joint(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad, FFTLog_config* hex, FFTLog_config* shot){
-  // Convolved monopole calculation to 2nd order. updated via bailey.c. Shot noise adds to large scale power. 
-  for(i=0; i<mono->N; i++){
-    cnvld->xi[i][0]   =         (mono->xi[i][0] + shot->xi[i][0])*FFTlog_W0_joint[i]; // calculation to 2nd order; updated via bailey.c
+int cnvldmonoCorr_joint(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad, FFTLog_config* hex, FFTLog_config* shot, int joint){
+  // Convolved monopole calculation to 2nd order. updated via bailey.c. Shot noise adds to large scale power.
+  if(joint == 0){
+    for(i=0; i<mono->N; i++){
+      cnvld->xi[i][0]    =           mono->xi[i][0]*FFTlog_W0[i];
 
-    cnvld->xi[i][0]  +=  (1./5.)*quad->xi[i][0]*FFTlog_W2_joint[i];
-    cnvld->xi[i][0]  +=   (1./9.)*hex->xi[i][0]*FFTlog_W4_joint[i];
+      cnvld->xi[i][0]   +=   (1./5.)*quad->xi[i][0]*FFTlog_W2[i];
+      cnvld->xi[i][0]   +=   (1./9.)*hex->xi[i][0]*FFTlog_W4[i];
+    }
   }
 
+  else if(joint == 1){
+    for(i=0; i<mono->N; i++){
+      cnvld->xi[i][0]    =           mono->xi[i][0]*FFTlog_W0_joint[i];
+      // cnvld->xi[i][0] =          (mono->xi[i][0] + shot->xi[i][0])*FFTlog_W0_joint[i]; // calculation to 2nd order; updated via bailey.c
+      
+      cnvld->xi[i][0]   +=   (1./5.)*quad->xi[i][0]*FFTlog_W2_joint[i];
+      cnvld->xi[i][0]   +=   (1./9.)*hex->xi[i][0]*FFTlog_W4_joint[i];
+    }
+  }
+
+  else{
+    printf("\n\nAnother choice please.");
+
+    exit(EXIT_FAILURE);
+  }
+  
   return 0;
 }
 

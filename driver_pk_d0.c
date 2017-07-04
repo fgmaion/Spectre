@@ -78,7 +78,7 @@ int main(int argc, char **argv){
   logk_min                  =      -2.0;
   logk_max                  =   0.60206;                    // k = 4 hMpc^{-1}.
   
-  CatalogNumber             =       306;                    // Total number of (independent) HOD mocks.
+  CatalogNumber             =       153;                    // Total number of (independent) HOD mocks.
 
   
   
@@ -126,7 +126,7 @@ int main(int argc, char **argv){
   
   walltime("All prep. done");
   
-  for(data_mock_flag = 0; data_mock_flag < 2; data_mock_flag++){ // analysis of VIPERS data and mock catalogues.
+  for(data_mock_flag = 1; data_mock_flag < 2; data_mock_flag++){ // analysis of VIPERS data and mock catalogues.
     trash_nbarshot_file(atoi(argv[4])); // internal loop over d0. 
     
     for(loopCount=atoi(argv[4]); loopCount <= mock_end; loopCount++){            
@@ -158,7 +158,7 @@ int main(int argc, char **argv){
     
       prep_inverseCumulative_nbar();
       
-      calc_clipping_weights(); 
+      // calc_clipping_weights(); 
     
       walltime("Clipping weights done.");
     
@@ -174,7 +174,7 @@ int main(int argc, char **argv){
     
       printf("\n\n");
     
-      for(int m=1; m<5; m++){
+      for(int m=4; m<5; m++){
         d0 = d0s[m];
       
         set_clipping_weights(); // unity weights for d0=1000, else load. 

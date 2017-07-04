@@ -122,8 +122,8 @@ int findSuitableNodePairs_bruteforcePairCount(double* n, double* wn, double* r, 
       
     postprocesspairs(n, wn, r, mu, node1, node2);
       
-    nodeone_progresscount = node1->label + (long) floor(tree_labelCount/20.);
-    nodetwo_progresscount = node2->label + (long) floor(tree_labelCount/20.);
+    nodeone_progresscount = node1->label + (long) floor(tree_labelCount/1000.);
+    nodetwo_progresscount = node2->label + (long) floor(tree_labelCount/1000.);
   }
     
   // Given two nodes, is their maximum displacement smaller than the smallest bin? is their minimum displacement larger than the largest bin
@@ -169,7 +169,7 @@ int bruteforceCountpairs_betweenChildren(double* n, double* wn, double* r, doubl
       for(jj=ii+1; jj<node2->N; jj++){
         log10_r                = log10_particleSeparation(node1->particle[ii], node2->particle[jj]); 
                     
-        if(log10_r > zerolog){
+        if((log10_r > zerolog) && (log10_r < maxlog)){
           pair_mu              = pair_zmu(node1->particle[ii], node2->particle[jj], log10_r);
           
           indi                 = (int) floor(  (log10_r - zerolog)/logbinsz);  // logarithmic binning in r.	      
@@ -183,7 +183,7 @@ int bruteforceCountpairs_betweenChildren(double* n, double* wn, double* r, doubl
              n[Index]         +=                      1.0;
             wn[Index]         +=                   weight; 
              r[Index]         +=           log10_r*weight;                     // l=2, (2l+1) L_2 -> C2[indi][indj] +=(3.*pair_mu2 - 1.);
-            mu[Index]         +=           pair_mu*weight;                     // l=4, (2l+1) L_4 -> C4[indi][indj] += (35.*pair_mu2*pair_mu2 - 30.*pair_mu2 + 3.);                  
+            mu[Index]         +=           pair_mu*weight;                     // l=4, (2l+1) L_4 -> C4[indi][indj] += (35.*pair_mu2*pair_mu2 - 30.*pair_mu2 + 3.);
           }
         }
                 
@@ -200,7 +200,7 @@ int bruteforceCountpairs_betweenChildren(double* n, double* wn, double* r, doubl
       for(jj=0; jj<node2->N; jj++){
         log10_r               = log10_particleSeparation(node1->particle[ii], node2->particle[jj]); 
                         
-        if(log10_r > zerolog){
+        if((log10_r > zerolog) && (log10_r < maxlog)){
           pair_mu             = pair_zmu(node1->particle[ii],  node2->particle[jj], log10_r);
           
           indi                = (int) floor(  (log10_r - zerolog)/logbinsz);  // logarithmic binning in r.	    

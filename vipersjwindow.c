@@ -262,9 +262,10 @@ int prep_VIPERS_jmaskMultipoles(){
   spline(VIPERS_jmaskr_hihi, VIPERS_jmaskOct_hihi,  VIPERS_jmask_lineNo_hihi, 1.0e31, 1.0e31, VIPERS_jmaskOct2D_hihi);
   spline(VIPERS_jmaskr_hihi, VIPERS_jmaskDec_hihi,  VIPERS_jmask_lineNo_hihi, 1.0e31, 1.0e31, VIPERS_jmaskDec2D_hihi);
   
-  // Set the r value at which the super high resolution points will join the high resolution counts.  
-  jhiRes_hihiRes_join = VIPERS_jmaskr_hihi[VIPERS_jmask_lineNo_hihi - 1];
-    
+  // Outdated.  Set the r value at which the super high resolution points will join the high resolution counts.  
+  // jhiRes_hihiRes_join = VIPERS_jmaskr_hihi[VIPERS_jmask_lineNo_hihi - 1];
+  jhiRes_hihiRes_join = 1.8;
+  
   // High resolution
   inputfile = fopen(hiRes_filepath, "r");
 
@@ -321,9 +322,10 @@ int prep_VIPERS_jmaskMultipoles(){
   spline(VIPERS_jmaskr_hi, VIPERS_jmaskOct_hi,  VIPERS_jmask_lineNo_hi, 1.0e31, 1.0e31, VIPERS_jmaskOct2D_hi);
   spline(VIPERS_jmaskr_hi, VIPERS_jmaskDec_hi,  VIPERS_jmask_lineNo_hi, 1.0e31, 1.0e31, VIPERS_jmaskDec2D_hi);
     
-  // Set the r value at which the  high resolution counts will join the low resolution counts.  
-  jloRes_highRes_join = VIPERS_jmaskr_hi[VIPERS_jmask_lineNo_hi - 1];
-    
+  // Outdated. Set the r value at which the  high resolution counts will join the low resolution counts.  
+  // jloRes_highRes_join = VIPERS_jmaskr_hi[VIPERS_jmask_lineNo_hi - 1];
+  jloRes_highRes_join = 8.5;
+  
                                                 //--//
                                                 
   // Low resolution on larger scales.

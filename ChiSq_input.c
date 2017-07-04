@@ -20,7 +20,7 @@ int load_withoutfolding(char filepath[]){
 }
 
 int load_withfolding(char filepath[]){
-  double loc_k;
+  double             loc_k;
 
   char  firstfilepath[200];
   char foldedfilepath[200];
@@ -93,5 +93,10 @@ int load_data(void){
     load_withfolding(filepath);
   }
 
+  for(j=0; j<mono_order; j++){
+    kdata[j]              = kVals[j];
+    kdata[j + mono_order] = kVals[j];
+  }
+  
   return 0;
 }

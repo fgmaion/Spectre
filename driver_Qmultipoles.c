@@ -90,10 +90,10 @@ int main(int argc, char **argv){
   int               count_res;
   double        sampling_frac;
 
-  double      dilution = 0.01;
+  double     dilution =  0.25; // 0.05 -> 1.3 hrs for hihiRes. 
   
-  double       max_logs[6]  = {log10(2.0), log10(20.0), log10(2000.0), log10(2.0), log10(20.0), log10(4000.0)}; 
-  double sampling_fracs[6]  = {1.00, 0.30, 0.01, 1.00, 0.20, 0.01}; // 1.00, 0.10, 0.01, 1.000, 0.004, 0.005
+  double       max_logs[6]  = {log10(2.0), log10(20.0), log10(4000.0), log10(2.0), log10(20.0), log10(4000.0)}; 
+  double sampling_fracs[6]  = {0.05, 0.02, 0.01, 0.05, 0.02, 0.01};
   
   thread                    =                                   1;
   outputdir                 =                 getenv("outputdir");
@@ -106,7 +106,7 @@ int main(int argc, char **argv){
   hi_zlim                   =                       atof(argv[3]);
   count_res                 =                       atoi(argv[4]);
 
-  maxlog                    =                       log10(4000.0); // max_logs[count_res];
+  maxlog                    =                 max_logs[count_res]; // max_logs[count_res];
   sampling_frac             =  dilution*sampling_fracs[count_res];
 
   // Comoving number density, n(z), measurement. Change to equal increments in (effective) volume?
@@ -125,7 +125,7 @@ int main(int argc, char **argv){
   
   // Correlation fn's, logarithmic binning in r. 
   zerolog  =               log10(0.001);
-  logbinsz =               log10(1.050);    // previously 1.01 and befor that 1.4. must be > 1.0 otherwise log gives 0. or -ve.
+  logbinsz =               log10(1.100);    // previously 1.01 and befor that 1.4. must be > 1.0 otherwise log gives 0. or -ve.
   
   // linear binning in mu. 
   zerolin  =                      0.000;
@@ -154,8 +154,11 @@ int main(int argc, char **argv){
   prep_inverseCumulative_nbar();
   
   set_outputfiles(count_res);
+
+  // load_maskedRSD_rands(sampling_frac);
   
   load_maskfits(sampling_frac, count_res);
+
   // load_homogeneous_rands_window(sampling_frac, count_res); // load randoms with sampling sampling_frac.
   
   delete_lockfile();

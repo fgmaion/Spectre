@@ -1,8 +1,10 @@
 int assignMemory_xi(){
+  double rmax = log10(4000.);
+
   point_rands = (Particle *) realloc(point_rands, rand_number*sizeof(Particle));
 
-  nlogbins    = (int)        ceil((maxlog  - zerolog)/logbinsz);
-  nlinbins    = (int)        ceil((maxlin  - zerolin)/linbinsz);
+  nlogbins    = (int)        ceil((rmax   - zerolog)/logbinsz);
+  nlinbins    = (int)        ceil((maxlin - zerolin)/linbinsz);
   
   // mu^n + FKP weighted pair counts. 
   rr_0        = (double *)   calloc(nlogbins*nlinbins, sizeof(double)); 
@@ -34,7 +36,7 @@ int postprocesspairs_nonodes(double* C0, double* C2, double* C4, double* C6, dou
   double  mu0weighted_paircount, mu2weighted_paircount, mu4weighted_paircount, mu6weighted_paircount, mu8weighted_paircount, mu10weighted_paircount;
 
   // Save raw counts.
-  sprintf(filepath, "%s/Qmultipoles/%s_nonodes_raw.dat", outputdir, surveyType);
+  sprintf(filepath, "%s/Qmultipoles/%s_raw.dat", outputdir, surveyType);
 
   output = fopen(filepath, "w");
 
@@ -77,11 +79,11 @@ int postprocesspairs_nonodes(double* C0, double* C2, double* C4, double* C6, dou
   xiMonopole(C8, xi8);  // masked RSD work.
 
   // Save multipoles.
-  sprintf(filepath, "%s/Qmultipoles/%s_nonodes.dat", outputdir, surveyType);
+  sprintf(filepath, "%s/Qmultipoles/%s.dat", outputdir, surveyType);
 
   output = fopen(filepath, "w");
 
-  fprintf(output, "## Walltime: %.4lf seconds; number of nodes in tree: %d \n", getRealTime() - begin, tree_labelCount);
+  fprintf(output, "## Walltime: %.4lf seconds; \n", getRealTime() - begin);
 
   for(j=0; j<nlogbins; j++)  fprintf(output, "%.4le \t %.4le \t %.4le \t %.4le \t %.4le \t %.4le \n", logrbins[j], xi0[j], xi2[j], xi4[j], xi6[j], xi8[j]);
 
@@ -189,9 +191,11 @@ int randWindow_pairCount(){
   // get_qsnapshot(rr_meann, rr_meanwn, rr_meanr, rr_meanmu, randTree, randTree);
   
   // bruteforce_nonodes(rr_0, rr_2, rr_4, rr_6, rr_8, rr_10, rr_meanr, rr_meanmu, point_rands, point_rands, rand_number, rand_number, 1);
+
   // postprocesspairs_nonodes(rr_0, rr_2, rr_4, rr_6, rr_8, rr_10, rr_meanr, rr_meanmu, randTree, randTree, 1);
   
   findSuitableNodePairs_bruteforcePairCount(rr_meann, rr_meanwn, rr_meanr, rr_meanmu, randTree, randTree, 1);
+
   postprocesspairs(rr_meann, rr_meanwn, rr_meanr, rr_meanmu, randTree, randTree);
   
   return 0;

@@ -32,8 +32,8 @@ int spline_nbar(int truth){
     if(data_mock_flag == 0){	 // analysis on mocks.   
       if(truth==0){
         // smoothed counts, 1% renormalisation to \sum E^-1 (sum over W1 and W4).
-        sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/nbar_100_smoothedCounts/nbar_smooth_%.1lf_Nagoya_v7_Samhain_mock_%d_twofield_avg_v2.dat", root_dir, nz_smoothRadius, loopCount);
-        // sprintf(filepath, "%s/mocks_v1.7/nbar/nosmooth_Nagoya_v7_Samhain_mock_%03d_twofield_avg.dat", outputdir, loopCount);
+        // sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/nbar_100_smoothedCounts/nbar_smooth_%.1lf_Nagoya_v7_Samhain_mock_%d_twofield_avg_v2.dat", root_dir, nz_smoothRadius, loopCount);
+        sprintf(filepath, "%s/mocks_v1.7/nbar/nosmooth_Nagoya_v7_Samhain_mock_%03d_twofield_avg.dat", outputdir, loopCount);
       }
 	        
       if(truth==1){
