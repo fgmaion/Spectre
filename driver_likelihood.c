@@ -44,11 +44,12 @@
 #include "Ruiz.c"
 #include "camb_call.c"
 #include "joint_clipped_fsig8.c"
+#include "priors.c"
 
 
 int main(int argc, char** argv){  
   thread                    =                           1;
-
+  mull                      =                           0;  // 0 for False; 1 for True (replicate mull/skene)
   z_eff                     =        atof(getenv("ZEFF"));
   
   outputdir                 =         getenv("outputdir");
@@ -57,45 +58,20 @@ int main(int argc, char** argv){
   sprintf(root_dir,                              "/home/mjw/HOD_MockRun");
   sprintf(vipersHOD_dir,         "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); 
   sprintf(models_path,                                         outputdir);
+
+  if(mull==0){
+    sprintf(covariance_mocks_path,                             outputdir);
+  }
+
+  else{
+    sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); // W1_Spectro_V7_3
+  }
   
-  sprintf(covariance_mocks_path,                               outputdir);
-  // sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3"); // W1_Spectro_V7_2
-   
   d0                        =               atoi(argv[1]);
   fieldFlag                 =               atoi(argv[2]);
   lo_zlim                   =               atof(argv[3]);   // previously 0.6<z<0.9, 0.7<z<1.1
   hi_zlim                   =               atof(argv[4]);
   ChiSq_kmax                =               atof(argv[5]);
-
-  min_bsigma8               =      0.05;                  // FOR GRANETT 2D POSTERIOR.
-  max_bsigma8               =      1.20;                  // Previously 0.2 < b \sig_8 < 1.6
-
-  min_fsigma8               =      0.05;                  // Priors on the model params.
-  max_fsigma8               =      1.00;
-
-  min_velDisperse           =      0.00;                  // CHANGED FROM 0.00 13/02/2017
-  max_velDisperse           =     16.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS) 
-  /*
-  // clipping priors; 0.6 < z < 0.8 
-  min_bsigma8               =      0.50;                  // FOR GRANETT 2D POSTERIOR.
-  max_bsigma8               =      1.00;                  // Previously 0.2 < b \sig_8 < 1.6
-                                                          // 0.05 < b s8 < 1.0 (13/02/17)   
-  min_fsigma8               =      0.05;                  // Priors on the model params.  
-  max_fsigma8               =      0.80;
-
-  min_velDisperse           =      0.00;                  // CHANGED FROM 0.00 13/02/2017
-  max_velDisperse           =      6.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
-  */
-  /*                                                                                                                                                   
-  min_bsigma8               =      0.05;                                                                                                                
-  max_bsigma8               =      3.50;                                                                                                               
-                                                                                                                                                        
-  min_fsigma8               =      0.00;                                                                                                                
-  max_fsigma8               =      1.80;                                                                                                               
-
-  min_velDisperse           =      0.00;                                                                                                                
-  max_velDisperse           =     15.00;                                                                                                                
-  */
   
   min_alpha_pad             =    0.9999;
   max_alpha_pad             =    1.0001;
@@ -108,8 +84,8 @@ int main(int argc, char** argv){
 
   paramNumber               =       3.0;  // # of fitted params. -> dof in X^2. 
 
-   Res                      =        32;  // Likelihood resolution [voxel number].
-  dRes                      =      32.0;  // Previously 16: 13/02/17
+   Res                      =        16;  // Likelihood resolution [voxel number].
+  dRes                      =      16.0;  // Previously 16: 13/02/17
 
    Res_ap                   =         1;  // Resoltuion in AP.
   dRes_ap                   =       1.0;
@@ -133,6 +109,11 @@ int main(int argc, char** argv){
 
   
   start_walltime();
+  
+  set_recordedpriors();
+  // set_normalpriors();
+  // set_clippingpriors();
+  // set_widepriors(); 
 
   printf_branch();
   
@@ -147,9 +128,9 @@ int main(int argc, char** argv){
   nonlinear_pk();             
   // linear_pk();       
   
-  get_mocksshotnoise();       // <n> estimate without clipping.  high-k estimate with clipping. 
+  if(mull == 0)  get_mocksshotnoise();       // <n> estimate without clipping.  high-k estimate with clipping. 
   
-  prep_FFTlog_memory();       // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
+  prep_FFTlog_memory();                      // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
   
   set_FFTlog(FFTlogRes, pow(10., -10.), pow(10., 14.), 1., velDispersion);  // assigns values to mono_config etc. 
   
@@ -181,33 +162,34 @@ int main(int argc, char** argv){
   Covariance_eigenVecs(CatalogNumber);
   
   delete_lockfile();
-  
+  /*
   prep_dlnPR_dlnk();
 
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
   
-  if(ChiSq_kmax == 0.2)  calc_models();
+  // if(ChiSq_kmax == 0.2)
+  calc_models();
   
   set_models();
     
   double maxL_fsig8, maxL_sigv, maxL_bsig8;
   
-  for(data_mock_flag=0; data_mock_flag<2; data_mock_flag++){
+  for(data_mock_flag=1; data_mock_flag<2; data_mock_flag++){
     if(data_mock_flag == 0){
-      sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks2_%.1lf_%.1lf_%s_res_%d.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim, model_flag, Res);
+      sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks5_%.1lf_%.1lf_%s_res_%d.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim, model_flag, Res);
     }
 
     if(data_mock_flag == 1){
-      sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data2_%.1lf_%.1lf_%s_res_%d.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim, model_flag, Res);
+      sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data5_%.1lf_%.1lf_%s_res_%d.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim, model_flag, Res);
     }
     
     output = fopen(filepath, "w");
     
     walltime("Walltime at start of chi^2 calc.");
 
-    for(int ab=1; ab<CatalogNumber; ab++){
-      //for(int ab=1; ab<2; ab++){
-      calc_ChiSqs(ab, 1);
+    // for(int ab=1; ab<CatalogNumber; ab++){
+    for(int ab=1; ab<2; ab++){
+      calc_ChiSqs(ab, 0);
       
       set_minChiSq();
       
@@ -223,7 +205,7 @@ int main(int argc, char** argv){
     
     fclose(output);
   }
-  
+  */
   // default_params();
 
   // getmockmean_params(d0);

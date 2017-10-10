@@ -2,6 +2,8 @@ int get_zeff(){
   double norm = 0.0;
   double rand_redshift;
   double weighted_redshift = 0.0; 
+
+  printf("\n\nReassigning <n(z)> for effective redshift calc.");
   
   spline_nbar(1); // set to parent <n(z)>
 

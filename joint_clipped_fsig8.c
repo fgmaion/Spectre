@@ -81,7 +81,7 @@ int calc_bestfit_fsig8(int field, double kmax, double z_eff){
 
   double  inva[n*n];
 
-  gsl_matrix_view   m = gsl_matrix_view_array(cov2,  n, n);
+  gsl_matrix_view   m = gsl_matrix_view_array(&cov2,  n, n);
   gsl_matrix_view inv = gsl_matrix_view_array(inva,  n, n);
   gsl_permutation*  p = gsl_permutation_alloc(n);
 

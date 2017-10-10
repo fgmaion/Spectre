@@ -13,8 +13,11 @@ def covariance_corrections(Ns, Nb, Np):
 
 
 # Pezzotta et al.
-covariance_corrections(153., 20., 4.)
+# covariance_corrections(153., 20., 4.)
 
 # Wilson et al.
-covariance_corrections(153., 24., 3.)
+covariance_corrections(153., 40., 3.)  # k_max = 0.2
+covariance_corrections(153., 50., 3.)  # k_max = 0.4
+covariance_corrections(153., 56., 3.)  # k_max = 0.6 
+covariance_corrections(153., 60., 3.)  # k_max = 0.8 
 

@@ -19,7 +19,7 @@ int nosort_MultipoleCalc(regress* inst, int mock_start){
   
   printf("\n\nShot noise: randoms %.4lf, galaxies %.4lf", rand_shot, gal_shot);
   
-  // print_nbarshot(mock_start);
+  print_nbarshot(mock_start);
   
   // clear arrays. 
   for(k=0; k<KBIN_NO; k++){
@@ -81,8 +81,8 @@ int nosort_MultipoleCalc(regress* inst, int mock_start){
 int print_multipoles(regress* inst){
   // sprintf(filepath, "%s/W1_Spectro_V7_5/mocks_v1.7/pk/mask_pk/W%d/mock_%03d_zlim_%.1lf_%.1lf_Jf_%d.dat", root_dir, fieldFlag, loopCount, lo_zlim, hi_zlim, 2*fold);
 
-  if(data_mock_flag == 0) sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/nosmooth/mock_%03d_zlim_%.1lf_%.1lf_Jf_%d.dat", outputdir, d0, fieldFlag, loopCount, lo_zlim, hi_zlim, 2*fold);
-  if(data_mock_flag == 1) sprintf(filepath, "%s/data_v1.7/pk/d0_%d/W%d/nosmooth/data_zlim_%.1lf_%.1lf_Jf_%d.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim, 2*fold);
+  if(data_mock_flag == 0) sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock_%03d_zlim_%.1lf_%.1lf_Jf_%d.dat", outputdir, d0, fieldFlag, loopCount, lo_zlim, hi_zlim, 2*fold);
+  if(data_mock_flag == 1) sprintf(filepath, "%s/data_v1.7/pk/d0_%d/W%d/data_zlim_%.1lf_%.1lf_Jf_%d.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim, 2*fold);
   
   output = fopen(filepath, "w");
 

@@ -2,11 +2,16 @@ int get_allkvals(int start){
   char   firstfilepath[200];
   char  foldedfilepath[200];
   
-  sprintf(filepath,      "%s/mocks_v1.7/pk/d0_%d/W%d/mock",   covariance_mocks_path, d0, fieldFlag);
-  
-  sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
-  // sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
+  sprintf(filepath,        "%s/mocks_v1.7/pk/d0_%d/W%d/mock",   covariance_mocks_path, d0, fieldFlag);
 
+  if(mull==0){
+    sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
+  }
+
+  else{
+    sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
+  }
+  
   printf("\n\n%s", firstfilepath);
   
   inputfile = fopen(firstfilepath, "r");
@@ -32,8 +37,13 @@ int get_allkvals(int start){
   fclose(inputfile);
   
   // file with folded measurements.
-  sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
-  // sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
+  if(mull == 0){
+    sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
+  }
+
+  else{
+    sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
+  }
   
   inputfile  = fopen(foldedfilepath, "r");
 
@@ -60,10 +70,15 @@ int get_allkvals(int start){
   for(i=0; i<jenkins_foldIndex_unfoldedfile; i++)  fscanf(inputfile, "%le \t %*le \t %*le \t %*d \n", &all_kVals[i]);
 
   fclose(inputfile);
-  
-  sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;
-  // sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;  
 
+  if(mull == 0){
+    sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;
+  }
+
+  else{
+    sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;  
+  }
+  
   inputfile = fopen(foldedfilepath, "r");
   
   for(i=0; i<lineNo; i++){

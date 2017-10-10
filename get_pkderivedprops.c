@@ -130,17 +130,17 @@ int set_oldclippingvars(){
 
   if(data_mock_flag == 1){ // data
     if(fieldFlag == 1){
-      if(d0      == 1000.)  mean_suppression    =  1.00;
-      else if(d0 ==   10.)  mean_suppression    =  1.30;
-      else if(d0 ==    6.)  mean_suppression    =  1.70;
-      else                  mean_suppression    =  2.70;
+      if(d0      == 1000.)  mean_suppression  =  1.00;
+      else if(d0 ==   10.)  mean_suppression  =  1.30;
+      else if(d0 ==    6.)  mean_suppression  =  1.70;
+      else                  mean_suppression  =  2.70;
     }
 
     if(fieldFlag == 4){
-      if(d0      == 1000.)  mean_suppression    =  1.00;
-      else if(d0 ==   10.)  mean_suppression    =  1.30;
-      else if(d0 ==    6.)  mean_suppression    =  1.90;
-      else                  mean_suppression    =  2.70;
+      if(d0      == 1000.)  mean_suppression  =  1.00;
+      else if(d0 ==   10.)  mean_suppression  =  1.30;
+      else if(d0 ==    6.)  mean_suppression  =  1.90;
+      else                  mean_suppression  =  2.70;
     }
   }
       

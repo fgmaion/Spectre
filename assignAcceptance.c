@@ -56,10 +56,10 @@ int assignAcceptance_rand(){
     for(j=0; j<rand_number; j++){
       // randoms satisfy chi limits by construction.
       if(rand_dec[j] >= -5.97){
-	rand_number = j;  // dec problem in mocks.
+        rand_number = j;  // dec problem in mocks.
 
-	break;
-	// fkp_accepted_rand += pow(1. + (*pt2nz)(rand_chi[j])*fkpPk, -1.);
+        break;
+        // fkp_accepted_rand += pow(1. + (*pt2nz)(rand_chi[j])*fkpPk, -1.);
       }
     }
 
@@ -151,13 +151,11 @@ double AcceptedMin(double a[], bool b[], int n){
   return min;
 }
 
-
 int assignAcceptance_true(){
     for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j]  = true;
 
     return 0;
 }
-
 
 double assignAcceptance_parent(){
   int accepted = 0;
@@ -191,7 +189,6 @@ double assignAcceptance_parent(){
 
   return daccepted_gals;
 } 
-
 
 int assignAcceptanceCube(){
     accepted_gals = 0;

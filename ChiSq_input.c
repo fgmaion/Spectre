@@ -1,8 +1,13 @@
 int load_withoutfolding(char filepath[]){
   char  firstfilepath[200];
 
-  sprintf( firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, lo_zlim, hi_zlim);
-  // sprintf( firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, lo_zlim, hi_zlim);
+  if(mull == 0){
+    sprintf(firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, lo_zlim, hi_zlim);
+  }
+
+  else{
+    sprintf(firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, lo_zlim, hi_zlim);
+  }
   
   inputfile = fopen(firstfilepath, "r");
 
@@ -25,11 +30,17 @@ int load_withfolding(char filepath[]){
   char  firstfilepath[200];
   char foldedfilepath[200];
 
-  sprintf( firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, lo_zlim, hi_zlim);
-  // sprintf( firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, lo_zlim, hi_zlim);
+  if(mull == 0){
+    sprintf(firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, lo_zlim, hi_zlim);
+  }
 
+  else{
+    sprintf(firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, lo_zlim, hi_zlim);
+  }
+  
   sprintf(foldedfilepath, "%s_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, lo_zlim, hi_zlim);
 
+  
   inputfile = fopen(firstfilepath, "r");
 
   for(i=0; i<jenkins_foldIndex_unfoldedfile; i++){
@@ -58,17 +69,20 @@ int load_withfolding(char filepath[]){
 }
 
 int load_mock(int mockNumber){
-  sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock_%03d", covariance_mocks_path, d0, fieldFlag, mockNumber);
-  // sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock_%d", covariance_mocks_path, d0, fieldFlag, mockNumber);
-  
-  // printf("\n\n%s", filepath);
-  
-  if(ChiSq_kmax <= jenkins_fold_kjoin){
-    load_withoutfolding(filepath);  // amplitude rescaling in load_withoutfolding.
+  if(mull == 0){
+    sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock_%03d", covariance_mocks_path, d0, fieldFlag, mockNumber);
   }
 
   else{
-    load_withfolding(filepath);  // amplitude recsaling in load_withfolding.
+    sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock_%d", covariance_mocks_path, d0, fieldFlag, mockNumber);
+  }
+    
+  if(ChiSq_kmax <= jenkins_fold_kjoin){
+    load_withoutfolding(filepath);  // amplitude rescaling no longer in load_withoutfolding.
+  }
+
+  else{
+    load_withfolding(filepath);  // amplitude recsaling no longer in load_withfolding.
   }
 
   // printf("\n\nCorrelated data.");
@@ -83,8 +97,8 @@ int load_mock(int mockNumber){
 }
 
 int load_data(void){
-  sprintf(filepath, "%s/data_v1.7/pk/d0_%d/W%d/data", covariance_mocks_path, d0, fieldFlag);
-  
+  sprintf(filepath, "%s/data_v1.7/pk/d0_%d/W%d/data", covariance_mocks_path, d0, fieldFlag);  // covariance_mocks_path updated according to mull flag.
+    
   if(ChiSq_kmax <= jenkins_fold_kjoin){
     load_withoutfolding(filepath);
   }

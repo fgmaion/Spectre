@@ -1,7 +1,6 @@
 double splintHODpk(double k){
-  // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec).
+  // Interpolated matter power spectrum evaluated at |k_vec|.
   if(k>10.)          return pk_hiA*pow(k, 3. + pk_hin);
-
   else if(k<0.0001)  return pk_loA*pow(k, 3. + pk_lon);
 
   else{
@@ -31,13 +30,13 @@ int nonlinear_pk(){
   
   printf("\n\nLoading %s", filepath);
 
-  while((inputfile = fopen(filepath, "r")) == NULL){ 
+  while((inputfile = fopen(filepath, "r")) == NULL){  // Generate file if it can't be found. 
     camb_call(1, z_eff);      // nonlinear/linear flag, redshift;
   }
 
-  // line_count(inputfile, &pk_lineNo);
   linecount_header(inputfile, 1, &pk_lineNo);
-        
+  // line_count(inputfile, &pk_lineNo);
+  
   sdltk  = realloc(sdltk,  pk_lineNo*sizeof(*sdltk));
   sdltPk = realloc(sdltPk, pk_lineNo*sizeof(*sdltPk));
   sdlt2d = realloc(sdlt2d, pk_lineNo*sizeof(*sdlt2d));  // Second derivates of HOD P(k) for cubic spline.

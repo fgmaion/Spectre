@@ -2,6 +2,9 @@
 double       Interim, dummy;
 int          Index, local_Index, loopCount, lineNo;
 
+//-- mull run -- //
+int mull = 0;
+
 //-- Cosmology -- //
 double   H_0;
 double   H_0inPerSec;

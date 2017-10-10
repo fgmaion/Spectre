@@ -40,7 +40,6 @@ int set_fittomean_params(void){
   return 0;
 }
 
-
 int getmockmean_params(int d0){
   int                            line_no;
   double   fs8, bs8, sp, fs8L, bs8L, spL;
@@ -80,7 +79,6 @@ int getmockmean_params(int d0){
   
   return 0;
 }
-
 
 int default_params(void){
   fsigma8       = 0.500000;
@@ -197,15 +195,17 @@ int calc_ChiSqs(int mockNumber, int print){
     }
     
     // printf("\n\nChi sq. input.");
-    
-    if(data_mock_flag == 0){
-      for(j=0; j<mono_order; j++)  xdata[j] -= shotnoise_instances[mockNumber - 1]; 
-    }
-    
-    if(data_mock_flag == 1){
-      get_datashotnoise();         // assigns to mean_shot. 
 
-      for(j=0; j<mono_order; j++)  xdata[j] -= mean_shot;
+    if(mull == 0){  // mull results are already shot noise subtracted. 
+      if(data_mock_flag == 0){
+        for(j=0; j<mono_order; j++)  xdata[j] -= shotnoise_instances[mockNumber - 1]; 
+      }
+    
+      if(data_mock_flag == 1){
+        get_datashotnoise();         // assigns to mean_shot. 
+
+        for(j=0; j<mono_order; j++)  xdata[j] -= mean_shot;
+      }
     }
     
     // set_oldshotnoise();
@@ -272,6 +272,8 @@ int calc_ChiSqs(int mockNumber, int print){
 }
 
 int get_ydata(int mockNumber, int data_mock_flag){
+  // Set up zero mean, decorrelated, unit variance, variables.
+
   if     (data_mock_flag == 0)  load_mock(mockNumber);
   else if(data_mock_flag == 1)  load_data();
   else if(data_mock_flag == 2)  load_meanMultipoles();
@@ -400,6 +402,7 @@ int print_model(double dfsigma8, double dbsigma8, double dvelDispersion, double 
 }
 
 int set_models(){
+  // Read in models precomputed up to 0.8 and assign xtheory to be these values us to ChiSq_kmax only. 
   int    ll, mm, nn;
   double store[Res][Res][Res][Res_ap][Res_ap][all_order];
   
