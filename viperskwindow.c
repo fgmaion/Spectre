@@ -76,10 +76,18 @@ int printf_kMask_multipoles(){
 int prepVIPERS_kSpaceMultipole(){  
   printf_kMask_multipoles();
 
-  sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
-  // sprintf(filepath, "%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim,hi_zlim);
-  // sprintf(filepath, "/home/mjw/maskedRSD/new/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_kmultipoles_Nov20.dat");
+  if(mull == 0){
+    sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+  }
+  
+  else if(mull == 1){
+    sprintf(filepath, "%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim,hi_zlim);
+  }
 
+  else{
+    printf("Error on Fourier Q multipoles load.");
+  }
+  
   inputfile = fopen(filepath, "r");
 
   line_count(inputfile, &VIPERS_kSpace_multipoles_lineNo);

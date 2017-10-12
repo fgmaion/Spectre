@@ -193,10 +193,19 @@ int prep_VIPERS_jmaskMultipoles(){
   char   loRes_filepath[200];
   char   hiRes_filepath[200];
   char hihiRes_filepath[200];
-  
-  sprintf(filepath, "%s/Qmultipoles/Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1", maskmultipoles_path, lo_zlim, hi_zlim);
-  // sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W1W4_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, lo_zlim, hi_zlim);
 
+  if(mull==0){
+    sprintf(filepath, "%s/Qmultipoles/Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1", maskmultipoles_path, lo_zlim, hi_zlim);
+  }
+
+  else if(mull == 1){
+    sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W1W4_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, lo_zlim, hi_zlim);
+  }
+
+  else{
+    printf("Error onjoint Q-multipoles load.");
+  }
+  
   printf("\n\nJoint Q-multipoles: %s", filepath);
   
   sprintf(hihiRes_filepath, "%s_hihiRes_hex.dat", filepath);

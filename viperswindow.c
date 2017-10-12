@@ -21,7 +21,6 @@ double splint_VIPERS_maskMono(double r){
   }
 }
 
-
 double splint_VIPERS_maskQuad(double r){
   if(r<0.2)   return 0.;
   if(r>900.0) return 0.;
@@ -44,7 +43,6 @@ double splint_VIPERS_maskQuad(double r){
     return Interim;
   }
 }
-
 
 double splint_VIPERS_maskHex(double r){
   if(r<0.2)   return 0.;
@@ -69,7 +67,6 @@ double splint_VIPERS_maskHex(double r){
   }
 }
 
-
 double splint_VIPERS_maskOct(double r){
   if(r<  0.5) return 0.;
   if(r>900.0) return 0.;
@@ -92,7 +89,6 @@ double splint_VIPERS_maskOct(double r){
     return Interim;
   }
 }
-
 
 double splint_VIPERS_maskDec(double r){
   if(r<  0.5) return 0.;
@@ -117,7 +113,6 @@ double splint_VIPERS_maskDec(double r){
   }
 }
 
-
 double splint_VIPERS_maskMultipoles(double r, int transformOrder){
   switch(transformOrder){
   case 0:
@@ -135,7 +130,6 @@ double splint_VIPERS_maskMultipoles(double r, int transformOrder){
   }
 }
    
- 
 double splint_unit_maskMultipoles(double r, int transformOrder){
   switch(transformOrder){
   case 0:
@@ -160,9 +154,17 @@ int prep_VIPERS_maskMultipoles(){
   char   hiRes_filepath[200];
   char hihiRes_filepath[200];
 
-  sprintf(filepath, "%s/Qmultipoles/Ql_W%d_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
-  // sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
-  // sprintf(filepath, "/home/mjw/maskedRSD/new/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_multipoles_Nov20");
+  if(mull==0){
+    sprintf(filepath, "%s/Qmultipoles/Ql_W%d_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+  }
+
+  else if(mull==1){
+    sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+  }
+
+  else{
+    printf("\n\nError from Q multipoles load.");
+  }
   
   printf("\n\nQ-multipoles: %s", filepath);
   

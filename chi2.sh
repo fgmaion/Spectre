@@ -30,9 +30,12 @@ test(){
   ## Interactive run with: qsub -I -o $outputdir/chi2_log/chi2_stdout.pbs -e $outputdir/chi2_log/chi2_stderr.pbs chi2.sh
   export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9/
   export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9/ # W1_Spectro_V7_2
+
   export LOZ=0.6
   export HIZ=0.9
+  
   export FIELDFLAG=1
+
   export d0=1000
   export ZEFF=0.75    ## ZEFFS=(0.607 0.958)  ## ZEFFS=(0.75 1.05)  ## ZEFFS=(0.706 0.903) 
 
@@ -41,20 +44,21 @@ test(){
   gcc -std=gnu11 -o chi2.o Scripts/driver_likelihood.c -lfftw3 -lm -lgsl -lgslcblas -fopenmp -lfftw3_omp
 }
 
-test
+## test
 
 DIR="$HOME/HOD_MockRun/Scripts/"
 cd $DIR
 
 export BRANCH=$(git symbolic-ref --short HEAD) # current Git branch
+
 export GSL_RNG_SEED=123
 export GSL_RNG_TYPE=taus
 
 export OMP_NUM_THREADS=1 # Threads = allocated processors.
 cd .. 
 
-for k in 0.6
-#for k in $(seq 0.2 0.2 0.8)
+#for k in 0.6
+for k in $(seq 0.2 0.2 0.8)
   do
     echo "Analysing k_max of $k"  
 

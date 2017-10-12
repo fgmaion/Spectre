@@ -47,14 +47,15 @@
 #include "priors.c"
 
 
-int main(int argc, char** argv){  
+int main(int argc, char** argv){
+  mull                      =                           1;  // 0 for False; 1 for True (replicate mull/skene)  
   thread                    =                           1;
-  mull                      =                           0;  // 0 for False; 1 for True (replicate mull/skene)
+
   z_eff                     =        atof(getenv("ZEFF"));
   
   outputdir                 =         getenv("outputdir");
   maskmultipoles_path       =        getenv("mask_Qldir");
-   
+    
   sprintf(root_dir,                              "/home/mjw/HOD_MockRun");
   sprintf(vipersHOD_dir,         "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); 
   sprintf(models_path,                                         outputdir);
@@ -64,7 +65,8 @@ int main(int argc, char** argv){
   }
 
   else{
-    sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); // W1_Spectro_V7_3
+    sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");                // W1_Spectro_V7_3
+    sprintf(maskmultipoles_path,   "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
   }
   
   d0                        =               atoi(argv[1]);
@@ -105,12 +107,13 @@ int main(int argc, char** argv){
   smooth_radius             =       2.0;
 
   // Regression to ~ May 2016 -> Catalog number to 305; change file paths of mocks (covariance and chi sq input) and Qmultipoles. Change init_covariance.
-  CatalogNumber             =       153;
+  CatalogNumber             =       305;
 
   
   start_walltime();
-  
-  set_recordedpriors();
+
+  set_oldestpriors();
+  // set_recordedpriors();
   // set_normalpriors();
   // set_clippingpriors();
   // set_widepriors(); 
@@ -162,19 +165,18 @@ int main(int argc, char** argv){
   Covariance_eigenVecs(CatalogNumber);
   
   delete_lockfile();
-  /*
+  
   prep_dlnPR_dlnk();
 
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
   
-  // if(ChiSq_kmax == 0.2)
-  calc_models();
+  if(ChiSq_kmax == 0.2)  calc_models();
   
   set_models();
-    
+  
   double maxL_fsig8, maxL_sigv, maxL_bsig8;
   
-  for(data_mock_flag=1; data_mock_flag<2; data_mock_flag++){
+  for(data_mock_flag=0; data_mock_flag<2; data_mock_flag++){
     if(data_mock_flag == 0){
       sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks5_%.1lf_%.1lf_%s_res_%d.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim, model_flag, Res);
     }
@@ -187,8 +189,8 @@ int main(int argc, char** argv){
     
     walltime("Walltime at start of chi^2 calc.");
 
-    // for(int ab=1; ab<CatalogNumber; ab++){
-    for(int ab=1; ab<2; ab++){
+    for(int ab=1; ab<CatalogNumber; ab++){
+    // for(int ab=1; ab<10; ab++){
       calc_ChiSqs(ab, 0);
       
       set_minChiSq();
@@ -205,19 +207,19 @@ int main(int argc, char** argv){
     
     fclose(output);
   }
-  */
-  // default_params();
+  /*
+  default_params();
 
   // getmockmean_params(d0);
-  /*
-  set_fittomean_params();
+  
+  // set_fittomean_params();
   
   model_compute(0, 0, 0, 0, 0, 1);
-  
+  */
   // jointfield_cnvldmodel();
 
-  calc_bestfit_fsig8(fieldFlag, ChiSq_kmax, z_eff);
-  */
+  // calc_bestfit_fsig8(fieldFlag, ChiSq_kmax, z_eff);
+  
   walltime("Wall time at finish");
 
   // MPI_Finalize();

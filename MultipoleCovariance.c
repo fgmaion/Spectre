@@ -313,9 +313,9 @@ int load_CovarianceMatrix(int mocks, int start){
     load_CovarianceMatrix_withfolding(mocks, start, filepath);
   }
 
-  printCov();
+  // printCov();
 
-  print_meanMultipoes();
+  // print_meanMultipoes();
   
   return 0;
 }

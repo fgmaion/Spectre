@@ -5,7 +5,13 @@ int model_compute(int aa, int bb, int cc, int dd, int ee, int print){
  
   FFTlog_updatepk(mono_config, quad_config, hex_config, fsigma8/bsigma8, velDispersion);
   // apmultipoles(mono_config, quad_config, hex_config, fsigma8/bsigma8, velDispersion, alpha_pad, epsilon_pad);
-  
+  /*
+  for(j=0; j<mono_config->N; j++){
+    if((0.01 < mono_config->krvals[j][0]) && (mono_config->krvals[j][0] < 1.0)){
+      printf("\n%le \t %le \t %le", mono_config->krvals[j][0], mono_config->pk[j][0], quad_config->pk[j][0]);
+    }
+  }
+  */
   xi_mu(mono_config);  // Transform to correlation function. 
   xi_mu(quad_config);  
   xi_mu( hex_config);
@@ -43,12 +49,12 @@ int model_compute(int aa, int bb, int cc, int dd, int ee, int print){
     // convlquadCorr->pk[j][0]  = quad_config->pk[j][0];
 
     // Single-field
-    convlmonoCorr->pk[j][0] -= cnvldpk_zero*FFTlog_Wk0[j];
-    convlquadCorr->pk[j][0] -= cnvldpk_zero*FFTlog_Wk2[j];
+    // convlmonoCorr->pk[j][0] -= cnvldpk_zero*FFTlog_Wk0[j];
+    // convlquadCorr->pk[j][0] -= cnvldpk_zero*FFTlog_Wk2[j];
 
     // Joint-field 
-    // convlmonoCorr->pk[j][0] -= cnvldpk_zero*fracArea*FFTlog_Wk0[j];
-    // convlquadCorr->pk[j][0] -= cnvldpk_zero*fracArea*FFTlog_Wk2[j];
+    convlmonoCorr->pk[j][0]    -= cnvldpk_zero*fracArea*FFTlog_Wk0[j];
+    convlquadCorr->pk[j][0]    -= cnvldpk_zero*fracArea*FFTlog_Wk2[j];
   }
   
   if(print == 1){
@@ -61,12 +67,16 @@ int model_compute(int aa, int bb, int cc, int dd, int ee, int print){
 }
 
 int print_basemodel(){
+  printf("\n\nConvolved power spectra: \n\n");
+
   sprintf(filepath, "%s/models/defaultparamas_model_intcor_cnvld_W%d_zlim_%.1lf_%.1lf_d0_%d_kmax_%.1lf.dat", outputdir, fieldFlag, lo_zlim, hi_zlim, d0, ChiSq_kmax);
 
   output = fopen(filepath, "w");
 
   for(j=0; j<mono_config->N; j++){
-    if((0.001 < mono_config->krvals[j][0]) && (mono_config->krvals[j][0] < 3.0)){
+    if((0.01 < mono_config->krvals[j][0]) && (mono_config->krvals[j][0] < 1.0)){
+      printf("%le \t %le \t %le \n", convlmonoCorr->krvals[j][0], convlmonoCorr->pk[j][0], convlquadCorr->pk[j][0]);
+
       fprintf(output, "%le \t %le \t %le \n", convlmonoCorr->krvals[j][0], convlmonoCorr->pk[j][0], convlquadCorr->pk[j][0]);
     }
   }

@@ -1,3 +1,16 @@
+int set_oldestpriors(){
+  min_bsigma8               =      0.05;
+  max_bsigma8               =      1.00;
+
+  min_fsigma8               =      0.00;
+  max_fsigma8               =      0.80;
+
+  min_velDisperse           =      0.00;
+  max_velDisperse           =      7.00;             
+
+  return 0;
+}
+  
 int set_recordedpriors(){                                  // i.e. that on mull/stacpolly_backups/stacpolly_backup4/ driver_likelihood.c
   min_bsigma8               =      0.05;                  
   max_bsigma8               =      1.00;                  
@@ -6,14 +19,14 @@ int set_recordedpriors(){                                  // i.e. that on mull/
   max_fsigma8               =      0.80;
 
   min_velDisperse           =      0.00;              
-  max_velDisperse           =      6.00;                  
+  max_velDisperse           =      6.00;                                
 
   return 0;
 }
 
 int set_normalpriors(){
-  min_bsigma8               =      0.05;                  // FOR GRANETT 2D POSTERIOR.
-  max_bsigma8               =      1.20;                  // Previously 0.2 < b \sig_8 < 1.6
+  min_bsigma8               =      0.05;                  // FOR GRANETT 2D POSTERIOR:  0.2 < b \sig_8 < 1.6 
+  max_bsigma8               =      1.20;                 
 
   min_fsigma8               =      0.05;                  // Priors on the model params.
   max_fsigma8               =      1.00;
