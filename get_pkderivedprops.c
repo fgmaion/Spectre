@@ -93,7 +93,7 @@ int get_datashotnoise(){
 
   fclose(inputfile);
 
-  printf("\n\nMean shot noise: %.4lf", mean_shot);
+  printf("\n\nMean shot noise (%s): %.4lf", filepath, mean_shot);
   
   return 0;
 }
