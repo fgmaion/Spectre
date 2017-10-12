@@ -48,7 +48,7 @@
 
 
 int main(int argc, char** argv){
-  mull                      =                           1;  // 0 for False; 1 for True (replicate mull/skene)  
+  mull                      =                           0;  // 0 for False; 1 for True (replicate mull/skene)  
   thread                    =                           1;
 
   z_eff                     =        atof(getenv("ZEFF"));
@@ -107,13 +107,13 @@ int main(int argc, char** argv){
   smooth_radius             =       2.0;
 
   // Regression to ~ May 2016 -> Catalog number to 305; change file paths of mocks (covariance and chi sq input) and Qmultipoles. Change init_covariance.
-  CatalogNumber             =       305;
+  CatalogNumber             =       153;
 
   
   start_walltime();
 
-  set_oldestpriors();
-  // set_recordedpriors();
+  // set_oldestpriors();
+  set_recordedpriors();
   // set_normalpriors();
   // set_clippingpriors();
   // set_widepriors(); 
@@ -189,8 +189,8 @@ int main(int argc, char** argv){
     
     walltime("Walltime at start of chi^2 calc.");
 
-    for(int ab=1; ab<CatalogNumber; ab++){
-    // for(int ab=1; ab<10; ab++){
+    // for(int ab=1; ab<CatalogNumber; ab++){
+    for(int ab=1; ab<10; ab++){
       calc_ChiSqs(ab, 0);
       
       set_minChiSq();

@@ -44,7 +44,7 @@ test(){
   gcc -std=gnu11 -o chi2.o Scripts/driver_likelihood.c -lfftw3 -lm -lgsl -lgslcblas -fopenmp -lfftw3_omp
 }
 
-## test
+test
 
 DIR="$HOME/HOD_MockRun/Scripts/"
 cd $DIR
@@ -57,8 +57,8 @@ export GSL_RNG_TYPE=taus
 export OMP_NUM_THREADS=1 # Threads = allocated processors.
 cd .. 
 
-#for k in 0.6
-for k in $(seq 0.2 0.2 0.8)
+for k in 0.6
+#for k in $(seq 0.2 0.2 0.8)
   do
     echo "Analysing k_max of $k"  
 
