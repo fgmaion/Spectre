@@ -83,13 +83,44 @@ int get_mocksclippedamplitudes(){
   
   return 0;
 }
-
+/*
 int get_datashotnoise(){
   sprintf(filepath, "%s/data_v1.7/pk_derivedprops/d0_%d/W%d/shotnoise_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
 
   inputfile = fopen(filepath, "r");
 
-  fscanf(inputfile, "%*.6lf \t %.6lf \n", &mean_shot);
+  if(inputfile == NULL){
+    printf("\n\nError retrieving data shot noise.");
+
+    exit(EXIT_FAILURE);
+  }
+
+  fscanf(inputfile, "%*[^\n]\n", NULL); // skip one line (hashed comment)
+
+  fscanf(inputfile, "%*lf \t %lf \n", &mean_shot);  // Without clipping, <n> estimate.
+  // fscanf(inputfile, "%lf \t %*lf \n", &mean_shot);  // With clipping, high-k estimate.
+
+  fclose(inputfile);
+
+  printf("\n\nData mean shot noise (%s): %.4lf", filepath, mean_shot);
+
+  return 0;
+}
+*/
+int get_datashotnoise(){  
+  sprintf(filepath, "%s/data_v1.7/pk_derivedprops/d0_%d/W%d/shotnoise_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
+  
+  inputfile = fopen(filepath, "r");
+
+  if(inputfile == NULL){
+    printf("\n\nError retrieving data shot noise.");
+
+    exit(EXIT_FAILURE);
+  }
+  
+  fscanf(inputfile, "%*[^\n] \n", NULL); // skip one line (hashed comment)
+  
+  fscanf(inputfile, "%*lf \t %lf", &mean_shot);
 
   fclose(inputfile);
 
