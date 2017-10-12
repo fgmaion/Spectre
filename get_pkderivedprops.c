@@ -14,6 +14,8 @@ int get_mocksshotnoise(){
   mean_shot = 0.0;
 
   sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/shotnoise_zlim_%.1lf_%.1lf.dat", covariance_mocks_path, d0, fieldFlag, lo_zlim, hi_zlim);
+
+  printf("\n\nLoading shotnoise from:  %s", filepath);
   
   inputfile = fopen(filepath, "r");
 
@@ -27,7 +29,7 @@ int get_mocksshotnoise(){
     fscanf(inputfile, "%*d    %*lf    %lf\n", &shotnoise_instances[j]); // Without clipping, <n> estimate. 
     // fscanf(inputfile, "%*d    %lf    %*lf\n", &shotnoise_instances[j]); // With clipping, high-k estimate.
     
-    // printf("\n%d \t %lf", j, shotnoise_instances[j]);
+    printf("\n%d \t %lf", j, shotnoise_instances[j]);
     
     mean_shot += shotnoise_instances[j];
   }
