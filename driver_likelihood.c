@@ -184,7 +184,7 @@ int main(int argc, char** argv){
     
   double maxL_fsig8, maxL_sigv, maxL_bsig8;
   
-  for(data_mock_flag=0; data_mock_flag<1; data_mock_flag++){
+  for(data_mock_flag=0; data_mock_flag<2; data_mock_flag++){
     if(data_mock_flag == 0){
       sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
     }
