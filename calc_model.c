@@ -51,10 +51,11 @@ int model_compute(int aa, int bb, int cc, int dd, int ee, int print){
     // Single-field
     // convlmonoCorr->pk[j][0] -= cnvldpk_zero*FFTlog_Wk0[j];
     // convlquadCorr->pk[j][0] -= cnvldpk_zero*FFTlog_Wk2[j];
-
+    /*
     // Joint-field 
     convlmonoCorr->pk[j][0]    -= cnvldpk_zero*fracArea*FFTlog_Wk0[j];
     convlquadCorr->pk[j][0]    -= cnvldpk_zero*fracArea*FFTlog_Wk2[j];
+    */
   }
   
   if(print == 1){
