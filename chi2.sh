@@ -31,10 +31,10 @@ test(){
   ## Interactive run with: qsub -I -o $outputdir/chi2_log/chi2_stdout.pbs -e $outputdir/chi2_log/chi2_stderr.pbs chi2.sh
   export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9
   export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9 # W1_Spectro_V7_2
-  export LOZ=0.8
-  export HIZ=1.0
+  export LOZ=0.6
+  export HIZ=0.9
   export FIELDFLAG=1
-  export d0=10
+  export d0=1000
   export ZEFF=0.75    ## ZEFFS=(0.607 0.958)  ## ZEFFS=(0.75 1.05)  ## ZEFFS=(0.706 0.903) 
 
   rm -r /home/mjw/IO_lock/
@@ -54,7 +54,7 @@ export GSL_RNG_TYPE=taus
 export OMP_NUM_THREADS=1 # Threads = allocated processors.
 cd .. 
 
-for k in 0.2
+for k in 0.6
 #for k in $(seq 0.2 0.2 0.8)
   do
     echo "Analysing k_max of $k"  

@@ -135,8 +135,8 @@ int main(int argc, char** argv){
   
   chi_zcalc();              
   
-  // nonlinear_pk();             
-  linear_pk();       
+  nonlinear_pk();             
+  // linear_pk();       
   
   get_mocksshotnoise();
   
@@ -158,9 +158,9 @@ int main(int argc, char** argv){
     
   assign_LikelihoodMemory();  // Assigns memory for xdata, ydata, xtheory, ytheory, ChiSqGrid.
   
-  get_mocksclippedamplitudes();
+  // get_mocksclippedamplitudes();
 
-  set_clippingvars();
+  // set_clippingvars();
   // set_oldclippingvars();
   
   load_CovarianceMatrix(CatalogNumber, 1);
@@ -175,7 +175,8 @@ int main(int argc, char** argv){
   
   prep_dlnPR_dlnk();
     
-  if(ChiSq_kmax == 0.2)  calc_models();
+  // if(ChiSq_kmax == 0.2)
+  calc_models();
   
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
   
@@ -196,8 +197,8 @@ int main(int argc, char** argv){
     
     walltime("Walltime at start of chi^2 calc.");
 
-    for(int ab=1; ab<CatalogNumber; ab++){
-    // for(int ab=1; ab<2; ab++){
+    // for(int ab=1; ab<CatalogNumber; ab++){
+    for(int ab=1; ab<10; ab++){
       calc_ChiSqs(ab);
       
       set_minChiSq();
@@ -214,11 +215,11 @@ int main(int argc, char** argv){
     
     fclose(output);
   }
-  
+  /*
   default_params();
 
   model_compute(0, 0, 0, 0, 0, 1);
-  
+  */
   // jointfield_cnvldmodel();
   
   walltime("Wall time at finish");
