@@ -62,7 +62,7 @@ for k in 0.6
   do
     echo "Analysing k_max of $k"  
 
-    set_lock
+    ## set_lock
     
     export FILE=$outputdir"/chi2_log/chi2_d0_"$d0"_W"$FIELDFLAG"_"$LOZ"_"$HIZ"_kmax_"$k".log"
       

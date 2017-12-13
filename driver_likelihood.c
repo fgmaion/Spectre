@@ -48,7 +48,7 @@
 
 
 int main(int argc, char** argv){
-  mull                      =                           0;  // 0 for False; 1 for True (replicate mull/skene)  
+  mull                      =                           1;  // 0 for False; 1 for True (replicate mull/skene)  
   thread                    =                           1;
 
   z_eff                     =        atof(getenv("ZEFF"));
@@ -185,7 +185,7 @@ int main(int argc, char** argv){
       sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data5_%.1lf_%.1lf_%s_res_%d.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim, model_flag, Res);
     }
     
-    output = fopen(filepath, "w");
+    // output = fopen(filepath, "w");
     
     walltime("Walltime at start of chi^2 calc.");
 
@@ -200,12 +200,12 @@ int main(int argc, char** argv){
       // maximum likelihood of one-dim posteriors and of entire parameter space. 
       printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf", maxL_fsig8, maxL_bsig8, maxL_sigv, minX2_fsig8, minX2_bsig8, minX2_sigp);
       
-      fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
+      // fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
       
       if(data_mock_flag == 1)  break;
     }
     
-    fclose(output);
+    // fclose(output);
   }
   /*
   default_params();
