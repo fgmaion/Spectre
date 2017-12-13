@@ -41,7 +41,7 @@
 
 
 int main(int argc, char **argv){  
-  (void) argc; // escape compiler unused variable warning. 
+  (void) argc;                                              // escape compiler unused variable warning. 
 
   thread                    =                   1; 
   
@@ -70,7 +70,7 @@ int main(int argc, char **argv){
     nz_smoothRadius         =      100.; 
   }
 
-  lopad                     =      50.0;                    // stefano_trans_z set such that lo_zlim boundary is lopad [h^-1 Mpc] from embeeded volume boundary.
+  lopad                     =      50.0;                    // stefano_trans_z set such that lo_zlim boundary is lopad [h^-1 Mpc] from embedded vol boundary.
   fkpPk                     =    8000.0;                    // [h^-1 Mpc]^3.  Stefano: 4000 [h^-1 Mpc]^3.
 
   fft_size                  =       512;                    // Worker 46 works up to 1024. 
@@ -78,9 +78,9 @@ int main(int argc, char **argv){
   logk_min                  =      -2.0;
   logk_max                  =   0.60206;                    // k = 4 hMpc^{-1}.
   
-  CatalogNumber             =       306;                    // Total number of (independent) HOD mocks.
+  CatalogNumber             =       153;                    // Total number of (independent) HOD mocks.
 
-  
+   
   
   start_walltime();
   
@@ -92,13 +92,13 @@ int main(int argc, char **argv){
   
   set_angularlimits(0, fieldFlag);                       // Assumes data cut to mock limits.
   
-  Initialise();                                          // Initialise grid, fft params and random generation.
+  Initialise();                                          // Initialise grid, FFT params and random generation.
   
   check_radialextent(loChi, hiChi, lopad);
   
-  stefano_trans_z = -loChi + lopad;                      // Translate lower limit to close to edge of box.
+  stefano_trans_z = -loChi + lopad;                      // Translate lower limit to near the edge of box.
   
-  prep_CatalogueInput_500s();                            // Max. number of gals of ALL mocks (& data) analysed simultaneously is hard coded.  
+  prep_CatalogueInput_500s();                            // Max. number of gals of ALL mocks (& data) analysed simultaneously is `hard coded' (with some contingency).  
   
   prep_nbar();                                           // assign memory and zero e.g. bins of number of galaxies per chi. 
   
@@ -110,7 +110,9 @@ int main(int argc, char **argv){
   load_rands_radec(1.0);
   
   get_zeff();
-  
+
+  calc_volavg_fkpweights2();
+
   delete_lockfile();
   
   prep_clipping_calc();
@@ -126,7 +128,7 @@ int main(int argc, char **argv){
   
   walltime("All prep. done");
   
-  for(data_mock_flag = 0; data_mock_flag < 2; data_mock_flag++){ // analysis of VIPERS data and mock catalogues.
+  for(data_mock_flag = 0; data_mock_flag < 1; data_mock_flag++){ // analysis of VIPERS data and mock catalogues.
     trash_nbarshot_file(atoi(argv[4])); // internal loop over d0. 
     
     for(loopCount=atoi(argv[4]); loopCount <= mock_end; loopCount++){            
@@ -158,7 +160,7 @@ int main(int argc, char **argv){
     
       prep_inverseCumulative_nbar();
       
-      calc_clipping_weights(); 
+      // calc_clipping_weights(); 
     
       walltime("Clipping weights done.");
     
@@ -174,7 +176,7 @@ int main(int argc, char **argv){
     
       printf("\n\n");
     
-      for(int m=1; m<5; m++){
+      for(int m=4; m<5; m++){
         d0 = d0s[m];
       
         set_clipping_weights(); // unity weights for d0=1000, else load. 

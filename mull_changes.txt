@@ -1,0 +1,10 @@
+ChiSq_input.c:          -- Mock P(k) naming convention for Jenkins folding, either number of folds or fold factor {(0,2) or (1,2)};  mocks labelled 001 or simply 1.
+
+ChiSq_minimisation.c:   -- Mull results are already shot noise subtracted.
+
+driver_likelihood.c:    -- Set covariance mocks path, and set to retrieve shot noise values. 
+
+get_allkvals.c:         -- Mock P(k) naming convention for Jenkins folding, either number of folds or fold factor {(0,2) or (1,2)};  mocks    labelled 001 or simply 1.
+
+MultipoleCovariance.c:  -- Mock P(k) naming convention for Jenkins folding, either number of folds or fold factor {(0,2) or (1,2)};  mocks    labelled 001 or simply 1.
+                        -- Shot noise subtrated. 

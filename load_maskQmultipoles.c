@@ -4,15 +4,29 @@ int set_rand_rng(void){
   return 0;
 }
 
+int rotate_ra(void){
+  // Stefano basis has ra aligned with y and redshift along z; R1 rotation can be done simply by changing ra coordinate,
+  // this is NOT true of dec.
+  for(j=0; j<rand_number; j++)  rand_ra[j] -= CentreRA;
+
+  return 0;
+}
+
 int rand_chiReassignment(){
   // With nbar specified according to interp_nz(chi), assign chi for randoms such that they satisfy this bar.
   // Achieved with the transformation method, see pg. 287 of NR and smooth_nbar.c
 
   double  cos_dec;
+  double   x2, z2;
+  double    c_dec;
+
+  c_dec   = CentreDec*(pi/180.);
+
+  rotate_ra();
   
-  printf("\n\nRandoms chi reassignment.");
+  printf("\n\nRandoms chi reassignment; centre RA: %.3lf \t centre DEC: %.3lf", CentreRA, CentreDec);
   
-  #pragma omp parallel for private(j, cos_dec) if(thread == 1)
+  // #pragma omp parallel for private(j, cos_dec, x2, z2) if(thread == 1)
   for(j=0; j<rand_number; j++){
     rand_chi[j]    = inverse_cumulative_nbar(rand_rng[j]);
 
@@ -21,13 +35,24 @@ int rand_chiReassignment(){
 
     cos_dec        = cos(rand_dec[j]);
       
-    rand_x[j]      = rand_chi[j]*cos(rand_ra[j])*cos_dec;
-    rand_y[j]      = rand_chi[j]*sin(rand_ra[j])*cos_dec;
-    rand_z[j]      = rand_chi[j]*sin(rand_dec[j]);
+    rand_x[j]      =  rand_chi[j]*cos(rand_ra[j])*cos_dec;
+    rand_y[j]      =  rand_chi[j]*sin(rand_ra[j])*cos_dec;
+    rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);
 
     rand_weight[j] = 1./(1. + (*pt2nz)(rand_chi[j])*fkpPk);   // rand fkp weights.
+    
+    x2             = -sin(c_dec)*rand_x[j]  - cos(c_dec)*rand_z[j];
+    z2             =  cos(c_dec)*rand_x[j]  - sin(c_dec)*rand_z[j];
+
+    rand_x[j]      = x2 + stefano_trans_x;  // Translate to fit in the box. P(k) unaffected.
+    rand_y[j]     +=      stefano_trans_y;
+    rand_z[j]      = z2 + stefano_trans_z;   
   }
 
+  printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));
+  printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));
+  printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));     
+  
   return 0;
 }
 
@@ -132,7 +157,7 @@ int load_maskfits(double sampling, int count_res){
   
   read_maskfits(filepath, sampling);  // rand_number set by nrows.
   
-  printf("\n\nMask: %s with sampling %.2lf has %d randoms", filepath, sampling, rand_number);
+  printf("\n\nMask: %s with sampling %.4lf has %d randoms", filepath, sampling, rand_number);
   
   assign_randmemory();
 
@@ -142,5 +167,26 @@ int load_maskfits(double sampling, int count_res){
 
   rand_chiReassignment();
   
+  return 0;
+}
+
+
+int load_maskedRSD_rands(double sampling){
+  sprintf(filepath, "/home/mjw/maskedRSD/dat/randoms_W1_Nagoya_xyz_0.7_0.8_gridded.cat");
+
+  inputfile = fopen(filepath, "r");
+
+  line_count(inputfile, &rand_number);  
+
+  lowerSampling_randomisedCatalogue(sampling);
+  
+  assign_randmemory();
+  
+  for(j=0; j<rand_number; j++){
+    fscanf(inputfile, "%le \t %le \t %le", &rand_x[j], &rand_y[j], &rand_z[j]);
+    
+    rand_weight[j]  = 1.0;    
+  }
+
   return 0;
 }

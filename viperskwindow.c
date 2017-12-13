@@ -34,7 +34,7 @@ double get_kMask_norm(){
   double norm = 0.0;  // norm = 4.700981*1.823239*pow(10., 6.);
 
   for(j=0; j<mono_config->N; j++){
-    if(mono_config->krvals[j][0] > 0.0001){
+    if(mono_config->krvals[j][0] > 0.001){
       norm = mono_config->pk[j][0];
 
       break;
@@ -56,9 +56,10 @@ int printf_kMask_multipoles(){
   pk_mu(mono_config);
   pk_mu(quad_config);
 
-  sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_4000_%.1lf_%.1lf_thread_1.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+  sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
   // sprintf(filepath,"%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
-
+  // sprintf(filepath, "/home/mjw/maskedRSD/new/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_kmultipoles_Nov20.dat");
+  
   output = fopen(filepath, "w");
 
   for(j=0; j<mono_config->N; j++){
@@ -75,9 +76,18 @@ int printf_kMask_multipoles(){
 int prepVIPERS_kSpaceMultipole(){  
   printf_kMask_multipoles();
 
-  sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_4000_%.1lf_%.1lf_thread_1.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
-  // sprintf(filepath, "%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim,hi_zlim);
+  if(mull == 0){
+    sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+  }
+  
+  else if(mull == 1){
+    sprintf(filepath, "%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim,hi_zlim);
+  }
 
+  else{
+    printf("Error on Fourier Q multipoles load.");
+  }
+  
   inputfile = fopen(filepath, "r");
 
   line_count(inputfile, &VIPERS_kSpace_multipoles_lineNo);
@@ -96,7 +106,7 @@ int prepVIPERS_kSpaceMultipole(){
     fscanf(inputfile, "%le \t %le \t %le \n", &VIPERS_k[j], &VIPERS_kMono[j], &VIPERS_kQuad[j]);
     
     // set limits due to noise. 
-    if(VIPERS_k[j] < 0.0001){
+    if(VIPERS_k[j] < 0.001){
       VIPERS_kMono[j] = 1.0;
       VIPERS_kQuad[j] = 0.0;
     }

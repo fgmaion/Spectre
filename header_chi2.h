@@ -234,6 +234,10 @@ int    FFTLog_initialise_mask(FFTLog_config *fc);
 
 int    apmultipoles(FFTLog_config *mono, FFTLog_config *quad, FFTLog_config *hex, double beta, double velDispersion, double alpha, double epsilon);
 
+double calc_onedposteriors(double* maxL_fsig8, double* maxL_bsig8, double* maxL_sigv);
+double calc_ChiSq(double dfsigma8, double dbsigma8, double dvelDispersion, double depsilon);
+
+
 // -- Posteriors -- //
 double calc_fsigma8Posterior();
 double calc_bsigma8Posterior();

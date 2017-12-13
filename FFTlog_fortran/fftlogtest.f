@@ -127,8 +127,9 @@ c        kr = k_c r_c
       read (*,*,end=300,err=300) kr
 c--------r^(mu+1) exp(-r^2/2)
       do i=1,n
-        r=10.d0**(logrc+(i-nc)*dlogr)
-        a(i)=r**(mu+1.d0)*exp(-r**2/2.d0)
+         r=10.d0**(logrc+(i-nc)*dlogr)
+c--------r     exp(-r^2/2) (xxx) j_mu(k r) k dr = k     exp(-k^2/2)         
+        a(i)=r**(mu+1.d0)*exp(-r**2/2.d0)  
       enddo
 c--------initialize FFTLog transform - note fhti resets kr
       call fhti(n,mu,q,dlnr,kr,kropt,wsave,ok)

@@ -1,0 +1,4435 @@
+diff --git a/AgeOftheUniverse.c b/AgeOftheUniverse.c
+index a0da3f3..55e8293 100644
+--- a/AgeOftheUniverse.c
++++ b/AgeOftheUniverse.c
+@@ -34,6 +34,7 @@ double f_Om_545(double x, void* p){
+ int UniverseAge(){
+   H_0                         = 100.0*h;                                                            // km s^-1 Mpc^-1 
+   H_0inPerSec                 = H_0*pow(3.08567758, -1.)*pow(10.0, -19.0);                          // s^{-1}                    
++
+   HubbleTime                  = pow(H_0inPerSec, -1.)*pow(OneYearInSeconds, -1.)*pow(10., -9.);     // Hubble time in Gyears
+     
+   linearGrowth_nPoints        = 1120;
+diff --git a/ChiSq_input.c b/ChiSq_input.c
+index db521c5..2b04bc7 100644
+--- a/ChiSq_input.c
++++ b/ChiSq_input.c
+@@ -1,8 +1,13 @@
+ int load_withoutfolding(char filepath[]){
+   char  firstfilepath[200];
+ 
+-  sprintf( firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, lo_zlim, hi_zlim);
+-  // sprintf( firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, lo_zlim, hi_zlim);
++  if(mull == 0){
++    sprintf(firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, lo_zlim, hi_zlim);
++  }
++
++  else{
++    sprintf(firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, lo_zlim, hi_zlim);
++  }
+   
+   inputfile = fopen(firstfilepath, "r");
+ 
+@@ -20,16 +25,22 @@ int load_withoutfolding(char filepath[]){
+ }
+ 
+ int load_withfolding(char filepath[]){
+-  double loc_k;
++  double             loc_k;
+ 
+   char  firstfilepath[200];
+   char foldedfilepath[200];
+ 
+-  sprintf( firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, lo_zlim, hi_zlim);
+-  // sprintf( firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, lo_zlim, hi_zlim);
++  if(mull == 0){
++    sprintf(firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, lo_zlim, hi_zlim);
++  }
+ 
++  else{
++    sprintf(firstfilepath, "%s_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, lo_zlim, hi_zlim);
++  }
++  
+   sprintf(foldedfilepath, "%s_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, lo_zlim, hi_zlim);
+ 
++  
+   inputfile = fopen(firstfilepath, "r");
+ 
+   for(i=0; i<jenkins_foldIndex_unfoldedfile; i++){
+@@ -58,17 +69,20 @@ int load_withfolding(char filepath[]){
+ }
+ 
+ int load_mock(int mockNumber){
+-  sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock_%03d", covariance_mocks_path, d0, fieldFlag, mockNumber);
+-  // sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock_%d", covariance_mocks_path, d0, fieldFlag, mockNumber);
+-  
+-  // printf("\n\n%s", filepath);
+-  
++  if(mull == 0){
++    sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock_%03d", covariance_mocks_path, d0, fieldFlag, mockNumber);
++  }
++
++  else{
++    sprintf(filepath, "%s/mocks_v1.7/pk/d0_%d/W%d/mock_%d", covariance_mocks_path, d0, fieldFlag, mockNumber);
++  }
++    
+   if(ChiSq_kmax <= jenkins_fold_kjoin){
+-    load_withoutfolding(filepath);  // amplitude rescaling in load_withoutfolding.
++    load_withoutfolding(filepath);  // amplitude rescaling no longer in load_withoutfolding.
+   }
+ 
+   else{
+-    load_withfolding(filepath);  // amplitude recsaling in load_withfolding.
++    load_withfolding(filepath);  // amplitude recsaling no longer in load_withfolding.
+   }
+ 
+   // printf("\n\nCorrelated data.");
+@@ -83,8 +97,8 @@ int load_mock(int mockNumber){
+ }
+ 
+ int load_data(void){
+-  sprintf(filepath, "%s/data_v1.7/pk/d0_%d/W%d/data", covariance_mocks_path, d0, fieldFlag);
+-  
++  sprintf(filepath, "%s/data_v1.7/pk/d0_%d/W%d/data", covariance_mocks_path, d0, fieldFlag);  // covariance_mocks_path updated according to mull flag.
++    
+   if(ChiSq_kmax <= jenkins_fold_kjoin){
+     load_withoutfolding(filepath);
+   }
+@@ -93,5 +107,10 @@ int load_data(void){
+     load_withfolding(filepath);
+   }
+ 
++  for(j=0; j<mono_order; j++){
++    kdata[j]              = kVals[j];
++    kdata[j + mono_order] = kVals[j];
++  }
++  
+   return 0;
+ }
+diff --git a/ChiSq_minimisation.c b/ChiSq_minimisation.c
+index 2fa6eb8..5194fcc 100644
+--- a/ChiSq_minimisation.c
++++ b/ChiSq_minimisation.c
+@@ -1,7 +1,89 @@
+-int default_params(){
+-  fsigma8       = 0.050000;
+-  velDispersion = 2.250000;
+-  bsigma8       = 0.762500;
++int set_fittomean_params(void){
++  double maxL_fsig8, maxL_sigv, maxL_bsig8;
++
++  data_mock_flag = 2;
++  
++  calc_ChiSqs(0, 0);
++  
++  set_minChiSq();
++  
++  // calc_onedposteriors(&maxL_fsig8, &maxL_bsig8, &maxL_sigv);
++  
++  fsigma8       = minX2_fsig8;
++  bsigma8       = minX2_bsig8;
++  velDispersion = minX2_sigp;
++
++  // fsigma8       =   0.05;
++  // bsigma8       = 0.6875;
++  // velDispersion = 5.6250;
++
++  // fsigma8       = 0.1437;
++  // bsigma8       = 0.6875;
++  // velDispersion = 5.6250;
++  
++  printf("\n\nFit-to-mean params:  %.6lf \t %.6lf \t %.6lf", fsigma8, velDispersion, bsigma8);
++
++  epsilon_pad   = 0.000000;
++  alpha_pad     = 1.000000;
++
++
++  load_data();
++
++  get_datashotnoise();         // assigns to mean_shot.
++    
++  for(j=0; j<mono_order; j++)  xdata[j] -= mean_shot;
++
++  ctypeskvals_matchup();
++  
++  calc_ChiSq(fsigma8, bsigma8, velDispersion, epsilon_pad);
++  
++  return 0;
++}
++
++int getmockmean_params(int d0){
++  int                            line_no;
++  double   fs8, bs8, sp, fs8L, bs8L, spL;
++  
++  fsigma8       = 0.0;
++  velDispersion = 0.0;
++  bsigma8       = 0.0;  
++
++  sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
++
++  inputfile = fopen(filepath, "r");
++
++  line_count(inputfile, &line_no);
++
++  // printf("\n\nGetting mock mean parameters.  File: %s.  Input line number: %d", filepath, line_no);
++  
++  for(j=0; j<line_no; j++){
++    fscanf(inputfile, "%lg \t %lg \t %lg \t %lg \t %lg \t %lg \n", &fs8, &sp, &bs8, &fs8L, &spL, &bs8L);
++
++    // printf("\n%d \t %.6lf \t %.6lf \t %.6lf", j, fs8, sp, bs8);
++    
++    fsigma8       += fs8;
++    bsigma8       += bs8;
++    velDispersion +=  sp;
++  }
++
++  fclose(inputfile);
++
++  fsigma8        /= (double) line_no;
++  bsigma8        /= (double) line_no;
++  velDispersion  /= (double) line_no;
++      
++  // printf("\n\nMock Mean:  %.6lf \t %.6lf \t %.6lf", fsigma8, velDispersion, bsigma8);
++
++  epsilon_pad   = 0.000000;
++  alpha_pad     = 1.000000;
++  
++  return 0;
++}
++
++int default_params(void){
++  fsigma8       = 0.500000;
++  velDispersion = 5.625000;
++  bsigma8       = 0.652500;
+   epsilon_pad   = 0.000000;
+   alpha_pad     = 1.000000;
+   
+@@ -10,7 +92,7 @@ int default_params(){
+   return 0;
+ }
+ 
+-int bestfit_params(){
++int bestfit_params(void){
+   fsigma8       = minX2_fsig8;
+   velDispersion = minX2_sigp;
+   bsigma8       = minX2_bsig8;
+@@ -20,7 +102,7 @@ int bestfit_params(){
+   return 0;
+ }
+ 
+-int set_chiSq_intervals(){
++int set_chiSq_intervals(void){
+     fsigma8Interval       = (max_fsigma8     - min_fsigma8)/dRes;
+     bsigma8Interval       = (max_bsigma8     - min_bsigma8)/dRes;
+     sigmaInterval         = (max_velDisperse - min_velDisperse)/dRes;
+@@ -32,7 +114,7 @@ int set_chiSq_intervals(){
+     return 0;
+ }
+ 
+-int kvals_matchup(){
++int kvals_matchup(void){
+   double     diff;
+   double min_diff;
+     
+@@ -99,33 +181,35 @@ int calc_models(){
+   return 0;
+ }
+ 
+-int calc_ChiSqs(int mockNumber){    
++int calc_ChiSqs(int mockNumber, int print){    
+     int ll, mm, nn;
+ 
+     minChiSq = pow(10., 12.);
+     
+-    if      (data_mock_flag == 0)  load_mock(mockNumber);
+-    else if (data_mock_flag == 1)  load_data();
++    if     (data_mock_flag == 0)  load_mock(mockNumber);
++    else if(data_mock_flag == 1)  load_data();
++    else if(data_mock_flag == 2)  load_meanMultipoles();
++    
+     else{
+       printf("\n\nChi sq. input is invalid.");
+     }
+     
+     // printf("\n\nChi sq. input.");
++
++    if(mull == 0){  // mull results are already shot noise subtracted. 
++      if(data_mock_flag == 0){
++        for(j=0; j<mono_order; j++)  xdata[j] -= shotnoise_instances[mockNumber - 1]; 
++      }
+     
+-    if(data_mock_flag == 0){
+-      for(j=0; j<mono_order; j++)  xdata[j] -= shotnoise_instances[mockNumber - 1]; 
+-    }
+-    
+-    if(data_mock_flag == 1){
+-      get_datashotnoise();         // assigns to mean_shot. 
++      if(data_mock_flag == 1){
++        get_datashotnoise();         // assigns to mean_shot. 
+ 
+-      for(j=0; j<mono_order; j++)  xdata[j] -= mean_shot;
++        for(j=0; j<mono_order; j++)  xdata[j] -= mean_shot;
++      }
+     }
+     
+     // set_oldshotnoise();
+     
+-    // set_meanmultipoles();
+-    
+     // scale_Cov(130);
+     
+     for(j=0; j<order; j++){
+@@ -177,7 +261,7 @@ int calc_ChiSqs(int mockNumber){
+                 // ChiSqGrid[jj][kk][ii][ll][mm] *= (1. - (order + 1)/(CatalogNumber - 1.)); // Hartlap et al. correction.
+               }
+ 
+-              // printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf", fsigma8, bsigma8, velDispersion, ChiSqGrid[jj][kk][ii][ll][mm]);
++              if(print == 1)  printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf", fsigma8, bsigma8, velDispersion, ChiSqGrid[jj][kk][ii][ll][mm]);
+             }
+           }
+         }
+@@ -188,9 +272,11 @@ int calc_ChiSqs(int mockNumber){
+ }
+ 
+ int get_ydata(int mockNumber, int data_mock_flag){
+-  if      (data_mock_flag == 0)  load_mock(mockNumber);
+-  else if (data_mock_flag == 1)  load_data();
+-  else if (data_mock_flag == 2)  set_meanMultipoles();
++  // Set up zero mean, decorrelated, unit variance, variables.
++
++  if     (data_mock_flag == 0)  load_mock(mockNumber);
++  else if(data_mock_flag == 1)  load_data();
++  else if(data_mock_flag == 2)  load_meanMultipoles();
+   else{
+     printf("\n\nChi sq. input is invalid.");
+   }
+@@ -200,9 +286,9 @@ int get_ydata(int mockNumber, int data_mock_flag){
+   }
+ 
+   if(data_mock_flag == 1){
+-    double shot = get_datashotnoise();
++    get_datashotnoise();
+ 
+-    for(j=0; j<mono_order; j++)  xdata[j] -= shot;
++    for(j=0; j<mono_order; j++)  xdata[j] -= mean_shot;
+   }
+   */
+   for(j=0; j<order; j++){
+@@ -259,17 +345,29 @@ double calc_ChiSq(double dfsigma8, double dbsigma8, double dvelDispersion, doubl
+     
+     // for(j=0; j<mono_order; j++)  printf("\n%.6le \t %.6le \t %.6le", kVals[j], xtheory[0][0][0][0][0][j], xtheory[0][0][0][0][0][j + mono_order]);
+     
+-    ytheory_compute(0, 0, 0, 0, 0);  // over ride zeroth model.
++    // ytheory_compute(0, 0, 0, 0, 0);  // over ride zeroth model.
+ 
+-    // for(nn=0; nn<order; nn++)  printf("\nTHERE: %.6le", pow(ydata[nn] - ytheory[0][0][0][0][0][nn], 2.)/gsl_vector_get(eval, nn));
++    double dChiSq;
++    double  ChiSq  = 0.0;
+ 
+-    double ChiSq  = 0.0;
++    printf("\n\nChi sq. eval.");
+     
+-    for(nn=0; nn<order; nn++)  ChiSq += pow(ydata[nn] - ytheory[0][0][0][0][0][nn], 2.)/gsl_vector_get(eval, nn);
++    for(nn=0; nn<order; nn++){
++      dChiSq = pow(xdata[nn] - xtheory[0][0][0][0][0][nn], 2.)*pow(gsl_matrix_get(sigma_norm, nn, nn), 2.);
+ 
+-    // printf("\n\nIndependent eval. of chi sq.: %.6le \n\n", ChiSq);
++      ChiSq += dChiSq;
++      
++      printf("\n%.6le \t %.6le \t %le \t %le \t %lf", kVals[nn%mono_order],xdata[nn],xtheory[0][0][0][0][0][nn],1./gsl_matrix_get(sigma_norm,nn,nn),dChiSq);
++
++      if(nn+1 == mono_order)  printf("\n");
++    }
++
++    // for(nn=0; nn<order; nn++)  ChiSq += pow(ydata[nn] - ytheory[0][0][0][0][0][nn], 2.)/gsl_vector_get(eval, nn);
+     
+-    return -ChiSq/2.;
++    // printf("\n\nIndependent eval. of chi sq.: %.6le \n\n", ChiSq);
++
++    return     ChiSq;
++    // return -ChiSq/2.;
+ }
+ 
+ int print_model(double dfsigma8, double dbsigma8, double dvelDispersion, double depsilon){
+@@ -304,6 +402,7 @@ int print_model(double dfsigma8, double dbsigma8, double dvelDispersion, double
+ }
+ 
+ int set_models(){
++  // Read in models precomputed up to 0.8 and assign xtheory to be these values us to ChiSq_kmax only. 
+   int    ll, mm, nn;
+   double store[Res][Res][Res][Res_ap][Res_ap][all_order];
+   
+diff --git a/FFTlog_fortran/fftlogtest.f b/FFTlog_fortran/fftlogtest.f
+index a654416..1495d9b 100644
+--- a/FFTlog_fortran/fftlogtest.f
++++ b/FFTlog_fortran/fftlogtest.f
+@@ -127,8 +127,9 @@ c        kr = k_c r_c
+       read (*,*,end=300,err=300) kr
+ c--------r^(mu+1) exp(-r^2/2)
+       do i=1,n
+-        r=10.d0**(logrc+(i-nc)*dlogr)
+-        a(i)=r**(mu+1.d0)*exp(-r**2/2.d0)
++         r=10.d0**(logrc+(i-nc)*dlogr)
++c--------r     exp(-r^2/2) (xxx) j_mu(k r) k dr = k     exp(-k^2/2)         
++        a(i)=r**(mu+1.d0)*exp(-r**2/2.d0)  
+       enddo
+ c--------initialize FFTLog transform - note fhti resets kr
+       call fhti(n,mu,q,dlnr,kr,kropt,wsave,ok)
+diff --git a/FFTlog_vipers_clipping.c b/FFTlog_vipers_clipping.c
+index 8b5d68a..fb48c70 100644
+--- a/FFTlog_vipers_clipping.c
++++ b/FFTlog_vipers_clipping.c
+@@ -206,14 +206,14 @@ int precompute_vipers_clipping_model(int FFTlogRes){
+   }
+ 
+   for(i=0; i<mono_config->N;   i++){
+-    if((mono_config->krvals[i][0]) >= pow(10., -3.)){
++    if((mono_config->krvals[i][0]) >= 0.005){
+       cnvldpk_zeropoint_index = i; // index where k>0.001; assume this is pk(0).
+ 
+       break;
+     }
+   }
+ 
+-  xi_mu(shot_config); // set shot noise xi. 
++  // xi_mu(shot_config); // set shot noise xi. 
+   
+   return 0;
+ }
+@@ -297,15 +297,33 @@ int clip_p0p2(FFTLog_config* clip_p0, FFTLog_config* clip_p2, FFTLog_config* mon
+ }
+ 
+ 
+-int cnvldmonoCorr_joint(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad, FFTLog_config* hex, FFTLog_config* shot){
+-  // Convolved monopole calculation to 2nd order. updated via bailey.c. Shot noise adds to large scale power. 
+-  for(i=0; i<mono->N; i++){
+-    cnvld->xi[i][0]   =         (mono->xi[i][0] + shot->xi[i][0])*FFTlog_W0_joint[i]; // calculation to 2nd order; updated via bailey.c
++int cnvldmonoCorr_joint(FFTLog_config* cnvld, FFTLog_config* mono, FFTLog_config* quad, FFTLog_config* hex, FFTLog_config* shot, int joint){
++  // Convolved monopole calculation to 2nd order. updated via bailey.c. Shot noise adds to large scale power.
++  if(joint == 0){
++    for(i=0; i<mono->N; i++){
++      cnvld->xi[i][0]    =           mono->xi[i][0]*FFTlog_W0[i];
++
++      cnvld->xi[i][0]   +=   (1./5.)*quad->xi[i][0]*FFTlog_W2[i];
++      cnvld->xi[i][0]   +=   (1./9.)*hex->xi[i][0]*FFTlog_W4[i];
++    }
++  }
+ 
+-    cnvld->xi[i][0]  +=  (1./5.)*quad->xi[i][0]*FFTlog_W2_joint[i];
+-    cnvld->xi[i][0]  +=   (1./9.)*hex->xi[i][0]*FFTlog_W4_joint[i];
++  else if(joint == 1){
++    for(i=0; i<mono->N; i++){
++      cnvld->xi[i][0]    =           mono->xi[i][0]*FFTlog_W0_joint[i];
++      // cnvld->xi[i][0] =          (mono->xi[i][0] + shot->xi[i][0])*FFTlog_W0_joint[i]; // calculation to 2nd order; updated via bailey.c
++      
++      cnvld->xi[i][0]   +=   (1./5.)*quad->xi[i][0]*FFTlog_W2_joint[i];
++      cnvld->xi[i][0]   +=   (1./9.)*hex->xi[i][0]*FFTlog_W4_joint[i];
++    }
+   }
+ 
++  else{
++    printf("\n\nAnother choice please.");
++
++    exit(EXIT_FAILURE);
++  }
++  
+   return 0;
+ }
+ 
+diff --git a/Faddeeva.c b/Faddeeva.c
+index 78f5714..bfc6e45 100644
+--- a/Faddeeva.c
++++ b/Faddeeva.c
+@@ -1,3 +1,2 @@
+-/* The Faddeeva.cc file contains macros to let it compile as C code
+-   (assuming C99 complex-number support), so just #include it. */
++/* The Faddeeva.cc file contains macros to let it compile as C code (assuming C99 complex-number support), so just #include it. */
+ #include "Faddeeva.cc"
+diff --git a/Initialise.c b/Initialise.c
+index caf01ff..38841e6 100644
+--- a/Initialise.c
++++ b/Initialise.c
+@@ -12,7 +12,6 @@ int init_gsl_randgen(){
+   return 0;
+ }
+ 
+-
+ int init_padding(){
+   n0 = n1 = n2 = fft_size;
+     
+@@ -28,7 +27,6 @@ int init_padding(){
+   return 0;
+ }
+ 
+-
+ int init_cell_info(){
+   // assumes cubic cells.
+   xCellSize             = (AxisLimsArray[1][2] - AxisLimsArray[0][2])/n2;
+@@ -41,18 +39,16 @@ int init_cell_info(){
+   return 0;
+ }
+ 
+-
+ int init_dist_z(){
+   chi_zcalc(); // Cosmology determined by inclusion of cosmology_planck2015.h or cosmology_valueaddedmocks.h
+   
+   printf("\n\nRedshift limits, lower bound: %.6lf\t%.10lf h^-1 Mpc (%.10lf Mpc), \n\t\t upper bound: %.6lf\t%.10lf h^-1 Mpc (%.10lf Mpc)", lo_zlim, loChi, loChi/h, hi_zlim, hiChi, hiChi/h);
+ 
+-  printf("\n\nVolume surveyed: %.10lf [10^-3 (h^-1 Gpc)^3]", pow(10., 3.)*calc_vol());
++  printf("\n\nVolume surveyed by field W%d: %.10lf [10^-3 (h^-1 Gpc)^3]", fieldFlag, pow(10., 3.)*calc_vol());
+   
+   return 0;
+ }
+ 
+-
+ double check_radialextent(double lochi, double hichi, double lopad){
+   double radial_extent = hichi - lochi;
+ 
+@@ -65,7 +61,6 @@ double check_radialextent(double lochi, double hichi, double lopad){
+   return 0;
+ }
+ 
+-
+ int init_fftgrid(){
+   xNy = pi/xCellSize;  // k = 2*pi x Nyquist frequency
+   yNy = pi/yCellSize;  // k = 2*pi x Nyquist frequency
+@@ -78,7 +73,6 @@ int init_fftgrid(){
+   return 0;
+ }
+ 
+-
+ int Initialise(){
+   init_gsl_randgen();
+ 
+@@ -93,7 +87,6 @@ int Initialise(){
+   return 0;
+ }
+ 
+-
+ double SolidAngleCalc(double decLowerBound, double decUpperBound, double raInterval){
+     double SolidAngle    = 0.0;
+     
+diff --git a/MultipoleCovariance.c b/MultipoleCovariance.c
+index 11eb7b2..25e5511 100644
+--- a/MultipoleCovariance.c
++++ b/MultipoleCovariance.c
+@@ -36,8 +36,13 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
+   char     Nthfilepath[200];
+   char   firstfilepath[200];
+ 
+-  sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
+-  // sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
++  if(mull == 0){
++    sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
++  }
++
++  else{
++    sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
++  }
+   
+   printf("\n\n%s", firstfilepath);
+   
+@@ -66,8 +71,13 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
+   
+   // Be careful with 0 or 1 for the mock numbering.
+   for(k=0; k<mocks; k++){
+-    sprintf(Nthfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, k + start, lo_zlim, hi_zlim);   //  Be careful with 0 or 1 for initial mock.
+-    // sprintf(Nthfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, k + start, lo_zlim, hi_zlim);
++    if(mull == 0){
++      sprintf(Nthfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, k + start, lo_zlim, hi_zlim);   //  Be careful with 0 or 1 for initial mock.
++    }
++
++    else{
++      sprintf(Nthfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, k + start, lo_zlim, hi_zlim);
++    }
+     
+     inputfile = fopen(Nthfilepath, "r");
+ 
+@@ -81,10 +91,12 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
+ 
+     fclose(inputfile);
+   }
+-  
+-  for(kk=0; kk<mocks; kk++){
+-    for(ii=0; ii<mono_order; ii++)  Multipoles[kk][ii] -=  shotnoise_instances[kk]; // uses fold factor of 4.0 currently; subtract off monopole.
+-    // for(ii=0; ii<order;      ii++)  Multipoles[kk][ii] *=         mean_suppression;
++
++  if(mull == 0){
++    for(kk=0; kk<mocks; kk++){
++      for(ii=0; ii<mono_order; ii++)  Multipoles[kk][ii] -=  shotnoise_instances[kk]; // uses fold factor of 4.0 currently; subtract off monopole.
++      // for(ii=0; ii<order;      ii++)  Multipoles[kk][ii] *=         mean_suppression;
++    }
+   }
+   
+   for(k=0; k<order; k++){
+@@ -110,13 +122,18 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
+ int get_kindices(int start, char filepath[]){
+   char   firstfilepath[200];
+   char  foldedfilepath[200];
+-  
+-  sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
+-  // sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
++
++  if(mull == 0){
++    sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
++  }
++
++  else{
++    sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
++  }
+   
+   printf("\n\n%s", firstfilepath);
+   
+-  inputfile  = fopen(firstfilepath, "r");
++  inputfile = fopen(firstfilepath, "r");
+     
+   line_count(inputfile, &lineNo);
+ 
+@@ -139,10 +156,15 @@ int get_kindices(int start, char filepath[]){
+   printf("\n\nk for switching to folded measurement: %.3lf (%d)", jenkins_fold_kjoin, jenkins_foldIndex_unfoldedfile);
+ 
+   // again, but for folded measurement.
+-  sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
+-  // sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
++  if(mull == 0){
++    sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
++  }
++
++  else{
++    sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
++  }
+   
+-  inputfile  = fopen(foldedfilepath, "r");
++  inputfile = fopen(foldedfilepath, "r");
+ 
+   line_count(inputfile, &lineNo);
+ 
+@@ -174,9 +196,14 @@ int get_Multipoles(int mocks, int start, char filepath[]){
+   char Nfoldedfilepath[200];
+ 
+   for(k=0; k<mocks; k++){
+-    sprintf(Nthfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, k + start, lo_zlim, hi_zlim);
+-    // sprintf(Nthfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, k + start, lo_zlim, hi_zlim);
+-    
++    if(mull == 0){
++      sprintf(Nthfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, k + start, lo_zlim, hi_zlim);
++    }
++
++    else{
++      sprintf(Nthfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, k + start, lo_zlim, hi_zlim);
++    }
++        
+     inputfile = fopen(Nthfilepath, "r");
+ 
+     for(i=0; i<jenkins_foldIndex_unfoldedfile; i++){
+@@ -189,8 +216,13 @@ int get_Multipoles(int mocks, int start, char filepath[]){
+ 
+     fclose(inputfile);
+ 
+-    sprintf(Nfoldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, k + start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;
+-    // sprintf(Nfoldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, k + start, lo_zlim, hi_zlim);
++    if(mull == 0){
++      sprintf(Nfoldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, k + start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;
++    }
++
++    else{
++      sprintf(Nfoldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, k + start, lo_zlim, hi_zlim);
++    }
+     
+     inputfile = fopen(Nfoldedfilepath, "r");
+ 
+@@ -209,7 +241,9 @@ int get_Multipoles(int mocks, int start, char filepath[]){
+ }
+ 
+ 
+-int get_kmaxes(int mocks, int start, char filepath[]){                                                                                                                                         int min_index = 0;                                                                                                                                                                                                                                                                                                                                                                     
++int get_kmaxes(int mocks, int start, char filepath[]){
++  int min_index = 0;
++  
+   for(i=0; i<mono_order; i++){                                                                                                                                                               
+     for(j=min_index; j<ChiSq_nkmaxes; j++){                                                                                                                                                  
+       if(kVals[i] > ChiSq_kmaxes[j]){                                                                                                                                                        
+@@ -233,10 +267,12 @@ int load_CovarianceMatrix_withfolding(int mocks, int start, char filepath[]){
+   get_Multipoles(mocks, start, filepath);
+   
+   // get_kmaxes(mocks, start, filepath);
+-  
+-  for(kk=0; kk<mocks; kk++){
+-    for(ii=0; ii<mono_order; ii++)  Multipoles[kk][ii] -= shotnoise_instances[kk];      // uses fold factor of 4.0 currently; subtract off monopole.
+-    // for(ii=0; ii<order;      ii++)  Multipoles[kk][ii] *=        mean_suppression;
++
++  if(mull == 0){
++    for(kk=0; kk<mocks; kk++){
++      for(ii=0; ii<mono_order; ii++)  Multipoles[kk][ii] -= shotnoise_instances[kk];      // uses fold factor of 4.0 currently; subtract off monopole.
++      // for(ii=0; ii<order;      ii++)  Multipoles[kk][ii] *=        mean_suppression;
++    }
+   }
+   
+   for(k=0; k<order; k++){
+@@ -277,9 +313,9 @@ int load_CovarianceMatrix(int mocks, int start){
+     load_CovarianceMatrix_withfolding(mocks, start, filepath);
+   }
+ 
+-  printCov();
++  // printCov();
+ 
+-  print_meanMultipoes();
++  // print_meanMultipoes();
+   
+   return 0;
+ }
+diff --git a/assignAcceptance.c b/assignAcceptance.c
+index 4a83ef6..95d3eac 100644
+--- a/assignAcceptance.c
++++ b/assignAcceptance.c
+@@ -56,10 +56,10 @@ int assignAcceptance_rand(){
+     for(j=0; j<rand_number; j++){
+       // randoms satisfy chi limits by construction.
+       if(rand_dec[j] >= -5.97){
+-	rand_number = j;  // dec problem in mocks.
++        rand_number = j;  // dec problem in mocks.
+ 
+-	break;
+-	// fkp_accepted_rand += pow(1. + (*pt2nz)(rand_chi[j])*fkpPk, -1.);
++        break;
++        // fkp_accepted_rand += pow(1. + (*pt2nz)(rand_chi[j])*fkpPk, -1.);
+       }
+     }
+ 
+@@ -151,14 +151,12 @@ double AcceptedMin(double a[], bool b[], int n){
+   return min;
+ }
+ 
+-
+ int assignAcceptance_true(){
+     for(j=0; j<Vipers_Num; j++)                     Acceptanceflag[j]  = true;
+ 
+     return 0;
+ }
+ 
+-
+ double assignAcceptance_parent(){
+   int accepted = 0;
+ 
+@@ -192,7 +190,6 @@ double assignAcceptance_parent(){
+   return daccepted_gals;
+ } 
+ 
+-
+ int assignAcceptanceCube(){
+     accepted_gals = 0;
+     
+diff --git a/calc_model.c b/calc_model.c
+index 92c987b..98b2196 100644
+--- a/calc_model.c
++++ b/calc_model.c
+@@ -5,7 +5,13 @@ int model_compute(int aa, int bb, int cc, int dd, int ee, int print){
+  
+   FFTlog_updatepk(mono_config, quad_config, hex_config, fsigma8/bsigma8, velDispersion);
+   // apmultipoles(mono_config, quad_config, hex_config, fsigma8/bsigma8, velDispersion, alpha_pad, epsilon_pad);
+-    
++  /*
++  for(j=0; j<mono_config->N; j++){
++    if((0.01 < mono_config->krvals[j][0]) && (mono_config->krvals[j][0] < 1.0)){
++      printf("\n%le \t %le \t %le", mono_config->krvals[j][0], mono_config->pk[j][0], quad_config->pk[j][0]);
++    }
++  }
++  */
+   xi_mu(mono_config);  // Transform to correlation function. 
+   xi_mu(quad_config);  
+   xi_mu( hex_config);
+@@ -17,13 +23,11 @@ int model_compute(int aa, int bb, int cc, int dd, int ee, int print){
+   }
+   */
+   // last arg. for shot noise contribution to P_*(0) as given by shot_config 
+-  cnvldmonoCorr_joint(convlmonoCorr, mono_config, quad_config, hex_config, zero_config);
++  cnvldmonoCorr_joint(convlmonoCorr, mono_config, quad_config, hex_config, zero_config, 0);
+   
+   pk_mu(convlmonoCorr);
+   
+   cnvldpk_zero = convlmonoCorr->pk[cnvldpk_zeropoint_index][0];  // zero point determined for P'(0) for the joint fields. 
+-
+-  // printf("\n\nConvolved P(k) zero point: %.4lf", cnvldpk_zero);
+   
+   cnvldmonoCorr(convlmonoCorr, mono_config, quad_config, hex_config, zero_config, zero_config, zero_config);
+   cnvldquadCorr(convlquadCorr, mono_config, quad_config, hex_config, zero_config, zero_config, zero_config);
+@@ -39,24 +43,41 @@ int model_compute(int aa, int bb, int cc, int dd, int ee, int print){
+   
+   // double kmask_norm = get_kMask_norm();  
+   // printf("\n\nKMASK NORM RATIO: %.9lf", kmask_norm*9.599*pow(10., -2.)/(cnvldpk_zero*fracArea));
+-  /*
++  
+   for(j=0; j<mono_config->N; j++){
+-    convlmonoCorr->pk[j][0] -= cnvldpk_zero*fracArea*FFTlog_Wk0[j];
+-    convlquadCorr->pk[j][0] -= cnvldpk_zero*fracArea*FFTlog_Wk2[j];
++    // convlmonoCorr->pk[j][0]  = mono_config->pk[j][0];
++    // convlquadCorr->pk[j][0]  = quad_config->pk[j][0];
++
++    // Single-field
++    // convlmonoCorr->pk[j][0] -= cnvldpk_zero*FFTlog_Wk0[j];
++    // convlquadCorr->pk[j][0] -= cnvldpk_zero*FFTlog_Wk2[j];
++    /*
++    // Joint-field 
++    convlmonoCorr->pk[j][0]    -= cnvldpk_zero*fracArea*FFTlog_Wk0[j];
++    convlquadCorr->pk[j][0]    -= cnvldpk_zero*fracArea*FFTlog_Wk2[j];
++    */
++  }
++  
++  if(print == 1){
++    print_basemodel();
++
++    printf("\n\nConvolved P(k) zero point: %.4lf", cnvldpk_zero);  
+   }
+-  */
+-  if(print == 1)  print_basemodel();
+   
+   return 0;
+ }
+ 
+ int print_basemodel(){
+-  sprintf(filepath, "%s/models/defaultparamas_model_intcor_cnvld_zlim_%.1lf_%.1lf.dat", outputdir, lo_zlim, hi_zlim);
++  printf("\n\nConvolved power spectra: \n\n");
++
++  sprintf(filepath, "%s/models/defaultparamas_model_intcor_cnvld_W%d_zlim_%.1lf_%.1lf_d0_%d_kmax_%.1lf.dat", outputdir, fieldFlag, lo_zlim, hi_zlim, d0, ChiSq_kmax);
+ 
+   output = fopen(filepath, "w");
+ 
+   for(j=0; j<mono_config->N; j++){
+-    if((0.01 < mono_config->krvals[j][0]) && (mono_config->krvals[j][0] < 3.0)){
++    if((0.01 < mono_config->krvals[j][0]) && (mono_config->krvals[j][0] < 1.0)){
++      printf("%le \t %le \t %le \n", convlmonoCorr->krvals[j][0], convlmonoCorr->pk[j][0], convlquadCorr->pk[j][0]);
++
+       fprintf(output, "%le \t %le \t %le \n", convlmonoCorr->krvals[j][0], convlmonoCorr->pk[j][0], convlquadCorr->pk[j][0]);
+     }
+   }
+diff --git a/chi2.sh b/chi2.sh
+index f4e9687..5acbdf3 100755
+--- a/chi2.sh
++++ b/chi2.sh
+@@ -2,9 +2,8 @@
+ #PBS -N chi2_run
+ #PBS -V
+ #PBS -p 1023
+-#PBS -l nodes=1:ppn=1                                                                                     
++#PBS -l nodes=1:ppn=1                                                                                    
+ #PBS -l walltime=00:120:00
+-#PBS -l mem=5MB
+ 
+ set_lock(){
+   locked=1
+@@ -29,17 +28,20 @@ set_lock(){
+ 
+ test(){
+   ## Interactive run with: qsub -I -o $outputdir/chi2_log/chi2_stdout.pbs -e $outputdir/chi2_log/chi2_stderr.pbs chi2.sh
+-  export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9
+-  export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9 # W1_Spectro_V7_2
++  export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9/
++  export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9/ # W1_Spectro_V7_2
++
+   export LOZ=0.6
+   export HIZ=0.9
++  
+   export FIELDFLAG=1
++
+   export d0=1000
+   export ZEFF=0.75    ## ZEFFS=(0.607 0.958)  ## ZEFFS=(0.75 1.05)  ## ZEFFS=(0.706 0.903) 
+ 
+   rm -r /home/mjw/IO_lock/
+ 
+-  gcc -std=gnu11 -o chi2.o Scripts/driver_likelihood.c -lfftw3 -lm -lgsl -lgslcblas -fopenmp
++  gcc -std=gnu11 -o chi2.o Scripts/driver_likelihood.c -lfftw3 -lm -lgsl -lgslcblas -fopenmp -lfftw3_omp
+ }
+ 
+ test
+@@ -48,6 +50,7 @@ DIR="$HOME/HOD_MockRun/Scripts/"
+ cd $DIR
+ 
+ export BRANCH=$(git symbolic-ref --short HEAD) # current Git branch
++
+ export GSL_RNG_SEED=123
+ export GSL_RNG_TYPE=taus
+ 
+diff --git a/combining_clipped_fsig8.c b/combining_clipped_fsig8.c
+deleted file mode 100644
+index 9e63571..0000000
+--- a/combining_clipped_fsig8.c
++++ /dev/null
+@@ -1,229 +0,0 @@
+-double mock_mean_fsig8(int d0, int field, double kmax){
+-  // Given d0, field and k_max, calculate the mean fsig8 of the available mocks.
+-  double mock_fsig8;
+-  double mock_mean_fsig8 = 0.0;
+-
+-  for(j=1; j<26; j++){
+-    // mocks 1 to 25.                                                                                                                                                                                                                        
+-    if((d0 == 4) && (field == 1))  sprintf(filepath, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/new_mock_%d_0.6_0.9_snipCorrected.dat",     d0, field, kmax, j);
+-    else if(field == 4)            sprintf(filepath, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mock_%d_0.6_0.9_snipCorrected.dat",     d0, field, kmax, j);
+-    else                           sprintf(filepath, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/new/new_mock_%d_0.6_0.9_snipCorrected.dat", d0, field, kmax, j);
+-
+-    // printf("\n%s", filepath);
+-    
+-    inputfile = fopen(filepath, "r");
+-
+-    fscanf(inputfile, "%le", &mock_fsig8);
+-
+-    mock_mean_fsig8 += mock_fsig8;
+-
+-    fclose(inputfile);
+-  }
+-
+-  mock_mean_fsig8 /= 25.;
+-
+-  return mock_mean_fsig8;
+-}
+-
+-
+-double calc_clipped_fsig8_cov(int d0i, int d0j, int field, double kmax){
+-  // calc d0_i, d0_j element of the covariance matrix. 
+-  const double fsig8_loz = 0.462;
+-  const double fsig8_hiz = 0.430;
+-
+-  double result = 0.0;
+-
+-  double mock_fsig8_d0i;
+-  double mock_fsig8_d0j;
+-
+-  double mock_mean_fsig8_d0i = 0.0;
+-  double mock_mean_fsig8_d0j = 0.0;
+-
+-  double cal_d0i, cal_d0j;
+-
+-  mock_mean_fsig8_d0i = mock_mean_fsig8(d0i,  field, kmax);
+-  mock_mean_fsig8_d0j = mock_mean_fsig8(d0j,  field, kmax);
+-
+-  cal_d0i = fsig8_loz/mock_mean_fsig8_d0i;
+-  cal_d0j = fsig8_loz/mock_mean_fsig8_d0j;
+-
+-  // printf("\n\nCalibration factors: %.2lf \t %.2lf", cal_ii, cal_jj);
+-
+-  for(j=1; j<26; j++){
+-    // mocks 1 to 26.                                                                                                                                                                                                                        
+-    if((d0i == 4) && (field == 1))    sprintf(filepath, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/new_mock_%d_0.6_0.9_snipCorrected.dat",     d0i, field, kmax, j);
+-    else if(field == 4)               sprintf(filepath, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mock_%d_0.6_0.9_snipCorrected.dat",         d0i, field, kmax, j);
+-    else                              sprintf(filepath, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/new/new_mock_%d_0.6_0.9_snipCorrected.dat", d0i, field, kmax, j);
+-
+-    inputfile = fopen(filepath, "r");
+-
+-    fscanf(inputfile, "%le", &mock_fsig8_d0i);
+-
+-    fclose(inputfile);
+-
+-
+-    if((d0j == 4) && (field == 1))    sprintf(filepath, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/new_mock_%d_0.6_0.9_snipCorrected.dat",     d0j, field, kmax, j);
+-    else if(field == 4)               sprintf(filepath, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mock_%d_0.6_0.9_snipCorrected.dat",         d0j, field, kmax, j);
+-    else                              sprintf(filepath, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/new/new_mock_%d_0.6_0.9_snipCorrected.dat", d0j, field, kmax, j);
+-
+-    inputfile = fopen(filepath, "r");
+-
+-    fscanf(inputfile, "%le", &mock_fsig8_d0j);
+-
+-    // covariance element for calibrated fsig8. 
+-    result += (cal_d0i*mock_fsig8_d0i - fsig8_loz)*(cal_d0j*mock_fsig8_d0j - fsig8_loz);
+-
+-    fclose(inputfile);
+-
+-    // printf("\n%.2lf \t %.2lf \t %.6lf", mock_fsig8_ii, mock_fsig8_jj, result);
+-  }
+-
+-  result /= 25.;
+-
+-  // printf("\n%.6lf", result);
+-
+-  return result;
+-}
+-
+-
+-int calc_bestfit_fsig8(int field, double kmax){
+-  // theory prediction. 
+-  const double fsig8_loz = 0.462;
+-  const double fsig8_hiz = 0.430;
+-
+-  int thresholds[4] = {4, 6, 10, 1000};
+-
+-  int    s, n = 4;
+-
+-  double     D[n];   // Data for four thresholds.
+-  double   var[n];   // Sq. error on data.
+-  double cal_D[n];   // Calibration factors.
+-
+-  double  cov[n][n]; // 4 x 4 covariance matrix. 
+-  double cov2[n][n]; // Copy of covariance, inversion seems to be in place. 
+-
+-  double inva[n*n];
+-
+-  gsl_matrix_view   m = gsl_matrix_view_array(cov2,  n, n);
+-  gsl_matrix_view inv = gsl_matrix_view_array(inva,  n, n);
+-  gsl_permutation*  p = gsl_permutation_alloc(n);
+-
+-  // Covariance matrix calc. for calibrated fsig8.
+-  for(ii=0; ii<n; ii++){
+-    for(jj=0; jj<n; jj++){
+-      cov[ii][jj]  = calc_clipped_fsig8_cov(thresholds[ii], thresholds[jj], field, kmax);
+-
+-      cov2[ii][jj] = cov[ii][jj];
+-    }
+-
+-    var[ii] = cov[ii][ii];
+-  }
+-  /*
+-  // Assume diagonal covariance //  i.e. inverse variance weighting.                                                                                                                                                                        
+-  for(ii=0; ii<n; ii++){
+-    for(jj=0; jj<n; jj++){
+-      if(ii != jj) cov[ii][jj] = cov2[ii][jj] = 0.0;
+-    }
+-  }
+-  */                                                                                                                                                                                                                                         
+-
+-  //** Test covariance. **//
+-  //cov[0][0] = var[0] = 0.50;
+-  //cov[0][1] = 0.25;  
+-  //cov[1][0] = 0.25;
+-  //cov[1][1] = var[1] = 0.75;
+-  
+-  printf("\n\nCovariance matrix of fsig8 with d0.\n");
+-
+-  for(ii=0; ii<n; ii++){
+-    for(jj=0; jj<n; jj++){
+-      printf("%.6lf \t ", cov[ii][jj]);
+-    }
+-
+-    printf("\n");
+-  }
+-
+-  printf("\n\nCorrelation matrix of fsig8 with d0.\n");
+-
+-  for(ii=0; ii<n; ii++){
+-    for(jj=0; jj<n; jj++){
+-      printf("%.6lf \t ", cov[ii][jj]/(sqrt(var[ii])*sqrt(var[jj])));
+-    }
+-
+-    printf("\n");
+-  }
+-  
+-  gsl_linalg_LU_decomp(&m.matrix, p, &s);    
+-  gsl_linalg_LU_invert(&m.matrix, p, &inv.matrix);
+-  
+-  printf("\n\nInverse covariance: \n");
+-      
+-  for(ii=0; ii<n; ii++){
+-   for(jj=0; jj<n; jj++)  printf("%+.4lf \t", gsl_matrix_get(&inv.matrix, ii, jj));
+-
+-   printf("\n");
+-  }
+-  
+-  //
+-  // Check inverse is right here. 
+-  //
+-
+-  gsl_permutation_free(p);
+-
+-  // F = numer/denom;
+-  double denom, numer;
+-
+-  denom = 0.0;
+-  numer = 0.0;
+-
+-  // Sum of all precision matrix elements.
+-  for(i=0; i<n; i++){
+-    for(j=0; j<n; j++)  denom += gsl_matrix_get(&inv.matrix, i, j);
+-  }
+-
+-  // Calibration factors.                                                                                                                                                                                                                   
+-  for(ii=0; ii<n; ii++)  cal_D[ii] = fsig8_loz/mock_mean_fsig8(thresholds[ii],  field, kmax);
+-
+-  // Load PDR-2 clipped f \sigma_8 data, and calibrate. 
+-  for(i=0; i<n; i++){
+-    sprintf(filepath, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data_0.6_0.9_snipCorrected.dat", thresholds[i], field, kmax);
+-
+-    inputfile = fopen(filepath, "r");
+-
+-    fscanf(inputfile, "%le", &D[i]);
+-
+-    fclose(inputfile);
+-
+-    // Calibrate data.                                                                                                                                                                                                                      
+-    D[i] *= cal_D[i];
+-  }
+-  
+-  printf("\n\nd0 \t D \t\t D_calib \t err_calib: \t frac err_calib: \n");
+-
+-  for(ii=0; ii<n; ii++)  printf("%d \t %.4lf \t %.4lf \t %.4lf \t %.4lf% \n", thresholds[ii], D[ii]/cal_D[ii], D[ii], sqrt(cov[ii][ii]), 100.*sqrt(cov[ii][ii])/D[ii]);
+-  
+-  for(i=0; i<n; i++){
+-    for(j=0; j<n; j++)  numer     += gsl_matrix_get(&inv.matrix, i, j)*D[j];    
+-  }
+-
+-
+-  double F, var_F;
+-
+-  F = numer/denom;
+-
+-  // variance calc. 
+-
+-  var_F = 0.0;
+-
+-  for(i=0; i<n; i++){
+-    for(j=0; j<n; j++)  var_F += gsl_matrix_get(&inv.matrix, i, j);
+-  }
+-
+-  var_F = 1.0/var_F;
+-
+-  printf("\nFIELD: W%d \t \t KMAX: %.2lf \t \t RESULT: %.4lf \t \t ERROR:  %.4lf \t FRACTIONAL ERROR:  %.4lf%", field, kmax, F, sqrt(var_F), 100.*sqrt(var_F)/F);
+-   
+-  return 0;
+-}
+-
+-
+diff --git a/cosmology_planck15.h b/cosmology_planck15.h
+index 905bc87..b9569b6 100644
+--- a/cosmology_planck15.h
++++ b/cosmology_planck15.h
+@@ -1,5 +1,5 @@
+ // VIPERS HOD mock parameters.              
+-// 500s mocks. Big multidark, http://www.multidark.org/MultiDark/Help?page=simulations corresponding to planck 1: http:arxiv.org/abs/1303.5076
++// 500s mocks. Big multidark Planck, http://www.multidark.org/MultiDark/Help?page=simulations corresponding to Planck 1: http:arxiv.org/abs/1303.5076
+ double  Om_v      =    0.69;          // 0.73; value added mocks + HOD Cube. outdated unless using one of these. 
+ double  Om_r      =    0.00;          // 0.0;
+ 
+diff --git a/driver_Ballinger_mcmctest.c b/driver_Ballinger_mcmctest.c
+deleted file mode 100644
+index b5c52c8..0000000
+--- a/driver_Ballinger_mcmctest.c
++++ /dev/null
+@@ -1,475 +0,0 @@
+-// Stacpolly run. 
+-#include <stdbool.h>
+-#include <time.h>
+-
+-#include <gsl/gsl_rng.h>
+-// #include <gsl/gsl_randist.h>
+-#include <gsl/gsl_linalg.h>
+-#include <gsl/gsl_math.h>
+-#include <gsl/gsl_eigen.h>
+-// #include <gsl/gsl_blas.h>
+-#include <gsl/gsl_sf_bessel.h>
+-#include <gsl/gsl_sf_erf.h>
+-#include <gsl/gsl_sf_gamma.h>
+-#include <gsl/gsl_sf_dawson.h>
+-#include <gsl/gsl_sf_legendre.h>
+-#include <gsl/gsl_sf_expint.h>
+-#include <gsl/gsl_deriv.h>
+-#include <gsl/gsl_integration.h>
+-#include <gsl/gsl_multimin.h>>
+-// #include "omp.h"
+-
+-//#define   AUXfn_header "/disk1/mjw/Aux_functions/header.h"
+-//#include  AUXfn_header
+-
+-// #define   AUXfn_funcs  "/disk1/mjw/Aux_functions/Aux_functions.c"
+-// #include  AUXfn_funcs
+-
+-#define  AUXfn_header "/home/mjw/Aux_functions/header.h"
+-#include AUXfn_header
+-
+-#define  AUXfn_funcs  "/home/mjw/Aux_functions/Aux_functions.c"
+-#include AUXfn_funcs
+-
+-#include "header.h"
+-
+-#include "cosmology_planck2015.h"
+-// #include "Scripts/cosmology_valueaddedmocks.h"
+-
+-#include "comovDistRedshiftCalc.c"
+-
+-#include "Jenkins_fold.c"
+-#include "GridParams.c"
+-
+-#include "assignMemory.c"
+-
+-#include "load_mask.c"
+-
+-#include "assignAcceptance.c"
+-
+-#include "CoordinateCalc.c"
+-#include "CoordinateCalcCube.c"
+-
+-#include "overdensity_calc.c"
+-#include "CloudInCell.c"
+-// #include "Scripts/BasisChange.c"
+-// #include "Scripts/CalcCellraDec.c"
+-
+-#include "KaiserMultipoles.c"
+-// #include "Scripts/KaiserGaussMultipoles.c"
+-#include "KaiserLorentzMultipoles.c"
+-
+-#include "qSortCompare.c"
+-#include "FFTw.c"
+-
+-#include "nbar.c"
+-#include "nbar_fit.c"
+-#include "nbar_smooth.c"
+-// #include "Scripts/MockAvgComovingDensity.c"
+-
+-#include "AgeOftheUniverse.c"
+-#include "linearGrowthRate.c"
+-// #include "Scripts/growthfactor_derivative.c"
+-
+-// #include "Scripts/smith_mjw.h"
+-// #include "Scripts/smith_mjw.c"
+-
+-#include "toymodel_pk_xi.c"
+-#include "matter_pk.c"
+-#include "Clipped_zSpace.c"
+-
+-#include "ArtificialWf.c"
+-// #include "Scripts/BootStrap.c"
+-
+-// #include "Scripts/correlation_fns.c"
+-
+-#include "fkp_weights.c"
+-#include "clipping_weights.c"
+-
+-#include "randGen.c"
+-
+-#include "FFT_log.h"
+-
+-#include "clipped_lnnormal.c"
+-
+-#include "FFT_log.c"
+-// #include "Scripts/FFTw_3Dwf.c"
+-
+-/*#include "Scripts/cubature/cubature.h"*/
+-/*#include "Scripts/FFT_log_zeldovich.h"*/
+-/*#include "Scripts/FFT_log_zeldovich.c"*/
+-
+-/*#include "Scripts/anisotropicGaussian_multipoles.c"*/
+-
+-/*#include "Scripts/HOD_mock_theoryExp.c"*/
+-
+-#include "MultipoleCovariance.c"
+-#include "MultipoleCovariance_eigenvecs.c"
+-#include "ChiSq_minimisation.c"
+-#include "posteriors_1D.c"
+-#include "posteriors_2D.c"
+-
+-/*#include "Scripts/MonteCarlo_SSPOC.c"*/
+-/*#include "Scripts/AngularSelectionCats.c"*/
+-/*#include "Scripts/SaundersDeproject.c"*/
+-
+-#include "libkdtree.h"
+-#include "kdtree_xi_mom.c"
+-#include "buildTree.c"
+-#include "libkdtree.c"
+-
+-/*#include "Scripts/mockGalaxyCats.c"*/
+-
+-// #include "Scripts/halomodel.c"
+-#include "VIPERS_window.c"
+-#include "VIPERS_window_jointfield.c"
+-#include "super_vipers.c"
+-
+-// #include "Scripts/libkdpoly.h"
+-// #include "Scripts/libkdpoly.c"
+-// #include "Scripts/spec_weights.c"
+-// #include "Scripts/fkp.c"
+-// #include "Scripts/Bailey.c"
+-#include "Alcock_Paczynski.c"
+-
+-#include "paircount_mask.c"
+-#include "Ruiz.c"
+-
+-// #include "tinker.c"
+-
+-#include "Metropolis_algorithm.c"
+-
+-#include "freeMemory.c"
+-
+-
+-int main(int argc, char **argv){
+-  // char* s = getenv("ROOTDIR");
+-  sprintf(root_dir,      "/home/mjw/HOD_MockRun");
+-
+-  sprintf(vipersHOD_dir, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
+-  // sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_HOD_Mocks");
+-  // sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_ValueAddedHOD");
+-
+-  // MPI_Init(&argc,&argv);
+-  // MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
+-  // MPI_Comm_size(MPI_COMM_WORLD, &process_number);
+- 
+-  // With orientation of the -z Cartesian axis to the line of sight. 
+-  // lower_xlimit & upper_xlimit
+-  // AxisLimsArray[0][0]   =    1550.0;                                                  // h^-1 Mpc
+-  // AxisLimsArray[1][0]   =    2180.0;                                                  // h^-1 Mpc
+-
+-  // lower_ylimit & upper_ylimit
+-  // AxisLimsArray[0][1]   =    -170.0;                                                  // h^-1 Mpc
+-  // AxisLimsArray[1][1]   =     170.0;                                                  // h^-1 Mpc
+-
+-  // lower_zlimit & upper_zlimit
+-  // AxisLimsArray[0][2]   =     -75.0;                                                  // h^-1 Mpc
+-  // AxisLimsArray[1][2]   =     -10.0;                                                  // h^-1 Mpc
+-
+-  // Embedding volume for P(k) measurement. Stefano basis. 
+-  AxisLimsArray[0][0]       =        0.0; 
+-  AxisLimsArray[1][0]       =      800.0;
+- 
+-  // ALTERED 800 -> 400 
+-  AxisLimsArray[0][1]       =        0.0;   
+-  AxisLimsArray[1][1]       =      800.0;                                                     // h^-1 Mpc                                                 
+-
+-  // ALTERED 800 -> 400
+-  AxisLimsArray[0][2]       =        0.0;                                                     // h^-1 Mpc
+-  AxisLimsArray[1][2]       =      800.0;
+-
+-  // analysis of VIPERS data or mock catalogues.                                                                                                                                                                                            
+-  data_mock_flag            =          0;
+-  
+-  fieldFlag                 =     atoi(argv[1]);
+-  
+-  if(fieldFlag == 1){
+-    // W1 catalogue. Nagoya v6 spectroscopic mask (& Samhain).
+-    LowerRAlimit            =     30.175; 
+-    UpperRAlimit            =     38.797;
+-    CentreRA                =     34.492;
+-
+-    LowerDecLimit           =     -5.970;     
+-    UpperDecLimit           =     -4.171;     
+-    CentreDec               =     -5.091; 
+-    
+-    // degree of translation for Stefano's co-ordinates, fit survey into surrounding volume. 
+-    stefano_trans_x         =       +50.; 
+-    stefano_trans_y         =      +250.; 
+-    stefano_trans_z         =     -1425.;
+-  }
+-  
+-  else if(fieldFlag ==4){
+-    // W4 catalogue. Nagoya v6 spectroscopic mask (& Samhain). parent boundary limits. 
+-    LowerRAlimit            =    330.046; 
+-    UpperRAlimit            =    335.389;
+-    CentreRA                =    332.638;
+-  
+-    LowerDecLimit           =      0.862;     
+-    UpperDecLimit           =     2.3696;     
+-    CentreDec               =      1.583; 
+-    
+-    // degree of translation for Stefano's co-ordinates, fit survey into surrounding volume. 
+-    stefano_trans_x         =       +50.; 
+-    stefano_trans_y         =      +250.; 
+-    stefano_trans_z         =     -1425.;
+-  }
+-  
+-  // official release info, (Nagoya v7 - overlapping Samhain area). With regards angular coverage v7 and v6 are identical. 
+-  // data.
+-  if(data_mock_flag == 1)  W1area = 10.763;  // sq. degs. from Ben. 
+-  if(data_mock_flag == 1)  W4area =  5.155;
+-  
+-  // mocks
+-  if(data_mock_flag == 0)  W1area = 10.692;
+-  if(data_mock_flag == 0)  W4area =  5.155; 
+-
+-  // Required for <n(z)> calculation.
+-  TotalW1W4area             =      W1area + W4area; 
+-  
+-  fft_size                  =         256;     
+-
+-  // Selection parameters.
+-  lo_MBlim                  =     -90.5;                  // -20.5 < M_B < -19.5
+-  hi_MBlim                  =     -00.0;
+-  
+-  lo_zlim                   =      atof(argv[3]);         // previously 0.6<z<0.9, 0.7<z<1.1 
+-  hi_zlim                   =      atof(argv[4]);
+-  z_eff                     =      0.75;                  // set to weighted average of all galaxies in sample (Anderson et. al.)
+-
+-  linearBias                =      1.53;                  // 1.32, appropriate for 0.6 to 0.9;
+-  velDispersion             =       3.0;                  // units of h^-1 Mpc rather than 300 km s^-1
+-  beta                      =     0.541;                  // 2dF measurement, beta = 0.43, beta = 0.542 for the cube. 
+-
+-  fsigma8                   =       1.0;
+-  bsigma8                   =       1.0;
+-
+-  // Priors on the model params.
+-  min_fsigma8               =      0.00;
+-  max_fsigma8               =      0.80;
+-
+-  min_velDisperse           =      0.00;
+-  max_velDisperse           =      7.00;                   // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
+-
+-  // min_bsigma8            =       0.2;
+-  // max_bsigma8            =       1.6;
+-
+-  min_bsigma8               =       0.2;  // FOR GRANETT 2D POSTERIOR.                                                                                                                                                                      
+-  max_bsigma8               =       1.6;
+-
+-  // Relevant only for likelihood grid.  
+-  min_alpha_pad             =    0.9999;
+-  max_alpha_pad             =    1.0001;
+-
+-  min_epsilon_pad           =   -0.0001;
+-  max_epsilon_pad           =    0.0001;
+- 
+-  // distinguished from linear bias by spectral distortion.  
+-  min_A11Sq                 =      0.99;
+-  max_A11Sq                 =      1.01;
+-
+-  // Number of fitted parameters, defines degrees of freedom in chi sq. expectation. 
+-  paramNumber               =       3.0;
+-
+-  // Resolution of the likelihood evaluation [voxel number].
+-   Res                      =        16;
+-  dRes                      =      16.0; 
+-
+-  // Resolution of the likelihood along the alock-paczynski param directions.  
+-   Res_ap                   =         1;
+-  dRes_ap                   =       1.0;
+-
+-  ChiSq_kmin                =      0.02;
+-  ChiSq_kmax                =       0.1*atof(argv[6]); 
+-                 
+-  // select k value at which measured p(k) used in likelihood switches from unfolded to folded.     
+-  jenkins_fold_kjoin        =       0.4;
+-          
+-  // Fit solely the monopole (1) or both mono and quad (2).
+-  hiMultipoleOrder          =         2;
+-
+-  // Comoving number density, n(z), measurement. Change to equal increments in volume?
+-  chi_interval              =     16.00;
+-  
+-  if(lo_zlim > 0.8){
+-    nz_smoothRadius         =      50.0;
+-  }
+-
+-  else{
+-    nz_smoothRadius         =      100.;
+-  }
+-
+-  // Apply Jenkins folding to increase spatial resolution of mesh. 
+-  Jenkins_foldfactor        =       atof(argv[5]);
+-
+-  // fkp p(k) of interest;
+-  fkpPk                     =    8000.0;            // [h^-1 Mpc]^3.
+-
+-  // binned p(k) variables.
+-  modkMax                   =      1.00;
+-  muBinNumb                 =       100;
+-  kbin_no                   =        40;            
+-
+-  // Total number of HOD mocks. 
+-  CatalogNumber             =       306;
+-
+-  //  Apodise the window fn. to supress ringing of the window ("Gibb's phenomenon").
+-  GibbsSkinDepth            =       5.0;
+-    
+-  // clipping variables. 
+-  appliedClippingThreshold  =   atof(argv[2]);
+-  
+-  clipping_smoothing_radius =       2.0;
+-  
+-  // nfw halo generation
+-  nfw_conc                  =       1.0; 
+-  
+-  // Correlation fn's, logarithmic binning in r. 
+-  zerolog  =             log10(0.001);
+-  maxlog   =             log10(2000.0);     // hiRes: 20., lowRes: 2000.
+-  logbinsz =             log10( 1.01);      // previously 1.4, must be >1.0 otherwise log gives 0. or -ve.
+-  
+-  nlogbins =  (int) ceil((maxlog - zerolog)/logbinsz);
+-
+-  // linear binning in mu. 
+-  zerolin  =                   0.00;
+-  maxlin   =                   1.00;
+-  linbinsz =                   0.05;
+-
+-  nlinbins =  (int) ceil((maxlin - zerolin)/linbinsz);
+-
+-  printf("\n\nRun details: field flag: %d, d0: %.1lf, lo z: %.1lf, hi z: %.1lf, fold factor: %.1lf, chi sq. k_max: %.1lf", fieldFlag, appliedClippingThreshold, lo_zlim, hi_zlim, Jenkins_foldfactor, ChiSq_kmax);  
+-
+-  // Random variable generation.    
+-  gsl_rng_env_setup();
+-
+-  gsl_ran_T = gsl_rng_default;
+-  
+-  gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
+-  
+-  //-- cosmology determined by inclusion of cosmology_planck2015.h or cosmology_valueaddedmocks.h --//
+-  comovDistReshiftCalc();
+-  
+-  Jenkins_foldEmbeddingVol();
+-  
+-  EvaluateGridParameters();
+-  
+-  // AgeOftheUniverse.c
+-  UniverseAge();
+-  
+-  // linearGrowthRate.c
+-  linearGrowthRate();
+-  
+-  // Must match Cosmology declared in cosmology_planck2015.h, cosmology_valueaddedmocks.h //
+-  // This is NOT automatically ensured. //
+-    
+-  // input_powerlaw_n4();
+-  inputHODPk();
+-  // inputLinearPk();               
+-  // set_maskedRSDpaper_pk();
+-  
+-  // prep_NFWhaloCat(10000, 100000);
+-  
+-  // assign2DPkMemory(muBinNumb, kBinNumb);   
+-
+-  // knownGRF_mask();
+-  
+-  // recall if nbar changes, redshift limits change etc. 
+-  // z_eff = zeff_calc();
+-  
+-  // ^^Turn off Jenkins folding. ^^//
+-  // randoms_maskGen();
+-  
+-  // localTSR_calc_Data();
+-  
+-  // mask_area();
+-  
+-  // quadrant_sampling();
+-  
+-  // assign2DPkMemory();
+-  
+-  // toySpoc();
+-
+-  // AP_correction();
+-  
+-  // randoms_slowDFTcalc();
+-  
+-  // modeSampling(4000.);
+-  
+-  // vipers_fkpCalc(4000.);
+-  
+-  // wfPkCalc();
+-    
+-  // clipped_lnnorm_pkCalc();
+-  
+-  // 'truth' from averaging over mocks, no smoothing or reflection.
+-  // nbar_calc(293); 
+-    
+-  // assigns memory for overdensity grid.
+-  prep_grid();
+-  
+-  prep_mask();
+-   
+-  prep_fftw();
+-  
+-  prep_pkRegression(-2., log10(modkMax), kbin_no, 0);
+-  
+-  // paircount_mask(5);
+-  
+-  // number of mocks, starting index. 
+-  load_CovarianceMatrix(305, 1);    
+-  
+-  // Must be uncommented for fftlog calcs.                                                                                                                                                                        
+-  prep_VIPERS_maskMultipoles();
+-  
+-  prep_VIPERS_jmaskMultipoles();
+-  
+-  // VIPERS_mask_cnvldpk();
+-
+-  // nbar_calc(150);
+-
+-  // for(loopCount=1; loopCount<306; loopCount++)  fitted_nbar_calc();
+-
+-  // VIPERS_mask_cnvldpk();
+-
+-  // fprintf_model();
+-
+-  // number of mocks to be analysed, starting index. mocks are selected at random.
+-  // ensemble_fsig8(int mockNumber, int start, int totalCats)
+-  // ensemble_fsig8(100, 1, 305); //
+-  
+-  // pw_ap_corrected_multipoles();
+-
+-  int mock_number = atoi(argv[7]);
+-
+-  metropolis_mcmc(mock_number);
+-  
+-  // calc_veff(0.6, 0.9);
+-  // calc_veff(0.9, 1.2);
+-  
+-  // superVIPERS_chiSq();
+-  /*
+-  load_maskedRSDpaper_mask(0.0001);
+-  
+-  assignMemory_xi();
+-  */
+-  
+-  /*
+-  Gaussianfield();
+-  
+-  knownGRF_mask_smallCell();
+-  
+-  wfPkCalc();
+-  */
+-  
+-  // fastLegendre_init();
+-  
+-  // kaiserLorentz_convergence();
+-  
+-  // VIPERS_mask_intCnsrt();  
+-  
+-  printf("\n\n");
+-
+-  return 0; 
+-}
+diff --git a/driver_Qmultipoles.c b/driver_Qmultipoles.c
+index 2be6b16..220f2a1 100644
+--- a/driver_Qmultipoles.c
++++ b/driver_Qmultipoles.c
+@@ -90,10 +90,10 @@ int main(int argc, char **argv){
+   int               count_res;
+   double        sampling_frac;
+ 
+-  double      dilution = 0.01;
++  double     dilution =  0.25; // 0.05 -> 1.3 hrs for hihiRes. 
+   
+-  double       max_logs[6]  = {log10(2.0), log10(20.0), log10(2000.0), log10(2.0), log10(20.0), log10(4000.0)}; 
+-  double sampling_fracs[6]  = {1.00, 0.30, 0.01, 1.00, 0.20, 0.01}; // 1.00, 0.10, 0.01, 1.000, 0.004, 0.005
++  double       max_logs[6]  = {log10(2.0), log10(20.0), log10(4000.0), log10(2.0), log10(20.0), log10(4000.0)}; 
++  double sampling_fracs[6]  = {0.05, 0.02, 0.01, 0.05, 0.02, 0.01};
+   
+   thread                    =                                   1;
+   outputdir                 =                 getenv("outputdir");
+@@ -106,7 +106,7 @@ int main(int argc, char **argv){
+   hi_zlim                   =                       atof(argv[3]);
+   count_res                 =                       atoi(argv[4]);
+ 
+-  maxlog                    =                       log10(4000.0); // max_logs[count_res];
++  maxlog                    =                 max_logs[count_res]; // max_logs[count_res];
+   sampling_frac             =  dilution*sampling_fracs[count_res];
+ 
+   // Comoving number density, n(z), measurement. Change to equal increments in (effective) volume?
+@@ -125,7 +125,7 @@ int main(int argc, char **argv){
+   
+   // Correlation fn's, logarithmic binning in r. 
+   zerolog  =               log10(0.001);
+-  logbinsz =               log10(1.050);    // previously 1.01 and befor that 1.4. must be > 1.0 otherwise log gives 0. or -ve.
++  logbinsz =               log10(1.100);    // previously 1.01 and befor that 1.4. must be > 1.0 otherwise log gives 0. or -ve.
+   
+   // linear binning in mu. 
+   zerolin  =                      0.000;
+@@ -154,8 +154,11 @@ int main(int argc, char **argv){
+   prep_inverseCumulative_nbar();
+   
+   set_outputfiles(count_res);
++
++  // load_maskedRSD_rands(sampling_frac);
+   
+   load_maskfits(sampling_frac, count_res);
++
+   // load_homogeneous_rands_window(sampling_frac, count_res); // load randoms with sampling sampling_frac.
+   
+   delete_lockfile();
+diff --git a/driver_cube.c b/driver_cube.c
+deleted file mode 100644
+index d08f6db..0000000
+--- a/driver_cube.c
++++ /dev/null
+@@ -1,380 +0,0 @@
+-// Stacpolly run. 
+-// #define AUXfn_DIR "/home/mjw/Aux_functions/header.h"
+-
+-#include <stdbool.h>
+-#include <time.h>
+-
+-#include <gsl/gsl_rng.h>
+-#include <gsl/gsl_randist.h>
+-#include <gsl/gsl_linalg.h>
+-#include <gsl/gsl_math.h>
+-#include <gsl/gsl_eigen.h>
+-#include <gsl/gsl_blas.h>
+-#include <gsl/gsl_sf_bessel.h>
+-#include <gsl/gsl_sf_erf.h>
+-#include <gsl/gsl_sf_gamma.h>
+-#include <gsl/gsl_sf_dawson.h>
+-#include <gsl/gsl_sf_legendre.h>
+-#include <gsl/gsl_sf_expint.h>
+-
+-// #include "omp.h"
+-
+-#define   AUXfn_header "/disk1/mjw/Aux_functions/header.h"
+-#include  AUXfn_header
+-
+-#define   AUXfn_funcs  "/disk1/mjw/Aux_functions/Aux_functions.c"
+-#include  AUXfn_funcs
+-
+-#include "Scripts/header.h"
+-
+-// #include "Scripts/cosmology_planck2015.h"
+-#include "Scripts/cosmology_valueaddedmocks.h"
+-
+-#include "Scripts/comovDistRedshiftCalc.c"
+-
+-#include "Scripts/Jenkins_fold.c"
+-#include "Scripts/GridParams.c"
+-
+-#include "Scripts/assignMemory.c"
+-
+-#include "Scripts/load_mask.c"
+-
+-#include "Scripts/assignAcceptance.c"
+-
+-#include "Scripts/CoordinateCalc.c"
+-#include "Scripts/CoordinateCalcCube.c"
+-
+-#include "Scripts/overdensity_calc.c"
+-#include "Scripts/CloudInCell.c"
+-// #include "Scripts/BasisChange.c"
+-// #include "Scripts/CalcCellraDec.c"
+-
+-#include "Scripts/KaiserMultipoles.c"
+-// #include "Scripts/KaiserGaussMultipoles.c"
+-#include "Scripts/KaiserLorentzMultipoles.c"
+-
+-#include "Scripts/qSortCompare.c"
+-#include "Scripts/FFTw.c"
+-
+-#include "Scripts/nbar.c"
+-#include "Scripts/nbar_smooth.c"
+-// #include "Scripts/MockAvgComovingDensity.c"
+-
+-#include "Scripts/AgeOftheUniverse.c"
+-#include "Scripts/linearGrowthRate.c"
+-// #include "Scripts/growthfactor_derivative.c"
+-
+-#include "Scripts/smith_mjw.h"
+-#include "Scripts/smith_mjw.c"
+-
+-#include "Scripts/toymodel_pk_xi.c"
+-#include "Scripts/matter_pk.c"
+-#include "Scripts/Clipped_zSpace.c"
+-
+-#include "Scripts/ArtificialWf.c"
+-// #include "Scripts/BootStrap.c"
+-
+-// #include "Scripts/correlation_fns.c"
+-
+-#include "Scripts/randGen.c"
+-
+-#include "Scripts/FFT_log.h"
+-
+-#include "Scripts/clipped_lnnormal.c"
+-
+-#include "Scripts/FFT_log.c"
+-#include "Scripts/FFTw_3Dwf.c"
+-
+-/*#include "Scripts/cubature/cubature.h"*/
+-/*#include "Scripts/FFT_log_zeldovich.h"*/
+-/*#include "Scripts/FFT_log_zeldovich.c"*/
+-
+-/*#include "Scripts/anisotropicGaussian_multipoles.c"*/
+-
+-/*#include "Scripts/HOD_mock_theoryExp.c"*/
+-
+-#include "Scripts/MultipoleCovariance.c"
+-#include "Scripts/MultipoleCovariance_eigenvecs.c"
+-#include "Scripts/ChiSq_minimisation.c"
+-#include "Scripts/posteriors_1D.c"
+-// #include "Scripts/posteriors_2D.c"
+-
+-/*#include "Scripts/MonteCarlo_SSPOC.c"*/
+-/*#include "Scripts/AngularSelectionCats.c"*/
+-/*#include "Scripts/SaundersDeproject.c"*/
+-
+-#include "Scripts/libkdtree.h"
+-#include "Scripts/kdtree_xi_mom.c"
+-#include "Scripts/buildTree.c"
+-#include "Scripts/libkdtree.c"
+-
+-/*#include "Scripts/mockGalaxyCats.c"*/
+-
+-#include "Scripts/halomodel.c"
+-#include "Scripts/VIPERS_window.c"
+-
+-#include "Scripts/libkdpoly.h"
+-#include "Scripts/libkdpoly.c"
+-#include "Scripts/spec_weights.c"
+-#include "Scripts/clipping_weights.c"
+-#include "Scripts/fkp_weights.c"
+-#include "Scripts/tidal_tensor.c"
+-// #include "tinker.c"
+-
+-#include "Scripts/freeMemory.c"
+-
+-int main(int argc, char **argv){
+-  // char* s = getenv("ROOTDIR");
+-  sprintf(root_dir,      "/disk1/mjw/HOD_MockRun");
+-  sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_HOD_Mocks");
+-  // sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_ValueAddedHOD");
+-
+-  // MPI_Init(&argc,&argv);
+-  // MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
+-  // MPI_Comm_size(MPI_COMM_WORLD, &process_number);
+- 
+-  // With orientation of the -z Cartesian axis to the line of sight. 
+-  // lower_xlimit & upper_xlimit
+-  // AxisLimsArray[0][0]   =    1550.0;                                                  // h^-1 Mpc
+-  // AxisLimsArray[1][0]   =    2180.0;                                                  // h^-1 Mpc
+-
+-  // lower_ylimit & upper_ylimit
+-  // AxisLimsArray[0][1]   =    -170.0;                                                  // h^-1 Mpc
+-  // AxisLimsArray[1][1]   =     170.0;                                                  // h^-1 Mpc
+-
+-  // lower_zlimit & upper_zlimit
+-  // AxisLimsArray[0][2]   =     -75.0;                                                  // h^-1 Mpc
+-  // AxisLimsArray[1][2]   =     -10.0;                                                  // h^-1 Mpc
+-
+-  // Embedding volume for P(k) measurement. Stefano basis. 
+-  AxisLimsArray[0][0]   =       0.0; 
+-  AxisLimsArray[1][0]   =    1000.0;
+- 
+-  AxisLimsArray[0][1]   =       0.0;   
+-  AxisLimsArray[1][1]   =    1000.0;                                                     // h^-1 Mpc                                                 
+-
+-  AxisLimsArray[0][2]   =       0.0;                                                     // h^-1 Mpc
+-  AxisLimsArray[1][2]   =    1000.0;
+-
+-  // degree of translation for Stefano's co-ordinates, fit survey into surrounding volume. 
+-  // stefano_trans_x       =      +50.; 
+-  // stefano_trans_y       =     +250.; 
+-  // stefano_trans_z       =    -1425.;
+-  
+-  // stefano_trans_x       =     +250.;
+-  // stefano_trans_y       =     +250.;
+-  // stefano_trans_z       =    -1700.;
+-  
+-  /*
+-  // W1 catalogue. new 500s mocks. parent
+-  LowerRAlimit          =       30.1; 
+-  UpperRAlimit          =       38.8;
+-  CentreRA              =      34.45;
+-
+-  LowerDecLimit         =      -5.95;     
+-  UpperDecLimit         =      -4.15;     
+-  CentreDec             =      -5.05;  
+-  
+-  W1area                =      15.66;      
+-  */
+-  
+-  // W1 catalogue. new 500s mocks. Nagoya v4 spectroscopic mask. Nagoya v5 is identical except for a single pointing removed, to be reobserved.
+-  LowerRAlimit          =      30.17; 
+-  UpperRAlimit          =       38.8;
+-  CentreRA              =     34.487;
+-  
+-  LowerDecLimit         =      -5.38;     
+-  UpperDecLimit         =      -4.17;     
+-  CentreDec             =      -4.77;     
+-  
+-  // calculated in spec_weights.c
+-  // W1area             =      7.471;
+-  
+-  // official release info, maybe photo mask is included. v4 Nagoya.
+-  W1area                =      7.017;  // sq. degs.
+-  W4area                =      5.150;
+-  
+-  TotalW1W4area         =      W1area + W4area; 
+-  
+-  // Cell size, comoving distance, h^-1 Mpc. 
+-  fft_size              =       256;     
+-
+-  // Selection parameters.
+-  lo_MBlim              =     -90.5;                  // -20.5 < M_B < -19.5
+-  hi_MBlim              =     -00.0;
+-  
+-  lo_zlim               =      0.60;                  // previously 0.6<z<0.9, 0.7<z<1.1 
+-  hi_zlim               =      0.90;
+-  z_eff                 =      0.75;                  // set to volume avg. redshift of the survey? prior to FKP weights.
+-
+-  linearBias            =      1.53;                  // 1.32, appropriate for 0.6 to 0.9;
+-  velDispersion         =       3.0;                  // units of h^-1 Mpc rather than 300 km s^-1
+-  beta                  =     0.541;                  // 2dF measurement, beta = 0.43, beta = 0.542 for the cube. 
+-
+-  // Priors on the model params.
+-  min_fsigma8           =      0.00;
+-  max_fsigma8           =      0.80;
+-
+-  min_velDisperse       =      0.00;
+-  max_velDisperse       =      6.00;
+-
+-  // 4 param likelihood required. change this. 
+-  min_bsigma8           =       0.8;
+-  max_bsigma8           =       1.6;
+- 
+-  // distinguished from linear bias by spectral distortion.  
+-  min_A11Sq             =      0.99;
+-  max_A11Sq             =      1.01;
+-
+-  // Number of fitted parameters, defines degrees of freedom in chi sq. expectation. 
+-  paramNumber           =       3.0;
+-
+-  // Resolution of the Likelihood evaluation [voxel number].
+-   Res                   =       16;
+-  dRes                  =      16.0;
+-
+-  ChiSq_kmin            =      0.04;
+-  ChiSq_kmax            =      0.20; 
+-     
+-  // Fit solely the monopole (1) or both mono and Quad (2).
+-  hiMultipoleOrder      =         2;
+-
+-  // Comoving number density, n(z), measurement. Change to equal increments in volume?
+-  chi_interval          =     16.00;
+-
+-  // Apply Jenkins folding to increase spatial resolution of mesh. 
+-  Jenkins_foldfactor    =       2.0;
+-
+-  // FKP P(k) of interest.
+-  fkpPk                 =    3000.0;            // [h^-1 Mpc]^3.
+-  meanSampling          =       0.4;
+-
+-  // Binning interval for P(k).
+-  modkMax               =       1.0;
+-  muBinNumb             =       100;
+-  kbin_no               =        40;
+-
+-  // Total number of HOD mocks. 
+-  CatalogNumber         =       306;
+-
+-  //  Apodise the window fn. to supress ringing of the window ("Gibb's phenomenon").
+-  GibbsSkinDepth            =         5.0;
+-    
+-  // remember to smooth.
+-  appliedClippingThreshold  =      1000.0;    
+-  
+-  clipping_smoothing_radius =         2.0;
+-
+-  GaussianFilter_radius     =         0.0;
+-
+-  // subsample HOD catalogue 
+-  depletion_factor          =        1.25;
+-
+-  // nfw halo generation
+-  nfw_conc                  =         1.0; 
+-
+-  // Correlation fn's, logarithmic binning in r. 
+-  zerolog  =                 log10(0.001);
+-  maxlog   =                   log10(2.0);      // hiRes: 20., lowRes: 2000.
+-  logbinsz =                 log10( 1.01);      // previously 1.4, must be >1.0 otherwise log gives 0. or -ve.
+-  
+-  nlogbins =  (int) ceil((maxlog - zerolog)/logbinsz);
+-
+-  // linear binning in mu. 
+-  zerolin  =                         0.00;
+-  maxlin   =                         1.00;
+-  linbinsz =                         0.05;
+-
+-  nlinbins =  (int) ceil((maxlin - zerolin)/linbinsz);
+-
+-  // Random variable generation.    
+-  gsl_rng_env_setup();
+-
+-  gsl_ran_T = gsl_rng_default;
+-  gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
+-
+-  
+-  double fkp_norm;
+-  
+-  comovDistReshiftCalc();
+-  
+-  Jenkins_foldEmbeddingVol();
+-  
+-  EvaluateGridParameters();
+-  
+-  
+-  // assigns memory for overdensity grid.
+-  prep_grid();
+-  
+-  prep_mask(); 
+-  
+-  prep_fftw();
+-  
+-  prep_pkRegression(-2., log10(modkMax), kbin_no);
+-    
+-  
+-  // CoordinateCalcCube("/disk1/mjw/HOD_MockRun/Data/HODCube/cube_gal_shuf_-20.0.dat");
+-  // CoordinateCalcCube("/disk1/mjw/HOD_MockRun/Data/HODCube/zcube_zvel_gal_-20.0.dat");
+-  
+-  // calculated in real space
+-  CoordinateCalcCube("/disk1/mjw/HOD_MockRun/Data/500s/hod_cube/galaxies_infilament.dat");
+-  
+-  // randoms_Cube(Vipers_Num*10);
+-  randoms_inenvironment("/disk1/mjw/HOD_MockRun/Data/500s/hod_cube/randoms_infilament.dat");
+-  
+-  assignAcceptanceCube();
+-  
+-  Jenkins_foldRand();
+-  
+-  Jenkins_foldCat();
+-  
+-  pt2nz = &cube_nbar;
+-  
+-  // clipped lognormal model investigation.
+-  // Gauss_varlognormal();
+-  
+-  // calc_clippingweights();
+-  
+-  // load_clippingweights();
+-  
+-  for(j=0; j<Vipers_Num; j++) clip_galweight[j] = 1.;
+-  
+-  // normalisation of FKP weights set by random catalogue. 
+-  fkp_norm = calc_fkpweights();
+-  
+-  // Apply this normalisation to gal. weights. 
+-  set_cube_fkpweights(fkp_norm);
+-  
+-  // calc_delta();
+-  
+-  // tidal_tensor();
+-  
+-  calc_overdensity();
+-  
+-  // Calculate the galaxy contribution to the shotnoise, galaxies
+-  // are weighted by gal_weights.  assumes weights are density independent.  
+-  // weighted_shotnoise();
+-  
+-  PkCalc();
+-  
+-  /*
+-  // AgeOftheUniverse.c
+-  UniverseAge();
+-  
+-  // linearGrowthRate.c
+-  linearGrowthRate();
+-  
+-  // needs checked.
+-  // halofit(z_eff);
+-  
+-  //  WATCH OUT: Loads Value added mocks cosmology P(k), change back to Planck 2015. // 
+-  inputHODPk();
+-  
+-  // clipped_lnnormal_main();
+-  
+-  clipped_lnnorm_pkCalc();
+-  */
+-  printf("\n\n");
+-  
+-  return 0; 
+-}
+diff --git a/driver_likelihood.c b/driver_likelihood.c
+index 63482bf..3c55f80 100644
+--- a/driver_likelihood.c
++++ b/driver_likelihood.c
+@@ -43,50 +43,37 @@
+ #include "FisherForecastFAP.c"
+ #include "Ruiz.c"
+ #include "camb_call.c"
+-// #include "combining_clipped_fsig8.c"
++#include "joint_clipped_fsig8.c"
++#include "priors.c"
+ 
+ 
+-int main(int argc, char** argv){  
++int main(int argc, char** argv){
++  mull                      =                           0;  // 0 for False; 1 for True (replicate mull/skene)  
+   thread                    =                           1;
+ 
+   z_eff                     =        atof(getenv("ZEFF"));
+-
++  
+   outputdir                 =         getenv("outputdir");
+   maskmultipoles_path       =        getenv("mask_Qldir");
+-   
++    
+   sprintf(root_dir,                              "/home/mjw/HOD_MockRun");
+   sprintf(vipersHOD_dir,         "/home/mjw/HOD_MockRun/W1_Spectro_V7_2"); 
+   sprintf(models_path,                                         outputdir);
++
++  if(mull==0){
++    sprintf(covariance_mocks_path,                             outputdir);
++  }
++
++  else{
++    sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");                // W1_Spectro_V7_3
++    sprintf(maskmultipoles_path,   "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
++  }
+   
+-  sprintf(covariance_mocks_path,                               outputdir);
+-  // sprintf(covariance_mocks_path, "/home/mjw/HOD_MockRun/W1_Spectro_V7_3"); // W1_Spectro_V7_2
+-   
+   d0                        =               atoi(argv[1]);
+   fieldFlag                 =               atoi(argv[2]);
+   lo_zlim                   =               atof(argv[3]);   // previously 0.6<z<0.9, 0.7<z<1.1
+   hi_zlim                   =               atof(argv[4]);
+   ChiSq_kmax                =               atof(argv[5]);
+-
+-  // Old priors. 
+-  min_bsigma8               =      0.05;                  // FOR GRANETT 2D POSTERIOR.
+-  max_bsigma8               =      1.00;                  // Previously 0.2 < b \sig_8 < 1.6
+-                                                          // 0.05 < b s8 < 1.0 (13/02/17)   
+-  min_fsigma8               =      0.05;                  // Priors on the model params.  
+-  max_fsigma8               =      0.80;
+-
+-  min_velDisperse           =      0.00;                  // CHANGED FROM 0.00 13/02/2017
+-  max_velDisperse           =      6.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
+-
+-  /*                                                                                                                                                   
+-  min_bsigma8               =      0.05;                                                                                                                
+-  max_bsigma8               =      3.50;                                                                                                               
+-                                                                                                                                                        
+-  min_fsigma8               =      0.00;                                                                                                                
+-  max_fsigma8               =      1.80;                                                                                                               
+-
+-  min_velDisperse           =      0.00;                                                                                                                
+-  max_velDisperse           =     15.00;                                                                                                                
+-  */
+   
+   min_alpha_pad             =    0.9999;
+   max_alpha_pad             =    1.0001;
+@@ -105,13 +92,13 @@ int main(int argc, char** argv){
+    Res_ap                   =         1;  // Resoltuion in AP.
+   dRes_ap                   =       1.0;
+ 
+-  FFTlogRes                 =       768;  // FFTlogRes = 4096;
+-  //FFTlogRes               =      4096;
++  //FFTlogRes               =       768;  // FFTlogRes = 4096;
++  FFTlogRes                 =      4096;
+   
+   logk_min                  =      -2.0;
+   logk_max                  =   0.60206;  // k = 4 hMpc^{-1}.
+   
+-  ChiSq_kmin                =      0.02;
++  ChiSq_kmin                =      0.02;  // Clipping: 0.6 < z < 0.8 h Mpc^-1: ChiSq_kmin = 0.11; 
+ 
+   hiMultipoleOrder          =         2;  // Fit monopole (1) or mono + quad (2).
+   jenkins_fold_kjoin        =       0.4;  // k at which P(k) switches from unfolded to folded.     
+@@ -125,22 +112,28 @@ int main(int argc, char** argv){
+   
+   start_walltime();
+ 
++  // set_oldestpriors();
++  set_recordedpriors();
++  // set_normalpriors();
++  // set_clippingpriors();
++  // set_widepriors(); 
++
+   printf_branch();
+   
+-  // fftw_init_threads();
++  fftw_init_threads();
+ 
+-  // fftw_plan_with_nthreads(omp_get_max_threads()); // Maximum number of threads to be used; use all openmp threads available. 
++  fftw_plan_with_nthreads(omp_get_max_threads()); // Maximum number of threads to be used; use all openmp threads available. 
+ 
+-  set_angularlimits(0, fieldFlag);                   // Cut data to mock limits.
++  set_angularlimits(0, fieldFlag);                // Cut data to mock limits.
+   
+   chi_zcalc();              
+   
+   nonlinear_pk();             
+   // linear_pk();       
+   
+-  get_mocksshotnoise();
++  if(mull == 0)  get_mocksshotnoise();       // <n> estimate without clipping.  high-k estimate with clipping. 
+   
+-  prep_FFTlog_memory();       // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
++  prep_FFTlog_memory();                      // assign memory for arrays speeding up FFTlog calc; e.g. xi -> pre/post factors. 
+   
+   set_FFTlog(FFTlogRes, pow(10., -10.), pow(10., 14.), 1., velDispersion);  // assigns values to mono_config etc. 
+   
+@@ -174,23 +167,22 @@ int main(int argc, char** argv){
+   delete_lockfile();
+   
+   prep_dlnPR_dlnk();
+-    
+-  // if(ChiSq_kmax == 0.2)
+-  calc_models();
+-  
++
+   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
+   
++  if(ChiSq_kmax == 0.2)  calc_models();
++  
+   set_models();
+-    
++  
+   double maxL_fsig8, maxL_sigv, maxL_bsig8;
+   
+   for(data_mock_flag=0; data_mock_flag<2; data_mock_flag++){
+     if(data_mock_flag == 0){
+-      sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
++      sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks5_%.1lf_%.1lf_%s_res_%d.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim, model_flag, Res);
+     }
+ 
+     if(data_mock_flag == 1){
+-      sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
++      sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data5_%.1lf_%.1lf_%s_res_%d.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim, model_flag, Res);
+     }
+     
+     output = fopen(filepath, "w");
+@@ -199,7 +191,7 @@ int main(int argc, char** argv){
+ 
+     // for(int ab=1; ab<CatalogNumber; ab++){
+     for(int ab=1; ab<10; ab++){
+-      calc_ChiSqs(ab);
++      calc_ChiSqs(ab, 0);
+       
+       set_minChiSq();
+       
+@@ -218,9 +210,15 @@ int main(int argc, char** argv){
+   /*
+   default_params();
+ 
++  // getmockmean_params(d0);
++  
++  // set_fittomean_params();
++  
+   model_compute(0, 0, 0, 0, 0, 1);
+   */
+   // jointfield_cnvldmodel();
++
++  // calc_bestfit_fsig8(fieldFlag, ChiSq_kmax, z_eff);
+   
+   walltime("Wall time at finish");
+ 
+diff --git a/driver_pk_d0.c b/driver_pk_d0.c
+index 63308cf..9032fe8 100644
+--- a/driver_pk_d0.c
++++ b/driver_pk_d0.c
+@@ -41,7 +41,7 @@
+ 
+ 
+ int main(int argc, char **argv){  
+-  (void) argc; // escape compiler unused variable warning. 
++  (void) argc;                                              // escape compiler unused variable warning. 
+ 
+   thread                    =                   1; 
+   
+@@ -70,7 +70,7 @@ int main(int argc, char **argv){
+     nz_smoothRadius         =      100.; 
+   }
+ 
+-  lopad                     =      50.0;                    // stefano_trans_z set such that lo_zlim boundary is lopad [h^-1 Mpc] from embeeded volume boundary.
++  lopad                     =      50.0;                    // stefano_trans_z set such that lo_zlim boundary is lopad [h^-1 Mpc] from embedded vol boundary.
+   fkpPk                     =    8000.0;                    // [h^-1 Mpc]^3.  Stefano: 4000 [h^-1 Mpc]^3.
+ 
+   fft_size                  =       512;                    // Worker 46 works up to 1024. 
+@@ -78,9 +78,9 @@ int main(int argc, char **argv){
+   logk_min                  =      -2.0;
+   logk_max                  =   0.60206;                    // k = 4 hMpc^{-1}.
+   
+-  CatalogNumber             =       306;                    // Total number of (independent) HOD mocks.
++  CatalogNumber             =       153;                    // Total number of (independent) HOD mocks.
+ 
+-  
++   
+   
+   start_walltime();
+   
+@@ -92,13 +92,13 @@ int main(int argc, char **argv){
+   
+   set_angularlimits(0, fieldFlag);                       // Assumes data cut to mock limits.
+   
+-  Initialise();                                          // Initialise grid, fft params and random generation.
++  Initialise();                                          // Initialise grid, FFT params and random generation.
+   
+   check_radialextent(loChi, hiChi, lopad);
+   
+-  stefano_trans_z = -loChi + lopad;                      // Translate lower limit to close to edge of box.
++  stefano_trans_z = -loChi + lopad;                      // Translate lower limit to near the edge of box.
+   
+-  prep_CatalogueInput_500s();                            // Max. number of gals of ALL mocks (& data) analysed simultaneously is hard coded.  
++  prep_CatalogueInput_500s();                            // Max. number of gals of ALL mocks (& data) analysed simultaneously is `hard coded' (with some contingency).  
+   
+   prep_nbar();                                           // assign memory and zero e.g. bins of number of galaxies per chi. 
+   
+@@ -110,7 +110,9 @@ int main(int argc, char **argv){
+   load_rands_radec(1.0);
+   
+   get_zeff();
+-  
++
++  calc_volavg_fkpweights2();
++
+   delete_lockfile();
+   
+   prep_clipping_calc();
+@@ -126,7 +128,7 @@ int main(int argc, char **argv){
+   
+   walltime("All prep. done");
+   
+-  for(data_mock_flag = 0; data_mock_flag < 2; data_mock_flag++){ // analysis of VIPERS data and mock catalogues.
++  for(data_mock_flag = 0; data_mock_flag < 1; data_mock_flag++){ // analysis of VIPERS data and mock catalogues.
+     trash_nbarshot_file(atoi(argv[4])); // internal loop over d0. 
+     
+     for(loopCount=atoi(argv[4]); loopCount <= mock_end; loopCount++){            
+@@ -158,7 +160,7 @@ int main(int argc, char **argv){
+     
+       prep_inverseCumulative_nbar();
+       
+-      calc_clipping_weights(); 
++      // calc_clipping_weights(); 
+     
+       walltime("Clipping weights done.");
+     
+@@ -174,7 +176,7 @@ int main(int argc, char **argv){
+     
+       printf("\n\n");
+     
+-      for(int m=1; m<5; m++){
++      for(int m=4; m<5; m++){
+         d0 = d0s[m];
+       
+         set_clipping_weights(); // unity weights for d0=1000, else load. 
+diff --git a/get_allkvals.c b/get_allkvals.c
+index 6428135..88159ea 100644
+--- a/get_allkvals.c
++++ b/get_allkvals.c
+@@ -2,11 +2,16 @@ int get_allkvals(int start){
+   char   firstfilepath[200];
+   char  foldedfilepath[200];
+   
+-  sprintf(filepath,      "%s/mocks_v1.7/pk/d0_%d/W%d/mock",   covariance_mocks_path, d0, fieldFlag);
+-  
+-  sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
+-  // sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
++  sprintf(filepath,        "%s/mocks_v1.7/pk/d0_%d/W%d/mock",   covariance_mocks_path, d0, fieldFlag);
++
++  if(mull==0){
++    sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
++  }
+ 
++  else{
++    sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
++  }
++  
+   printf("\n\n%s", firstfilepath);
+   
+   inputfile = fopen(firstfilepath, "r");
+@@ -32,8 +37,13 @@ int get_allkvals(int start){
+   fclose(inputfile);
+   
+   // file with folded measurements.
+-  sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
+-  // sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
++  if(mull == 0){
++    sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
++  }
++
++  else{
++    sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
++  }
+   
+   inputfile  = fopen(foldedfilepath, "r");
+ 
+@@ -60,10 +70,15 @@ int get_allkvals(int start){
+   for(i=0; i<jenkins_foldIndex_unfoldedfile; i++)  fscanf(inputfile, "%le \t %*le \t %*le \t %*d \n", &all_kVals[i]);
+ 
+   fclose(inputfile);
+-  
+-  sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;
+-  // sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;  
+ 
++  if(mull == 0){
++    sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;
++  }
++
++  else{
++    sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;  
++  }
++  
+   inputfile = fopen(foldedfilepath, "r");
+   
+   for(i=0; i<lineNo; i++){
+diff --git a/get_pkderivedprops.c b/get_pkderivedprops.c
+index 8bb2a2f..59ede75 100644
+--- a/get_pkderivedprops.c
++++ b/get_pkderivedprops.c
+@@ -15,7 +15,7 @@ int get_mocksshotnoise(){
+ 
+   sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/shotnoise_zlim_%.1lf_%.1lf.dat", covariance_mocks_path, d0, fieldFlag, lo_zlim, hi_zlim);
+ 
+-  printf("\n\nLoading shotnoise from: %s", filepath);
++  printf("\n\nLoading shotnoise from:  %s", filepath);
+   
+   inputfile = fopen(filepath, "r");
+ 
+@@ -26,8 +26,9 @@ int get_mocksshotnoise(){
+   fscanf(inputfile, "%*[^\n]\n", NULL); // skip one line (hashed comment)
+    
+   for(j=0; j<shot_ninstance; j++){
+-    fscanf(inputfile, "%*d    %*lf    %lf\n", &shotnoise_instances[j]);
+-
++    fscanf(inputfile, "%*d    %*lf    %lf\n", &shotnoise_instances[j]); // Without clipping, <n> estimate. 
++    // fscanf(inputfile, "%*d    %lf    %*lf\n", &shotnoise_instances[j]); // With clipping, high-k estimate.
++    
+     printf("\n%d \t %lf", j, shotnoise_instances[j]);
+     
+     mean_shot += shotnoise_instances[j];
+@@ -83,30 +84,7 @@ int get_mocksclippedamplitudes(){
+   
+   return 0;
+ }
+-/*
+-int get_datashotnoise(){
+-  sprintf(filepath, "%s/data_v1.7/pk_derivedprops/d0_%d/W%d/shotnoise_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
+-
+-  inputfile = fopen(filepath, "r");
+-
+-  if(inputfile == NULL){
+-    printf("\n\nError retrieving data shot noise.");
+-
+-    exit(EXIT_FAILURE);
+-  }
+-
+-  fscanf(inputfile, "%*[^\n]\n", NULL); // skip one line (hashed comment)
+-
+-  fscanf(inputfile, "%*lf \t %lf \n", &mean_shot);  // Without clipping, <n> estimate.
+-  // fscanf(inputfile, "%lf \t %*lf \n", &mean_shot);  // With clipping, high-k estimate.
+-
+-  fclose(inputfile);
+ 
+-  printf("\n\nData mean shot noise (%s): %.4lf", filepath, mean_shot);
+-
+-  return 0;
+-}
+-*/
+ int get_datashotnoise(){  
+   sprintf(filepath, "%s/data_v1.7/pk_derivedprops/d0_%d/W%d/shotnoise_zlim_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim);
+   
+@@ -117,14 +95,15 @@ int get_datashotnoise(){
+ 
+     exit(EXIT_FAILURE);
+   }
++
++  fscanf(inputfile, "%*[^\n]\n", NULL); // skip one line (hashed comment)
+   
+-  fscanf(inputfile, "%*[^\n] \n", NULL); // skip one line (hashed comment)
++  fscanf(inputfile, "%*lf \t %lf \n", &mean_shot);  // Without clipping, <n> estimate.
++  // fscanf(inputfile, "%lf \t %*lf \n", &mean_shot);  // With clipping, high-k estimate.
+   
+-  fscanf(inputfile, "%*lf \t %lf", &mean_shot);
+-
+   fclose(inputfile);
+ 
+-  printf("\n\nMean shot noise (%s): %.4lf", filepath, mean_shot);
++  printf("\n\nData mean shot noise (%s): %.4lf", filepath, mean_shot);
+   
+   return 0;
+ }
+@@ -145,25 +124,25 @@ int get_dataclippedamplitude(){
+ 
+ int set_oldclippingvars(){
+   if(data_mock_flag == 0){ // mocks
+-      if(d0      == 1000.)  mean_suppression    =  1.00;
+-      else if(d0 ==   10.)  mean_suppression    =  1.30;
+-      else if(d0 ==    6.)  mean_suppression    =  1.85;
+-      else                  mean_suppression    =  3.00;
++    if(d0      == 1000.)  mean_suppression    =  1.00;
++    else if(d0 ==   10.)  mean_suppression    =  1.30;
++    else if(d0 ==    6.)  mean_suppression    =  1.85;
++    else                  mean_suppression    =  3.00;
+   }
+ 
+   if(data_mock_flag == 1){ // data
+     if(fieldFlag == 1){
+-      if(d0      == 1000.)  mean_suppression    =  1.00;
+-      else if(d0 ==   10.)  mean_suppression    =  1.30;
+-      else if(d0 ==    6.)  mean_suppression    =  1.70;
+-      else                  mean_suppression    =  2.70;
++      if(d0      == 1000.)  mean_suppression  =  1.00;
++      else if(d0 ==   10.)  mean_suppression  =  1.30;
++      else if(d0 ==    6.)  mean_suppression  =  1.70;
++      else                  mean_suppression  =  2.70;
+     }
+ 
+     if(fieldFlag == 4){
+-      if(d0      == 1000.)  mean_suppression    =  1.00;
+-      else if(d0 ==   10.)  mean_suppression    =  1.30;
+-      else if(d0 ==    6.)  mean_suppression    =  1.90;
+-      else                  mean_suppression    =  2.70;
++      if(d0      == 1000.)  mean_suppression  =  1.00;
++      else if(d0 ==   10.)  mean_suppression  =  1.30;
++      else if(d0 ==    6.)  mean_suppression  =  1.90;
++      else                  mean_suppression  =  2.70;
+     }
+   }
+       
+@@ -174,7 +153,7 @@ int set_oldclippingvars(){
+   return 0;
+ }
+ 
+-int set_oldshotnoise(){
++int set_oldshotnoise(){ // Clipping. 
+   if(data_mock_flag == 0){ // mocks
+     if(fieldFlag == 1){
+       if(d0      == 1000.)  for(j=0; j<mono_order; j++) xdata[j] -= 277.16;   // Correct monopole.
+diff --git a/get_zeff.c b/get_zeff.c
+index 49a02fe..b9ef569 100644
+--- a/get_zeff.c
++++ b/get_zeff.c
+@@ -2,6 +2,8 @@ int get_zeff(){
+   double norm = 0.0;
+   double rand_redshift;
+   double weighted_redshift = 0.0; 
++
++  printf("\n\nReassigning <n(z)> for effective redshift calc.");
+   
+   spline_nbar(1); // set to parent <n(z)>
+ 
+diff --git a/header.h b/header.h
+index c093d19..96ec732 100644
+--- a/header.h
++++ b/header.h
+@@ -2,6 +2,9 @@
+ double       Interim, dummy;
+ int          Index, local_Index, loopCount, lineNo;
+ 
++//-- mull run -- //
++int mull = 0;
++
+ //-- Cosmology -- //
+ double   H_0;
+ double   H_0inPerSec;
+diff --git a/header_chi2.h b/header_chi2.h
+index f70c722..44b9ff3 100644
+--- a/header_chi2.h
++++ b/header_chi2.h
+@@ -234,6 +234,10 @@ int    FFTLog_initialise_mask(FFTLog_config *fc);
+ 
+ int    apmultipoles(FFTLog_config *mono, FFTLog_config *quad, FFTLog_config *hex, double beta, double velDispersion, double alpha, double epsilon);
+ 
++double calc_onedposteriors(double* maxL_fsig8, double* maxL_bsig8, double* maxL_sigv);
++double calc_ChiSq(double dfsigma8, double dbsigma8, double dvelDispersion, double depsilon);
++
++
+ // -- Posteriors -- //
+ double calc_fsigma8Posterior();
+ double calc_bsigma8Posterior();
+diff --git a/joint_clipped_fsig8.c b/joint_clipped_fsig8.c
+new file mode 100644
+index 0000000..6c104fe
+--- /dev/null
++++ b/joint_clipped_fsig8.c
+@@ -0,0 +1,216 @@
++double calc_fs8(double z){
++  void*                  null;
++  double  ln_a, f, fs8;
++
++  ln_a  = -log(1. + z);
++  
++  f     = f_Om_545(ln_a, null);
++
++  fs8   = f*camb_sig8; // camb_sig8 already for given redshift, not z=0;
++
++  printf("\nHERE: %.3lf \t %.3lf \t %.3lf", z, f, camb_sig8);
++  
++  return fs8;
++}
++
++double calc_clipped_fsig8_cov(int d0i, int d0j, int field, double kmax, double z_eff, double fs8_zeff){
++  // calc. d0_i, d0_j element of the covariance matrix. 
++  double result = 0.0;
++
++  double mock_fs8_d0i;
++  double mock_fs8_d0j;
++
++  double mean_fs8_d0i = 0.0;
++  double mean_fs8_d0j = 0.0;
++
++  double cal_d0i, cal_d0j;
++  
++  getmockmean_params(d0i);  mean_fs8_d0i = fsigma8;
++  getmockmean_params(d0j);  mean_fs8_d0j = fsigma8;
++  
++  cal_d0i = fs8_zeff/mean_fs8_d0i;
++  cal_d0j = fs8_zeff/mean_fs8_d0j;
++
++  // printf("\n\nCalibration factors: %.2lf \t %.2lf", cal_d0i, cal_d0j);
++  
++  double fsig8s_d0i[CatalogNumber];
++  double fsig8s_d0j[CatalogNumber];
++  
++  // Load mock fsig8s. 
++  sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", outputdir, d0i, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
++  
++  inputfile = fopen(filepath, "r");
++
++  for(j=0; j<CatalogNumber; j++)  fscanf(inputfile, "%lf \t %*lf \t %*lf \t %*lf \t %*lf \t %*lf \n", &fsig8s_d0i[j]);
++  // for(j=0; j<CatalogNumber; j++)  printf("\n%.4lf", fsig8s_d0i[j]);
++  
++  fclose(inputfile);
++  
++  // and for d0_j.
++  sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", outputdir, d0j, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
++  
++  inputfile = fopen(filepath, "r");
++
++  for(j=0; j<CatalogNumber; j++)  fscanf(inputfile, "%lf \t %*lf \t %*lf \t %*lf \t %*lf \t %*lf \n", &fsig8s_d0j[j]);
++  // for(j=0; j<CatalogNumber; j++)  printf("\n%.4lf", fsig8s_d0j[j]);
++  
++  fclose(inputfile);
++  
++  // Calculate matrix element. 
++  for(j=0; j<CatalogNumber; j++)  result += (cal_d0i*fsig8s_d0i[j] - fs8_zeff)*(cal_d0j*fsig8s_d0j[j] - fs8_zeff);  // covariance element for calibrated fsig8.
++  
++  result /= (double) CatalogNumber;
++
++  // printf("\n%.6lf", result);
++  
++  return result;
++}
++
++
++int calc_bestfit_fsig8(int field, double kmax, double z_eff){
++  int  thresholds[4] = {4, 6, 10, 1000};
++
++  int      s, n = 4; // Number of thresholds. 
++  
++  double       D[n]; // Data for four thresholds.
++  double     var[n]; // Sq. error on data.
++  double   cal_D[n]; // Calibration factors.
++
++  double  cov[n][n]; // 4 x 4 covariance matrix. 
++  double cov2[n][n]; // Copy of covariance, as inversion seems to be in place. 
++
++  double  inva[n*n];
++
++  gsl_matrix_view   m = gsl_matrix_view_array(&cov2,  n, n);
++  gsl_matrix_view inv = gsl_matrix_view_array(inva,  n, n);
++  gsl_permutation*  p = gsl_permutation_alloc(n);
++
++  double fs8_zeff;
++
++  
++  fs8_zeff = calc_fs8(z_eff);
++
++  printf("\n\nf * sigma_8 predictions: %.4lf", fs8_zeff);
++  
++  for(ii=0; ii<n; ii++){
++    for(jj=0; jj<n; jj++){
++       cov[ii][jj] = calc_clipped_fsig8_cov(thresholds[ii], thresholds[jj], field, kmax, z_eff, fs8_zeff);  // Covariance matrix calc. for calibrated fsig8.
++
++      cov2[ii][jj] = cov[ii][jj];
++    }
++
++    var[ii] = cov[ii][ii];
++  }
++  
++  // Assume diagonal covariance //  i.e. inverse variance weighting.                                                                                                                           //                        
++  // for(ii=0; ii<n; ii++){
++  //   for(jj=0; jj<n; jj++){
++  //     if(ii != jj) cov[ii][jj] = cov2[ii][jj] = 0.0;
++  //   }
++  // }                                                                                                                                                                                                                                        
++  // Test covariance. //
++  // cov[0][0] = var[0] = 0.50;
++  // cov[0][1] = 0.25;  
++  // cov[1][0] = 0.25;
++  // cov[1][1] = var[1] = 0.75;
++  
++  printf("\n\nCovariance matrix of (calibrated) fsig8 with d0.\n");
++
++  for(ii=0; ii<n; ii++){
++    for(jj=0; jj<n; jj++){
++      printf("%.6lf \t ", cov[ii][jj]);
++    }
++
++    printf("\n");
++  }
++  
++  printf("\n\nCorrelation matrix of (calibrated) fsig8 with d0.\n");
++
++  for(ii=0; ii<n; ii++){
++    for(jj=0; jj<n; jj++){
++      printf("%.6lf \t ", cov[ii][jj]/(sqrt(var[ii])*sqrt(var[jj])));
++    }
++
++    printf("\n");
++  }
++  
++  gsl_linalg_LU_decomp(&m.matrix, p, &s);    
++  gsl_linalg_LU_invert(&m.matrix, p, &inv.matrix);
++  
++  printf("\n\n(Calibrated) Precision matrix: \n");
++      
++  for(ii=0; ii<n; ii++){
++   for(jj=0; jj<n; jj++)  printf("%+.4lf \t", gsl_matrix_get(&inv.matrix, ii, jj));
++
++   printf("\n");
++  }
++
++  gsl_permutation_free(p);
++  
++  double numer, denom;  // F = numer/denom;
++
++  numer = 0.0;
++  denom = 0.0;
++
++  for(i=0; i<n; i++){
++    for(j=0; j<n; j++)  denom += gsl_matrix_get(&inv.matrix, i, j);  // Sum of all precision matrix elements.
++  }
++
++  printf("\n\nd0 \t mock mean fsig8 \t calibration \n");
++  
++  for(ii=0; ii<n; ii++){
++    getmockmean_params(thresholds[ii]); // Sets fsigma8.
++
++    cal_D[ii] = fs8_zeff/fsigma8;       // Calibration factors.
++
++    printf("%d \t %.4lf \t %.4lf \n", thresholds[ii], fsigma8, cal_D[ii]);
++  }
++  
++  // Load PDR-2 clipped f \sigma_8 data, and calibrate. 
++  for(i=0; i<n; i++){
++    sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data_%.1lf_%.1lf.dat", outputdir, thresholds[i], field, kmax, lo_zlim, hi_zlim);
++
++    inputfile = fopen(filepath, "r");
++
++    fscanf(inputfile, "%lf \t %*lf \t %*lf \t %*lf \t %*lf \t %*lf \n", &D[i]);
++
++    fclose(inputfile);
++
++    D[i] *= cal_D[i];  // Calibrate data.
++  }
++
++  
++  printf("\n\nd0 \t D \t\t D_calib \t err_calib: \t calibrated frac err (%): \n");
++
++  for(ii=0; ii<n; ii++)  printf("%d \t %.4lf \t %.4lf \t %.4lf \t %.4lf% \n", thresholds[ii], D[ii]/cal_D[ii], D[ii], sqrt(cov[ii][ii]), 100.*sqrt(cov[ii][ii])/D[ii]);
++  
++  for(i=0; i<n; i++){
++    for(j=0; j<n; j++)  numer     += gsl_matrix_get(&inv.matrix, i, j)*D[j];    
++  }
++
++  double F, var_F;
++  
++  F = numer/denom;
++
++  // variance calc. 
++  var_F = 0.0;
++
++  for(i=0; i<n; i++){
++    for(j=0; j<n; j++)  var_F += gsl_matrix_get(&inv.matrix, i, j);
++  }
++
++  var_F = 1.0/var_F;
++
++  printf("\nFIELD: W%d \t \t KMAX: %.2lf \t \t RESULT: %.4lf \t \t ERROR:  %.4lf \t FRACTIONAL ERROR:  %.4lf%", field, kmax, F, sqrt(var_F), 100.*sqrt(var_F)/F);
++
++  // Write to file. 
++  sprintf(filepath, "%s/data_v1.7/fsig8/joint/W%d/kmax_%.1lf/data_%.1lf_%.1lf.dat", outputdir, field, kmax, lo_zlim, hi_zlim);
++
++  output = fopen(filepath, "w");
++
++  fprintf(output, "%.6lf \t %.6lf", F, sqrt(var_F));
++  
++  return 0;
++}
++
++
+diff --git a/kdtree_xi_mom.c b/kdtree_xi_mom.c
+index 3fd2b22..65737b1 100644
+--- a/kdtree_xi_mom.c
++++ b/kdtree_xi_mom.c
+@@ -1,8 +1,10 @@
+ int assignMemory_xi(){
++  double rmax = log10(4000.);
++
+   point_rands = (Particle *) realloc(point_rands, rand_number*sizeof(Particle));
+ 
+-  nlogbins    = (int)        ceil((maxlog  - zerolog)/logbinsz);
+-  nlinbins    = (int)        ceil((maxlin  - zerolin)/linbinsz);
++  nlogbins    = (int)        ceil((rmax   - zerolog)/logbinsz);
++  nlinbins    = (int)        ceil((maxlin - zerolin)/linbinsz);
+   
+   // mu^n + FKP weighted pair counts. 
+   rr_0        = (double *)   calloc(nlogbins*nlinbins, sizeof(double)); 
+@@ -34,7 +36,7 @@ int postprocesspairs_nonodes(double* C0, double* C2, double* C4, double* C6, dou
+   double  mu0weighted_paircount, mu2weighted_paircount, mu4weighted_paircount, mu6weighted_paircount, mu8weighted_paircount, mu10weighted_paircount;
+ 
+   // Save raw counts.
+-  sprintf(filepath, "%s/Qmultipoles/%s_nonodes_raw.dat", outputdir, surveyType);
++  sprintf(filepath, "%s/Qmultipoles/%s_raw.dat", outputdir, surveyType);
+ 
+   output = fopen(filepath, "w");
+ 
+@@ -77,11 +79,11 @@ int postprocesspairs_nonodes(double* C0, double* C2, double* C4, double* C6, dou
+   xiMonopole(C8, xi8);  // masked RSD work.
+ 
+   // Save multipoles.
+-  sprintf(filepath, "%s/Qmultipoles/%s_nonodes.dat", outputdir, surveyType);
++  sprintf(filepath, "%s/Qmultipoles/%s.dat", outputdir, surveyType);
+ 
+   output = fopen(filepath, "w");
+ 
+-  fprintf(output, "## Walltime: %.4lf seconds; number of nodes in tree: %d \n", getRealTime() - begin, tree_labelCount);
++  fprintf(output, "## Walltime: %.4lf seconds; \n", getRealTime() - begin);
+ 
+   for(j=0; j<nlogbins; j++)  fprintf(output, "%.4le \t %.4le \t %.4le \t %.4le \t %.4le \t %.4le \n", logrbins[j], xi0[j], xi2[j], xi4[j], xi6[j], xi8[j]);
+ 
+@@ -189,9 +191,11 @@ int randWindow_pairCount(){
+   // get_qsnapshot(rr_meann, rr_meanwn, rr_meanr, rr_meanmu, randTree, randTree);
+   
+   // bruteforce_nonodes(rr_0, rr_2, rr_4, rr_6, rr_8, rr_10, rr_meanr, rr_meanmu, point_rands, point_rands, rand_number, rand_number, 1);
++
+   // postprocesspairs_nonodes(rr_0, rr_2, rr_4, rr_6, rr_8, rr_10, rr_meanr, rr_meanmu, randTree, randTree, 1);
+   
+   findSuitableNodePairs_bruteforcePairCount(rr_meann, rr_meanwn, rr_meanr, rr_meanmu, randTree, randTree, 1);
++
+   postprocesspairs(rr_meann, rr_meanwn, rr_meanr, rr_meanmu, randTree, randTree);
+   
+   return 0;
+diff --git a/libkdtree.c b/libkdtree.c
+index 28772b3..27211b9 100644
+--- a/libkdtree.c
++++ b/libkdtree.c
+@@ -122,8 +122,8 @@ int findSuitableNodePairs_bruteforcePairCount(double* n, double* wn, double* r,
+       
+     postprocesspairs(n, wn, r, mu, node1, node2);
+       
+-    nodeone_progresscount = node1->label + (long) floor(tree_labelCount/20.);
+-    nodetwo_progresscount = node2->label + (long) floor(tree_labelCount/20.);
++    nodeone_progresscount = node1->label + (long) floor(tree_labelCount/1000.);
++    nodetwo_progresscount = node2->label + (long) floor(tree_labelCount/1000.);
+   }
+     
+   // Given two nodes, is their maximum displacement smaller than the smallest bin? is their minimum displacement larger than the largest bin
+@@ -169,7 +169,7 @@ int bruteforceCountpairs_betweenChildren(double* n, double* wn, double* r, doubl
+       for(jj=ii+1; jj<node2->N; jj++){
+         log10_r                = log10_particleSeparation(node1->particle[ii], node2->particle[jj]); 
+                     
+-        if(log10_r > zerolog){
++        if((log10_r > zerolog) && (log10_r < maxlog)){
+           pair_mu              = pair_zmu(node1->particle[ii], node2->particle[jj], log10_r);
+           
+           indi                 = (int) floor(  (log10_r - zerolog)/logbinsz);  // logarithmic binning in r.	      
+@@ -183,7 +183,7 @@ int bruteforceCountpairs_betweenChildren(double* n, double* wn, double* r, doubl
+              n[Index]         +=                      1.0;
+             wn[Index]         +=                   weight; 
+              r[Index]         +=           log10_r*weight;                     // l=2, (2l+1) L_2 -> C2[indi][indj] +=(3.*pair_mu2 - 1.);
+-            mu[Index]         +=           pair_mu*weight;                     // l=4, (2l+1) L_4 -> C4[indi][indj] += (35.*pair_mu2*pair_mu2 - 30.*pair_mu2 + 3.);                  
++            mu[Index]         +=           pair_mu*weight;                     // l=4, (2l+1) L_4 -> C4[indi][indj] += (35.*pair_mu2*pair_mu2 - 30.*pair_mu2 + 3.);
+           }
+         }
+                 
+@@ -200,7 +200,7 @@ int bruteforceCountpairs_betweenChildren(double* n, double* wn, double* r, doubl
+       for(jj=0; jj<node2->N; jj++){
+         log10_r               = log10_particleSeparation(node1->particle[ii], node2->particle[jj]); 
+                         
+-        if(log10_r > zerolog){
++        if((log10_r > zerolog) && (log10_r < maxlog)){
+           pair_mu             = pair_zmu(node1->particle[ii],  node2->particle[jj], log10_r);
+           
+           indi                = (int) floor(  (log10_r - zerolog)/logbinsz);  // logarithmic binning in r.	    
+diff --git a/linearGrowthRate.c b/linearGrowthRate.c
+index 95aec7a..0cf0fc2 100644
+--- a/linearGrowthRate.c
++++ b/linearGrowthRate.c
+@@ -93,7 +93,7 @@ int linearGrowthRate(){
+   
+   approx_growthfactor_today = exp(result);    
+   
+-  printf("\n\nln(a) \t\t Age \t\t H(z) \t\t Om(a) \t\t f(a) \t\t D+(a) \t\t approx. D+(a) \n");
++  // printf("\n\nln(a) \t\t Age \t\t H(z) \t\t Om(a) \t\t f(a) \t\t D+(a) \t\t approx. D+(a) \n");
+   
+   for(k=151; k<linearGrowth_nPoints; k++){
+     init_lna  = lnAarray[10];
+@@ -109,11 +109,13 @@ int linearGrowthRate(){
+ 
+     approx2linear_growthfactor[k] = exp(result)/approx_growthfactor_today;
+ 
++    /*
+     if((k > 1050) && (i%10 == 0)){
+       printf("%+.4lf \t %.4lf \t %.4lf \t %.4lf \t %.4lf \t %.4lf \t %.4lf \n", lnAarray[k], HubbleTime*AgeInterp(lnAarray[k]), HubbleCnstWithTime[k], Om_mOfa[k], f_Om_mOfa545[k],
+                                                                                 linear_growthfactor[k], approx2linear_growthfactor[k]);
+     }
+-    
++    */    
++
+     // gsl_odeiv2_driver_reset(d);
+   }
+     
+diff --git a/load_mask.c b/load_mask.c
+index 8b31852..5158815 100644
+--- a/load_mask.c
++++ b/load_mask.c
+@@ -6,7 +6,6 @@ int rotate_ra(void){
+   return 0;
+ }
+   
+-
+ int load_rands_radec(double sampling){
+   rand_number = accepted_rand = (int) ceil(1382582*sampling);  // Hard coded catalogue max row number.
+ 
+@@ -34,14 +33,12 @@ int load_rands_radec(double sampling){
+   return 0;
+ }
+ 
+-
+ int set_rand_rng(void){
+   for(j=0; j<rand_number; j++)  rand_rng[j] = gsl_rng_uniform(gsl_ran_r);
+ 
+   return 0;
+ }
+ 
+-
+ int set_cnst_nbar(void){
+   // Reassign randoms to have constant \bar n(z); this will (much) better sample high z tail.
+   pt2nz = &unity; // constant <n(z)>
+@@ -51,7 +48,6 @@ int set_cnst_nbar(void){
+   return 0;
+ }
+ 
+-
+ int rand_newchi_newbasis(void){
+   // With nbar specified according to interp_nz(chi), assign chi for randoms such that they satisfy this bar.
+   // Achieved with the transformation method, see pg. 287 of NR and smooth_nbar.c
+@@ -104,7 +100,6 @@ int rand_newchi_newbasis(void){
+   return 0;
+ }
+ 
+-
+ int assign_randbox(){
+   for(j=0; j<rand_number; j++){
+     xlabel     = (int)  floor((rand_x[j] - min_x)/dx);
+@@ -117,14 +112,12 @@ int assign_randbox(){
+   return 0;
+ }
+ 
+-
+ int lowerSampling_randomisedCatalogue(double sampling){
+   rand_number = (int) ceil(rand_number*sampling);
+ 
+   return 0;
+ }
+ 
+-
+ int make_fastread_randomCats(void){
+   //  Output ra and dec only, in binary. assumes loaded already. 
+   sprintf(filepath, "%s/W1_Spectro_V7_4/randoms/randoms_W%d_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag);
+@@ -141,7 +134,6 @@ int make_fastread_randomCats(void){
+   return 0;
+ }
+ 
+-
+ int load_fastread_randomCats(int rand_number){  
+   sprintf(filepath, "%s/W1_Spectro_V7_4/randoms/randoms_W%d_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag);
+ 
+@@ -155,12 +147,10 @@ int load_fastread_randomCats(int rand_number){
+   return 0;
+ }
+ 
+-
+ double cmpfunc(const void* a, const void* b){
+   return ( *(double*) a - *(double*) b);
+ }
+ 
+-
+ int cut_rand_bydec(){
+   // Sorting only needs to be done once, ever.
+   gsl_sort2(rand_dec, 1, rand_ra, 1, rand_number);
+@@ -184,7 +174,6 @@ int cut_rand_bydec(){
+   return 0;
+ }
+ 
+-
+ int load_ascii_randomCats(double sampling){
+   sprintf(filepath, "%s/W1_Spectro_V7_2/randoms/randoms_W%d_xyz_%.1lf_%.1lf_Nagoya_v6_Samhain_stefano.cat", root_dir, fieldFlag, 0.6, 0.9);  // redshifts reassigned below.                 
+                                                                                                                                                                                             
+@@ -203,7 +192,6 @@ int load_ascii_randomCats(double sampling){
+   return 0;
+ }
+ 
+-
+ int del_lockfile(){
+   // Delete lockfile if necessary, e.g. for AP MCMC.                                                                                                        
+   char*       lockfile_path;                                                                                                                               
+@@ -221,50 +209,3 @@ int del_lockfile(){
+ 
+   return 0;
+ }
+-
+-/*
+-int load_maskedRSDpaper_mask(double sampling){
+-    sprintf(filepath, "%s/Data/maskedRSD_draftwork/randoms_W1_Nagoya_xyz_0.7_0.8_gridded.cat", root_dir);
+-
+-    inputfile   = fopen(filepath, "r");
+-
+-    ch          = 0;
+-    rand_number = 0;
+-
+-    do{
+-        ch = fgetc(inputfile);
+-        
+-        if(ch == '\n')
+-            rand_number += 1;
+-    } while(ch != EOF);
+-
+-    printf("\n\n%d randoms number", rand_number);
+-
+-    rewind(inputfile);
+-
+-    lowerSampling_randomisedCatalogue(sampling);
+-
+-    assign_randmemory();
+-
+-    for(j=0; j<rand_number; j++)   fscanf(inputfile, "%le \t %le \t %le \n", &rand_x[j], &rand_y[j], &rand_z[j]);
+-    
+-    fclose(inputfile);
+-    
+-    printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));
+-    printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));
+-    printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));
+-    
+-    for(j=0; j<n0*n1*n2; j++)  surveyMask[j] = 0.0;
+-    
+-    for(j=0; j<rand_number; j++){
+-        boxlabel = boxCoordinates(rand_x, rand_y, rand_z, j);
+-    
+-        surveyMask[boxlabel] = 1.;
+-    }
+-        
+-    for(j=0; j<rand_number; j++)  rand_weight[j] = 1.;
+-
+-    sprintf(filepath, "");
+-
+-    return 0;
+-}*/
+diff --git a/load_maskQmultipoles.c b/load_maskQmultipoles.c
+index 64480f3..f30b980 100644
+--- a/load_maskQmultipoles.c
++++ b/load_maskQmultipoles.c
+@@ -4,15 +4,29 @@ int set_rand_rng(void){
+   return 0;
+ }
+ 
++int rotate_ra(void){
++  // Stefano basis has ra aligned with y and redshift along z; R1 rotation can be done simply by changing ra coordinate,
++  // this is NOT true of dec.
++  for(j=0; j<rand_number; j++)  rand_ra[j] -= CentreRA;
++
++  return 0;
++}
++
+ int rand_chiReassignment(){
+   // With nbar specified according to interp_nz(chi), assign chi for randoms such that they satisfy this bar.
+   // Achieved with the transformation method, see pg. 287 of NR and smooth_nbar.c
+ 
+   double  cos_dec;
++  double   x2, z2;
++  double    c_dec;
++
++  c_dec   = CentreDec*(pi/180.);
++
++  rotate_ra();
+   
+-  printf("\n\nRandoms chi reassignment.");
++  printf("\n\nRandoms chi reassignment; centre RA: %.3lf \t centre DEC: %.3lf", CentreRA, CentreDec);
+   
+-  #pragma omp parallel for private(j, cos_dec) if(thread == 1)
++  // #pragma omp parallel for private(j, cos_dec, x2, z2) if(thread == 1)
+   for(j=0; j<rand_number; j++){
+     rand_chi[j]    = inverse_cumulative_nbar(rand_rng[j]);
+ 
+@@ -21,13 +35,24 @@ int rand_chiReassignment(){
+ 
+     cos_dec        = cos(rand_dec[j]);
+       
+-    rand_x[j]      = rand_chi[j]*cos(rand_ra[j])*cos_dec;
+-    rand_y[j]      = rand_chi[j]*sin(rand_ra[j])*cos_dec;
+-    rand_z[j]      = rand_chi[j]*sin(rand_dec[j]);
++    rand_x[j]      =  rand_chi[j]*cos(rand_ra[j])*cos_dec;
++    rand_y[j]      =  rand_chi[j]*sin(rand_ra[j])*cos_dec;
++    rand_z[j]      = -rand_chi[j]*sin(rand_dec[j]);
+ 
+     rand_weight[j] = 1./(1. + (*pt2nz)(rand_chi[j])*fkpPk);   // rand fkp weights.
++    
++    x2             = -sin(c_dec)*rand_x[j]  - cos(c_dec)*rand_z[j];
++    z2             =  cos(c_dec)*rand_x[j]  - sin(c_dec)*rand_z[j];
++
++    rand_x[j]      = x2 + stefano_trans_x;  // Translate to fit in the box. P(k) unaffected.
++    rand_y[j]     +=      stefano_trans_y;
++    rand_z[j]      = z2 + stefano_trans_z;   
+   }
+ 
++  printf("\nx: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_x, rand_number), arrayMax(rand_x, rand_number));
++  printf("\ny: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_y, rand_number), arrayMax(rand_y, rand_number));
++  printf("\nz: %.1lf \t %.1lf h^-1 Mpc", arrayMin(rand_z, rand_number), arrayMax(rand_z, rand_number));     
++  
+   return 0;
+ }
+ 
+@@ -132,7 +157,7 @@ int load_maskfits(double sampling, int count_res){
+   
+   read_maskfits(filepath, sampling);  // rand_number set by nrows.
+   
+-  printf("\n\nMask: %s with sampling %.2lf has %d randoms", filepath, sampling, rand_number);
++  printf("\n\nMask: %s with sampling %.4lf has %d randoms", filepath, sampling, rand_number);
+   
+   assign_randmemory();
+ 
+@@ -144,3 +169,24 @@ int load_maskfits(double sampling, int count_res){
+   
+   return 0;
+ }
++
++
++int load_maskedRSD_rands(double sampling){
++  sprintf(filepath, "/home/mjw/maskedRSD/dat/randoms_W1_Nagoya_xyz_0.7_0.8_gridded.cat");
++
++  inputfile = fopen(filepath, "r");
++
++  line_count(inputfile, &rand_number);  
++
++  lowerSampling_randomisedCatalogue(sampling);
++  
++  assign_randmemory();
++  
++  for(j=0; j<rand_number; j++){
++    fscanf(inputfile, "%le \t %le \t %le", &rand_x[j], &rand_y[j], &rand_z[j]);
++    
++    rand_weight[j]  = 1.0;    
++  }
++
++  return 0;
++}
+diff --git a/log.c b/log.c
+new file mode 100644
+index 0000000..bc3f071
+--- /dev/null
++++ b/log.c
+@@ -0,0 +1,3 @@
++11th October 2017
++
++-- Changed from single-field to joint-field integral constraint correction to match stacpolly backups on skene.
+diff --git a/mull_changes.txt b/mull_changes.txt
+new file mode 100644
+index 0000000..cd1af72
+--- /dev/null
++++ b/mull_changes.txt
+@@ -0,0 +1,10 @@
++ChiSq_input.c:          -- Mock p(k) naming convention for Jenkins folding, either number of folds or fold factor {(0,2) or (1,2)};  mocks labelled 001 or simply 1.
++
++ChiSq_minimisation.c:   -- Mull results are already shot noise subtracted.
++
++driver_likelihood.c:    -- Set covariance mocks path, and set to retrieve shot noise values. 
++
++get_allkvals.c:         -- Mock p(k) naming convention for Jenkins folding, either number of folds or fold factor {(0,2) or (1,2)};  mocks    labelled 001 or simply 1.
++
++MultipoleCovariance.c:  -- Mock p(k) naming convention for Jenkins folding, either number of folds or fold factor {(0,2) or (1,2)};  mocks    labelled 001 or simply 1.
++                        -- Shot noise subtrated. 
+\ No newline at end of file
+diff --git a/nbar.c b/nbar.c
+index b839605..40d6700 100644
+--- a/nbar.c
++++ b/nbar.c
+@@ -37,7 +37,7 @@ int spline_nbar(int truth){
+       }
+ 	        
+       if(truth==1){
+-        // PARENT: redshift errors? answer probably no. 
++        // PARENT: redshift errors? answer no from Andrea's work. 
+         sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/nbar_100_smoothedCounts/nbar_smooth_0.0_Nagoya_v7_Samhain_parent_mocks_avg_twofield_avg.dat", root_dir);
+       }
+     }
+@@ -47,7 +47,7 @@ int spline_nbar(int truth){
+       sprintf(filepath, "%s/W1_Spectro_V7_2/data_v1.7/nbar_100_smoothedCounts/nbar_smooth_%.1lf_Nagoya_v7_Samhain_twofield_avg.dat", root_dir, nz_smoothRadius); 
+     }
+ 
+-    printf("\n\n%s", filepath);
++    printf("\n\nLoading <n(z)> file:  %s", filepath);
+     
+     inputfile = fopen(filepath, "r");
+ 
+diff --git a/nonlinear_pk.c b/nonlinear_pk.c
+index be6ae22..246aa23 100644
+--- a/nonlinear_pk.c
++++ b/nonlinear_pk.c
+@@ -1,7 +1,6 @@
+ double splintHODpk(double k){
+-  // Interpolated matter power spectrum evaluated at mod(k_vec - q_vec).
++  // Interpolated matter power spectrum evaluated at |k_vec|.
+   if(k>10.)          return pk_hiA*pow(k, 3. + pk_hin);
+-
+   else if(k<0.0001)  return pk_loA*pow(k, 3. + pk_lon);
+ 
+   else{
+@@ -31,13 +30,13 @@ int nonlinear_pk(){
+   
+   printf("\n\nLoading %s", filepath);
+ 
+-  while((inputfile = fopen(filepath, "r")) == NULL){ 
++  while((inputfile = fopen(filepath, "r")) == NULL){  // Generate file if it can't be found. 
+     camb_call(1, z_eff);      // nonlinear/linear flag, redshift;
+   }
+ 
+-  // line_count(inputfile, &pk_lineNo);
+   linecount_header(inputfile, 1, &pk_lineNo);
+-        
++  // line_count(inputfile, &pk_lineNo);
++  
+   sdltk  = realloc(sdltk,  pk_lineNo*sizeof(*sdltk));
+   sdltPk = realloc(sdltPk, pk_lineNo*sizeof(*sdltPk));
+   sdlt2d = realloc(sdlt2d, pk_lineNo*sizeof(*sdlt2d));  // Second derivates of HOD P(k) for cubic spline.
+diff --git a/oldScripts/driver_cube.c b/oldScripts/driver_cube.c
+index 55d6f2e..d08f6db 100644
+--- a/oldScripts/driver_cube.c
++++ b/oldScripts/driver_cube.c
+@@ -27,9 +27,12 @@
+ 
+ #include "Scripts/header.h"
+ 
++// #include "Scripts/cosmology_planck2015.h"
++#include "Scripts/cosmology_valueaddedmocks.h"
++
+ #include "Scripts/comovDistRedshiftCalc.c"
+ 
+-// #include "Scripts/JenkinsRun.c"
++#include "Scripts/Jenkins_fold.c"
+ #include "Scripts/GridParams.c"
+ 
+ #include "Scripts/assignMemory.c"
+@@ -39,31 +42,36 @@
+ #include "Scripts/assignAcceptance.c"
+ 
+ #include "Scripts/CoordinateCalc.c"
++#include "Scripts/CoordinateCalcCube.c"
+ 
+ #include "Scripts/overdensity_calc.c"
+ #include "Scripts/CloudInCell.c"
+ // #include "Scripts/BasisChange.c"
+ // #include "Scripts/CalcCellraDec.c"
+ 
+-// #include "Scripts/KaiserMultipoles.c"
++#include "Scripts/KaiserMultipoles.c"
+ // #include "Scripts/KaiserGaussMultipoles.c"
+ #include "Scripts/KaiserLorentzMultipoles.c"
+ 
+ #include "Scripts/qSortCompare.c"
+-#include "Scripts/FFTw_3D.c"
++#include "Scripts/FFTw.c"
+ 
+ #include "Scripts/nbar.c"
++#include "Scripts/nbar_smooth.c"
+ // #include "Scripts/MockAvgComovingDensity.c"
+ 
+-// #include "Scripts/AgeOftheUniverse.c"
+-// #include "Scripts/linearGrowthRate.c"
++#include "Scripts/AgeOftheUniverse.c"
++#include "Scripts/linearGrowthRate.c"
+ // #include "Scripts/growthfactor_derivative.c"
+ 
+-#include "Scripts/matter_pk.c"
+-// #include "Scripts/Clipped_zSpace.c"
++#include "Scripts/smith_mjw.h"
++#include "Scripts/smith_mjw.c"
++
+ #include "Scripts/toymodel_pk_xi.c"
++#include "Scripts/matter_pk.c"
++#include "Scripts/Clipped_zSpace.c"
+ 
+-// #include "Scripts/ArtificialWf.c"
++#include "Scripts/ArtificialWf.c"
+ // #include "Scripts/BootStrap.c"
+ 
+ // #include "Scripts/correlation_fns.c"
+@@ -71,7 +79,11 @@
+ #include "Scripts/randGen.c"
+ 
+ #include "Scripts/FFT_log.h"
++
++#include "Scripts/clipped_lnnormal.c"
++
+ #include "Scripts/FFT_log.c"
++#include "Scripts/FFTw_3Dwf.c"
+ 
+ /*#include "Scripts/cubature/cubature.h"*/
+ /*#include "Scripts/FFT_log_zeldovich.h"*/
+@@ -81,19 +93,16 @@
+ 
+ /*#include "Scripts/HOD_mock_theoryExp.c"*/
+ 
+-/*#include "Scripts/MultipoleCovariance.c"*/
+-/*#include "Scripts/MultipoleCovariance_eigenvecs.c"*/
+-/*#include "Scripts/ChiSq_minimisation.c"*/
+-/*#include "Scripts/posteriors_1D.c"*/
+-/*#include "Scripts/posteriors_2D.c"*/
++#include "Scripts/MultipoleCovariance.c"
++#include "Scripts/MultipoleCovariance_eigenvecs.c"
++#include "Scripts/ChiSq_minimisation.c"
++#include "Scripts/posteriors_1D.c"
++// #include "Scripts/posteriors_2D.c"
+ 
+ /*#include "Scripts/MonteCarlo_SSPOC.c"*/
+ /*#include "Scripts/AngularSelectionCats.c"*/
+ /*#include "Scripts/SaundersDeproject.c"*/
+ 
+-#include "Scripts/smith_mjw.h"
+-#include "Scripts/smith_mjw.c"
+-
+ #include "Scripts/libkdtree.h"
+ #include "Scripts/kdtree_xi_mom.c"
+ #include "Scripts/buildTree.c"
+@@ -101,47 +110,182 @@
+ 
+ /*#include "Scripts/mockGalaxyCats.c"*/
+ 
+-#include "Scripts/halomodel_pk.c"
++#include "Scripts/halomodel.c"
+ #include "Scripts/VIPERS_window.c"
+ 
++#include "Scripts/libkdpoly.h"
++#include "Scripts/libkdpoly.c"
++#include "Scripts/spec_weights.c"
++#include "Scripts/clipping_weights.c"
++#include "Scripts/fkp_weights.c"
++#include "Scripts/tidal_tensor.c"
+ // #include "tinker.c"
+ 
+-#include "Scripts/hod_cube.c"
+-
+ #include "Scripts/freeMemory.c"
+ 
+-
+ int main(int argc, char **argv){
++  // char* s = getenv("ROOTDIR");
+   sprintf(root_dir,      "/disk1/mjw/HOD_MockRun");
+-  
+   sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_HOD_Mocks");
++  // sprintf(vipersHOD_dir, "/disk1/mjw/VIPERS_ValueAddedHOD");
++
++  // MPI_Init(&argc,&argv);
++  // MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
++  // MPI_Comm_size(MPI_COMM_WORLD, &process_number);
++ 
++  // With orientation of the -z Cartesian axis to the line of sight. 
++  // lower_xlimit & upper_xlimit
++  // AxisLimsArray[0][0]   =    1550.0;                                                  // h^-1 Mpc
++  // AxisLimsArray[1][0]   =    2180.0;                                                  // h^-1 Mpc
++
++  // lower_ylimit & upper_ylimit
++  // AxisLimsArray[0][1]   =    -170.0;                                                  // h^-1 Mpc
++  // AxisLimsArray[1][1]   =     170.0;                                                  // h^-1 Mpc
++
++  // lower_zlimit & upper_zlimit
++  // AxisLimsArray[0][2]   =     -75.0;                                                  // h^-1 Mpc
++  // AxisLimsArray[1][2]   =     -10.0;                                                  // h^-1 Mpc
+ 
+   // Embedding volume for P(k) measurement. Stefano basis. 
+-  AxisLimsArray[0][0]   =       0.0;                                                     // h^-1 Mpc
++  AxisLimsArray[0][0]   =       0.0; 
+   AxisLimsArray[1][0]   =    1000.0;
+  
+-  AxisLimsArray[0][1]   =       0.0;                                                     // h^-1 Mpc
+-  AxisLimsArray[1][1]   =    1000.0;
++  AxisLimsArray[0][1]   =       0.0;   
++  AxisLimsArray[1][1]   =    1000.0;                                                     // h^-1 Mpc                                                 
+ 
+   AxisLimsArray[0][2]   =       0.0;                                                     // h^-1 Mpc
+   AxisLimsArray[1][2]   =    1000.0;
+ 
++  // degree of translation for Stefano's co-ordinates, fit survey into surrounding volume. 
++  // stefano_trans_x       =      +50.; 
++  // stefano_trans_y       =     +250.; 
++  // stefano_trans_z       =    -1425.;
++  
++  // stefano_trans_x       =     +250.;
++  // stefano_trans_y       =     +250.;
++  // stefano_trans_z       =    -1700.;
++  
++  /*
++  // W1 catalogue. new 500s mocks. parent
++  LowerRAlimit          =       30.1; 
++  UpperRAlimit          =       38.8;
++  CentreRA              =      34.45;
++
++  LowerDecLimit         =      -5.95;     
++  UpperDecLimit         =      -4.15;     
++  CentreDec             =      -5.05;  
++  
++  W1area                =      15.66;      
++  */
++  
++  // W1 catalogue. new 500s mocks. Nagoya v4 spectroscopic mask. Nagoya v5 is identical except for a single pointing removed, to be reobserved.
++  LowerRAlimit          =      30.17; 
++  UpperRAlimit          =       38.8;
++  CentreRA              =     34.487;
++  
++  LowerDecLimit         =      -5.38;     
++  UpperDecLimit         =      -4.17;     
++  CentreDec             =      -4.77;     
++  
++  // calculated in spec_weights.c
++  // W1area             =      7.471;
++  
++  // official release info, maybe photo mask is included. v4 Nagoya.
++  W1area                =      7.017;  // sq. degs.
++  W4area                =      5.150;
++  
++  TotalW1W4area         =      W1area + W4area; 
++  
+   // Cell size, comoving distance, h^-1 Mpc. 
+-  fft_size              =       512;     
++  fft_size              =       256;     
++
++  // Selection parameters.
++  lo_MBlim              =     -90.5;                  // -20.5 < M_B < -19.5
++  hi_MBlim              =     -00.0;
++  
++  lo_zlim               =      0.60;                  // previously 0.6<z<0.9, 0.7<z<1.1 
++  hi_zlim               =      0.90;
++  z_eff                 =      0.75;                  // set to volume avg. redshift of the survey? prior to FKP weights.
++
++  linearBias            =      1.53;                  // 1.32, appropriate for 0.6 to 0.9;
++  velDispersion         =       3.0;                  // units of h^-1 Mpc rather than 300 km s^-1
++  beta                  =     0.541;                  // 2dF measurement, beta = 0.43, beta = 0.542 for the cube. 
++
++  // Priors on the model params.
++  min_fsigma8           =      0.00;
++  max_fsigma8           =      0.80;
++
++  min_velDisperse       =      0.00;
++  max_velDisperse       =      6.00;
++
++  // 4 param likelihood required. change this. 
++  min_bsigma8           =       0.8;
++  max_bsigma8           =       1.6;
++ 
++  // distinguished from linear bias by spectral distortion.  
++  min_A11Sq             =      0.99;
++  max_A11Sq             =      1.01;
++
++  // Number of fitted parameters, defines degrees of freedom in chi sq. expectation. 
++  paramNumber           =       3.0;
++
++  // Resolution of the Likelihood evaluation [voxel number].
++   Res                   =       16;
++  dRes                  =      16.0;
++
++  ChiSq_kmin            =      0.04;
++  ChiSq_kmax            =      0.20; 
++     
++  // Fit solely the monopole (1) or both mono and Quad (2).
++  hiMultipoleOrder      =         2;
++
++  // Comoving number density, n(z), measurement. Change to equal increments in volume?
++  chi_interval          =     16.00;
++
++  // Apply Jenkins folding to increase spatial resolution of mesh. 
++  Jenkins_foldfactor    =       2.0;
++
++  // FKP P(k) of interest.
++  fkpPk                 =    3000.0;            // [h^-1 Mpc]^3.
++  meanSampling          =       0.4;
+ 
+   // Binning interval for P(k).
+-  modkMax               =      1.00;
++  modkMax               =       1.0;
+   muBinNumb             =       100;
+   kbin_no               =        40;
+ 
+-  // Interval in k^2 for perp k binning of 2D P(k).
+-  perpkInterval         =      0.01;
+- 
+   // Total number of HOD mocks. 
+   CatalogNumber         =       306;
++
++  //  Apodise the window fn. to supress ringing of the window ("Gibb's phenomenon").
++  GibbsSkinDepth            =         5.0;
+     
+-  // Clipping variables. 
+-  appliedClippingThreshold  =  40.0;    
++  // remember to smooth.
++  appliedClippingThreshold  =      1000.0;    
++  
++  clipping_smoothing_radius =         2.0;
++
++  GaussianFilter_radius     =         0.0;
++
++  // subsample HOD catalogue 
++  depletion_factor          =        1.25;
++
++  // nfw halo generation
++  nfw_conc                  =         1.0; 
++
++  // Correlation fn's, logarithmic binning in r. 
++  zerolog  =                 log10(0.001);
++  maxlog   =                   log10(2.0);      // hiRes: 20., lowRes: 2000.
++  logbinsz =                 log10( 1.01);      // previously 1.4, must be >1.0 otherwise log gives 0. or -ve.
++  
++  nlogbins =  (int) ceil((maxlog - zerolog)/logbinsz);
++
++  // linear binning in mu. 
++  zerolin  =                         0.00;
++  maxlin   =                         1.00;
++  linbinsz =                         0.05;
++
++  nlinbins =  (int) ceil((maxlin - zerolin)/linbinsz);
+ 
+   // Random variable generation.    
+   gsl_rng_env_setup();
+@@ -149,25 +293,88 @@ int main(int argc, char **argv){
+   gsl_ran_T = gsl_rng_default;
+   gsl_ran_r = gsl_rng_alloc(gsl_ran_T);
+ 
+-  // comovDistReshiftCalc();
+   
+-  // VIPERS_SolidAngle = SolidAngleCalc(LowerDecLimit, UpperDecLimit, UpperRAlimit-LowerRAlimit);
+-
++  double fkp_norm;
++  
++  comovDistReshiftCalc();
++  
++  Jenkins_foldEmbeddingVol();
++  
+   EvaluateGridParameters();
+   
+-      
+   
+-  sprintf(filepath, "%s/mocks_W1_v9.0_500/cube_-20.0.dat", vipersHOD_dir);
+-    
+-  CatalogueInput_Cube(filepath);
++  // assigns memory for overdensity grid.
++  prep_grid();
++  
++  prep_mask(); 
++  
++  prep_fftw();
++  
++  prep_pkRegression(-2., log10(modkMax), kbin_no);
+     
+-  calc_overdensityCube();
+-
+-  clipDensity_cube(appliedClippingThreshold);
+-
+-  cube_PkCalc();
+   
++  // CoordinateCalcCube("/disk1/mjw/HOD_MockRun/Data/HODCube/cube_gal_shuf_-20.0.dat");
++  // CoordinateCalcCube("/disk1/mjw/HOD_MockRun/Data/HODCube/zcube_zvel_gal_-20.0.dat");
++  
++  // calculated in real space
++  CoordinateCalcCube("/disk1/mjw/HOD_MockRun/Data/500s/hod_cube/galaxies_infilament.dat");
++  
++  // randoms_Cube(Vipers_Num*10);
++  randoms_inenvironment("/disk1/mjw/HOD_MockRun/Data/500s/hod_cube/randoms_infilament.dat");
++  
++  assignAcceptanceCube();
++  
++  Jenkins_foldRand();
++  
++  Jenkins_foldCat();
++  
++  pt2nz = &cube_nbar;
++  
++  // clipped lognormal model investigation.
++  // Gauss_varlognormal();
++  
++  // calc_clippingweights();
++  
++  // load_clippingweights();
++  
++  for(j=0; j<Vipers_Num; j++) clip_galweight[j] = 1.;
++  
++  // normalisation of FKP weights set by random catalogue. 
++  fkp_norm = calc_fkpweights();
++  
++  // Apply this normalisation to gal. weights. 
++  set_cube_fkpweights(fkp_norm);
++  
++  // calc_delta();
++  
++  // tidal_tensor();
++  
++  calc_overdensity();
++  
++  // Calculate the galaxy contribution to the shotnoise, galaxies
++  // are weighted by gal_weights.  assumes weights are density independent.  
++  // weighted_shotnoise();
++  
++  PkCalc();
++  
++  /*
++  // AgeOftheUniverse.c
++  UniverseAge();
++  
++  // linearGrowthRate.c
++  linearGrowthRate();
++  
++  // needs checked.
++  // halofit(z_eff);
++  
++  //  WATCH OUT: Loads Value added mocks cosmology P(k), change back to Planck 2015. // 
++  inputHODPk();
++  
++  // clipped_lnnormal_main();
++  
++  clipped_lnnorm_pkCalc();
++  */
+   printf("\n\n");
+-
++  
+   return 0; 
+ }
+diff --git a/onedposteriors.c b/onedposteriors.c
+index b03957b..8fe5ba3 100644
+--- a/onedposteriors.c
++++ b/onedposteriors.c
+@@ -24,11 +24,10 @@ int set_minChiSq(){
+   return 0;
+ }
+ 
+-
+ double calc_onedposteriors(double* maxL_fsig8, double* maxL_bsig8, double* maxL_sigv){
+-  double   sigp_post[Res];
+-  double  bsig8_post[Res];
+-  double  fsig8_post[Res];
++  double      sigp_post[Res];
++  double     bsig8_post[Res];
++  double     fsig8_post[Res];
+   
+   int     bpost_peak_ind = 0;
+   int     fpost_peak_ind = 0;
+diff --git a/pk.sh b/pk.sh
+index f63dfb6..f26e9a0 100755
+--- a/pk.sh
++++ b/pk.sh
+@@ -28,7 +28,7 @@ set_lock(){
+ DIR="/home/mjw/HOD_MockRun/Scripts/"
+ cd $DIR
+ 
+-export OMP_NUM_THREADS=8 # Threads = processors.
++export OMP_NUM_THREADS=4 # Threads = processors.
+ export BRANCH=$(git symbolic-ref --short HEAD) # current Git branch
+ 
+ export GSL_RNG_TYPE="taus"
+@@ -38,7 +38,7 @@ cd ..
+ 
+ test(){
+   ## Interactive run with: qsub -I -o $outputdir/pk_log/pk_stdout.pbs -e $outputdir/pk_log/pk_stderr.pbs pk.sh
+-  export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9
++  export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9/
+   export mock_start=1   # not zero!
+   export nmocks_perjob=1 
+   export LOZ=0.6
+@@ -50,7 +50,7 @@ test(){
+   gcc -Wall -pedantic -Wextra -std=gnu11 -o pk.o Scripts/driver_pk_d0.c -fopenmp -lfftw3_omp -lfftw3 -lm  -lgsl -lgslcblas
+ }
+ 
+-##test
++test
+ 
+ set_lock
+ 
+@@ -59,7 +59,7 @@ date >> $outputdir/pk_log/"pk_W"$FIELDFLAG"_"$LOZ"_"$HIZ"_"$mock_start".log"
+ # /home/ert/local/bin/valgrind --tool=memcheck --leak-check=full /home/mjw/HOD_MockRun/pk.o $FIELDFLAG $LOZ $HIZ $mock_start $nmocks_perjob
+ # /home/ert/local/bin/valgrind --tool=massif --stacks=yes
+ 
+-./pk.o $FIELDFLAG $LOZ $HIZ $mock_start $nmocks_perjob  >> $outputdir/pk_log/"pk_W"$FIELDFLAG"_"$LOZ"_"$HIZ"_"$mock_start".log" 2>&1
++./pk.o $FIELDFLAG $LOZ $HIZ $mock_start $nmocks_perjob  # >> $outputdir/pk_log/"pk_W"$FIELDFLAG"_"$LOZ"_"$HIZ"_"$mock_start".log" 2>&1
+ 
+ #if [$? -neq 0]
+ #then
+diff --git a/priors.c b/priors.c
+new file mode 100644
+index 0000000..cc1a85e
+--- /dev/null
++++ b/priors.c
+@@ -0,0 +1,64 @@
++int set_oldestpriors(){
++  min_bsigma8               =      0.05;
++  max_bsigma8               =      1.00;
++
++  min_fsigma8               =      0.00;
++  max_fsigma8               =      0.80;
++
++  min_velDisperse           =      0.00;
++  max_velDisperse           =      7.00;             
++
++  return 0;
++}
++  
++int set_recordedpriors(){                                  // i.e. that on mull/stacpolly_backups/stacpolly_backup4/ driver_likelihood.c
++  min_bsigma8               =      0.05;                  
++  max_bsigma8               =      1.00;                  
++
++  min_fsigma8               =      0.05;                  
++  max_fsigma8               =      0.80;
++
++  min_velDisperse           =      0.00;              
++  max_velDisperse           =      6.00;                                
++
++  return 0;
++}
++
++int set_normalpriors(){
++  min_bsigma8               =      0.05;                  // FOR GRANETT 2D POSTERIOR:  0.2 < b \sig_8 < 1.6 
++  max_bsigma8               =      1.20;                 
++
++  min_fsigma8               =      0.05;                  // Priors on the model params.
++  max_fsigma8               =      1.00;
++
++  min_velDisperse           =      0.00;                  // CHANGED FROM 0.00 13/02/2017
++  max_velDisperse           =     16.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
++
++  return 0;
++}
++
++int set_clippingpriors(){
++  // clipping priors; 0.6 < z < 0.8
++  min_bsigma8               =      0.50;                  // FOR GRANETT 2D POSTERIOR.                                                                                                      
++  max_bsigma8               =      1.00;                  // Previously 0.2 < b \sig_8 < 1.6                                                                                                  
++
++  min_fsigma8               =      0.05;                  // Priors on the model params.                                                                                                     
++  max_fsigma8               =      0.80;                                                                                                                                                      
++
++  min_velDisperse           =      0.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
++  max_velDisperse           =      6.00;                  // CHANGED FROM 6.00, 19 JAN. DIFFERS FROM MUNICH CLIPPED RESULTS (I GUESS)
++
++  return 0;
++}
++
++int set_widepriors(){                                                                                                                                                                       
++  min_bsigma8               =      0.05;
++  max_bsigma8               =      3.50;                                                                                                                                                                                                                                                                                                                                                  
++  min_fsigma8               =      0.00;
++  max_fsigma8               =      1.80;                                                                                                                                                      
++
++  min_velDisperse           =      0.00;                                                                                                                                                     
++  max_velDisperse           =     15.00;                                                                                                                                                     
++
++  return 0;
++}
+diff --git a/run_emcee.py b/run_emcee.py
+index 4a8817e..d266821 100644
+--- a/run_emcee.py
++++ b/run_emcee.py
+@@ -76,7 +76,7 @@ mockNum   = 153
+ 
+ # all Python types except integers, strings and unicode strings have to be wrapped to corresponding ctypes type. 
+ likelihood.get_main(D0, FIELD, c_double(LOZ), c_double(HIZ), c_double(KMAX))
+-likelihood.get_ydata(1, 1) ## load data
++likelihood.get_ydata(1, 1)        ## load data
+ likelihood.ctypeskvals_matchup()  ## Reset k remapping between FFTlog and mock (to kmax).
+ 
+ result    = -2.*likelihood.calc_ChiSq(c_double(0.5), c_double(0.7), c_double(7.), c_double(0.01))
+@@ -98,6 +98,8 @@ print result.x
+     
+ np.seterr(invalid='warn')  ## necessary?
+ 
++
++## EMCEE run. 
+ ndim, nwalkers, nburn, nsteps = 4, 400, 200, 200
+ 
+ seed = 1
+diff --git a/super_vipers.c b/super_vipers.c
+index fbfe0de..8a5aad4 100644
+--- a/super_vipers.c
++++ b/super_vipers.c
+@@ -4,11 +4,23 @@ int scale_Cov(int N){
+   return 0;
+ }
+ 
+-int set_meanMultipoles(){
+-  for(j=0; j<order; j++){
+-    xdata[j] = MeanMultipoles[j];
++int load_meanMultipoles(){
++  double kval;
++  
++  sprintf(filepath, "%s/mocks_v1.7/pk_derivedprops/d0_%d/W%d/meanMultipoles_zlim_%.1lf_%.1lf_kmax_%.1lf.dat", outputdir, d0, fieldFlag, lo_zlim, hi_zlim, ChiSq_kmax);
++
++  inputfile = fopen(filepath, "r");
++
++  printf("\n\nLoading mean multipoles (%s).", filepath);
++  
++  for(j=0; j<mono_order; j++){
++    fscanf(inputfile, "%le \t %le \t %*le \t %le \t %*le \n", &kval, &xdata[j], &xdata[j + mono_order]);
++
++    printf("\n%le \t %le \t %le", kval, xdata[j], xdata[j + mono_order]);
+   }
+   
++  fclose(inputfile);
++  
+   return 0;
+ }
+ 
+@@ -18,7 +30,7 @@ int print_meanMultipoes(){
+   output = fopen(filepath, "w");
+ 
+   for(k=0; k<mono_order; k++){
+-    fprintf(output, "%e \t %e \t %e \t %e \t %e \n", kVals[k], MeanMultipoles[k], sqrt(gsl_matrix_get(Covariance, k, k)), MeanMultipoles[k + mono_order], sqrt(gsl_matrix_get(Covariance, k+mono_order, k+mono_order)));
++    fprintf(output, "%le \t %le \t %le \t %le \t %le \n", kVals[k], MeanMultipoles[k], sqrt(gsl_matrix_get(Covariance, k, k)), MeanMultipoles[k + mono_order], sqrt(gsl_matrix_get(Covariance, k+mono_order, k+mono_order)));
+   }
+   
+   fclose(output);
+diff --git a/twodim_pk.c b/twodim_pk.c
+index c427c2f..d4b2551 100644
+--- a/twodim_pk.c
++++ b/twodim_pk.c
+@@ -11,3 +11,121 @@ int assign2DPkMemory(){
+ 
+   return 0;
+ }
++
++int Cartesian2Dpk(int modeCount){
++  DualBinning(modeCount, twodim_pk, d2_binnedpk);
++
++  printf("\n\nWriting 2D pk.");
++  /*
++  sprintf(filepath,"%s/W1_Spectro_V7_2/data_v1.7/pk_2d/pk_2d_W%d_%.1lf_%.1lf_Jf_%d.dat", root_dir, fieldFlag, lo_zlim, hi_zlim, (int) foldfactor);
++
++  output = fopen(filepath, "w");
++
++  // corresponds to k=0.5 for **current** binning.
++  for(k=0; k<kbin_no; k++){
++    for(j=0; j<kbin_no; j++){
++      // fprintf(output, "%e \t", d2_binnedpk[k][j]);
++    }
++
++    fprintf(output, "\n");
++  }
++
++  fclose(output);
++  */
++  return 0;
++}
++
++int DualBinning(int NumberModes, double** DualParamArray, double** BinnedDualParamArray){
++  int m;
++
++  int bin_no = 50;
++
++  double firstBinLimits[bin_no];
++  double secndBinLimits[bin_no];
++
++  int modesPerBin[bin_no][bin_no];
++
++  int firstColLowerBinIndex     = 0;
++  int firstColUpperBinIndex     = 0;
++
++  int secndColLowerBinIndex     = 0;
++  int secndColUpperBinIndex     = 0;
++
++
++  qsort(DualParamArray, NumberModes, sizeof(DualParamArray[0]), FirstColumnCompare);
++
++  // Order by first then second column.
++  printf("\nDual param array sorted.");
++
++  for(j=0; j<bin_no; j++) firstBinLimits[j] = 0.01 + j*1./bin_no;
++  for(j=0; j<bin_no; j++) secndBinLimits[j] = 0.01 + j*1./bin_no;
++
++  // for(j=0; j<20; j++)  printf("\n%.3lf \t %.3lf \t %.3lf", DualParamArray[j][0], DualParamArray[j][1], DualParamArray[j][2]);
++
++  for(j=0; j<bin_no; j++){
++    for(k=0; k<bin_no; k++){
++      BinnedDualParamArray[j][k] = 0.0;
++      // mean_firstCol[j][k]        = 0.0;
++      // mean_secndCol[j][k]        = 0.0;
++      modesPerBin[j][k]          =   0;
++    }
++  }
++
++  for(j=0; j<NumberModes; j++){
++    if(DualParamArray[j][0]   >= firstBinLimits[0]){
++      firstColLowerBinIndex = j;
++
++      break;
++    }
++  }
++
++  for(j=0; j<bin_no; j++){
++    for(i=firstColLowerBinIndex; i<NumberModes; i++){
++      if(DualParamArray[i][0] > firstBinLimits[j+1]){
++        firstColUpperBinIndex = i;
++        break;
++      }
++    }
++
++    secndColLowerBinIndex = firstColLowerBinIndex;
++
++    qsort(&DualParamArray[firstColLowerBinIndex], firstColUpperBinIndex - firstColLowerBinIndex, sizeof(DualParamArray[0]), SecondColumnCompare);
++
++    // meets the lower bin limit
++    for(i=secndColLowerBinIndex; i<NumberModes; i++){
++      if(DualParamArray[i][1]   >= secndBinLimits[0]){
++        secndColLowerBinIndex = i;
++
++        break;
++      }
++    }
++
++    // meets the upper bin limit.
++    for(k=0; k<bin_no; k++){
++      for(m=secndColLowerBinIndex; m<firstColUpperBinIndex; m++){
++        if(DualParamArray[m][1] > secndBinLimits[k+1]){
++          secndColUpperBinIndex = m;
++          break;
++        }
++      }
++
++      for(m=secndColLowerBinIndex; m<secndColUpperBinIndex; m++){
++        BinnedDualParamArray[j][k]    += DualParamArray[m][2];
++        // mean_firstCol[j][k]           += DualParamArray[m][0];
++        // mean_secndCol[j][k]           += DualParamArray[m][1];
++        modesPerBin[j][k]             += 1;
++      }
++
++      if(modesPerBin[j][k] != 0)  BinnedDualParamArray[j][k] /= modesPerBin[j][k];
++      // if(modesPerBin[j][k] != 0)  mean_firstCol[j][k]        /= modesPerBin[j][k];
++      // if(modesPerBin[j][k] != 0)  mean_secndCol[j][k]        /= modesPerBin[j][k];
++
++      secndColLowerBinIndex = secndColUpperBinIndex;
++    }
++
++    firstColLowerBinIndex = firstColUpperBinIndex;
++  }
++
++  return 0;
++}
++
+diff --git a/vipersjwindow.c b/vipersjwindow.c
+index 24fda85..675ff18 100644
+--- a/vipersjwindow.c
++++ b/vipersjwindow.c
+@@ -193,10 +193,19 @@ int prep_VIPERS_jmaskMultipoles(){
+   char   loRes_filepath[200];
+   char   hiRes_filepath[200];
+   char hihiRes_filepath[200];
+-  
+-  sprintf(filepath, "%s/Qmultipoles/Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1", maskmultipoles_path, lo_zlim, hi_zlim);
+-  // sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W1W4_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, lo_zlim, hi_zlim);
+ 
++  if(mull==0){
++    sprintf(filepath, "%s/Qmultipoles/Ql_W1W4_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1", maskmultipoles_path, lo_zlim, hi_zlim);
++  }
++
++  else if(mull == 1){
++    sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W1W4_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, lo_zlim, hi_zlim);
++  }
++
++  else{
++    printf("Error onjoint Q-multipoles load.");
++  }
++  
+   printf("\n\nJoint Q-multipoles: %s", filepath);
+   
+   sprintf(hihiRes_filepath, "%s_hihiRes_hex.dat", filepath);
+@@ -262,9 +271,10 @@ int prep_VIPERS_jmaskMultipoles(){
+   spline(VIPERS_jmaskr_hihi, VIPERS_jmaskOct_hihi,  VIPERS_jmask_lineNo_hihi, 1.0e31, 1.0e31, VIPERS_jmaskOct2D_hihi);
+   spline(VIPERS_jmaskr_hihi, VIPERS_jmaskDec_hihi,  VIPERS_jmask_lineNo_hihi, 1.0e31, 1.0e31, VIPERS_jmaskDec2D_hihi);
+   
+-  // Set the r value at which the super high resolution points will join the high resolution counts.  
+-  jhiRes_hihiRes_join = VIPERS_jmaskr_hihi[VIPERS_jmask_lineNo_hihi - 1];
+-    
++  // Outdated.  Set the r value at which the super high resolution points will join the high resolution counts.  
++  // jhiRes_hihiRes_join = VIPERS_jmaskr_hihi[VIPERS_jmask_lineNo_hihi - 1];
++  jhiRes_hihiRes_join = 1.8;
++  
+   // High resolution
+   inputfile = fopen(hiRes_filepath, "r");
+ 
+@@ -321,9 +331,10 @@ int prep_VIPERS_jmaskMultipoles(){
+   spline(VIPERS_jmaskr_hi, VIPERS_jmaskOct_hi,  VIPERS_jmask_lineNo_hi, 1.0e31, 1.0e31, VIPERS_jmaskOct2D_hi);
+   spline(VIPERS_jmaskr_hi, VIPERS_jmaskDec_hi,  VIPERS_jmask_lineNo_hi, 1.0e31, 1.0e31, VIPERS_jmaskDec2D_hi);
+     
+-  // Set the r value at which the  high resolution counts will join the low resolution counts.  
+-  jloRes_highRes_join = VIPERS_jmaskr_hi[VIPERS_jmask_lineNo_hi - 1];
+-    
++  // Outdated. Set the r value at which the  high resolution counts will join the low resolution counts.  
++  // jloRes_highRes_join = VIPERS_jmaskr_hi[VIPERS_jmask_lineNo_hi - 1];
++  jloRes_highRes_join = 8.5;
++  
+                                                 //--//
+                                                 
+   // Low resolution on larger scales.
+diff --git a/viperskwindow.c b/viperskwindow.c
+index 5155df9..d8b1c51 100644
+--- a/viperskwindow.c
++++ b/viperskwindow.c
+@@ -34,7 +34,7 @@ double get_kMask_norm(){
+   double norm = 0.0;  // norm = 4.700981*1.823239*pow(10., 6.);
+ 
+   for(j=0; j<mono_config->N; j++){
+-    if(mono_config->krvals[j][0] > 0.0001){
++    if(mono_config->krvals[j][0] > 0.001){
+       norm = mono_config->pk[j][0];
+ 
+       break;
+@@ -56,9 +56,10 @@ int printf_kMask_multipoles(){
+   pk_mu(mono_config);
+   pk_mu(quad_config);
+ 
+-  sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_4000_%.1lf_%.1lf_thread_1.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
++  sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+   // sprintf(filepath,"%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+-
++  // sprintf(filepath, "/home/mjw/maskedRSD/new/rand_VIPERS_W1_xi_500_mask_0.7_0.8_gridded_kmultipoles_Nov20.dat");
++  
+   output = fopen(filepath, "w");
+ 
+   for(j=0; j<mono_config->N; j++){
+@@ -75,9 +76,18 @@ int printf_kMask_multipoles(){
+ int prepVIPERS_kSpaceMultipole(){  
+   printf_kMask_multipoles();
+ 
+-  sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_4000_%.1lf_%.1lf_thread_1.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+-  // sprintf(filepath, "%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim,hi_zlim);
++  if(mull == 0){
++    sprintf(filepath, "%s/Qmultipoles/Qlk_W%d_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1.dat", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
++  }
++  
++  else if(mull == 1){
++    sprintf(filepath, "%s/Qmultipoles/mask_kmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf.dat", maskmultipoles_path, fieldFlag, lo_zlim,hi_zlim);
++  }
+ 
++  else{
++    printf("Error on Fourier Q multipoles load.");
++  }
++  
+   inputfile = fopen(filepath, "r");
+ 
+   line_count(inputfile, &VIPERS_kSpace_multipoles_lineNo);
+@@ -96,7 +106,7 @@ int prepVIPERS_kSpaceMultipole(){
+     fscanf(inputfile, "%le \t %le \t %le \n", &VIPERS_k[j], &VIPERS_kMono[j], &VIPERS_kQuad[j]);
+     
+     // set limits due to noise. 
+-    if(VIPERS_k[j] < 0.0001){
++    if(VIPERS_k[j] < 0.001){
+       VIPERS_kMono[j] = 1.0;
+       VIPERS_kQuad[j] = 0.0;
+     }
+diff --git a/viperswindow.c b/viperswindow.c
+index 6e55ca4..d4b3622 100644
+--- a/viperswindow.c
++++ b/viperswindow.c
+@@ -21,7 +21,6 @@ double splint_VIPERS_maskMono(double r){
+   }
+ }
+ 
+-
+ double splint_VIPERS_maskQuad(double r){
+   if(r<0.2)   return 0.;
+   if(r>900.0) return 0.;
+@@ -45,7 +44,6 @@ double splint_VIPERS_maskQuad(double r){
+   }
+ }
+ 
+-
+ double splint_VIPERS_maskHex(double r){
+   if(r<0.2)   return 0.;
+   if(r>900.0) return 0.;
+@@ -69,7 +67,6 @@ double splint_VIPERS_maskHex(double r){
+   }
+ }
+ 
+-
+ double splint_VIPERS_maskOct(double r){
+   if(r<  0.5) return 0.;
+   if(r>900.0) return 0.;
+@@ -93,7 +90,6 @@ double splint_VIPERS_maskOct(double r){
+   }
+ }
+ 
+-
+ double splint_VIPERS_maskDec(double r){
+   if(r<  0.5) return 0.;
+   if(r>900.0) return 0.;
+@@ -117,7 +113,6 @@ double splint_VIPERS_maskDec(double r){
+   }
+ }
+ 
+-
+ double splint_VIPERS_maskMultipoles(double r, int transformOrder){
+   switch(transformOrder){
+   case 0:
+@@ -135,7 +130,6 @@ double splint_VIPERS_maskMultipoles(double r, int transformOrder){
+   }
+ }
+    
+- 
+ double splint_unit_maskMultipoles(double r, int transformOrder){
+   switch(transformOrder){
+   case 0:
+@@ -153,45 +147,25 @@ double splint_unit_maskMultipoles(double r, int transformOrder){
+   }
+ }
+ 
+-
+-int scaleandnormalise(int VIPERS_mask_lineNo, double VIPERS_maskr[], double VIPERS_maskMono[], double VIPERS_maskQuad[], double VIPERS_maskHex[], double VIPERS_maskOct[], double VIPERS_maskDec[], double* mask_monopolenorm, double VIPERS_maskMono2D[], double VIPERS_maskQuad2D[], double VIPERS_maskHex2D[], double VIPERS_maskOct2D[], double VIPERS_maskDec2D[]){
+-
+-  for(j=0; j<VIPERS_mask_lineNo; j++){
+-    VIPERS_maskMono[j] /= pow(VIPERS_maskr[j], 3.); // Divide out volume factor, r^2 for vol of shell at r, r for dlogr width of shell -> r^3.
+-    VIPERS_maskQuad[j] /= pow(VIPERS_maskr[j], 3.);
+-    VIPERS_maskHex[j]  /= pow(VIPERS_maskr[j], 3.);
+-    VIPERS_maskOct[j]  /= pow(VIPERS_maskr[j], 3.);
+-    VIPERS_maskDec[j]  /= pow(VIPERS_maskr[j], 3.);
+-  }
+-
+-  flatSlope_amp(VIPERS_mask_lineNo, 0.1, 0.2, 1.0, VIPERS_maskr, VIPERS_maskMono, mask_monopolenorm);  // Determine amplitude where correlation if flat.
+-  
+-  for(j=0; j<VIPERS_mask_lineNo; j++){
+-    VIPERS_maskMono[j] /= *mask_monopolenorm;  // Normalise such that the monopole counts tend to 1 for r<<1.
+-    VIPERS_maskQuad[j] /= *mask_monopolenorm;
+-    VIPERS_maskHex[j]  /= *mask_monopolenorm;
+-    VIPERS_maskOct[j]  /= *mask_monopolenorm;
+-    VIPERS_maskDec[j]  /= *mask_monopolenorm;
+-  }
+-
+-  spline(VIPERS_maskr, VIPERS_maskMono, VIPERS_mask_lineNo, 1.0e31, 1.0e31, VIPERS_maskMono2D);
+-  spline(VIPERS_maskr, VIPERS_maskQuad, VIPERS_mask_lineNo, 1.0e31, 1.0e31, VIPERS_maskQuad2D);
+-  spline(VIPERS_maskr, VIPERS_maskHex,  VIPERS_mask_lineNo, 1.0e31, 1.0e31, VIPERS_maskHex2D);
+-  spline(VIPERS_maskr, VIPERS_maskOct,  VIPERS_mask_lineNo, 1.0e31, 1.0e31, VIPERS_maskOct2D);
+-  spline(VIPERS_maskr, VIPERS_maskDec,  VIPERS_mask_lineNo, 1.0e31, 1.0e31, VIPERS_maskDec2D);
+-
+-  return 0;
+-}
+-
+ int prep_VIPERS_maskMultipoles(){
+   char           header[200];
++
+   char   loRes_filepath[200]; // Mask autocorrelation function. 
+   char   hiRes_filepath[200];
+   char hihiRes_filepath[200];
+ 
+-  sprintf(filepath, "%s/Qmultipoles/Ql_W%d_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
+-  // sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
++  if(mull==0){
++    sprintf(filepath, "%s/Qmultipoles/Ql_W%d_Nag_v7_specweight_nbar_Pfkp_8000_%.1lf_%.1lf_thread_1", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
++  }
++
++  else if(mull==1){
++    sprintf(filepath, "%s/Qmultipoles/maskmultipoles_W%d_Nagoya_v7_Samhain_incmock_specweight_nbar_fkpweighted_8000.00_xi_%.1lf_%.1lf", maskmultipoles_path, fieldFlag, lo_zlim, hi_zlim);
++  }
+ 
++  else{
++    printf("\n\nError from Q multipoles load.");
++  }
++  
+   printf("\n\nQ-multipoles: %s", filepath);
+   
+   sprintf(hihiRes_filepath, "%s_hihiRes_hex.dat", filepath);
+@@ -204,13 +178,13 @@ int prep_VIPERS_maskMultipoles(){
+   // line_count(inputfile, &VIPERS_mask_lineNo_hihi);
+   linecount_header(inputfile, 1, &VIPERS_mask_lineNo_hihi);
+   
+-  VIPERS_maskr_hihi        = realloc(VIPERS_maskr_hihi, VIPERS_mask_lineNo_hihi*sizeof(double));
++  VIPERS_maskr_hihi        = realloc(VIPERS_maskr_hihi,      VIPERS_mask_lineNo_hihi*sizeof(double));
+     
+-  VIPERS_maskMono_hihi     = realloc(VIPERS_maskMono_hihi, VIPERS_mask_lineNo_hihi*sizeof(double));
+-  VIPERS_maskQuad_hihi     = realloc(VIPERS_maskQuad_hihi, VIPERS_mask_lineNo_hihi*sizeof(double));
+-  VIPERS_maskHex_hihi      = realloc( VIPERS_maskHex_hihi, VIPERS_mask_lineNo_hihi*sizeof(double));
+-  VIPERS_maskOct_hihi      = realloc( VIPERS_maskOct_hihi, VIPERS_mask_lineNo_hihi*sizeof(double));
+-  VIPERS_maskDec_hihi      = realloc( VIPERS_maskDec_hihi, VIPERS_mask_lineNo_hihi*sizeof(double));
++  VIPERS_maskMono_hihi     = realloc(VIPERS_maskMono_hihi,   VIPERS_mask_lineNo_hihi*sizeof(double));
++  VIPERS_maskQuad_hihi     = realloc(VIPERS_maskQuad_hihi,   VIPERS_mask_lineNo_hihi*sizeof(double));
++  VIPERS_maskHex_hihi      = realloc( VIPERS_maskHex_hihi,   VIPERS_mask_lineNo_hihi*sizeof(double));
++  VIPERS_maskOct_hihi      = realloc( VIPERS_maskOct_hihi,   VIPERS_mask_lineNo_hihi*sizeof(double));
++  VIPERS_maskDec_hihi      = realloc( VIPERS_maskDec_hihi,   VIPERS_mask_lineNo_hihi*sizeof(double));
+     
+   VIPERS_maskMono2D_hihi   = realloc(VIPERS_maskMono2D_hihi, VIPERS_mask_lineNo_hihi*sizeof(double));
+   VIPERS_maskQuad2D_hihi   = realloc(VIPERS_maskQuad2D_hihi, VIPERS_mask_lineNo_hihi*sizeof(double));
+@@ -226,34 +200,61 @@ int prep_VIPERS_maskMultipoles(){
+   
+   fclose(inputfile);
+   
+-  scaleandnormalise(VIPERS_mask_lineNo_hihi, VIPERS_maskr_hihi, VIPERS_maskMono_hihi, VIPERS_maskQuad_hihi, VIPERS_maskHex_hihi, VIPERS_maskOct_hihi, VIPERS_maskDec_hihi, &mask_monopolenorm_hihi, VIPERS_maskMono2D_hihi, VIPERS_maskQuad2D_hihi, VIPERS_maskHex2D_hihi, VIPERS_maskOct2D_hihi, VIPERS_maskDec2D_hihi);
+- 
+-  hiRes_hihiRes_join = VIPERS_maskr_hihi[VIPERS_mask_lineNo_hihi - 1];  // Set the r at which the really high resolution will join the high resolution counts.  
++  for(j=0; j<VIPERS_mask_lineNo_hihi; j++){
++    VIPERS_maskMono_hihi[j]  /= pow(VIPERS_maskr_hihi[j], 3.);
++    VIPERS_maskQuad_hihi[j]  /= pow(VIPERS_maskr_hihi[j], 3.);
++     VIPERS_maskHex_hihi[j]  /= pow(VIPERS_maskr_hihi[j], 3.);
++     VIPERS_maskOct_hihi[j]  /= pow(VIPERS_maskr_hihi[j], 3.);
++     VIPERS_maskDec_hihi[j]  /= pow(VIPERS_maskr_hihi[j], 3.);
+ 
+-  //-- High resolution counts --//
++    // printf("\n%.6le \t %.6le \t %.6le", VIPERS_maskr_hi[j], VIPERS_maskMono_hi[j], VIPERS_maskQuad_hi[j]);
++  }
++  
++  flatSlope_amp(VIPERS_mask_lineNo_hihi, 0.1, 0.2, 1.0, VIPERS_maskr_hihi, VIPERS_maskMono_hihi, &mask_monopolenorm_hihi);  // Determine amplitude where correlation is flat.
++
++  for(j=0; j<VIPERS_mask_lineNo_hihi; j++){
++    VIPERS_maskMono_hihi[j]  /= mask_monopolenorm_hihi;
++    VIPERS_maskQuad_hihi[j]  /= mask_monopolenorm_hihi;
++     VIPERS_maskHex_hihi[j]  /= mask_monopolenorm_hihi;
++     VIPERS_maskOct_hihi[j]  /= mask_monopolenorm_hihi;
++     VIPERS_maskDec_hihi[j]  /= mask_monopolenorm_hihi;
++  }
++  
++  spline(VIPERS_maskr_hihi, VIPERS_maskMono_hihi,  VIPERS_mask_lineNo_hihi, 1.0e31, 1.0e31, VIPERS_maskMono2D_hihi);
++  spline(VIPERS_maskr_hihi, VIPERS_maskQuad_hihi,  VIPERS_mask_lineNo_hihi, 1.0e31, 1.0e31, VIPERS_maskQuad2D_hihi);
++  spline(VIPERS_maskr_hihi,  VIPERS_maskHex_hihi,  VIPERS_mask_lineNo_hihi, 1.0e31, 1.0e31, VIPERS_maskHex2D_hihi);
++  spline(VIPERS_maskr_hihi,  VIPERS_maskOct_hihi,  VIPERS_mask_lineNo_hihi, 1.0e31, 1.0e31, VIPERS_maskOct2D_hihi);
++  spline(VIPERS_maskr_hihi,  VIPERS_maskDec_hihi,  VIPERS_mask_lineNo_hihi, 1.0e31, 1.0e31, VIPERS_maskDec2D_hihi);
++  
++  // Outdated
++  // hiRes_hihiRes_join = VIPERS_maskr_hihi[VIPERS_mask_lineNo_hihi - 1];  // Set the r at which the really high resolution will join the high resolution counts.
++  hiRes_hihiRes_join = 1.80;
++  
+   inputfile = fopen(hiRes_filepath, "r");
+ 
+   // line_count(inputfile, &VIPERS_mask_lineNo_hi);
+   linecount_header(inputfile, 1, &VIPERS_mask_lineNo_hi);
+-    
++
+   VIPERS_maskr_hi        = realloc(VIPERS_maskr_hi,    VIPERS_mask_lineNo_hi*sizeof(double));
+-    
++
+   VIPERS_maskMono_hi     = realloc(VIPERS_maskMono_hi, VIPERS_mask_lineNo_hi*sizeof(double));
+   VIPERS_maskQuad_hi     = realloc(VIPERS_maskQuad_hi, VIPERS_mask_lineNo_hi*sizeof(double));
+   VIPERS_maskHex_hi      = realloc( VIPERS_maskHex_hi, VIPERS_mask_lineNo_hi*sizeof(double));
+   VIPERS_maskOct_hi      = realloc( VIPERS_maskOct_hi, VIPERS_mask_lineNo_hi*sizeof(double));
+   VIPERS_maskDec_hi      = realloc( VIPERS_maskDec_hi, VIPERS_mask_lineNo_hi*sizeof(double));
+-    
++
+   VIPERS_maskMono2D_hi   = realloc(VIPERS_maskMono2D_hi, VIPERS_mask_lineNo_hi*sizeof(double));
+   VIPERS_maskQuad2D_hi   = realloc(VIPERS_maskQuad2D_hi, VIPERS_mask_lineNo_hi*sizeof(double));
+   VIPERS_maskHex2D_hi    = realloc( VIPERS_maskHex2D_hi, VIPERS_mask_lineNo_hi*sizeof(double));
+   VIPERS_maskOct2D_hi    = realloc( VIPERS_maskOct2D_hi, VIPERS_mask_lineNo_hi*sizeof(double));
+   VIPERS_maskDec2D_hi    = realloc( VIPERS_maskDec2D_hi, VIPERS_mask_lineNo_hi*sizeof(double));
+-
++   
+   fgets(header, 200, inputfile); // skip header 
+   
+-  for(j=0; j<VIPERS_mask_lineNo_hi; j++)  fscanf(inputfile, "%le \t %le \t %le \t %le \t %le \t %le \n", &VIPERS_maskr_hi[j], &VIPERS_maskMono_hi[j], &VIPERS_maskQuad_hi[j], &VIPERS_maskHex_hi[j], &VIPERS_maskOct_hi[j], &VIPERS_maskDec_hi[j]);
+-    
++  for(j=0; j<VIPERS_mask_lineNo_hi; j++){
++    fscanf(inputfile, "%le \t %le \t %le \t %le \t %le \t %le \n", &VIPERS_maskr_hi[j], &VIPERS_maskMono_hi[j], &VIPERS_maskQuad_hi[j], &VIPERS_maskHex_hi[j], &VIPERS_maskOct_hi[j], &VIPERS_maskDec_hi[j]);
++  }
++
+   fclose(inputfile);
+   
+   for(j=0; j<VIPERS_mask_lineNo_hi; j++){
+@@ -262,6 +263,8 @@ int prep_VIPERS_maskMultipoles(){
+     VIPERS_maskHex_hi[j]  /= pow(VIPERS_maskr_hi[j], 3.);
+     VIPERS_maskOct_hi[j]  /= pow(VIPERS_maskr_hi[j], 3.);
+     VIPERS_maskDec_hi[j]  /= pow(VIPERS_maskr_hi[j], 3.);
++
++    // printf("\n%.6le \t %.6le \t %.6le", VIPERS_maskr_hi[j], VIPERS_maskMono_hi[j], VIPERS_maskQuad_hi[j]);
+   }
+ 
+   lowRes_amplitudeCalc(VIPERS_mask_lineNo_hihi, VIPERS_mask_lineNo_hi, 1., 1.5, VIPERS_maskr_hihi, VIPERS_maskr_hi, VIPERS_maskMono_hihi, VIPERS_maskMono_hi, &mask_monopolenorm_hi);
+@@ -273,14 +276,16 @@ int prep_VIPERS_maskMultipoles(){
+     VIPERS_maskOct_hi[j]  *= mask_monopolenorm_hi;
+     VIPERS_maskDec_hi[j]  *= mask_monopolenorm_hi;
+   }
+-    
++  
+   spline(VIPERS_maskr_hi, VIPERS_maskMono_hi, VIPERS_mask_lineNo_hi, 1.0e31, 1.0e31, VIPERS_maskMono2D_hi);
+   spline(VIPERS_maskr_hi, VIPERS_maskQuad_hi, VIPERS_mask_lineNo_hi, 1.0e31, 1.0e31, VIPERS_maskQuad2D_hi);
+   spline(VIPERS_maskr_hi, VIPERS_maskHex_hi,  VIPERS_mask_lineNo_hi, 1.0e31, 1.0e31, VIPERS_maskHex2D_hi);
+   spline(VIPERS_maskr_hi, VIPERS_maskOct_hi,  VIPERS_mask_lineNo_hi, 1.0e31, 1.0e31, VIPERS_maskOct2D_hi);
+   spline(VIPERS_maskr_hi, VIPERS_maskDec_hi,  VIPERS_mask_lineNo_hi, 1.0e31, 1.0e31, VIPERS_maskDec2D_hi);
+-    
+-  loRes_highRes_join = VIPERS_maskr_hi[VIPERS_mask_lineNo_hi - 1];
++
++  // outdated
++  // loRes_highRes_join = VIPERS_maskr_hi[VIPERS_mask_lineNo_hi - 1];
++  loRes_highRes_join = 8.5;
+   
+   //-- Low resolution counts --//
+   inputfile = fopen(loRes_filepath, "r");
+diff --git a/volavgs.c b/volavgs.c
+index 531399a..6f3811c 100644
+--- a/volavgs.c
++++ b/volavgs.c
+@@ -60,11 +60,11 @@ double chiSq_fkpweight2(double chi, void* p){
+ 
+   double nbar = (*pt2nz)(chi);
+ 
+-  return chi*chi*pow(nbar*fkpPk/(1. + nbar*fkpPk), 2.);
++  return chi*chi*pow(nbar*fkpPk/(1. + nbar*fkpPk), 2.); // fkpPk normalisation. 
+ }
+ 
+ 
+-double calc_volavg_fkpweights2(){
++int calc_volavg_fkpweights2(){
+   // Calculate cumulative nbar and splint its inverse.
+   gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
+ 
+@@ -74,7 +74,28 @@ double calc_volavg_fkpweights2(){
+ 
+   F.function = &chiSq_fkpweight2;
+ 
++  // TEST:
++  // loopCount = 10;
++  // spline_nbar(0);  
++  // END TEST. 
++
++  printf("\n\nReassigning <n(z)> for vol. avg. FKP weights calc.");
++  
++  spline_nbar(1); //  set to parent <n(z)>, i.e. mock average. 
++  
+   gsl_integration_qags(&F, loChi, hiChi, 0, 1e-7, 1000, w, &result, &error);
++
++  // VIPERS W1 area.
++  if(fieldFlag == 1)  result *= sqdegs2steradians(W1area);  // printf("\n\nSTERADIANS: %.6lf", sqdegs2steradians(W1area));
++  if(fieldFlag == 4)  result *= sqdegs2steradians(W4area);
++
++  // Mpc to Gpc
++  result *= pow(10., -9.);
++
++  // [10^-3 (h^-1 Gpc)^3]
++  result *= 1000.; 
++
++  printf("\n\nTegmark volume: %.6lf", result);
+   
+-  return result;
++  return 0;
+ }
+diff --git a/wishart.py b/wishart.py
+index 1d74a17..ea5fb36 100644
+--- a/wishart.py
++++ b/wishart.py
+@@ -13,8 +13,11 @@ def covariance_corrections(Ns, Nb, Np):
+ 
+ 
+ # Pezzotta et al.
+-covariance_corrections(153., 20., 4.)
++# covariance_corrections(153., 20., 4.)
+ 
+ # Wilson et al.
+-covariance_corrections(153., 24., 3.)
++covariance_corrections(153., 40., 3.)  # k_max = 0.2
++covariance_corrections(153., 50., 3.)  # k_max = 0.4
++covariance_corrections(153., 56., 3.)  # k_max = 0.6 
++covariance_corrections(153., 60., 3.)  # k_max = 0.8 
+ 
+diff --git a/writeshotnoise.py b/writeshotnoise.py
+index 3d5a5f9..d5abbb9 100644
+--- a/writeshotnoise.py
++++ b/writeshotnoise.py
+@@ -1,13 +1,14 @@
+ import os, sys, glob 
++
+ import numpy   as np
+ import pandas  as pd
+ 
+-root  = os.environ['outputdir']
+-#root   = "/home/mjw/HOD_MockRun/W1_Spectro_V7_3"
++
++root   = os.environ['outputdir']
+ 
+ mocks  = 153
+ 
+-args   = sys.argv
++args   = sys.argv         ## Redshift limits from command line. 
+ 
+ zs     = [0.75, 1.05]
+ fsig8s = [0.4907, 0.4570]
+@@ -15,17 +16,18 @@ fsig8s = [0.4907, 0.4570]
+ lo_zs  = np.array([np.float(args[1]), np.float(args[2])])
+ hi_zs  = np.array([np.float(args[3]), np.float(args[4])])
+ 
+-for c, d0 in enumerate([1000, 10, 6, 4]):
++for c, d0 in enumerate([1000]): #[1000 , 10, 6, 4]):
+   for a, field in enumerate(["W1", "W4"]):
+     for b, lo_z in enumerate(lo_zs):
+       hi_z   = hi_zs[b]
+-           
++      
+       ## mocks
+       files  = [root + "/mocks_v1.7/pk/d0_" + str(d0) + "/" + field + "/" + "mock_" + "{0:03}".format(i+1) + "_zlim_" + str(lo_z) + "_" + str(hi_z) + "_Jf_4.dat" for i in xrange(0,mocks,1)]
+-      
++
++      ## Upper limit of 3.0 previously (15/08/2017).
+       dflist = [pd.read_csv(fname, sep='\t', header=None, names=['k', 'P0', 'P2', 'N'])  for fname in files]
+       catdf  =  pd.concat(dflist)
+-      shot   =  np.array([dflist[i][dflist[i]['k'].between(1.2, 3.0, inclusive=True)]['P0'].mean() for i in range(len(dflist))]) # shot noise for each mock.
++      shot   =  np.array([dflist[i][dflist[i]['k'].between(1.2, 2.3, inclusive=True)]['P0'].mean() for i in range(len(dflist))]) # shot noise for each mock.
+ 
+       labels = np.array([i for i in xrange(1, mocks + 1)])
+ 
+@@ -37,21 +39,27 @@ for c, d0 in enumerate([1000, 10, 6, 4]):
+         estimates = np.vstack((estimates, np.loadtxt(files[i+1]))) ## i in enumerate still starts at 0. 
+ 
+       df = pd.DataFrame(estimates, columns=["num", "gal shot", "rand shot"])   
++
+       df.drop_duplicates(keep="first", inplace=True)
++
+       df["num"] = df["num"].astype(int)
+       
+       d = {key:value for key, value in zip(df["num"].values, df["gal shot"].values + df["rand shot"].values)} ## total shot noise
+-
++      
+       np.savetxt(root + "/mocks_v1.7/pk_derivedprops/d0_%d/%s/shotnoise_zlim_%.1lf_%.1lf.dat" % (d0, field, lo_z, hi_z), np.column_stack((labels, shot, np.array([d[x] for x in labels]))), fmt='%d \t %.6le \t %.6le', header=" labels,    high k estimate,    <n> estimate")
+ 
++      ## Clean up original nbar shotnoise estimate files. 
+       #for filename in files:
+       #  os.remove(filename) 
+       
+       ## data
+       files  = [root + "/data_v1.7/pk/d0_%d/%s/data_zlim_%.1lf_%.1lf_Jf_4.dat" % (d0, field, lo_z, hi_z)] 
+-      dflist = [pd.read_csv(fname, sep='\t', header=None, names=['k', 'P0', 'P2', 'N'])  for fname in files]
++
++      dflist = [pd.read_csv(fname, sep='\t', header=None, names=['k', 'P0', 'P2', 'N']) for fname in files]
++
+       catdf  =  pd.concat(dflist)
+-      shot   =  [dflist[i][dflist[i]['k'].between(1.5, 3.0, inclusive=True)]['P0'].mean() for i in range(len(dflist))] # shot noise for each mock.
++
++      shot   =  [dflist[i][dflist[i]['k'].between(1.2, 2.3, inclusive=True)]['P0'].mean() for i in range(len(dflist))] # shot noise for each mock.
+ 
+       ## Get <n> shot noise estimates.
+       filename  = root + "/data_v1.7/pk_derivedprops/d0_%d/%s/nbarshotnoise_data_zlim_%.1lf_%.1lf.dat" % (d0, field, lo_z, hi_z)
+@@ -60,8 +68,8 @@ for c, d0 in enumerate([1000, 10, 6, 4]):
+       nbar_shot = estimate[0] + estimate[1]  
+ 
+       output    = np.array([[shot[0], nbar_shot]])
+-         
++               
+       np.savetxt(root + "/data_v1.7/pk_derivedprops/d0_%d/%s/shotnoise_zlim_%.1lf_%.1lf.dat" % (d0, field, lo_z, hi_z), output, header=" high k estimate,    <n> estimate", delimiter='\t', fmt="%.6lf \t %.6lf")
+       
+       print root + "/data_v1.7/pk_derivedprops/d0_%d/%s/shotnoise_zlim_%.1lf_%.1lf.dat" % (d0, field, lo_z, hi_z), output
+-       
++      
+diff --git a/xiq.sh b/xiq.sh
+index d25e009..ee6c183 100755
+--- a/xiq.sh
++++ b/xiq.sh
+@@ -31,21 +31,21 @@ test(){
+     export oldversion="/home/mjw/HOD_MockRun/W1_Spectro_V7_"`expr $version - 1`
+ 
+     export outputdir="/home/mjw/HOD_MockRun/W1_Spectro_V7_"$version
+-    export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_2
++    export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9
+      
+     ## Interactive run with: qsub -I -o $outputdir/chi2_log/chi2_stdout.pbs -e $outputdir/chi2_log/chi2_stderr.pbs chi2.sh
+-    export LOZ=0.6
+-    export HIZ=0.8
++    export LOZ=0.8
++    export HIZ=1.0
+     export FIELDFLAG=1
+     export d0=1000
+-    export RES=2
++    export RES=0
+     export NPROCESSOR=4
+     
+-    MAX_LOGS=(2. 20. 2000. 2. 20. 4000.)
+-    MAX_LOG=${MAX_LOGS[$RES]}
++    MAX_CHIS=(2. 20. 4000. 2. 20. 4000.)
++    MAX_CHI=${MAX_CHIS[$RES]}
+ 
+     ## NLOGBINS IN R x NLINBINS IN MU (20).
+-    export NBINS=$(python -c "from math import ceil, log10; print int(40*ceil((log10(4000.) - log10(0.001))/log10(1.05)))")
++    export NBINS=$(python -c "from math import ceil, log10; print int(40*ceil((log10(4000.) - log10(0.001))/log10(1.10)))")
+ 
+     ## -I /share/star/include/ -L/share/star/lib/
+     gcc -o xiq_$RES.o Scripts/driver_Qmultipoles.c -fopenmp -lfftw3 -lm  -lgsl -lgslcblas -lcfitsio -D "NBINS=${NBINS}"
+@@ -53,7 +53,7 @@ test(){
+     rm -rf /home/mjw/IO_lock/
+ }
+ 
+-## test 
++##test 
+ 
+ DIR="$HOME/HOD_MockRun/Scripts"
+ cd $DIR
+@@ -71,8 +71,8 @@ export FILE=$outputdir"/xiq_log/xiq_W"$FIELDFLAG"_"$LOZ"_"$HIZ"_"$RES".log"
+ 
+ ./xiq_$RES.o $FIELDFLAG $LOZ $HIZ $RES > $FILE 2>&1
+ 
+-if [[ $(tr -d "\r\n" < $FILE | wc -c) -eq 0 ]]; then
+-    printf "\n%s" "$FILE" >> $outputdir/xiq_log/xiq_stderr.pbs
+-else
+-    date >> $FILE
+-fi
++#if [[ $(tr -d "\r\n" < $FILE | wc -c) -eq 0 ]]; then
++#    printf "\n%s" "$FILE" >> $outputdir/xiq_log/xiq_stderr.pbs
++#else
++#    date >> $FILE
++#fi

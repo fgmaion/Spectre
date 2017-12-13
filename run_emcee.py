@@ -76,7 +76,7 @@ mockNum   = 153
 
 # all Python types except integers, strings and unicode strings have to be wrapped to corresponding ctypes type. 
 likelihood.get_main(D0, FIELD, c_double(LOZ), c_double(HIZ), c_double(KMAX))
-likelihood.get_ydata(1, 1) ## load data
+likelihood.get_ydata(1, 1)        ## load data
 likelihood.ctypeskvals_matchup()  ## Reset k remapping between FFTlog and mock (to kmax).
 
 result    = -2.*likelihood.calc_ChiSq(c_double(0.5), c_double(0.7), c_double(7.), c_double(0.01))
@@ -98,6 +98,8 @@ print result.x
     
 np.seterr(invalid='warn')  ## necessary?
 
+
+## EMCEE run. 
 ndim, nwalkers, nburn, nsteps = 4, 400, 200, 200
 
 seed = 1

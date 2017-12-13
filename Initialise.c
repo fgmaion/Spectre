@@ -12,7 +12,6 @@ int init_gsl_randgen(){
   return 0;
 }
 
-
 int init_padding(){
   n0 = n1 = n2 = fft_size;
     
@@ -28,7 +27,6 @@ int init_padding(){
   return 0;
 }
 
-
 int init_cell_info(){
   // assumes cubic cells.
   xCellSize             = (AxisLimsArray[1][2] - AxisLimsArray[0][2])/n2;
@@ -41,17 +39,15 @@ int init_cell_info(){
   return 0;
 }
 
-
 int init_dist_z(){
   chi_zcalc(); // Cosmology determined by inclusion of cosmology_planck2015.h or cosmology_valueaddedmocks.h
   
   printf("\n\nRedshift limits, lower bound: %.6lf\t%.10lf h^-1 Mpc (%.10lf Mpc), \n\t\t upper bound: %.6lf\t%.10lf h^-1 Mpc (%.10lf Mpc)", lo_zlim, loChi, loChi/h, hi_zlim, hiChi, hiChi/h);
 
-  printf("\n\nVolume surveyed: %.10lf [10^-3 (h^-1 Gpc)^3]", pow(10., 3.)*calc_vol());
+  printf("\n\nVolume surveyed by field W%d: %.10lf [10^-3 (h^-1 Gpc)^3]", fieldFlag, pow(10., 3.)*calc_vol());
   
   return 0;
 }
-
 
 double check_radialextent(double lochi, double hichi, double lopad){
   double radial_extent = hichi - lochi;
@@ -65,7 +61,6 @@ double check_radialextent(double lochi, double hichi, double lopad){
   return 0;
 }
 
-
 int init_fftgrid(){
   xNy = pi/xCellSize;  // k = 2*pi x Nyquist frequency
   yNy = pi/yCellSize;  // k = 2*pi x Nyquist frequency
@@ -77,7 +72,6 @@ int init_fftgrid(){
   
   return 0;
 }
-
 
 int Initialise(){
   init_gsl_randgen();
@@ -92,7 +86,6 @@ int Initialise(){
     
   return 0;
 }
-
 
 double SolidAngleCalc(double decLowerBound, double decUpperBound, double raInterval){
     double SolidAngle    = 0.0;

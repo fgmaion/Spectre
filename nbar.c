@@ -37,7 +37,7 @@ int spline_nbar(int truth){
       }
 	        
       if(truth==1){
-        // PARENT: redshift errors? answer probably no. 
+        // PARENT: redshift errors? answer no from Andrea's work. 
         sprintf(filepath, "%s/W1_Spectro_V7_2/mocks_v1.7/nbar_100_smoothedCounts/nbar_smooth_0.0_Nagoya_v7_Samhain_parent_mocks_avg_twofield_avg.dat", root_dir);
       }
     }
@@ -47,7 +47,7 @@ int spline_nbar(int truth){
       sprintf(filepath, "%s/W1_Spectro_V7_2/data_v1.7/nbar_100_smoothedCounts/nbar_smooth_%.1lf_Nagoya_v7_Samhain_twofield_avg.dat", root_dir, nz_smoothRadius); 
     }
 
-    printf("\n\n%s", filepath);
+    printf("\n\nLoading <n(z)> file:  %s", filepath);
     
     inputfile = fopen(filepath, "r");
 

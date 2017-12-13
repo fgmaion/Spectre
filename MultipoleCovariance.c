@@ -36,8 +36,13 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
   char     Nthfilepath[200];
   char   firstfilepath[200];
 
-  sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
-  // sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
+  if(mull == 0){
+    sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
+  }
+
+  else{
+    sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
+  }
   
   printf("\n\n%s", firstfilepath);
   
@@ -66,8 +71,13 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
   
   // Be careful with 0 or 1 for the mock numbering.
   for(k=0; k<mocks; k++){
-    sprintf(Nthfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, k + start, lo_zlim, hi_zlim);   //  Be careful with 0 or 1 for initial mock.
-    // sprintf(Nthfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, k + start, lo_zlim, hi_zlim);
+    if(mull == 0){
+      sprintf(Nthfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, k + start, lo_zlim, hi_zlim);   //  Be careful with 0 or 1 for initial mock.
+    }
+
+    else{
+      sprintf(Nthfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, k + start, lo_zlim, hi_zlim);
+    }
     
     inputfile = fopen(Nthfilepath, "r");
 
@@ -81,10 +91,12 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
 
     fclose(inputfile);
   }
-  
-  for(kk=0; kk<mocks; kk++){
-    for(ii=0; ii<mono_order; ii++)  Multipoles[kk][ii] -=  shotnoise_instances[kk]; // uses fold factor of 4.0 currently; subtract off monopole.
-    // for(ii=0; ii<order;      ii++)  Multipoles[kk][ii] *=         mean_suppression;
+
+  if(mull == 0){
+    for(kk=0; kk<mocks; kk++){
+      for(ii=0; ii<mono_order; ii++)  Multipoles[kk][ii] -=  shotnoise_instances[kk]; // uses fold factor of 4.0 currently; subtract off monopole.
+      // for(ii=0; ii<order;      ii++)  Multipoles[kk][ii] *=         mean_suppression;
+    }
   }
   
   for(k=0; k<order; k++){
@@ -110,13 +122,18 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
 int get_kindices(int start, char filepath[]){
   char   firstfilepath[200];
   char  foldedfilepath[200];
-  
-  sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
-  // sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
+
+  if(mull == 0){
+    sprintf(firstfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, start, lo_zlim, hi_zlim);
+  }
+
+  else{
+    sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
+  }
   
   printf("\n\n%s", firstfilepath);
   
-  inputfile  = fopen(firstfilepath, "r");
+  inputfile = fopen(firstfilepath, "r");
     
   line_count(inputfile, &lineNo);
 
@@ -139,10 +156,15 @@ int get_kindices(int start, char filepath[]){
   printf("\n\nk for switching to folded measurement: %.3lf (%d)", jenkins_fold_kjoin, jenkins_foldIndex_unfoldedfile);
 
   // again, but for folded measurement.
-  sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
-  // sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
+  if(mull == 0){
+    sprintf(foldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
+  }
+
+  else{
+    sprintf(foldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, start, lo_zlim, hi_zlim);
+  }
   
-  inputfile  = fopen(foldedfilepath, "r");
+  inputfile = fopen(foldedfilepath, "r");
 
   line_count(inputfile, &lineNo);
 
@@ -174,9 +196,14 @@ int get_Multipoles(int mocks, int start, char filepath[]){
   char Nfoldedfilepath[200];
 
   for(k=0; k<mocks; k++){
-    sprintf(Nthfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, k + start, lo_zlim, hi_zlim);
-    // sprintf(Nthfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, k + start, lo_zlim, hi_zlim);
-    
+    if(mull == 0){
+      sprintf(Nthfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_0.dat", filepath, k + start, lo_zlim, hi_zlim);
+    }
+
+    else{
+      sprintf(Nthfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, k + start, lo_zlim, hi_zlim);
+    }
+        
     inputfile = fopen(Nthfilepath, "r");
 
     for(i=0; i<jenkins_foldIndex_unfoldedfile; i++){
@@ -189,8 +216,13 @@ int get_Multipoles(int mocks, int start, char filepath[]){
 
     fclose(inputfile);
 
-    sprintf(Nfoldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, k + start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;
-    // sprintf(Nfoldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, k + start, lo_zlim, hi_zlim);
+    if(mull == 0){
+      sprintf(Nfoldedfilepath, "%s_%03d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, k + start, lo_zlim, hi_zlim);  // add in folded measurements, e.g. at k_join = 0.2;
+    }
+
+    else{
+      sprintf(Nfoldedfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_2.dat", filepath, k + start, lo_zlim, hi_zlim);
+    }
     
     inputfile = fopen(Nfoldedfilepath, "r");
 
@@ -209,7 +241,9 @@ int get_Multipoles(int mocks, int start, char filepath[]){
 }
 
 
-int get_kmaxes(int mocks, int start, char filepath[]){                                                                                                                                         int min_index = 0;                                                                                                                                                                                                                                                                                                                                                                     
+int get_kmaxes(int mocks, int start, char filepath[]){
+  int min_index = 0;
+  
   for(i=0; i<mono_order; i++){                                                                                                                                                               
     for(j=min_index; j<ChiSq_nkmaxes; j++){                                                                                                                                                  
       if(kVals[i] > ChiSq_kmaxes[j]){                                                                                                                                                        
@@ -233,10 +267,12 @@ int load_CovarianceMatrix_withfolding(int mocks, int start, char filepath[]){
   get_Multipoles(mocks, start, filepath);
   
   // get_kmaxes(mocks, start, filepath);
-  
-  for(kk=0; kk<mocks; kk++){
-    for(ii=0; ii<mono_order; ii++)  Multipoles[kk][ii] -= shotnoise_instances[kk];      // uses fold factor of 4.0 currently; subtract off monopole.
-    // for(ii=0; ii<order;      ii++)  Multipoles[kk][ii] *=        mean_suppression;
+
+  if(mull == 0){
+    for(kk=0; kk<mocks; kk++){
+      for(ii=0; ii<mono_order; ii++)  Multipoles[kk][ii] -= shotnoise_instances[kk];      // uses fold factor of 4.0 currently; subtract off monopole.
+      // for(ii=0; ii<order;      ii++)  Multipoles[kk][ii] *=        mean_suppression;
+    }
   }
   
   for(k=0; k<order; k++){
@@ -277,9 +313,9 @@ int load_CovarianceMatrix(int mocks, int start){
     load_CovarianceMatrix_withfolding(mocks, start, filepath);
   }
 
-  printCov();
+  // printCov();
 
-  print_meanMultipoes();
+  // print_meanMultipoes();
   
   return 0;
 }

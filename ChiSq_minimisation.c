@@ -1,7 +1,89 @@
-int default_params(){
-  fsigma8       = 0.050000;
-  velDispersion = 2.250000;
-  bsigma8       = 0.762500;
+int set_fittomean_params(void){
+  double maxL_fsig8, maxL_sigv, maxL_bsig8;
+
+  data_mock_flag = 2;
+  
+  calc_ChiSqs(0, 0);
+  
+  set_minChiSq();
+  
+  // calc_onedposteriors(&maxL_fsig8, &maxL_bsig8, &maxL_sigv);
+  
+  fsigma8       = minX2_fsig8;
+  bsigma8       = minX2_bsig8;
+  velDispersion = minX2_sigp;
+
+  // fsigma8       =   0.05;
+  // bsigma8       = 0.6875;
+  // velDispersion = 5.6250;
+
+  // fsigma8       = 0.1437;
+  // bsigma8       = 0.6875;
+  // velDispersion = 5.6250;
+  
+  printf("\n\nFit-to-mean params:  %.6lf \t %.6lf \t %.6lf", fsigma8, velDispersion, bsigma8);
+
+  epsilon_pad   = 0.000000;
+  alpha_pad     = 1.000000;
+
+
+  load_data();
+
+  get_datashotnoise();         // assigns to mean_shot.
+    
+  for(j=0; j<mono_order; j++)  xdata[j] -= mean_shot;
+
+  ctypeskvals_matchup();
+  
+  calc_ChiSq(fsigma8, bsigma8, velDispersion, epsilon_pad);
+  
+  return 0;
+}
+
+int getmockmean_params(int d0){
+  int                            line_no;
+  double   fs8, bs8, sp, fs8L, bs8L, spL;
+  
+  fsigma8       = 0.0;
+  velDispersion = 0.0;
+  bsigma8       = 0.0;  
+
+  sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks_%.1lf_%.1lf.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim);
+
+  inputfile = fopen(filepath, "r");
+
+  line_count(inputfile, &line_no);
+
+  // printf("\n\nGetting mock mean parameters.  File: %s.  Input line number: %d", filepath, line_no);
+  
+  for(j=0; j<line_no; j++){
+    fscanf(inputfile, "%lg \t %lg \t %lg \t %lg \t %lg \t %lg \n", &fs8, &sp, &bs8, &fs8L, &spL, &bs8L);
+
+    // printf("\n%d \t %.6lf \t %.6lf \t %.6lf", j, fs8, sp, bs8);
+    
+    fsigma8       += fs8;
+    bsigma8       += bs8;
+    velDispersion +=  sp;
+  }
+
+  fclose(inputfile);
+
+  fsigma8        /= (double) line_no;
+  bsigma8        /= (double) line_no;
+  velDispersion  /= (double) line_no;
+      
+  // printf("\n\nMock Mean:  %.6lf \t %.6lf \t %.6lf", fsigma8, velDispersion, bsigma8);
+
+  epsilon_pad   = 0.000000;
+  alpha_pad     = 1.000000;
+  
+  return 0;
+}
+
+int default_params(void){
+  fsigma8       = 0.500000;
+  velDispersion = 5.625000;
+  bsigma8       = 0.652500;
   epsilon_pad   = 0.000000;
   alpha_pad     = 1.000000;
   
@@ -10,7 +92,7 @@ int default_params(){
   return 0;
 }
 
-int bestfit_params(){
+int bestfit_params(void){
   fsigma8       = minX2_fsig8;
   velDispersion = minX2_sigp;
   bsigma8       = minX2_bsig8;
@@ -20,7 +102,7 @@ int bestfit_params(){
   return 0;
 }
 
-int set_chiSq_intervals(){
+int set_chiSq_intervals(void){
     fsigma8Interval       = (max_fsigma8     - min_fsigma8)/dRes;
     bsigma8Interval       = (max_bsigma8     - min_bsigma8)/dRes;
     sigmaInterval         = (max_velDisperse - min_velDisperse)/dRes;
@@ -32,7 +114,7 @@ int set_chiSq_intervals(){
     return 0;
 }
 
-int kvals_matchup(){
+int kvals_matchup(void){
   double     diff;
   double min_diff;
     
@@ -99,32 +181,34 @@ int calc_models(){
   return 0;
 }
 
-int calc_ChiSqs(int mockNumber){    
+int calc_ChiSqs(int mockNumber, int print){    
     int ll, mm, nn;
 
     minChiSq = pow(10., 12.);
     
-    if      (data_mock_flag == 0)  load_mock(mockNumber);
-    else if (data_mock_flag == 1)  load_data();
+    if     (data_mock_flag == 0)  load_mock(mockNumber);
+    else if(data_mock_flag == 1)  load_data();
+    else if(data_mock_flag == 2)  load_meanMultipoles();
+    
     else{
       printf("\n\nChi sq. input is invalid.");
     }
     
     // printf("\n\nChi sq. input.");
-    
-    if(data_mock_flag == 0){
-      for(j=0; j<mono_order; j++)  xdata[j] -= shotnoise_instances[mockNumber - 1]; 
-    }
-    
-    if(data_mock_flag == 1){
-      get_datashotnoise();         // assigns to mean_shot. 
 
-      for(j=0; j<mono_order; j++)  xdata[j] -= mean_shot;
+    if(mull == 0){  // mull results are already shot noise subtracted. 
+      if(data_mock_flag == 0){
+        for(j=0; j<mono_order; j++)  xdata[j] -= shotnoise_instances[mockNumber - 1]; 
+      }
+    
+      if(data_mock_flag == 1){
+        get_datashotnoise();         // assigns to mean_shot. 
+
+        for(j=0; j<mono_order; j++)  xdata[j] -= mean_shot;
+      }
     }
     
     // set_oldshotnoise();
-    
-    // set_meanmultipoles();
     
     // scale_Cov(130);
     
@@ -177,7 +261,7 @@ int calc_ChiSqs(int mockNumber){
                 // ChiSqGrid[jj][kk][ii][ll][mm] *= (1. - (order + 1)/(CatalogNumber - 1.)); // Hartlap et al. correction.
               }
 
-              // printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf", fsigma8, bsigma8, velDispersion, ChiSqGrid[jj][kk][ii][ll][mm]);
+              if(print == 1)  printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf", fsigma8, bsigma8, velDispersion, ChiSqGrid[jj][kk][ii][ll][mm]);
             }
           }
         }
@@ -188,9 +272,11 @@ int calc_ChiSqs(int mockNumber){
 }
 
 int get_ydata(int mockNumber, int data_mock_flag){
-  if      (data_mock_flag == 0)  load_mock(mockNumber);
-  else if (data_mock_flag == 1)  load_data();
-  else if (data_mock_flag == 2)  set_meanMultipoles();
+  // Set up zero mean, decorrelated, unit variance, variables.
+
+  if     (data_mock_flag == 0)  load_mock(mockNumber);
+  else if(data_mock_flag == 1)  load_data();
+  else if(data_mock_flag == 2)  load_meanMultipoles();
   else{
     printf("\n\nChi sq. input is invalid.");
   }
@@ -200,9 +286,9 @@ int get_ydata(int mockNumber, int data_mock_flag){
   }
 
   if(data_mock_flag == 1){
-    double shot = get_datashotnoise();
+    get_datashotnoise();
 
-    for(j=0; j<mono_order; j++)  xdata[j] -= shot;
+    for(j=0; j<mono_order; j++)  xdata[j] -= mean_shot;
   }
   */
   for(j=0; j<order; j++){
@@ -259,17 +345,29 @@ double calc_ChiSq(double dfsigma8, double dbsigma8, double dvelDispersion, doubl
     
     // for(j=0; j<mono_order; j++)  printf("\n%.6le \t %.6le \t %.6le", kVals[j], xtheory[0][0][0][0][0][j], xtheory[0][0][0][0][0][j + mono_order]);
     
-    ytheory_compute(0, 0, 0, 0, 0);  // over ride zeroth model.
+    // ytheory_compute(0, 0, 0, 0, 0);  // over ride zeroth model.
 
-    // for(nn=0; nn<order; nn++)  printf("\nTHERE: %.6le", pow(ydata[nn] - ytheory[0][0][0][0][0][nn], 2.)/gsl_vector_get(eval, nn));
+    double dChiSq;
+    double  ChiSq  = 0.0;
 
-    double ChiSq  = 0.0;
+    printf("\n\nChi sq. eval.");
     
-    for(nn=0; nn<order; nn++)  ChiSq += pow(ydata[nn] - ytheory[0][0][0][0][0][nn], 2.)/gsl_vector_get(eval, nn);
+    for(nn=0; nn<order; nn++){
+      dChiSq = pow(xdata[nn] - xtheory[0][0][0][0][0][nn], 2.)*pow(gsl_matrix_get(sigma_norm, nn, nn), 2.);
 
+      ChiSq += dChiSq;
+      
+      printf("\n%.6le \t %.6le \t %le \t %le \t %lf", kVals[nn%mono_order],xdata[nn],xtheory[0][0][0][0][0][nn],1./gsl_matrix_get(sigma_norm,nn,nn),dChiSq);
+
+      if(nn+1 == mono_order)  printf("\n");
+    }
+
+    // for(nn=0; nn<order; nn++)  ChiSq += pow(ydata[nn] - ytheory[0][0][0][0][0][nn], 2.)/gsl_vector_get(eval, nn);
+    
     // printf("\n\nIndependent eval. of chi sq.: %.6le \n\n", ChiSq);
-    
-    return -ChiSq/2.;
+
+    return     ChiSq;
+    // return -ChiSq/2.;
 }
 
 int print_model(double dfsigma8, double dbsigma8, double dvelDispersion, double depsilon){
@@ -304,6 +402,7 @@ int print_model(double dfsigma8, double dbsigma8, double dvelDispersion, double 
 }
 
 int set_models(){
+  // Read in models precomputed up to 0.8 and assign xtheory to be these values us to ChiSq_kmax only. 
   int    ll, mm, nn;
   double store[Res][Res][Res][Res_ap][Res_ap][all_order];
   

@@ -1,5 +1,5 @@
 // VIPERS HOD mock parameters.              
-// 500s mocks. Big multidark, http://www.multidark.org/MultiDark/Help?page=simulations corresponding to planck 1: http:arxiv.org/abs/1303.5076
+// 500s mocks. Big multidark Planck, http://www.multidark.org/MultiDark/Help?page=simulations corresponding to Planck 1: http:arxiv.org/abs/1303.5076
 double  Om_v      =    0.69;          // 0.73; value added mocks + HOD Cube. outdated unless using one of these. 
 double  Om_r      =    0.00;          // 0.0;
 

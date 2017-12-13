@@ -93,7 +93,7 @@ int linearGrowthRate(){
   
   approx_growthfactor_today = exp(result);    
   
-  printf("\n\nln(a) \t\t Age \t\t H(z) \t\t Om(a) \t\t f(a) \t\t D+(a) \t\t approx. D+(a) \n");
+  // printf("\n\nln(a) \t\t Age \t\t H(z) \t\t Om(a) \t\t f(a) \t\t D+(a) \t\t approx. D+(a) \n");
   
   for(k=151; k<linearGrowth_nPoints; k++){
     init_lna  = lnAarray[10];
@@ -109,11 +109,13 @@ int linearGrowthRate(){
 
     approx2linear_growthfactor[k] = exp(result)/approx_growthfactor_today;
 
+    /*
     if((k > 1050) && (i%10 == 0)){
       printf("%+.4lf \t %.4lf \t %.4lf \t %.4lf \t %.4lf \t %.4lf \t %.4lf \n", lnAarray[k], HubbleTime*AgeInterp(lnAarray[k]), HubbleCnstWithTime[k], Om_mOfa[k], f_Om_mOfa545[k],
                                                                                 linear_growthfactor[k], approx2linear_growthfactor[k]);
     }
-    
+    */    
+
     // gsl_odeiv2_driver_reset(d);
   }
     

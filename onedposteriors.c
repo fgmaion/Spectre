@@ -24,11 +24,10 @@ int set_minChiSq(){
   return 0;
 }
 
-
 double calc_onedposteriors(double* maxL_fsig8, double* maxL_bsig8, double* maxL_sigv){
-  double   sigp_post[Res];
-  double  bsig8_post[Res];
-  double  fsig8_post[Res];
+  double      sigp_post[Res];
+  double     bsig8_post[Res];
+  double     fsig8_post[Res];
   
   int     bpost_peak_ind = 0;
   int     fpost_peak_ind = 0;
