@@ -140,6 +140,8 @@ int kvals_matchup(void){
 int calc_models(){  
   sprintf(filepath, "%s/models/realspace_%s_sig8_%.3lf_d0_%d_W%d_%.1lf_%.1f_res_%d.cat", models_path, model_flag, camb_sig8, d0, fieldFlag, lo_zlim, hi_zlim, Res);
 
+  printf("\n\nWriting models: %s", filepath);
+  
   output = fopen(filepath, "wb");
   
   for(int aa=0; aa<Res; aa++){    

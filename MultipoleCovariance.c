@@ -107,7 +107,7 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
   // Covariance is an N x N matrix, where N corresponds to order, here hiMultipoleOrder is due to Mono-Mono, Mono-Quad, Quad-Quad, etc... elements. Here hex-blah elements are ignored.
   initialiseCovariance(mocks);
 
-  printf("\n\nMean multipoles:");
+  printf("\n\nMean multipoles (for %d mocks):", CatalogNumber);
 
   printf("\nk \t \t mean mono \t mean quad \t sig_mono \t sig_quad \n");
 
@@ -283,7 +283,7 @@ int load_CovarianceMatrix_withfolding(int mocks, int start, char filepath[]){
   // Covariance is an N x N matrix, where N corresponds to order, here hiMultipoleOrder is due to Mono-Mono, Mono-Quad, Quad-Quad, etc... elements.  Hex-blah elements are ignored. 
   initialiseCovariance(mocks);
     
-  printf("\n\nMean multipoles:");
+  printf("\n\nMean multipoles (for %d mocks):", CatalogNumber);
     
   printf("\nk \t \t mean mono \t mean quad \t sig_mono \t sig_quad \n");
     

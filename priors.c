@@ -10,7 +10,7 @@ int set_oldestpriors(){
 
   return 0;
 }
-  
+
 int set_recordedpriors(){                                  // i.e. that on mull/stacpolly_backups/stacpolly_backup4/ driver_likelihood.c
   min_bsigma8               =      0.05;                  
   max_bsigma8               =      1.00;                  
@@ -56,9 +56,20 @@ int set_widepriors(){
   max_bsigma8               =      3.50;                                                                                                                                                                                                                                                                                                                                                  
   min_fsigma8               =      0.00;
   max_fsigma8               =      1.80;                                                                                                                                                      
-
   min_velDisperse           =      0.00;                                                                                                                                                     
   max_velDisperse           =     15.00;                                                                                                                                                     
 
+  return 0;
+}
+
+int write_priors(){
+  printf("\n\nAssumed uniform priors for %d^3 likelihood grid:", Res);
+
+  printf("\n%.3lf < f * sigma_8 < %.3lf", min_fsigma8,     max_fsigma8);
+  printf("\n%.3lf < b * sigma_8 < %.3lf", min_bsigma8,     max_bsigma8);
+  printf("\n%.3lf <     sigma_p < %.3lf", min_velDisperse, max_velDisperse);
+
+  printf("\n");
+  
   return 0;
 }
