@@ -22,8 +22,8 @@ int model_compute(int aa, int bb, int cc, int dd, int ee, int print){
     clip_p0p2(clipmono_config, clipquad_config, mono_config, quad_config, zero_config, zero_config, u0, variance);
   }
   */
-  // last arg. for shot noise contribution to P_*(0) as given by shot_config 
-  cnvldmonoCorr_joint(convlmonoCorr, mono_config, quad_config, hex_config, zero_config, 0);
+  // second to last arg. for shot noise contribution to P_*(0), as given by shot_config; last argument for joint-field icc correction: 0 for single field, 1 for joint field.  
+  cnvldmonoCorr_joint(convlmonoCorr, mono_config, quad_config, hex_config, zero_config, 1);
   
   pk_mu(convlmonoCorr);
   
