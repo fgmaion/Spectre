@@ -1,3 +1,0 @@
-rm: cannot remove ‘/home/mjw/IO_lock/’: No such file or directory
-gcc: error: Scripts/driver_likelihood.c: No such file or directory
-/var/spool/pbs/mom_priv/jobs/26591.head.cluster.loc.SC: line 60:  5534 Segmentation fault      ./chi2.o $d0 $FIELDFLAG $LOZ $HIZ $k
