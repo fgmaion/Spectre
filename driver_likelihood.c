@@ -107,7 +107,7 @@ int main(int argc, char** argv){
   smooth_radius             =       2.0;
 
   // Regression to ~ May 2016 -> Catalog number from 153 to 305; change file paths of mocks (covariance and chi sq input) and Qmultipoles. Change init_covariance.
-  CatalogNumber             =       305;
+  CatalogNumber             =       153;
 
   
   start_walltime();
