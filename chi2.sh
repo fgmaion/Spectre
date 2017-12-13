@@ -3,7 +3,7 @@
 #PBS -V
 #PBS -p 1023
 #PBS -l nodes=1:ppn=1                                                                                    
-#PBS -l walltime=00:20:00
+#PBS -l walltime=00:120:00
 
 set_lock(){
   locked=1

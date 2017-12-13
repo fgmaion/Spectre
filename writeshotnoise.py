@@ -5,13 +5,9 @@ import pandas  as pd
 
 
 root   = os.environ['outputdir']
+mocks  = 305
 
-mocks  = 153
-
-args   = sys.argv         ## Redshift limits from command line. 
-
-zs     = [0.75, 1.05]
-fsig8s = [0.4907, 0.4570]
+args   = sys.argv         ## Redshift limits from command line.
 
 lo_zs  = np.array([np.float(args[1]), np.float(args[2])])
 hi_zs  = np.array([np.float(args[3]), np.float(args[4])])
@@ -24,15 +20,15 @@ for c, d0 in enumerate([1000]): #[1000 , 10, 6, 4]):
       ## mocks
       files  = [root + "/mocks_v1.7/pk/d0_" + str(d0) + "/" + field + "/" + "mock_" + "{0:03}".format(i+1) + "_zlim_" + str(lo_z) + "_" + str(hi_z) + "_Jf_4.dat" for i in xrange(0,mocks,1)]
 
-      ## Upper limit of 3.0 previously (15/08/2017).
+      ## Upper limit of 3.0 previously (15/08/2017); scales could be decided by minimising difference with <n> estimate. 
       dflist = [pd.read_csv(fname, sep='\t', header=None, names=['k', 'P0', 'P2', 'N'])  for fname in files]
       catdf  =  pd.concat(dflist)
       shot   =  np.array([dflist[i][dflist[i]['k'].between(1.2, 2.3, inclusive=True)]['P0'].mean() for i in range(len(dflist))]) # shot noise for each mock.
 
-      labels = np.array([i for i in xrange(1, mocks + 1)])
+      labels =  np.array([i for i in xrange(1, mocks + 1)])
 
       ## Get <n> shot noise estimates. 
-      files     = glob.glob(root + "/mocks_v1.7/pk_derivedprops/d0_%d/%s/nbarshotnoise_mocks_*_zlim_%.1lf_%.1lf.dat" % (d0, field, lo_z, hi_z)) ## not ordered. 
+      files     = glob.glob(root + "/mocks_v1.7/pk_derivedprops/d0_%d/%s/shotnoise/nbarshotnoise_mocks_*_zlim_%.1lf_%.1lf.dat" % (d0, field, lo_z, hi_z)) ## not ordered. 
       estimates = np.loadtxt(files[0])  
             
       for i, filename in enumerate(files[1:]):

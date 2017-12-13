@@ -6,7 +6,6 @@ double ln_PR(double ln_k, void* p){
   return log((*pt2Pk)(k));  // Given ln_k, return ln(P_R(k)), where P_R is the real space power spectrum.
 }
 
-
 int prep_dlnPR_dlnk(){
   gsl_function F;
   double       result, abserr, k, ln_k;  // Sanity check, d ln(P_R) / d ln k = 0.96 for large scale power law from inflation.
@@ -26,7 +25,6 @@ int prep_dlnPR_dlnk(){
 
   return 0;
 }
-
 
 int apmultipoles(FFTLog_config *mono, FFTLog_config *quad, FFTLog_config *hex, double beta, double velDispersion, double alpha, double epsilon){
   if(epsilon == 0.){

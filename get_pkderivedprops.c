@@ -21,6 +21,17 @@ int get_mocksshotnoise(){
 
   linecount_header(inputfile, 1, &shot_ninstance);
 
+  if(shot_ninstance < CatalogNumber){
+    printf("\n\nProblem with shot noise instances: number of mocks to analyse = %d, shot noise instances = %d", CatalogNumber, shot_ninstance);
+
+    exit(EXIT_FAILURE);
+  }
+
+  else{
+    // Greater than or equal to CatalogNumber.
+    shot_ninstance = CatalogNumber;
+  }
+  
   shotnoise_instances = malloc(shot_ninstance*sizeof(*shotnoise_instances));
 
   fscanf(inputfile, "%*[^\n]\n", NULL); // skip one line (hashed comment)
@@ -38,15 +49,7 @@ int get_mocksshotnoise(){
   
   fclose(inputfile);
 
-  if(shot_ninstance != CatalogNumber){
-    printf("\n\nProblem with shot noise instances: number of mocks = %d, shot noise instances = %d", CatalogNumber, shot_ninstance);
-
-    exit(EXIT_FAILURE);
-  }
-
-  else{
-    printf("\n\nMean shot noise: %.4lf", mean_shot);
-  }
+  printf("\n\nMean shot noise: %.4lf", mean_shot);
   
   return 0;
 }

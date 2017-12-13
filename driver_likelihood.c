@@ -48,7 +48,7 @@
 
 
 int main(int argc, char** argv){
-  mull                      =                           1;  // 0 for False; 1 for True (replicate mull/skene)  
+  mull                      =                           0;  // 0 for False; 1 for True (replicate mull/skene)  
   thread                    =                           1;
 
   z_eff                     =        atof(getenv("ZEFF"));
@@ -106,8 +106,8 @@ int main(int argc, char** argv){
 
   smooth_radius             =       2.0;
 
-  // Regression to ~ May 2016 -> Catalog number to 305; change file paths of mocks (covariance and chi sq input) and Qmultipoles. Change init_covariance.
-  CatalogNumber             =       153;
+  // Regression to ~ May 2016 -> Catalog number from 153 to 305; change file paths of mocks (covariance and chi sq input) and Qmultipoles. Change init_covariance.
+  CatalogNumber             =       305;
 
   
   start_walltime();
@@ -170,7 +170,8 @@ int main(int argc, char** argv){
 
   kvals_matchup();  // Now match only available modes between ChiSq_kmin and ChiSq_kmax.
   
-  if(ChiSq_kmax == 0.2)  calc_models();
+  // if(ChiSq_kmax == 0.2)
+  calc_models();
   
   set_models();
   
@@ -180,11 +181,11 @@ int main(int argc, char** argv){
   
   for(data_mock_flag=0; data_mock_flag<2; data_mock_flag++){
     if(data_mock_flag == 0){
-      sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks5_%.1lf_%.1lf_%s_res_%d.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim, model_flag, Res);
+      sprintf(filepath, "%s/mocks_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/mocks6_%.1lf_%.1lf_%s_res_%d.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim, model_flag, Res);
     }
 
     if(data_mock_flag == 1){
-      sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data5_%.1lf_%.1lf_%s_res_%d.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim, model_flag, Res);
+      sprintf(filepath, "%s/data_v1.7/fsig8/d0_%d/W%d/kmax_%.1lf/data6_%.1lf_%.1lf_%s_res_%d.dat", outputdir, d0, fieldFlag, ChiSq_kmax, lo_zlim, hi_zlim, model_flag, Res);
     }
     
     // output = fopen(filepath, "w");
