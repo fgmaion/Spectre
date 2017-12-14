@@ -22,8 +22,11 @@ int model_compute(int aa, int bb, int cc, int dd, int ee, int print){
     clip_p0p2(clipmono_config, clipquad_config, mono_config, quad_config, zero_config, zero_config, u0, variance);
   }
   */
-  // second to last arg. for shot noise contribution to P_*(0), as given by shot_config; last argument for joint-field icc correction: 0 for single field, 1 for joint field.  
-  cnvldmonoCorr_joint(convlmonoCorr, mono_config, quad_config, hex_config, zero_config, 0);
+  int jointfield = 0;  //  0: Single field, 1: Joint field. 
+  
+  // second to last arg. for shot noise contribution to P_*(0), as given by shot_config; last argument for joint-field icc correction:
+  // 0 for single field, 1 for joint field.  
+  cnvldmonoCorr_joint(convlmonoCorr, mono_config, quad_config, hex_config, zero_config, jointfield);
   
   pk_mu(convlmonoCorr);
   
@@ -40,22 +43,15 @@ int model_compute(int aa, int bb, int cc, int dd, int ee, int print){
   //    printf("\n%lf \t %lf \t %lf", mono_config->krvals[j][0], convlmonoCorr->pk[j][0], convlquadCorr->pk[j][0]);
   //  }
   //}
-  
-  // double kmask_norm = get_kMask_norm();  
-  // printf("\n\nKMASK NORM RATIO: %.9lf", kmask_norm*9.599*pow(10., -2.)/(cnvldpk_zero*fracArea));
+
+  if(jointfield == 1)  cnvldpk_zero *= fracArea;                 // Joint-field correction has an added field_area / total_area factor.
   
   for(j=0; j<mono_config->N; j++){
     // convlmonoCorr->pk[j][0]  = mono_config->pk[j][0];
     // convlquadCorr->pk[j][0]  = quad_config->pk[j][0];
-
-    // Single-field
-    // convlmonoCorr->pk[j][0] -= cnvldpk_zero*FFTlog_Wk0[j];
-    // convlquadCorr->pk[j][0] -= cnvldpk_zero*FFTlog_Wk2[j];
-    /*
-    // Joint-field 
-    convlmonoCorr->pk[j][0]    -= cnvldpk_zero*fracArea*FFTlog_Wk0[j];
-    convlquadCorr->pk[j][0]    -= cnvldpk_zero*fracArea*FFTlog_Wk2[j];
-    */
+    
+    convlmonoCorr->pk[j][0] -= cnvldpk_zero*FFTlog_Wk0[j];
+    convlquadCorr->pk[j][0] -= cnvldpk_zero*FFTlog_Wk2[j];
   }
   
   if(print == 1){
