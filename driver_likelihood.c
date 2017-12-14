@@ -48,7 +48,7 @@
 
 
 int main(int argc, char** argv){
-  mull                      =                           0;  // 0 for False; 1 for True (replicate mull/skene)  
+  mull                      =                           1;  // 0 for False; 1 for True (replicate mull/skene)  
   thread                    =                           1;
 
   z_eff                     =        atof(getenv("ZEFF"));
