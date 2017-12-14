@@ -6,14 +6,14 @@ int Covariance_eigenVecs(int mocks){
     
   gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_ABS_DESC);  // Descending sort in magnitude. eigenvalues should be non-negative definite.
     
-  printf("\n\nCovariance matrix eigenvalues.");
+  // printf("\n\nCovariance matrix eigenvalues.");
     
   for(i=0; i<order; i++){
     double eval_i          = gsl_vector_get(eval, i);
 
     gsl_vector_view evec_i = gsl_matrix_column(evec, i);
         
-    printf("\n%.4e", eval_i);
+    // printf("\n%.4e", eval_i);
 
     // printf("eigenvalue  = %.3e, eigenvector = \n", eval_i);
         
