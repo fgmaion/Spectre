@@ -29,7 +29,7 @@ set_lock(){
 test(){
   ## Interactive run with: qsub -I -o $outputdir/chi2_log/chi2_stdout.pbs -e $outputdir/chi2_log/chi2_stderr.pbs chi2.sh
   export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9/
-  export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9/ # W1_Spectro_V7_2
+  export mask_Qldir=/home/mjw/HOD_MockRun/W1_Spectro_V7_2/ # /home/mjw/HOD_MockRun/W1_Spectro_V7_9/
 
   export LOZ=0.6
   export HIZ=0.9
