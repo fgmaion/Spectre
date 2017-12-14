@@ -20,7 +20,7 @@ int get_mocksshotnoise(){
   inputfile = fopen(filepath, "r");
 
   linecount_header(inputfile, 1, &shot_ninstance);
-
+  
   if(shot_ninstance < CatalogNumber){
     printf("\n\nProblem with shot noise instances: number of mocks to analyse = %d, shot noise instances = %d", CatalogNumber, shot_ninstance);
 
@@ -29,7 +29,7 @@ int get_mocksshotnoise(){
 
   else{
     // Greater than or equal to CatalogNumber.
-    shot_ninstance = CatalogNumber;
+    shot_ninstance    = CatalogNumber;
   }
   
   shotnoise_instances = malloc(shot_ninstance*sizeof(*shotnoise_instances));
@@ -40,7 +40,7 @@ int get_mocksshotnoise(){
     fscanf(inputfile, "%*d    %*lf    %lf\n", &shotnoise_instances[j]); // Without clipping, <n> estimate. 
     // fscanf(inputfile, "%*d    %lf    %*lf\n", &shotnoise_instances[j]); // With clipping, high-k estimate.
     
-    printf("\n%d \t %lf", j, shotnoise_instances[j]);
+    if((j % 10 == 0) || (j == CatalogNumber - 1)) printf("\n%d \t %lf", 1 + j, shotnoise_instances[j]);
     
     mean_shot += shotnoise_instances[j];
   }

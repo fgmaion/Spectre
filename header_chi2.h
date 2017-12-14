@@ -237,7 +237,8 @@ int    apmultipoles(FFTLog_config *mono, FFTLog_config *quad, FFTLog_config *hex
 double calc_onedposteriors(double* maxL_fsig8, double* maxL_bsig8, double* maxL_sigv);
 double calc_ChiSq(double dfsigma8, double dbsigma8, double dvelDispersion, double depsilon);
 
-
+int    camb_call(int dononlinear, double redshift);
+  
 // -- Posteriors -- //
 double calc_fsigma8Posterior();
 double calc_bsigma8Posterior();

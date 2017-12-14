@@ -198,24 +198,23 @@ int calc_ChiSqs(int mockNumber, int print){
     
     // printf("\n\nChi sq. input.");
 
-    if(mull == 0){  // mull results are already shot noise subtracted. 
-      if(data_mock_flag == 0){
-        for(j=0; j<mono_order; j++)  xdata[j] -= shotnoise_instances[mockNumber - 1]; 
+    if(mull == 0){             // mull results are already shot noise subtracted. 
+      if(data_mock_flag == 0){ // mocks
+        for(j=0; j<mono_order; j++)  xdata[j] -= shotnoise_instances[mockNumber - 1]; // zero indexed array; for mock mockNumber.
       }
     
-      if(data_mock_flag == 1){
-        get_datashotnoise();         // assigns to mean_shot. 
+      if(data_mock_flag == 1){ // data
+        get_datashotnoise();   // assigns to mean_shot. 
 
         for(j=0; j<mono_order; j++)  xdata[j] -= mean_shot;
       }
     }
     
     // set_oldshotnoise();
-    
     // scale_Cov(130);
     
     for(j=0; j<order; j++){
-       ydata[j] = 0.0;  // new zero mean, unit variance, decorrelated variables.
+       ydata[j] = 0.0;         // new zero mean, unit variance, decorrelated variables.
       dkdata[j] = 0.0;
       
       gsl_matrix_get_col(col, evec, j);

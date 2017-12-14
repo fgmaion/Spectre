@@ -19,7 +19,7 @@ int nosort_MultipoleCalc(regress* inst, int mock_start){
   
   printf("\n\nShot noise: randoms %.4lf, galaxies %.4lf", rand_shot, gal_shot);
   
-  print_nbarshot(mock_start);
+  // print_nbarshot(mock_start);
   
   // clear arrays. 
   for(k=0; k<KBIN_NO; k++){
@@ -33,7 +33,9 @@ int nosort_MultipoleCalc(regress* inst, int mock_start){
     Sum_PiLi[k]         = 0.0;
   }
 
-  walltime("\n\nPerforming multipole calculation to quadrupole order:");
+  printf("\n\nPerforming regression calc. for fold factor: %d", inst->fold);
+    
+  walltime("\nPerforming multipole calculation to quadrupole order:");
 
   #pragma omp parallel for reduction(+: Sum_Pi[:KBIN_NO], Sum_PiLi[:KBIN_NO]) private(Index, k, j, i, pk) if(thread ==1)
   for(k=0; k<n0; k++){

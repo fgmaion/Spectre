@@ -105,8 +105,7 @@ int alpha_calc(){
 
   alpha = 1.*daccepted_gals/accepted_rand;
   
-  printf("\nInfo: d0=% 5d;  Total number of galaxies on input: %d, accepted: %d, accepted(weighted): % 6.2lf. (1./alpha): %.9lf; FKP norm: %.6lf", d0, Vipers_Num,
-                                                                                                                   accepted, daccepted_gals, 1./alpha, sqrt(alpha)*bare_fkp_norm);
+  printf("\nInfo: d0=% 5d;  Total number of galaxies on input: %d, accepted: %d, accepted(weighted): % 6.2lf. (1./alpha): %.9lf; FKP norm: %.6lf", d0, Vipers_Num, accepted, daccepted_gals, 1./alpha, sqrt(alpha)*bare_fkp_norm);
   
   return 0;
 }

@@ -9,7 +9,7 @@ int PkCalc(regress* inst, int mock_start){
 
   nosort_MultipoleCalc(inst, mock_start);
 
-  print_multipoles(inst);
+  // print_multipoles(inst);
   
   return 0;
 }
@@ -50,6 +50,8 @@ int prep_r2c_modes(regress* inst, double scaling){
     Sum_Li2[j]      = 0.0;
     modes_perbin[j] =   0;
   }
+
+  inst->fold = (int) scaling;
   
   // r2c returns half the modes on the direction in which overdensity changes first, i.e. x.
   #pragma omp parallel for reduction(+: Sum_Li[:KBIN_NO], Sum_Li2[:KBIN_NO], modes_perbin[:KBIN_NO], mean_k[:KBIN_NO]) private(Index, dummy, k, j, i, kk, jj, k_x, k_y, k_z, kSq, kmodulus, mu) if(thread == 1)

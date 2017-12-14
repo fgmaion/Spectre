@@ -65,9 +65,9 @@ int set_widepriors(){
 int write_priors(){
   printf("\n\nAssumed uniform priors for %d^3 likelihood grid:", Res);
 
-  printf("\n%.3lf < f * sigma_8 < %.3lf", min_fsigma8,     max_fsigma8);
-  printf("\n%.3lf < b * sigma_8 < %.3lf", min_bsigma8,     max_bsigma8);
-  printf("\n%.3lf <     sigma_p < %.3lf", min_velDisperse, max_velDisperse);
+  printf("\n%.3lf < f * sigma_8 < %.3lf (%.3lf resolution)", min_fsigma8,     max_fsigma8,     fsigma8Interval);
+  printf("\n%.3lf < b * sigma_8 < %.3lf (%.3lf resolution)", min_bsigma8,     max_bsigma8,     bsigma8Interval);
+  printf("\n%.3lf <     sigma_p < %.3lf (%.3lf resolution)", min_velDisperse, max_velDisperse,   sigmaInterval);
 
   printf("\n");
   

@@ -39,7 +39,7 @@ test(){
   export d0=1000
   export ZEFF=0.75    ## ZEFFS=(0.607 0.958)  ## ZEFFS=(0.75 1.05)  ## ZEFFS=(0.706 0.903) 
 
-  rm -r /home/mjw/IO_lock/
+  rm -rf /home/mjw/IO_lock/
 
   gcc -std=gnu11 -o chi2.o Scripts/driver_likelihood.c -lfftw3 -lm -lgsl -lgslcblas -fopenmp -lfftw3_omp
 }

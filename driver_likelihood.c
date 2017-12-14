@@ -69,11 +69,11 @@ int main(int argc, char** argv){
     sprintf(maskmultipoles_path,   "/home/mjw/HOD_MockRun/W1_Spectro_V7_2");
   }
   
-  d0                        =               atoi(argv[1]);
-  fieldFlag                 =               atoi(argv[2]);
-  lo_zlim                   =               atof(argv[3]);   // previously 0.6<z<0.9, 0.7<z<1.1
-  hi_zlim                   =               atof(argv[4]);
-  ChiSq_kmax                =               atof(argv[5]);
+  d0                        =    atoi(argv[1]);
+  fieldFlag                 =    atoi(argv[2]);
+  lo_zlim                   =    atof(argv[3]);   // previously 0.6<z<0.9, 0.7<z<1.1
+  hi_zlim                   =    atof(argv[4]);
+  ChiSq_kmax                =    atof(argv[5]);
   
   min_alpha_pad             =    0.9999;
   max_alpha_pad             =    1.0001;
@@ -106,7 +106,7 @@ int main(int argc, char** argv){
 
   smooth_radius             =       2.0;
 
-  // Regression to ~ May 2016 -> Catalog number from 153 to 305; change file paths of mocks (covariance and chi sq input) and Qmultipoles. Change init_covariance.
+  // Regression to ~ May 2016 -> catalog number from 153 independent to 305; change file paths of mocks (covariance and chi sq input) and Q-multipoles. Change init_covariance.
   CatalogNumber             =       153;
 
   
@@ -117,7 +117,7 @@ int main(int argc, char** argv){
   // set_normalpriors();
   // set_clippingpriors();
   // set_widepriors(); 
-
+  
   printf_branch();
   
   fftw_init_threads();
@@ -193,7 +193,7 @@ int main(int argc, char** argv){
     walltime("Walltime at start of chi^2 calc.");
 
     // for(int ab=1; ab<CatalogNumber; ab++){
-    for(int ab=1; ab<10; ab++){
+    for(int ab=1; ab<10; ab++){ // mocks labelled 1 to 153 (305) 
       calc_ChiSqs(ab, 0);
       
       set_minChiSq();
@@ -210,6 +210,7 @@ int main(int argc, char** argv){
     
     // fclose(output);
   }
+  
   /*
   default_params();
 

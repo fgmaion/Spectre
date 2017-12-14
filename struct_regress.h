@@ -5,6 +5,7 @@
 #define REGRESS_GUARD // Define REGRESS_GUARD
 
 struct Regress{
+  int    fold;
   int    modes_perbin[KBIN_NO];
   double mean_modk[KBIN_NO], detA[KBIN_NO];
   double Sum_Pi[KBIN_NO], Sum_Li[KBIN_NO], Sum_Li2[KBIN_NO], Sum_PiLi[KBIN_NO];

@@ -129,7 +129,7 @@ int main(int argc, char **argv){
   walltime("All prep. done");
   
   for(data_mock_flag = 0; data_mock_flag < 1; data_mock_flag++){ // analysis of VIPERS data and mock catalogues.
-    trash_nbarshot_file(atoi(argv[4])); // internal loop over d0. 
+    // trash_nbarshot_file(atoi(argv[4])); // internal loop over d0. 
     
     for(loopCount=atoi(argv[4]); loopCount <= mock_end; loopCount++){            
       sprintf(filepath, "%s/mock_%03d_VAC_Nagoya_v6_Samhain.dat",  vipersHOD_dir, loopCount);
