@@ -118,7 +118,6 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
   return 0;
 }
 
-
 int get_kindices(int start, char filepath[]){
   char   firstfilepath[200];
   char  foldedfilepath[200];
@@ -190,7 +189,6 @@ int get_kindices(int start, char filepath[]){
   return 0;
 }
 
-
 int get_Multipoles(int mocks, int start, char filepath[]){
   char     Nthfilepath[200];
   char Nfoldedfilepath[200];
@@ -240,7 +238,6 @@ int get_Multipoles(int mocks, int start, char filepath[]){
  return 0;
 }
 
-
 int get_kmaxes(int mocks, int start, char filepath[]){
   int min_index = 0;
   
@@ -257,7 +254,6 @@ int get_kmaxes(int mocks, int start, char filepath[]){
   
   return 0; 
 }
-
 
 int load_CovarianceMatrix_withfolding(int mocks, int start, char filepath[]){
   get_kindices(start, filepath);
@@ -285,16 +281,17 @@ int load_CovarianceMatrix_withfolding(int mocks, int start, char filepath[]){
     
   printf("\n\nMean multipoles (for %d mocks):", CatalogNumber);
     
-  printf("\nk \t \t mean mono \t mean quad \t sig_mono \t sig_quad \n");
+  printf("\nk \t \t mean mono \t mean quad \t sig_mono \t sig_quad \t S/N mono \t S/N quad \n");
     
   for(k=0; k<mono_order; k++){
-    printf("\n%e \t %e \t %e \t %e \t %e", kVals[k], MeanMultipoles[k], MeanMultipoles[k + mono_order], sqrt(gsl_matrix_get(Covariance, k, k)),
-                                                                                                        sqrt(gsl_matrix_get(Covariance, k + mono_order, k + mono_order)));
+    printf("\n%e \t %e \t %e \t %e \t %e \t %lf \t %lf", kVals[k], MeanMultipoles[k], MeanMultipoles[k + mono_order], sqrt(gsl_matrix_get(Covariance, k, k)),
+                                                         sqrt(gsl_matrix_get(Covariance, k + mono_order, k + mono_order)),
+                                                         MeanMultipoles[k] / sqrt(gsl_matrix_get(Covariance, k, k)),
+                                                         MeanMultipoles[k + mono_order] / sqrt(gsl_matrix_get(Covariance, k + mono_order, k + mono_order)));
   }
   
   return 0;
 }
-
 
 int load_CovarianceMatrix(int mocks, int start){
   assign_chisq_kmaxes();
