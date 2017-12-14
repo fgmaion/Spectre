@@ -60,6 +60,7 @@ cd ..
 for k in 0.6
 #for k in $(seq 0.2 0.2 0.8)
   do
+    echo
     echo "***  ANALYSING K_MAX OF $k ***"  
 
     ## set_lock

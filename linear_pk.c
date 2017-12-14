@@ -45,7 +45,7 @@ int get_linearsig8(){
 
   fclose(inputfile);
 
-  printf("\n\nLinear sigma_8 retrieved: %.4lf; z_eff: %.4lf", camb_sig8, z_eff);
+  // printf("\n\nLinear sigma_8 retrieved: %.4lf; z_eff: %.4lf", camb_sig8, z_eff);
 
   return 0;
 }
@@ -65,7 +65,7 @@ int linear_pk(){
   
   sprintf(filepath, "/home/mjw/CAMB/models/camb_matter_pk_linearity_0_Om_cdm_%.3lf_Om_v_%.3lf_H0_%.2lf_z_%.3lf.dat", Om_m - Om_b, Om_v, 100.*h, z_eff);
 
-  printf("\n\nLoading %s", filepath);
+  printf("\nFor z_eff of %.3lf, linear sigma_8 is %.6lf, f sigma_8 is %.3lf, and loading: \n%s", z_eff, camb_sig8, print_fsig8(), filepath);
 
   while((inputfile = fopen(filepath, "r")) == NULL){
     camb_call(0, z_eff);      // nonlinear/linear flag, redshift;
@@ -97,7 +97,7 @@ int linear_pk(){
   return 0;
 }
 
-int print_fsig8(){
+double print_fsig8(){
   void*  params;
  
   double lna   = log(1./(1. + z_eff));
@@ -106,5 +106,5 @@ int print_fsig8(){
 
   double fsig8 = camb_sig8*f_Om_545(lna, params); // camb returns sig8(z).
 
-  printf("\n\nAt z_eff = %.3lf, f sig_8(z_eff) = %.3lf", z_eff, fsig8);
+  return fsig8;
 }

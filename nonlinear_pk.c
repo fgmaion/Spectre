@@ -28,7 +28,7 @@ int nonlinear_pk(){
   sprintf(filepath,   "/home/mjw/CAMB/models/camb_matter_pk_linearity_1_Om_cdm_%.3lf_Om_v_%.3lf_H0_%.2lf_z_%.3lf.dat", Om_m - Om_b, Om_v, 100.*h, z_eff);
   // sprintf(filepath,   "/home/mjw/HOD_MockRun/W1_Spectro_V7_2/pkmodels/nonlinear_matter_pk_sig8_0.593_z_0.75.dat");
   
-  printf("\n\nLoading %s", filepath);
+  printf("\nFor z_eff of %.3lf, linear sigma_8 is %.6lf, f sigma_8 is %.3lf, and loading: \n%s", z_eff, camb_sig8, print_fsig8(), filepath);
 
   while((inputfile = fopen(filepath, "r")) == NULL){  // Generate file if it can't be found. 
     camb_call(1, z_eff);      // nonlinear/linear flag, redshift;
@@ -67,8 +67,6 @@ int nonlinear_pk(){
 
   // for(j=0; j<pk_lineNo; j++)  printf("\n %.6le \t %.6le", sdltk[j], sdltPk[j]);
 
-  print_fsig8();  // needs camb sig_8(z).
-  
   return 0;
 }
 
@@ -104,4 +102,3 @@ int print_fsigma8(){
 
   return 0;
 }
-

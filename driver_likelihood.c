@@ -43,7 +43,7 @@
 #include "FisherForecastFAP.c"
 #include "Ruiz.c"
 #include "camb_call.c"
-#include "joint_clipped_fsig8.c"
+// #include "joint_clipped_fsig8.c"
 #include "priors.c"
 
 

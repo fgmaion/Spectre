@@ -2,7 +2,7 @@ int delete_lockfile(){
   int    status = 0; 
   char   sys_command[200];
 
-  sprintf(sys_command, "rm -r /home/mjw/IO_lock;");
+  sprintf(sys_command, "rm -rf /home/mjw/IO_lock;");
 
   status = system(sys_command);
 

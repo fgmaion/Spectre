@@ -57,7 +57,7 @@ int Covariance_eigenVecs(int mocks){
     for(i=0; i<mocks; i++)  Multipoles[i][k] = dMultipoles[i][k]*gsl_matrix_get(sigma_norm, k, k);  // Store correlated, zero mean, unit variance variables.
   }
     
-  printf("\n");
+  // printf("\n");
     
   // Decorrelated multipole measurements. 
   for(j=0; j<order; j++){  
@@ -70,7 +70,7 @@ int Covariance_eigenVecs(int mocks){
     }
   }
     
-  printf("\n\nDecorrelated multipoles calculated.\n");
+  // printf("\n\nDecorrelated multipoles calculated.\n");
     
   // Reform covariance of decorrelated, zero mean, unit variance variables. Should be diagonal, with non-negative definite eigenvalues corresponding to eval.     
   // fprintf_dCov();

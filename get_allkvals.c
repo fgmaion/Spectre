@@ -11,9 +11,7 @@ int get_allkvals(int start){
   else{
     sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
   }
-  
-  printf("\n\n%s", firstfilepath);
-  
+    
   inputfile = fopen(firstfilepath, "r");
 
   if(inputfile == NULL){

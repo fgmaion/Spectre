@@ -34,7 +34,7 @@ double interp_inverseComovingDistance(double r){
 
 
 int chi_zcalc(){
-  printf("\nCalculating z - comoving distance.");
+  // printf("\nCalculating z - comoving distance.");
 
   gsl_integration_cquad_workspace* w = gsl_integration_cquad_workspace_alloc(1000); 
 
@@ -76,7 +76,7 @@ int chi_zcalc(){
 
   gsl_integration_cquad_workspace_free(w);
 
-  printf("\nComoving distance to redshift 1.5: %le [Mpc] \n\n", h*interp_comovingDistance(1.5));
+  // printf("\nComoving distance to redshift 1.5: %le [Mpc] \n\n", h*interp_comovingDistance(1.5));
   
   // -- Derived -- //
   UniverseAge();

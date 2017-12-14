@@ -84,7 +84,7 @@ int UniverseAge(){
 
   gsl_integration_qags(&F, -13.5, 0.0, 0, 1e-7, 1000, w, &result, &error);
   
-  printf("Age of the Universe today: %.3lf Gyr\n", HubbleTime*result);  
+  // printf("Age of the Universe today: %.3lf Gyr\n", HubbleTime*result);  
   
   spline(lnAarray,   AgeOftheUniverse,  linearGrowth_nPoints, 1.0e31, 1.0e31,            Age2derivatives);
   spline(lnAarray, HubbleCnstWithTime,  linearGrowth_nPoints, 1.0e31, 1.0e31, HubbleConstant2derivatives); // Natural cubic spline of H(a), zero second   derivative at both endpoints.

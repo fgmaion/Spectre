@@ -238,7 +238,13 @@ double calc_onedposteriors(double* maxL_fsig8, double* maxL_bsig8, double* maxL_
 double calc_ChiSq(double dfsigma8, double dbsigma8, double dvelDispersion, double depsilon);
 
 int    camb_call(int dononlinear, double redshift);
-  
+double print_fsig8();
+int    print_basemodel();
+int    calc_ChiSqs(int mockNumber, int print);
+int    set_minChiSq();
+int    ctypeskvals_matchup();
+
+
 // -- Posteriors -- //
 double calc_fsigma8Posterior();
 double calc_bsigma8Posterior();

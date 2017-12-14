@@ -44,8 +44,6 @@ int load_CovarianceMatrix_withoutfolding(int mocks, int start, char filepath[]){
     sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
   }
   
-  printf("\n\n%s", firstfilepath);
-  
   inputfile  = fopen(firstfilepath, "r");
 
   line_count(inputfile, &lineNo);
@@ -129,9 +127,7 @@ int get_kindices(int start, char filepath[]){
   else{
     sprintf(firstfilepath, "%s_%d_zlim_%.1lf_%.1lf_Jf_1.dat", filepath, start, lo_zlim, hi_zlim);
   }
-  
-  printf("\n\n%s", firstfilepath);
-  
+    
   inputfile = fopen(firstfilepath, "r");
     
   line_count(inputfile, &lineNo);
@@ -152,7 +148,7 @@ int get_kindices(int start, char filepath[]){
 
   fclose(inputfile);
 
-  printf("\n\nk for switching to folded measurement: %.3lf (%d)", jenkins_fold_kjoin, jenkins_foldIndex_unfoldedfile);
+  printf("\nJenkins switch @ k of %.3lf (%d)", jenkins_fold_kjoin, jenkins_foldIndex_unfoldedfile);
 
   // again, but for folded measurement.
   if(mull == 0){

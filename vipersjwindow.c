@@ -206,7 +206,7 @@ int prep_VIPERS_jmaskMultipoles(){
     printf("Error onjoint Q-multipoles load.");
   }
   
-  printf("\n\nJoint Q-multipoles: %s", filepath);
+  printf("\nand joint ... %s", filepath);
   
   sprintf(hihiRes_filepath, "%s_hihiRes_hex.dat", filepath);
   sprintf(  hiRes_filepath, "%s_hiRes_hex.dat",   filepath);
