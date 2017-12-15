@@ -48,6 +48,7 @@ int prep_r2c_modes(regress* inst, double scaling){
     mean_k[j]       = 0.0;
     Sum_Li[j]       = 0.0;
     Sum_Li2[j]      = 0.0;
+
     modes_perbin[j] =   0;
   }
 

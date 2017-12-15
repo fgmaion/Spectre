@@ -43,7 +43,7 @@
 int main(int argc, char **argv){  
   (void) argc;                                              // escape compiler unused variable warning. 
 
-  thread                    =                   1; 
+  thread                    =                   0; 
   
   fieldFlag                 =       atoi(argv[1]);
   lo_zlim                   =       atof(argv[2]);          // previously 0.6<z<0.9, 0.9<z<1.2
