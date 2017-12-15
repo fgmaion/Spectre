@@ -11,13 +11,13 @@ int boxCoordinates(double xCoor[], double yCoor[], double zCoor[], int rowNumber
 int calc_overdensity(){    
   walltime("Wall time at start of overdensity calc.");
 
-  // for(j=0; j<n0*n1*n2; j++)  overdensity[j] = 0.0;
-
+  for(j=0; j<n0*n1*n2; j++)  overdensity[j] = 0.0;
+  /*
   for(j=0; j<n0*n1*n2; j++){
     overdensity[j][0] = 0.0;
     overdensity[j][1] = 0.0;
   }
-  
+  */
   for(j=0; j<Vipers_Num; j++){
     if(Acceptanceflag[j] == true){
       // ngp_assign(xCoor[j], yCoor[j], zCoor[j], (fkp_galweight[j]/sqrt(alpha))*clip_galweight[j]/sampling[j]);
@@ -35,7 +35,6 @@ int calc_overdensity(){
   return 0;
 }
 
-
 static int rand_int(int n){
   int limit = RAND_MAX - RAND_MAX % n;
   int rnd;
@@ -48,7 +47,6 @@ static int rand_int(int n){
 
   return rnd % n;
 }
-
 
 void shuffle(double *array, int n){
   int i, j;

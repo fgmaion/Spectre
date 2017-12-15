@@ -19,8 +19,8 @@ int ngp_assign(double x, double y, double z, double p){
 
       // printf("\n%.6lf \t %.6lf \t %d", x, trunc(x), (int) trunc(x));
       
-      // overdensity[indx + n2*indy + n1*n2*indz] += p;
-      overdensity[indx + n2*indy + n1*n2*indz][0] += p;
+      overdensity[indx + n2*indy + n1*n2*indz] += p;
+      // overdensity[indx + n2*indy + n1*n2*indz][0] += p;
       
       break;
 
@@ -38,8 +38,8 @@ int ngp_assign(double x, double y, double z, double p){
       indy = (int) trunc(y);
       indz = (int) trunc(z);
 
-      // overdensity[indx + n2*indy + n1*n2*indz] += p;
-      overdensity[indx + n2*indy + n1*n2*indz][0] += p;
+      overdensity[indx + n2*indy + n1*n2*indz] += p;
+      // overdensity[indx + n2*indy + n1*n2*indz][0] += p;
       
       break;
 
@@ -56,8 +56,8 @@ int ngp_assign(double x, double y, double z, double p){
     indy = (int) trunc(y);
     indz = (int) trunc(z);
 
-    // overdensity[indx + n2*indy + n1*n2*indz] += p;
-    overdensity[indx + n2*indy + n1*n2*indz][0] += p;
+    overdensity[indx + n2*indy + n1*n2*indz] += p;
+    // overdensity[indx + n2*indy + n1*n2*indz][0] += p;
     
     break;
   }
