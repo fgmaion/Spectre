@@ -73,3 +73,13 @@ int write_priors(){
   
   return 0;
 }
+
+int prior_warnings(double maxL_fsig8, double maxL_bsig8, double maxL_sigv, char warning[]){
+  sprintf(warning, "No warning.");
+
+  if((maxL_fsig8 + fsigma8Interval == max_fsigma8)     || (maxL_fsig8 - fsigma8Interval == min_fsigma8))      sprintf(warning, "Hitting f sigma_8 prior.");
+  if((maxL_bsig8 + bsigma8Interval == max_bsigma8)     || (maxL_bsig8 - bsigma8Interval == min_bsigma8))      sprintf(warning, "Hitting b sigma_8 prior.");
+  if((maxL_sigv  +  sigmaInterval  == max_velDisperse) || (maxL_sigv  -  sigmaInterval  == min_velDisperse))  sprintf(warning, "Hitting   sigma_v prior.");
+  
+  return 0;
+}

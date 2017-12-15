@@ -175,6 +175,7 @@ int main(int argc, char** argv){
   
   set_models();
   
+  char   warning[200];
   double maxL_fsig8, maxL_sigv, maxL_bsig8;
   
   write_priors();
@@ -200,8 +201,10 @@ int main(int argc, char** argv){
       
       calc_onedposteriors(&maxL_fsig8, &maxL_bsig8, &maxL_sigv);
 
+      prior_warnings(maxL_fsig8, maxL_bsig8, maxL_sigv, warning); 
+      
       // maximum likelihood of one-dim posteriors and of entire parameter space. 
-      printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf", maxL_fsig8, maxL_bsig8, maxL_sigv, minX2_fsig8, minX2_bsig8, minX2_sigp);
+      printf("\n%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %s", maxL_fsig8, maxL_bsig8, maxL_sigv, minX2_fsig8, minX2_bsig8, minX2_sigp, warning);
       
       // fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
       
