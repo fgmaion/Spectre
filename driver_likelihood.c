@@ -49,7 +49,7 @@
 
 int printf_mull(){
   if(mull == 0){
-    printf("***  Replicating skene results (mull == %d).  ***", mull);
+    printf("***  Generating new results (mull == %d).  ***", mull);
   }
 
   else{
