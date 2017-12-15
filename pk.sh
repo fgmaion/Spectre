@@ -39,7 +39,7 @@ cd ..
 test(){
   ## Interactive run with: qsub -I -o $outputdir/pk_log/pk_stdout.pbs -e $outputdir/pk_log/pk_stderr.pbs pk.sh
   export outputdir=/home/mjw/HOD_MockRun/W1_Spectro_V7_9/
-  export mock_start=92   # not zero!
+  export mock_start=1   # not zero!
   export nmocks_perjob=1 
   export LOZ=0.6
   export HIZ=0.9

@@ -198,9 +198,9 @@ int calc_ChiSqs(int mockNumber, int print){
     
     // printf("\n\nChi sq. input.");
 
-    if(mull == 0){             // mull results are already shot noise subtracted. 
+    if(mull == 0){             // mull results are already shot noise subtracted; newly generated results are not. 
       if(data_mock_flag == 0){ // mocks
-        for(j=0; j<mono_order; j++)  xdata[j] -= shotnoise_instances[mockNumber - 1]; // zero indexed array; for mock mockNumber.
+        for(j=0; j<mono_order; j++)  xdata[j] -= shotnoise_instances[mockNumber - 1]; // zero indexed array; mock mockNumber starts from unity.
       }
     
       if(data_mock_flag == 1){ // data

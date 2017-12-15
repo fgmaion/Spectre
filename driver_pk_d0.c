@@ -76,7 +76,7 @@ int main(int argc, char **argv){
   fft_size                  =       512;                    // Worker 46 works up to 1024. 
   
   logk_min                  =      -2.0;
-  logk_max                  =   0.60206;                    // k = 4 hMpc^{-1}.
+  logk_max                  =   0.00000;                    // k = 1 hMpc^{-1} :  0.00000;  k = 3 hMpc^{-1} :  0.47712;  k = 4 hMpc^{-1} : 0.60206 
   
   CatalogNumber             =       153;                    // Total number of (independent) HOD mocks.
 
@@ -128,7 +128,7 @@ int main(int argc, char **argv){
   
   walltime("All prep. done");
   
-  for(data_mock_flag = 0; data_mock_flag < 1; data_mock_flag++){ // analysis of VIPERS data and mock catalogues.
+  for(data_mock_flag = 1; data_mock_flag < 2; data_mock_flag++){ // analysis of VIPERS data and mock catalogues.
     // trash_nbarshot_file(atoi(argv[4])); // internal loop over d0. 
     
     for(loopCount=atoi(argv[4]); loopCount <= mock_end; loopCount++){            

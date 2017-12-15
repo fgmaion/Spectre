@@ -6,7 +6,6 @@ int set_kbins_logkspacing(regress* inst){
   return 0;
 }
 
-
 int set_kbins_linearkspacing(regress* inst){
   double kmedia;
 
@@ -16,7 +15,6 @@ int set_kbins_linearkspacing(regress* inst){
 
   return 0;
 }
-
 
 int prep_pkRegression(void){  
   set_kbins_logkspacing(&flat);

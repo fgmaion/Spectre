@@ -99,14 +99,14 @@ int get_datashotnoise(){
     exit(EXIT_FAILURE);
   }
 
-  fscanf(inputfile, "%*[^\n]\n", NULL); // skip one line (hashed comment)
+  fscanf(inputfile, "%*[^\n]\n", NULL);                // skip one line (hashed comment)
 
-  fscanf(inputfile, "%*lf \t %lf \n", &mean_shot);  // Without clipping, <n> estimate.
+  fscanf(inputfile, "%*lf \t %lf \n", &mean_shot);     // Without clipping, <n> estimate.
   // fscanf(inputfile, "%lf \t %*lf \n", &mean_shot);  // With clipping, high-k estimate.
 
   fclose(inputfile);
 
-  printf("\n\nData mean shot noise (%s): %.4lf", filepath, mean_shot);
+  printf("\n\nData shot noise (%s): %.4lf", filepath, mean_shot);
 
   return 0;
 }
