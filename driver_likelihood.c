@@ -47,6 +47,20 @@
 #include "priors.c"
 
 
+int printf_mull(){
+  if(mull == 0){
+    printf("***  Replicating skene results (mull == %d).  ***", mull);
+  }
+
+  else{
+    printf("***  Replicating skene results (mull == %d).  ***", mull);
+  }
+
+  printf("\n\n");
+  
+  return 0;
+}
+  
 int main(int argc, char** argv){
   mull                      =                           1;  // 0 for False; 1 for True (replicate mull/skene)  
   thread                    =                           1;
@@ -119,6 +133,8 @@ int main(int argc, char** argv){
   // set_widepriors(); 
   
   printf_branch();
+
+  printf_mull();
   
   fftw_init_threads();
 
