@@ -50,7 +50,7 @@ int main(int argc, char **argv){
   lo_zlim                   =       atof(argv[2]);          // previously 0.6<z<0.9, 0.9<z<1.2
   hi_zlim                   =       atof(argv[3]);
 
-  smooth_radius             =                 2.0;
+  smooth_radius             =                 2.0;          // smoothing kernel for clipping.
 
   outputdir                 = getenv("outputdir");  
 
