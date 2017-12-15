@@ -8,27 +8,31 @@ int boxCoordinates(double xCoor[], double yCoor[], double zCoor[], int rowNumber
     return boxlabel;
 }
 
-
 int calc_overdensity(){    
   walltime("Wall time at start of overdensity calc.");
 
-  for(j=0; j<n0*n1*n2; j++)  overdensity[j] = 0.0;
-    
-    for(j=0; j<Vipers_Num; j++){
-      if(Acceptanceflag[j] == true){
-        // ngp_assign(xCoor[j], yCoor[j], zCoor[j], (fkp_galweight[j]/sqrt(alpha))*clip_galweight[j]/sampling[j]);
-        cic_assign(xCoor[j], yCoor[j], zCoor[j], (fkp_galweight[j]/sqrt(alpha))*clip_galweight[j]/sampling[j]);  // cic assign, weighted by sampling, fkp wghts and clipping.
-      }
-    }
+  // for(j=0; j<n0*n1*n2; j++)  overdensity[j] = 0.0;
 
-    for(j=0; j<rand_number; j++){
-      // ngp_assign(rand_x[j], rand_y[j], rand_z[j], -sqrt(alpha)*rand_weight[j]);
-      cic_assign(rand_x[j], rand_y[j], rand_z[j], -sqrt(alpha)*rand_weight[j]);  // assumes all randoms up to rand_number are accepted.    
+  for(j=0; j<n0*n1*n2; j++){
+    overdensity[j][0] = 0.0;
+    overdensity[j][1] = 0.0;
+  }
+  
+  for(j=0; j<Vipers_Num; j++){
+    if(Acceptanceflag[j] == true){
+      // ngp_assign(xCoor[j], yCoor[j], zCoor[j], (fkp_galweight[j]/sqrt(alpha))*clip_galweight[j]/sampling[j]);
+      cic_assign(xCoor[j], yCoor[j], zCoor[j], (fkp_galweight[j]/sqrt(alpha))*clip_galweight[j]/sampling[j]);  // cic assign, weighted by sampling, fkp wghts and clipping.
     }
+  }
+
+  for(j=0; j<rand_number; j++){
+    // ngp_assign(rand_x[j], rand_y[j], rand_z[j], -sqrt(alpha)*rand_weight[j]);
+    cic_assign(rand_x[j], rand_y[j], rand_z[j], -sqrt(alpha)*rand_weight[j]);  // assumes all randoms up to rand_number are accepted.    
+  }
       
-    walltime("Wall time after overdensity calc.");
-    
-    return 0;
+  walltime("Wall time after overdensity calc.");
+  
+  return 0;
 }
 
 

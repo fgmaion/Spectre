@@ -14,7 +14,7 @@ int prep_c2c(){
 int prep_r2c(){
   nx = n2/2 + 1;
 
-  overdensity         = (double*)       fftw_malloc(n0*n1*n2*sizeof(*overdensity));
+  overdensity         = (double*)       fftw_malloc(n0*n1*n2*sizeof(*overdensity));                  // here overdensity is a double, rather than complex.
   smooth_overdensity  = (double*)       fftw_malloc(n0*n1*n2*sizeof(*smooth_overdensity));
   
   H_k                 = (fftw_complex*) fftw_malloc(n0*n1*nx*sizeof(*H_k)); // returns half the array, along the fastest memory change direction: x.
