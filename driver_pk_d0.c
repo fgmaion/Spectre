@@ -73,7 +73,7 @@ int main(int argc, char **argv){
   lopad                     =      50.0;                    // stefano_trans_z set such that lo_zlim boundary is lopad [h^-1 Mpc] from embedded vol boundary.
   fkpPk                     =    8000.0;                    // [h^-1 Mpc]^3.  Stefano: 4000 [h^-1 Mpc]^3.
 
-  fft_size                  =       512;                    // Worker 46 works up to 1024. 
+  fft_size                  =       256;                    // Worker 46 works up to 1024. 
   
   logk_min                  =      -2.0;
   logk_max                  =   0.00000;                    // k = 1 hMpc^{-1} :  0.00000;  k = 3 hMpc^{-1} :  0.47712;  k = 4 hMpc^{-1} : 0.60206 

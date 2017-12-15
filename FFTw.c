@@ -95,7 +95,7 @@ int prep_r2c_modes(regress* inst, double scaling){
         // printf("\n%d %d %d \t %.6lf \t %.6lf \t %d", k, j, i, fund_kz, kmodulus, inst->kind[Index]);
           
         // Latest Open MP: reduction on array elements.  Each available mode has an index in the binning array.
-        Sum_Li[inst->kind[Index]]             += inst->kLi[Index];  // Seems to add up to zero numerically.
+        Sum_Li[inst->kind[Index]]             += inst->kLi[Index];                   // Seems to add up to zero numerically.
         Sum_Li2[inst->kind[Index]]            += inst->kLi[Index]*inst->kLi[Index];
 
         // printf("\n%.6lf", inst->Sum_Li2[inst->kind[Index]]);
