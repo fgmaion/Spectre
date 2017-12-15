@@ -48,8 +48,8 @@ int nosort_MultipoleCalc(regress* inst, int mock_start){
 
         pk                           = pow(H_k[Index][0], 2.) + pow(H_k[Index][1], 2.);
 
-        // pk                          -= rand_shot;
-        // pk                          -=  gal_shot;  // Fit for constant shotnoise of galaxies when clipping
+        pk                          -= rand_shot;
+        pk                          -=  gal_shot;  // Fit for constant shotnoise of galaxies when clipping
 
         Sum_Pi[inst->kind[Index]]   += pk;
         Sum_PiLi[inst->kind[Index]] += pk*inst->kLi[Index];
