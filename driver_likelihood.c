@@ -193,7 +193,7 @@ int main(int argc, char** argv){
     walltime("Walltime at start of chi^2 calc.");
 
     // for(int ab=1; ab<CatalogNumber; ab++){
-    for(int ab=1; ab<10; ab++){ // mocks labelled 1 to 153 (305) 
+    for(int ab=1; ab<20; ab++){ // mocks labelled 1 to 153 (305) 
       calc_ChiSqs(ab, 0);
       
       set_minChiSq();
@@ -205,7 +205,7 @@ int main(int argc, char** argv){
       
       // fprintf(output, "%.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \t %.6lf \n", maxL_fsig8, maxL_sigv, maxL_bsig8, minX2_fsig8, minX2_sigp, minX2_bsig8);
       
-      if(data_mock_flag == 1)  break;
+      if(data_mock_flag == 1)  break; // Only one calculation if data.
     }
     
     // fclose(output);
