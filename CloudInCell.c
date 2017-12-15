@@ -85,7 +85,7 @@ int cic_assign(double x, double y, double z, double p){
   // W = product_i of W_i(x_i - x_cell) = 1. - |x_i - x_cell|
   // Note: e.g. weight at bottom left   = 1. - |dx|, at bottom right = 1. - (1. - dx) 
 
-  /*
+  
   overdensity[iindx + n2*iindy + n1*n2*iindz][0] += hx1*hy1*hz1*p;
   overdensity[indx  + n2*iindy + n1*n2*iindz][0] += hx0*hy1*hz1*p;
   overdensity[iindx + n2*indy  + n1*n2*iindz][0] += hx1*hy0*hz1*p;
@@ -94,8 +94,8 @@ int cic_assign(double x, double y, double z, double p){
   overdensity[indx  + n2*iindy + n1*n2*indz ][0] += hx0*hy1*hz0*p;
   overdensity[iindx + n2*indy  + n1*n2*indz ][0] += hx1*hy0*hz0*p;
   overdensity[indx  + n2*indy  + n1*n2*indz ][0] += hx0*hy0*hz0*p;
-  */
   
+  /*
   overdensity[iindx + n2*iindy + n1*n2*iindz] += hx1*hy1*hz1*p;
   overdensity[indx  + n2*iindy + n1*n2*iindz] += hx0*hy1*hz1*p;
   overdensity[iindx + n2*indy  + n1*n2*iindz] += hx1*hy0*hz1*p;
@@ -104,6 +104,7 @@ int cic_assign(double x, double y, double z, double p){
   overdensity[indx  + n2*iindy + n1*n2*indz ] += hx0*hy1*hz0*p;
   overdensity[iindx + n2*indy  + n1*n2*indz ] += hx1*hy0*hz0*p;
   overdensity[indx  + n2*indy  + n1*n2*indz ] += hx0*hy0*hz0*p;
+  */
   
   return 0;
 }
