@@ -92,8 +92,8 @@ int main(int argc, char** argv){
    Res_ap                   =         1;  // Resoltuion in AP.
   dRes_ap                   =       1.0;
 
-  //FFTlogRes               =       768;  // FFTlogRes = 4096;
-  FFTlogRes                 =      4096;
+  FFTlogRes                 =       768;  //  768 on skenechecked -- commit May 17 before Berkeley. 
+  // FFTlogRes              =      4096;  // 4096 on master / qsmult (15/12/17).
   
   logk_min                  =      -2.0;
   logk_max                  =   0.60206;  // k = 4 hMpc^{-1}.
