@@ -54,9 +54,9 @@ int set_clippingpriors(){
 int set_widepriors(){                                                                                                                                                                       
   min_bsigma8               =      0.05;
   max_bsigma8               =      3.50;                                                                                                                                                                                                                                                                                                                                                  
-  min_fsigma8               =      0.00;
+  min_fsigma8               =      0.05;
   max_fsigma8               =      1.80;                                                                                                                                                      
-  min_velDisperse           =      0.00;                                                                                                                                                     
+  min_velDisperse           =      0.05;                                                                                                                                                     
   max_velDisperse           =     15.00;                                                                                                                                                     
 
   return 0;
