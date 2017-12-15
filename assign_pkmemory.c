@@ -1,4 +1,3 @@
-/*
 int prep_c2c(){
   nx = n2;
 
@@ -11,7 +10,6 @@ int prep_c2c(){
 
   return 0;
 }
-*/
 
 int prep_r2c(){
   nx = n2/2 + 1;
@@ -27,12 +25,11 @@ int prep_r2c(){
   return 0;
 }
 
-
 int prep_x2c(){
   fftw_import_wisdom_from_filename("/home/mjw/HOD_MockRun/wisdom/wisdom.dat");
 
-  // prep_c2c();
-  prep_r2c();
+  prep_c2c();
+  // prep_r2c();
 
   fftw_export_wisdom_to_filename("/home/mjw/HOD_MockRun/wisdom/wisdom.dat");
 
@@ -46,7 +43,6 @@ int prep_x2c(){
   
   return 0;
 }
-
 
 int regress_mem(regress* inst){
   inst->kind = calloc(n0*n1*nx, sizeof(int));

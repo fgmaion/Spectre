@@ -17,11 +17,11 @@ drand48_data* randBuffers;
 // r2c or c2c arrays/ 
 int     fft_size;
 
-double* overdensity;
-double* smooth_overdensity;
+// double* overdensity;
+// double* smooth_overdensity;
 
-// fftw_complex* overdensity;
-// fftw_complex* smooth_overdensity;
+fftw_complex* overdensity;
+fftw_complex* smooth_overdensity;
 
 fftw_complex* H_k;
 
