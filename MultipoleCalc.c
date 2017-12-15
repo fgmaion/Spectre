@@ -17,7 +17,7 @@ int nosort_MultipoleCalc(regress* inst, int mock_start){
   gal_shot  =  bare_gal_shot/alpha;
   rand_shot = bare_rand_shot*alpha;
   
-  printf("\n\nShot noise: randoms %.4lf, galaxies %.4lf", rand_shot, gal_shot);
+  printf("\n\nSubtracting shot noise contributions: randoms %.4lf, galaxies %.4lf", rand_shot, gal_shot);
   
   // print_nbarshot(mock_start);
   
