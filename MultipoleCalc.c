@@ -6,12 +6,12 @@ int nosort_MultipoleCalc(regress* inst, int mock_start){
   //  L_i  = 0.5*(3.*\mu_i**2 -1.)
   //  P_i  = P_i(k, \mu_i)
   
-  double              pk;
-  double  gal_shot = 0.0;
-  double rand_shot = 0.0;
+  double                        pk;
+  double            gal_shot = 0.0;
+  double           rand_shot = 0.0;
 
-  double   Sum_Pi[KBIN_NO];
-  double Sum_PiLi[KBIN_NO];
+  double           Sum_Pi[KBIN_NO];
+  double         Sum_PiLi[KBIN_NO];
   
   // update with alpha factors. 
   gal_shot  =  bare_gal_shot/alpha;
