@@ -1,14 +1,13 @@
 #include "qSortCompare.c"
 
-
-int PkCalc(regress* inst, int mock_start){
-  walltime("Wall time before FFT");
+int PkCalc(regress* inst){
+  // walltime("Wall time before FFT");
 
   fftw_execute(plan);
 
-  walltime("Wall time after FFT");
+  // walltime("Wall time after FFT");
 
-  nosort_MultipoleCalc(inst, mock_start);
+  nosort_MultipoleCalc(inst);
 
   // print_multipoles(inst);
   
@@ -37,7 +36,7 @@ int prep_r2c_modes(regress* inst, double scaling){
   
   prep_sinc_factors(scaling*fund_kz, scaling*zNy);
 
-  walltime("R2C prep. start:");
+  // walltime("R2C start:");
 
   double       mean_k[KBIN_NO];
   double       Sum_Li[KBIN_NO];
@@ -120,7 +119,7 @@ int prep_r2c_modes(regress* inst, double scaling){
     // printf("\nHERE:%lf \t %lf \t %lf \t %d", inst->mean_modk[j], inst->Sum_Li[j], inst->Sum_Li2[j], inst->modes_perbin[j]);
   }
 
-  walltime("R2C prep. end:");
+  // walltime("R2C end:");
   
   for(j=0; j<KBIN_NO; j++){
     inst->mean_modk[j]  /= inst->modes_perbin[j];
@@ -133,7 +132,7 @@ int prep_r2c_modes(regress* inst, double scaling){
   inst->detA[KBIN_NO - 1]      = NAN;
   inst->mean_modk[KBIN_NO - 1] = NAN;
 
-  walltime("Wall time after regression prep");
+  // walltime("Wall time after regression prep");
   
   return 0;
 }

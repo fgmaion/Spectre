@@ -35,7 +35,7 @@ int nosort_MultipoleCalc(regress* inst, int mock_start){
 
   printf("\n\nPerforming regression calc. for fold factor: %d", inst->fold);
     
-  walltime("\nPerforming multipole calculation to quadrupole order:");
+  //  walltime("\nPerforming multipole calculation to quadrupole order:");
 
   #pragma omp parallel for reduction(+: Sum_Pi[:KBIN_NO], Sum_PiLi[:KBIN_NO]) private(Index, k, j, i, pk) if (thread ==1)
   for(k=0; k<n0; k++){
@@ -75,7 +75,7 @@ int nosort_MultipoleCalc(regress* inst, int mock_start){
     if(log10(inst->detA[j]) > -6.0)  printf("\n%le \t %le \t %le \t %d", inst->mean_modk[j], inst->Monopole[j], inst->Quadrupole[j], inst->modes_perbin[j]);
   }
 
-  walltime("\n\nPerforming multipole calculation to quadrupole order (end):");
+  //  walltime("\n\nPerforming multipole calculation to quadrupole order (end):");
   
   return 0;
 }

@@ -9,7 +9,7 @@ int boxCoordinates(double xCoor[], double yCoor[], double zCoor[], int rowNumber
 }
 
 int calc_overdensity(int max_gals){    
-  walltime("Wall time at start of overdensity calc.");
+  //  walltime("Wall time at start of overdensity calc.");
 
   for(j=0; j<n0*n1*n2; j++)  overdensity[j] = -1.0;
   /*
@@ -33,7 +33,7 @@ int calc_overdensity(int max_gals){
     cic_assign(rand_x[j], rand_y[j], rand_z[j], -sqrt(alpha)*rand_weight[j]);  // assumes all randoms up to rand_number are accepted.    
   }
   */  
-  walltime("Wall time after overdensity calc.");
+  //  walltime("Wall time after overdensity calc.");
   
   return 0;
 }

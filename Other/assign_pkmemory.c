@@ -1,5 +1,5 @@
 /*
-1;95;0cint prep_c2c(){
+int prep_c2c(){
   nx = n2;
 
   overdensity         = (fftw_complex*) fftw_malloc(n0*n1*n2*sizeof(*overdensity));
@@ -44,10 +44,10 @@ int prep_x2c(){
   */
   
   regress_mem(&flat);
-  //  regress_mem(&half);
-  //  regress_mem(&quart);
+  regress_mem(&half);
+  regress_mem(&quart);
   
-  walltime("Wall time after pk array malloc");
+  //  walltime("Wall time after array malloc");
   
   return 0;
 }

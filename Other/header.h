@@ -113,6 +113,7 @@ int   CatalogNumber;
 // -- Clipping -- //
 double u0, variance;
 
+
 //-- Functions --//
 double LegendrePolynomials(double x, int n);
 
@@ -148,6 +149,3 @@ fftw_plan plan;
 int max_gals;
 
 fftw_complex *H_k; 
-
-time_t start_time;
-
