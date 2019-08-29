@@ -1,5 +1,5 @@
 #define   KBIN_NO     40
-1;95;0c#define   FOLDFACTOR 2.0       
+#define   FOLDFACTOR 2.0       
  
 #include <stddef.h>
 #include <stdbool.h>
@@ -32,9 +32,7 @@ int main(int argc, char **argv){
   (void) argc;                                              // escape compiler unused variable warning. 
 
   thread                    =                   1; 
-    
-  smooth_radius             =                 2.0;          // smoothing kernel for clipping.
-
+   
   max_gals                  =             3238855;
   
   //  outputdir                 = getenv("outputdir");  
